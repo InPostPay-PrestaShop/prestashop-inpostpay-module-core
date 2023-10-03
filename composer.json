@@ -1,0 +1,10 @@
+{
+    "name": "inpost-izi-prestashop/inpostizi",
+    "autoload": {
+        "psr-4": {
+            "izi\\prestashop\\": "src/",
+            "izi\\": "lib/"
+        }
+    },
+    "require": {}
+}
