@@ -406,8 +406,8 @@ class PrestashopBasket extends PrestashopBaseMap
         if (!empty($relatedProducts)) {
             foreach ($relatedProducts as $relatedProduct) {
                 $this->relatedProductIds[] = [
-                    'id' => $relatedProduct['id_product_attribute'],
-                    'variation' => $relatedProduct['id_product']
+                    'id' => $relatedProduct['id_product'],
+                    'variation' => $relatedProduct['id_product_attribute']
                 ];
             }
         }
