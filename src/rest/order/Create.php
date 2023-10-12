@@ -34,6 +34,22 @@ class Create
         Logger::log("SELECTED CARRIER IS {$cart->id_carrier}");
         $cart->save();
 
+        if (!empty($data->order_details->order_comments)){
+            $old_message = \Message::getMessageByCartId((int) $cartId);
+            if ($old_message){
+                $update_message = new \Message((int) $old_message['id_message']);
+                $update_message->message = \pSQL($data->order_details->order_comments);
+                $update_message->update();
+            }else{
+                $update_message = new \Message();
+                $update_message->message = \pSQL($data->order_details->order_comments);
+                $update_message->id_cart = $cartId;
+                $update_message->add();
+            }
+
+
+        }
+
         $paymentModuleName = 'inpostizi';
         $payment_module = \Module::getInstanceByName($paymentModuleName);
         @$payment_module->validateOrder($cart->id, \Configuration::get('PS_OS_BANKWIRE'), $cart->getOrderTotal(), 'Inpost Pay', 'Inpost Pay');
