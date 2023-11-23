@@ -3,6 +3,8 @@
 namespace izi\prestashop\rest\order;
 
 use izi\prestashop\CartSession;
+use izi\prestashop\Exception\BasketNotFoundException;
+use izi\prestashop\Exception\InternalServerErrorException;
 use izi\prestashop\Logger;
 use izi\prestashop\rest\SignatureVerification;
 
@@ -16,8 +18,19 @@ class Create
         $basketId = $data->order_details->basket_id;
         $cartId = CartSession::getSessionId($basketId);
 
-        $customerId = $this->createCustomer($data->account_info);
         $cart = new \Cart($cartId);
+
+        if (!\Validate::isLoadedObject($cart)) {
+            throw new BasketNotFoundException('Basket not found.');
+        }
+
+        if ($cart->orderExists()) {
+            throw new BasketNotFoundException('There already exists an order for this basket.');
+        }
+
+        $carrierId = $this->getCarrierId($data->delivery->delivery_type);
+
+        $customerId = $this->createCustomer($data->account_info);
         $cart->id_customer = $customerId;
         $cart->save();
 
@@ -31,7 +44,7 @@ class Create
         }
         $cart->id_lang = (int) \Configuration::get('PS_LANG_DEFAULT');
         $cart->id_currency = \Context::getContext()->currency->id;
-        $cart->setDeliveryOption([$deliveryAddressId => (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($data->delivery->delivery_type)) . ',']);
+        $cart->setDeliveryOption([$deliveryAddressId => $carrierId . ',']);
         Logger::log("SELECTED CARRIER IS {$cart->id_carrier}");
         $cart->save();
 
@@ -77,7 +90,8 @@ class Create
             $additionalDeliveryOprionsPrice = 0.0;
             if (isset($data->delivery->delivery_codes) && is_array($data->delivery->delivery_codes)) {
                 foreach ($data->delivery->delivery_codes as $additionalDeliveryOprion) {
-                    $additionalDeliveryOprionsPrice += (float) str_replace(',', '.', \Configuration::get('INPOST_PAY_payment_courier_' . strtolower($additionalDeliveryOprion)));
+                    $configKey = sprintf('INPOST_PAY_payment_%s_%s', strtolower($data->delivery->delivery_type), strtolower($additionalDeliveryOprion));
+                    $additionalDeliveryOprionsPrice += (float) str_replace(',', '.', \Configuration::get($configKey));
                 }
             }
             $additionalDeliveryOprionsPriceGross = $additionalDeliveryOprionsPrice * 1.23;
@@ -208,5 +222,16 @@ class Create
         }
 
         return $customer->id;
+    }
+
+    private function getCarrierId(string $delivery_type): int
+    {
+        $referenceId = (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($delivery_type));
+        $carrier = \Carrier::getCarrierByReference($referenceId);
+        if (false === $carrier) {
+            throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $delivery_type));
+        }
+
+        return $carrier->id;
     }
 }

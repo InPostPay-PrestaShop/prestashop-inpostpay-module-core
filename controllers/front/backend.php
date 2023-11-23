@@ -4,6 +4,8 @@ use izi\BasketIdentification;
 use izi\BindingProvider;
 use izi\InPostIzi;
 use izi\prestashop\CartSession;
+use izi\prestashop\Exception\ApiException;
+use izi\prestashop\Exception\InternalServerErrorException;
 use izi\prestashop\PrestashopBasket;
 use izi\prestashop\rest\SignatureVerification;
 use izi\Storage;
@@ -156,7 +158,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
                 $orderCreateResponse = \izi\prestashop\PrestashopOrder::getOrder($orderId, $json->order_details->basket_id)->encode();
                 \izi\prestashop\Logger::response($orderCreateResponse, 'Order create response');
             } catch (\Throwable $t) {
-                \izi\prestashop\Logger::log($t->getMessage() . ' at ' . $t->getFile() . ':' . $t->getLine());
+                $this->handleError($t);
             }
             \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController()->basketBindingDelete();
             \izi\BasketIdentification::drop();
@@ -382,5 +384,16 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         }
 
         return 0;
+    }
+
+    private function handleError(\Throwable $error): void
+    {
+        \izi\prestashop\Logger::log($error->getMessage() . ' at ' . $error->getFile() . ':' . $error->getLine());
+
+        if (!$error instanceof ApiException) {
+            $error = new InternalServerErrorException('Something went wrong. Please try again later.');
+        }
+
+        $error->sendResponse();
     }
 }

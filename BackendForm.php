@@ -605,11 +605,11 @@ trait BackendForm
     {
         $options = [];
         $table_name = '`' . _DB_PREFIX_ . 'carrier`';
-        $carrierList = Db::getInstance()->executeS('select id_carrier, name from ' . $table_name . ' WHERE deleted = 0');
+        $carrierList = Db::getInstance()->executeS('select id_reference, name from ' . $table_name . ' WHERE deleted = 0');
         foreach ($carrierList as $carrier) {
             $options[] = [
-                'id_option' => $carrier['id_carrier'],
-                'name' => $carrier['name'] . " ({$carrier['id_reference']})",
+                'id_option' => $carrier['id_reference'],
+                'name' => $carrier['name'],
             ];
         }
 
