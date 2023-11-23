@@ -20,17 +20,18 @@ class Create
         $cart = new \Cart($cartId);
         $cart->id_customer = $customerId;
         $cart->save();
-        $cart = new \Cart($cartId);
 
-        $cart->id_address_delivery = $this->createDeliveryAddress($data->account_info, $customerId);
+        $deliveryAddressId = $this->createDeliveryAddress($data->account_info, $customerId);
+
+        $cart->updateAddressId($cart->id_address_delivery, $deliveryAddressId);
         if (isset($data->invoice_details)) {
-            $cart->id_address_invoice = $this->createInvoiceAddress($data->invoice_details, $data->account_info);
+            $cart->id_address_invoice = $this->createInvoiceAddress($data->invoice_details, $data->account_info, $customerId);
         } else {
-            $cart->id_address_invoice = $this->createDeliveryAddress($data->account_info, $customerId);
+            $cart->id_address_invoice = $deliveryAddressId;
         }
         $cart->id_lang = (int) \Configuration::get('PS_LANG_DEFAULT');
         $cart->id_currency = \Context::getContext()->currency->id;
-        $cart->setDeliveryOption([$cart->id_address_delivery => (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($data->delivery->delivery_type))]);
+        $cart->setDeliveryOption([$deliveryAddressId => (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($data->delivery->delivery_type)) . ',']);
         Logger::log("SELECTED CARRIER IS {$cart->id_carrier}");
         $cart->save();
 
@@ -38,11 +39,11 @@ class Create
             $old_message = \Message::getMessageByCartId((int) $cartId);
             if ($old_message) {
                 $update_message = new \Message((int) $old_message['id_message']);
-                $update_message->message = \pSQL($data->order_details->order_comments);
+                $update_message->message = $data->order_details->order_comments;
                 $update_message->update();
             } else {
                 $update_message = new \Message();
-                $update_message->message = \pSQL($data->order_details->order_comments);
+                $update_message->message = $data->order_details->order_comments;
                 $update_message->id_cart = $cartId;
                 $update_message->add();
             }
@@ -50,7 +51,7 @@ class Create
 
         $paymentModuleName = 'inpostizi';
         $payment_module = \Module::getInstanceByName($paymentModuleName);
-        @$payment_module->validateOrder($cart->id, \Configuration::get('PS_OS_BANKWIRE'), $cart->getOrderTotal(), 'Inpost Pay', 'Inpost Pay');
+        $payment_module->validateOrder($cart->id, \Configuration::get('PS_OS_BANKWIRE'), $cart->getOrderTotal(), 'Inpost Pay', 'Inpost Pay');
 
         $orderMessage = new \Message();
         $orderMessage->id_order = $payment_module->currentOrder;
@@ -59,7 +60,6 @@ class Create
         $orderMessage->save();
 
         $order = new \Order($payment_module->currentOrder);
-        $order->id_carrier = (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($data->delivery->delivery_type));
 
         $free = false;
         foreach ($cart->getCartRules() as $rule) {
@@ -77,7 +77,7 @@ class Create
             $additionalDeliveryOprionsPrice = 0.0;
             if (isset($data->delivery->delivery_codes) && is_array($data->delivery->delivery_codes)) {
                 foreach ($data->delivery->delivery_codes as $additionalDeliveryOprion) {
-                    $additionalDeliveryOprionsPrice += floatval(str_replace(',', '.', \Configuration::get('INPOST_PAY_payment_courier_' . strtolower($additionalDeliveryOprion))));
+                    $additionalDeliveryOprionsPrice += (float) str_replace(',', '.', \Configuration::get('INPOST_PAY_payment_courier_' . strtolower($additionalDeliveryOprion)));
                 }
             }
             $additionalDeliveryOprionsPriceGross = $additionalDeliveryOprionsPrice * 1.23;
@@ -135,7 +135,7 @@ class Create
         }
     }
 
-    public function createDeliveryAddress($delivery, $idCustomer = null)
+    public function createDeliveryAddress($delivery, $idCustomer)
     {
         $address = new \Address();
         $address->alias = $delivery->client_address->address;
@@ -154,7 +154,7 @@ class Create
         return $address->id;
     }
 
-    public function createInvoiceAddress($invoiceDetails, $accountInfo)
+    public function createInvoiceAddress($invoiceDetails, $accountInfo, $idCustomer)
     {
         $address1 = $invoiceDetails->street . ' ' . $invoiceDetails->building . ' ' . ($invoiceDetails->flat ?? '');
 
@@ -164,7 +164,7 @@ class Create
         $address->lastname = ($invoiceDetails->surname ?? $accountInfo->surname);
         $address->city = $invoiceDetails->city;
         $address->id_state = 0;
-        $address->id_customer = null;
+        $address->id_customer = $idCustomer;
         $address->id_country = $this->getCountryId($invoiceDetails->country_code);
         $address->address1 = $address1;
         $address->postcode = $invoiceDetails->postal_code;
@@ -203,6 +203,7 @@ class Create
             $customer->lastname = $accountInfo->name;
             $customer->firstname = $accountInfo->surname;
             $customer->passwd = 'no password';
+            $customer->is_guest = true;
             $customer->add();
         }
 
