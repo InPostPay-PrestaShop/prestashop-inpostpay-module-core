@@ -138,8 +138,8 @@ class PrestashopOrder
             $this->orderPromoPriceVat += $product->promo_price->vat;
         }
 
-        return array_map(static function (BasketProduct $product): OrderProduct {
-            return $product->asOrderProduct();
+        return array_map(static function ($product): OrderProduct {
+            return OrderProduct::fromBasketProduct($product);
         }, $basket->products);
     }
 
