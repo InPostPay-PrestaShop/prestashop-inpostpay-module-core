@@ -2,6 +2,7 @@
 
 namespace izi\prestashop;
 
+use izi\item\Quantity;
 use izi\PriceNumber;
 use izi\Storage;
 
@@ -139,7 +140,7 @@ class PrestashopBasket extends PrestashopBaseMap
 
     public function mapProductData($prestashopProduct, $idLang, $rawData, $variation)
     {
-        $product = new \izi\item\Product();
+        $product = new \izi\item\BasketProduct();
 
         if ($prestashopProduct->id) {
             $product->product_id = $prestashopProduct->id . '.' . $variation;
@@ -230,9 +231,9 @@ class PrestashopBasket extends PrestashopBaseMap
 
     public function readStockQuantity($prestashopProduct, $idLang, $productData)
     {
-        $quantity = new \izi\item\Quantity();
+        $quantity = new \izi\item\BasketQuantity();
 
-        $quantity->quantity_type = 'INTEGER';
+        $quantity->quantity_type = Quantity::INTEGER;
         $quantity->quantity_unit = 'pcs';
 
         $availableQuantity = \StockAvailable::getQuantityAvailableByProduct($prestashopProduct->id, $productData['id_product_attribute']);

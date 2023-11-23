@@ -2,11 +2,23 @@
 
 namespace izi\item;
 
-class Quantity extends \izi\Item
+abstract class Quantity extends \izi\Item
 {
+    const DECIMAL = 'DECIMAL';
+    const INTEGER = 'INTEGER';
+
+    /**
+     * @var int|float
+     */
     protected $quantity;
+
+    /**
+     * @var self::DECIMAL|self::integer|null
+     */
     protected $quantity_type;
+
+    /**
+     * @var string|null
+     */
     protected $quantity_unit;
-    protected $available_quantity;
-    protected $max_quantity;
 }

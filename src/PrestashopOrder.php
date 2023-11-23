@@ -2,6 +2,9 @@
 
 namespace izi\prestashop;
 
+use izi\item\BasketProduct;
+use izi\item\order\OrderProduct;
+
 class PrestashopOrder
 {
     private $orderId;
@@ -119,23 +122,25 @@ class PrestashopOrder
     public function mapProducts()
     {
         $basket = CartSession::getBasketCacheById($this->basketId);
-        if ($basket) {
-            $basket = json_decode($basket);
-
-            foreach ($basket->products as $product) {
-                $this->orderBasePriceNet += $product->base_price->net;
-                $this->orderBasePriceGross += $product->base_price->gross;
-                $this->orderBasePriceVat += $product->base_price->vat;
-
-                $this->orderPromoPriceNet += $product->promo_price->net;
-                $this->orderPromoPriceGross += $product->promo_price->gross;
-                $this->orderPromoPriceVat += $product->promo_price->vat;
-            }
-
-            return $basket->products;
+        if (!$basket) {
+            return [];
         }
 
-        return [];
+        $basket = json_decode($basket);
+
+        foreach ($basket->products as $product) {
+            $this->orderBasePriceNet += $product->base_price->net;
+            $this->orderBasePriceGross += $product->base_price->gross;
+            $this->orderBasePriceVat += $product->base_price->vat;
+
+            $this->orderPromoPriceNet += $product->promo_price->net;
+            $this->orderPromoPriceGross += $product->promo_price->gross;
+            $this->orderPromoPriceVat += $product->promo_price->vat;
+        }
+
+        return array_map(static function (BasketProduct $product): OrderProduct {
+            return $product->asOrderProduct();
+        }, $basket->products);
     }
 
     public function mapCartProduct($item)
@@ -193,32 +198,18 @@ class PrestashopOrder
 
     public function readQuantity($item)
     {
-        $quantity = $this->readStockQuantity($item->get_product());
+        $quantity = $this->readStockQuantity();
         $quantity->quantity = $item->get_quantity();
 
         return $quantity;
     }
 
-    public function readStockQuantity($productSimple)
+    public function readStockQuantity()
     {
-        $quantity = new \izi\item\Quantity();
+        $quantity = new \izi\item\order\OrderQuantity();
 
-        $quantity->quantity_type = 'INTEGER';
+        $quantity->quantity_type = \izi\item\Quantity::INTEGER;
         $quantity->quantity_unit = 'pcs';
-
-        $availableQuantity = $productSimple->get_stock_quantity();
-        if ($availableQuantity) {
-            $quantity->available_quantity = $availableQuantity;
-        } else {
-            $quantity->available_quantity = 999;
-        }
-
-        $maxQuantity = $productSimple->get_max_purchase_quantity();
-        if ($maxQuantity !== -1) {
-            $quantity->max_quantity = $maxQuantity;
-        } else {
-            $quantity->max_quantity = 999;
-        }
 
         return $quantity;
     }
@@ -228,7 +219,7 @@ class PrestashopOrder
         if (!$cartItem->get_product()) {
             return;
         }
-        $product = new \izi\item\Product();
+        $product = new OrderProduct();
 
         $product->product_id = $cartItem->get_product_id();
         if (isset($cartItem->get_product()->get_category_ids()[0])) {
@@ -325,9 +316,8 @@ class PrestashopOrder
                 return $data->invoice_details;
             }
         }
-        $invoiceDetails = new \izi\item\order\InvoiceDetails();
 
-        return $invoiceDetails;
+        return null;
     }
 
     public function mapDelivery()
@@ -368,7 +358,7 @@ class PrestashopOrder
         $this->setDeliveryPrice($delivery);
 
         $delivery->mail = $this->order->getCustomer()->email;
-        $delivery->phone = $this->mapPhone();
+        $delivery->phone_number = $this->mapPhone();
         $delivery->delivery_address = $this->mapDeliveryAddress();
 
         $delivery->courier_note = $this->readComments();
@@ -469,12 +459,7 @@ class PrestashopOrder
         $orderDetails->order_id = $this->orderId;
         $orderDetails->pos_id = \Configuration::get('INPOST_PAY_pos_id');
         $orderDetails->order_creation_date = date("Y-m-d\TH:i:s.000\Z", strtotime($this->order->date_add));
-        $orderDetails->order_update_date = date("Y-m-d\TH:i:s.000\Z", strtotime($this->order->date_upd));
-        $orderDetails->merchant_id = \Configuration::get('INPOST_PAY_client_id');
         $orderDetails->basket_id = $this->basketId;
-
-        $orderDetails->payment_status = ''; //get_post_meta($this->orderId, 'izi_payment_status', true);;
-        $orderDetails->order_status = ''; //get_post_meta($this->orderId, 'izi_order_status', true);;
 
         $orderDetails->order_merchant_status_description = 'Oczekuje na płatność'; //StatusTranslator::paymentStatusToText($orderDetails->payment_status);
         $orderDetails->order_base_price = $this->readSummaryOrderPromoPrice();
