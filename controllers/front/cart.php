@@ -2,7 +2,6 @@
 
 class InpostIziCartModuleFrontController extends ModuleFrontController
 {
-
     public function displayAjax()
     {
         return $this->display();
@@ -22,7 +21,7 @@ class InpostIziCartModuleFrontController extends ModuleFrontController
         $nbTotalProducts = 0;
 
         foreach ($products as $product) {
-            $nbTotalProducts += (int)$product['cart_quantity'];
+            $nbTotalProducts += (int) $product['cart_quantity'];
         }
 
         die(json_encode(['count' => $nbTotalProducts]));

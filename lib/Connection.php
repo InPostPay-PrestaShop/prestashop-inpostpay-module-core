@@ -12,7 +12,7 @@ class Connection extends Fetcher
         parent::__construct();
     }
 
-    public function request($command, $type = "GET", $data = [], $withCode = false, $raw = false)
+    public function request($command, $type = 'GET', $data = [], $withCode = false, $raw = false)
     {
         return $this->fetch(InPostIzi::getApiUrl() . "/$command", $type, $data, $withCode, $raw);
     }
@@ -20,8 +20,9 @@ class Connection extends Fetcher
     public function headers()
     {
         $headers = [
-            "Authorization: Bearer {$this->authorization->getToken()}"
+            "Authorization: Bearer {$this->authorization->getToken()}",
         ];
+
         return $headers;
     }
 }

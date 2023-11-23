@@ -28,11 +28,12 @@ class InpostIziPayPrestashop extends \izi\InPostIzi
         if (!self::$instance) {
             self::$instance = new self();
         }
+
         return self::$instance;
     }
 
     public function getBasket()
     {
-        return PrestashopBasket::getBasket( );
+        return PrestashopBasket::getBasket();
     }
 }

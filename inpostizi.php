@@ -9,12 +9,11 @@ if (!defined('_PS_VERSION_')) {
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/BackendForm.php';
 
-use \PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 class Inpostizi extends PaymentModule
 {
     use BackendForm;
-
 
     private $firstRender = true;
 
@@ -58,7 +57,7 @@ class Inpostizi extends PaymentModule
         return $paymentOptions;
     }
 
-    private function checkCurrency(\Cart $cart)
+    private function checkCurrency(Cart $cart)
     {
         $currency_order = new \Currency($cart->id_currency);
         /** @var array $currencies_module */
@@ -212,8 +211,7 @@ class Inpostizi extends PaymentModule
         $cart = false,
         $float = 'left',
         $bindingPlace = ''
-    )
-    {
+    ) {
         static $alreadyShown;
         if (!$alreadyShown) {
             $alreadyShown = true;
@@ -244,14 +242,16 @@ class Inpostizi extends PaymentModule
         $context = \Context::getContext();
         $id_cart = $context->cookie->id_cart;
 
-        if ($id_cart == '') $id_cart = \Tools::getValue('id_cart');
+        if ($id_cart == '') {
+            $id_cart = \Tools::getValue('id_cart');
+        }
 
         $theCart = new \Cart($id_cart);
         $products = $theCart->getProducts(true);
         $nbTotalProducts = 0;
 
         foreach ($products as $product) {
-            $nbTotalProducts += (int)$product['cart_quantity'];
+            $nbTotalProducts += (int) $product['cart_quantity'];
         }
 
         $html = \izi\InPostIzi::render(
@@ -343,6 +343,7 @@ class Inpostizi extends PaymentModule
                 'apm' => $orderData->delivery->delivery_type == 'APM' ? $orderData->delivery->delivery_point : '',
             ]
         );
+
         return $this->display(__FILE__, 'backend.tpl');
     }
 
@@ -366,13 +367,15 @@ class Inpostizi extends PaymentModule
 }
 
 if (!function_exists('getallheaders')) {
-    function getallheaders() {
+    function getallheaders()
+    {
         $headers = [];
         foreach ($_SERVER as $name => $value) {
             if (substr($name, 0, 5) == 'HTTP_') {
                 $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
             }
         }
+
         return $headers;
     }
 }

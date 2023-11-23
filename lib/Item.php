@@ -13,7 +13,8 @@ class Item
         }
     }
 
-    public function __get($property) {
+    public function __get($property)
+    {
         if (property_exists($this, $property)) {
             return $this->$property;
         } else {
@@ -45,21 +46,23 @@ class Item
     public function encode()
     {
         $data = $this->toArray();
+
         return json_encode($data, JSON_UNESCAPED_UNICODE);
     }
 
     public function getProducts()
     {
-      return $this->toArray( )["products"];
+        return $this->toArray()['products'];
     }
 
-    public function compareProduct( $product )
+    public function compareProduct($product)
     {
-      return json_encode( $this->getProducts( ) ) === json_encode( $product );
+        return json_encode($this->getProducts()) === json_encode($product);
     }
 
     /**
      * @param $property
+     *
      * @throws \ErrorException
      */
     protected function throwNonExistent($property): void

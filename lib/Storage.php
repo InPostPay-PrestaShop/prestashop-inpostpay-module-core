@@ -4,7 +4,6 @@ namespace izi;
 
 class Storage
 {
-
     public static function initialize()
     {
         if (session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
@@ -12,7 +11,7 @@ class Storage
             $secure = true;
             $httponly = true;
 
-            if(PHP_VERSION_ID < 70300) {
+            if (PHP_VERSION_ID < 70300) {
                 session_set_cookie_params(
                     $maxlifetime,
                     '/; samesite=lax',

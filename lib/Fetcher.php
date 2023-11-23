@@ -14,8 +14,9 @@ class Fetcher
     {
         $this->init();
 
-        $this->curlJoinHeaders(["content-type: application/x-www-form-urlencoded"]);
+        $this->curlJoinHeaders(['content-type: application/x-www-form-urlencoded']);
         curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($payload));
+
         return $this->execute($url);
     }
 
@@ -23,7 +24,7 @@ class Fetcher
     {
         $this->init();
 
-        $headers = ["Content-Type:application/json"];
+        $headers = ['Content-Type:application/json'];
         curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, $type);
         $payloadLength = 0;
         if ($payload && ((is_array($payload) && count($payload)) || !is_array($payload))) {
@@ -50,6 +51,7 @@ class Fetcher
 
         InPostIzi::getLoggerClass()::request($url, $type, json_encode($payload
         ), $payloadLength, json_encode($data[0]), $data[1]);
+
         return $withCode ? $data : $data[0];
     }
 
@@ -80,6 +82,7 @@ class Fetcher
         $output = curl_exec($this->curl);
         $httpcode = curl_getinfo($this->curl, CURLINFO_HTTP_CODE);
         curl_close($this->curl);
+
         return [json_decode($output), $httpcode];
     }
 }

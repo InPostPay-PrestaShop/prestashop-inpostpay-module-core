@@ -12,8 +12,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->EnvironmentOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -22,8 +22,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->ShowOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'text',
@@ -52,13 +52,13 @@ trait BackendForm
                     [
                         'id' => 'active_on',
                         'value' => 1,
-                        'label' => $this->l('Tak')
+                        'label' => $this->l('Tak'),
                     ],
                     [
                         'id' => 'active_off',
                         'value' => 0,
-                        'label' => $this->l('Nie')
-                    ]
+                        'label' => $this->l('Nie'),
+                    ],
                 ],
             ],
 
@@ -71,13 +71,13 @@ trait BackendForm
                     [
                         'id' => 'active_on',
                         'value' => 1,
-                        'label' => $this->l('Tak')
+                        'label' => $this->l('Tak'),
                     ],
                     [
                         'id' => 'active_off',
                         'value' => 0,
-                        'label' => $this->l('Nie')
-                    ]
+                        'label' => $this->l('Nie'),
+                    ],
                 ],
             ],
             [
@@ -87,13 +87,13 @@ trait BackendForm
                 'options' => [
                     'query' => $this->StatusOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
+                    'name' => 'name',
                 ],
             ],
         ];
 
         $states = new OrderState();
-        foreach ($states->getOrderStates((int)Configuration::get('PS_LANG_DEFAULT')) as $status) {
+        foreach ($states->getOrderStates((int) Configuration::get('PS_LANG_DEFAULT')) as $status) {
             $fieldName = 'INPOST_PAY_status_translation_' . $status['id_order_state'];
             if (!\Configuration::get($fieldName)) {
                 \Configuration::updateValue($fieldName, $status['name']);
@@ -126,7 +126,7 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TermsOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
+                    'name' => 'name',
                 ],
             ],
             [
@@ -142,7 +142,7 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TermsOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
+                    'name' => 'name',
                 ],
             ],
             [
@@ -158,7 +158,7 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TermsOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
+                    'name' => 'name',
                 ],
             ],
             [
@@ -167,6 +167,7 @@ trait BackendForm
                 'name' => 'INPOST_PAY_terms_options_additional_text',
             ],
         ];
+
         return $fields;
     }
 
@@ -180,8 +181,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DeliveryOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'text',
@@ -196,8 +197,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DayOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -206,8 +207,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TimeOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -216,8 +217,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DayOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -226,8 +227,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TimeOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'text',
@@ -242,8 +243,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DayOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -252,8 +253,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TimeOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -262,8 +263,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DayOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -272,8 +273,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TimeOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -282,8 +283,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DeliveryOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'text',
@@ -298,8 +299,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DayOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -308,8 +309,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TimeOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -318,8 +319,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DayOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -328,8 +329,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TimeOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'text',
@@ -344,8 +345,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DayOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -354,8 +355,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TimeOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -364,8 +365,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->DayOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ],
             [
                 'type' => 'select',
@@ -374,10 +375,11 @@ trait BackendForm
                 'options' => [
                     'query' => $this->TimeOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
-            ]
+                    'name' => 'name',
+                ],
+            ],
         ];
+
         return $fields;
     }
 
@@ -387,14 +389,14 @@ trait BackendForm
         $translations = [
             'cart' => 'koszyk',
             'list' => 'lista',
-            'details' => 'karta produktu'
+            'details' => 'karta produktu',
         ];
 
         $translationsDirection = [
             'up' => 'Góra',
             'down' => 'Dół',
             'left' => 'Lewo',
-            'right' => 'Prawo'
+            'right' => 'Prawo',
         ];
         foreach (['cart', 'details'] as $place) {
             $fields[] = [
@@ -406,13 +408,13 @@ trait BackendForm
                     [
                         'id' => 'active_on',
                         'value' => 1,
-                        'label' => $this->l('Tak')
+                        'label' => $this->l('Tak'),
                     ],
                     [
                         'id' => 'active_off',
                         'value' => 0,
-                        'label' => $this->l('Nie')
-                    ]
+                        'label' => $this->l('Nie'),
+                    ],
                 ],
             ];
             $fields[] = [
@@ -422,8 +424,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->AlignmentOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ];
             $fields[] = [
                 'type' => 'select',
@@ -432,8 +434,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->BackgroundOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ];
             $fields[] = [
                 'type' => 'select',
@@ -442,8 +444,8 @@ trait BackendForm
                 'options' => [
                     'query' => $this->VariantOptions(),
                     'id' => 'id_option',
-                    'name' => 'name'
-                ]
+                    'name' => 'name',
+                ],
             ];
             if ($place == 'cart') {
                 foreach (['up', 'down', 'left', 'right'] as $direction) {
@@ -456,8 +458,10 @@ trait BackendForm
                 }
             }
         }
+
         return $fields;
     }
+
     protected function formFields()
     {
         return array_merge(
@@ -492,6 +496,7 @@ trait BackendForm
 
             $output = $this->displayConfirmation($this->l('Settings updated'));
         }
+
         return $output . $this->displayForm();
     }
 
@@ -517,7 +522,7 @@ trait BackendForm
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $helper->currentIndex = AdminController::$currentIndex . '&' . http_build_query(['configure' => $this->name]);
         $helper->submit_action = 'submit' . $this->name;
-        $helper->default_form_language = (int)Configuration::get('PS_LANG_DEFAULT');
+        $helper->default_form_language = (int) Configuration::get('PS_LANG_DEFAULT');
 
         foreach ($this->formFields() as $field) {
             if ($field['name'] == 'INPOST_PAY_client_secret') {
@@ -538,16 +543,16 @@ trait BackendForm
         if (defined('IZI_LOGGER')) {
             $options[] = [
                 'id_option' => \izi\InPostIzi::ENVIRONMENT_DEVELOP,
-                'name' => 'Deweloperskie'
+                'name' => 'Deweloperskie',
             ];
         }
         $options[] = [
             'id_option' => \izi\InPostIzi::ENVIRONMENT_SANDBOX,
-            'name' => 'Sandbox'
+            'name' => 'Sandbox',
         ];
         $options[] = [
             'id_option' => \izi\InPostIzi::ENVIRONMENT_PRODUCTION,
-            'name' => 'Produkcyjne'
+            'name' => 'Produkcyjne',
         ];
 
         return $options;
@@ -558,26 +563,27 @@ trait BackendForm
         $options = [
             [
                 'id_option' => 1,
-                'name' => 'Testerom'
+                'name' => 'Testerom',
             ],
             [
                 'id_option' => 2,
-                'name' => 'Wszystkim'
-            ]
+                'name' => 'Wszystkim',
+            ],
         ];
+
         return $options;
     }
 
     protected function TermsOptions()
     {
         $options = [];
-        foreach (CMS::getCMSPages((int)Configuration::get('PS_LANG_DEFAULT'), 1, true) as $page) {
-
+        foreach (CMS::getCMSPages((int) Configuration::get('PS_LANG_DEFAULT'), 1, true) as $page) {
             $options[] = [
                 'id_option' => $this->context->link->getCMSLink($page['id_cms'], $page['link_rewrite']),
-                'name' => $page['meta_title']
+                'name' => $page['meta_title'],
             ];
         }
+
         return $options;
     }
 
@@ -585,13 +591,13 @@ trait BackendForm
     {
         $options = [];
         $states = new OrderState();
-        foreach ($states->getOrderStates((int)Configuration::get('PS_LANG_DEFAULT')) as $status) {
-
+        foreach ($states->getOrderStates((int) Configuration::get('PS_LANG_DEFAULT')) as $status) {
             $options[] = [
                 'id_option' => $status['id_order_state'],
-                'name' => $status   ['name']
+                'name' => $status['name'],
             ];
         }
+
         return $options;
     }
 
@@ -603,9 +609,10 @@ trait BackendForm
         foreach ($carrierList as $carrier) {
             $options[] = [
                 'id_option' => $carrier['id_carrier'],
-                'name' => $carrier['name'] . " ({$carrier['id_reference']})"
+                'name' => $carrier['name'] . " ({$carrier['id_reference']})",
             ];
         }
+
         return $options;
     }
 
@@ -615,21 +622,23 @@ trait BackendForm
         foreach (['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'] as $key => $name) {
             $options[] = [
                 'id_option' => $key,
-                'name' => $name
+                'name' => $name,
             ];
         }
+
         return $options;
     }
 
     protected function TimeOptions()
     {
         $options = [];
-        for ($i = 1; $i < 25; $i++) {
+        for ($i = 1; $i < 25; ++$i) {
             $options[] = [
                 'id_option' => $i,
-                'name' => $i . ":00"
+                'name' => $i . ':00',
             ];
         }
+
         return $options;
     }
 
@@ -638,17 +647,18 @@ trait BackendForm
         $options = [
             [
                 'id_option' => 'left',
-                'name' => 'Do lewej'
+                'name' => 'Do lewej',
             ],
             [
                 'id_option' => 'center',
-                'name' => 'Do środka'
+                'name' => 'Do środka',
             ],
             [
                 'id_option' => 'right',
-                'name' => 'Do prawej'
-            ]
+                'name' => 'Do prawej',
+            ],
         ];
+
         return $options;
     }
 
@@ -657,13 +667,14 @@ trait BackendForm
         $options = [
             [
                 'id_option' => 'light',
-                'name' => 'Jasne'
+                'name' => 'Jasne',
             ],
             [
                 'id_option' => 'dark',
-                'name' => 'Ciemne'
+                'name' => 'Ciemne',
             ],
         ];
+
         return $options;
     }
 
@@ -672,13 +683,14 @@ trait BackendForm
         $options = [
             [
                 'id_option' => 'black',
-                'name' => 'Czarny'
+                'name' => 'Czarny',
             ],
             [
                 'id_option' => 'yellow',
-                'name' => 'Żółty'
+                'name' => 'Żółty',
             ],
         ];
+
         return $options;
     }
 }

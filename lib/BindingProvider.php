@@ -11,6 +11,7 @@ class BindingProvider
         if (!self::$binding || $force) {
             self::$binding = InPostIzi::getInstance()->getController()->basketBindingGet($force);
         }
+
         return self::$binding;
     }
 }

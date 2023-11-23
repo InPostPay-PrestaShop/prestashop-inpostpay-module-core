@@ -16,6 +16,7 @@ class Authorization extends Fetcher
                 InPostIzi::setCachedToken($this->token, $this->expiration);
             }
         }
+
         return $this->token;
     }
 
@@ -23,9 +24,9 @@ class Authorization extends Fetcher
     {
         $url = InPostIzi::getAuthUrl() . '/auth/realms/external/protocol/openid-connect/token';
         $resonse = $this->query($url, [
-            "client_id" => InPostIzi::getClientId(),
-            "client_secret" => InPostIzi::getClientSecret(),
-            "grant_type" => "client_credentials"
+            'client_id' => InPostIzi::getClientId(),
+            'client_secret' => InPostIzi::getClientSecret(),
+            'grant_type' => 'client_credentials',
         ]);
 
         $this->token = isset($resonse, $resonse[0], $resonse[0]->access_token) ? $resonse[0]->access_token : '';
@@ -36,5 +37,4 @@ class Authorization extends Fetcher
     {
         return [];
     }
-
 }

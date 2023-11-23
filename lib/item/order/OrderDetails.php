@@ -2,8 +2,6 @@
 
 namespace izi\item\order;
 
-use izi\item\Price;
-
 class OrderDetails extends \izi\Item
 {
     protected $order_comments;

@@ -31,11 +31,12 @@ class PrestaDeliveryPrice
 
             $delivery = new \izi\item\Delivery();
             $delivery->delivery_type = strtoupper($deliveryType);
-            $delivery->delivery_date = date("Y-m-d\T12:00:00.000\Z", strtotime(" + 2 day"));
+            $delivery->delivery_date = date("Y-m-d\T12:00:00.000\Z", strtotime(' + 2 day'));
             $delivery->delivery_options = $this->mapDeliveryOptions($deliveryType);
             $delivery->delivery_price = $this->mapDeliveryPrice($net, $gross);
             $options[] = $delivery;
         }
+
         return $options;
     }
 
@@ -68,23 +69,23 @@ class PrestaDeliveryPrice
         $pwwPrice = floatval(\Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_pww'));
         $pwwPriceAvailable = $this->optionAvailability('pww', $deliveryType);
         $codPrice = floatval(\Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_cod'));
-        $codPriceAvailable = $this->optionAvailability('cod', $deliveryType);;
+        $codPriceAvailable = $this->optionAvailability('cod', $deliveryType);
 
         Logger::log("CENA PWW {$pwwPrice}, DOSTEPNOPSC PWW {$pwwPriceAvailable}");
         Logger::log("CENA COD {$codPrice}, DOSTEPNOPSC COD {$codPriceAvailable}");
 
         if ($pwwPrice && $pwwPriceAvailable) {
             $option = new \izi\item\DeliveryOption();
-            $option->delivery_name = "Paczka w Weekend";
-            $option->delivery_code_value = "PWW";
+            $option->delivery_name = 'Paczka w Weekend';
+            $option->delivery_code_value = 'PWW';
             $option->delivery_option_price = $this->mapDeliveryOptionPrice($pwwPrice);
             $data[] = $option;
         }
 
         if ($codPrice && $codPriceAvailable) {
             $option = new \izi\item\DeliveryOption();
-            $option->delivery_name = "Pobranie";
-            $option->delivery_code_value = "COD";
+            $option->delivery_name = 'Pobranie';
+            $option->delivery_code_value = 'COD';
             $option->delivery_option_price = $this->mapDeliveryOptionPrice($codPrice);
             $data[] = $option;
         }
@@ -97,10 +98,10 @@ class PrestaDeliveryPrice
         $dayOfWeek = date('N');
         $hour = date('H');
 
-        $dayFrom = \Configuration::get('INPOST_PAY_payment_'. $deliveryType . '_' . $option . '_from_day');
-        $dayTo = \Configuration::get('INPOST_PAY_payment_'. $deliveryType . '_' . $option . '_to_day');
-        $hourFrom = \Configuration::get('INPOST_PAY_payment_'. $deliveryType . '_' . $option . '_from_time');
-        $hourTo = \Configuration::get('INPOST_PAY_payment_'. $deliveryType . '_' . $option . '_to_time');
+        $dayFrom = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_from_day');
+        $dayTo = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_to_day');
+        $hourFrom = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_from_time');
+        $hourTo = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_to_time');
 
         if ($dayOfWeek < $dayFrom) {
             return false;
@@ -119,6 +120,7 @@ class PrestaDeliveryPrice
                 return false;
             }
         }
+
         return true;
     }
 }

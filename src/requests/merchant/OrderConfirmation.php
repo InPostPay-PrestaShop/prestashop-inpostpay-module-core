@@ -4,7 +4,6 @@ namespace izi\prestashop\requests\merchant;
 
 use izi\BasketIdentification;
 use izi\prestashop\InpostIziPayPrestashop;
-use izi\prestashop\Logger;
 use izi\Storage;
 
 class OrderConfirmation extends \izi\prestashop\requests\EventStream

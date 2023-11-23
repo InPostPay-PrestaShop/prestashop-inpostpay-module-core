@@ -28,26 +28,24 @@ class Create
         } else {
             $cart->id_address_invoice = $this->createDeliveryAddress($data->account_info, $customerId);
         }
-        $cart->id_lang = (int)\Configuration::get('PS_LANG_DEFAULT');
+        $cart->id_lang = (int) \Configuration::get('PS_LANG_DEFAULT');
         $cart->id_currency = \Context::getContext()->currency->id;
-        $cart->setDeliveryOption([$cart->id_address_delivery => (int)\Configuration::get('INPOST_PAY_payment_' . strtolower($data->delivery->delivery_type))]);
+        $cart->setDeliveryOption([$cart->id_address_delivery => (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($data->delivery->delivery_type))]);
         Logger::log("SELECTED CARRIER IS {$cart->id_carrier}");
         $cart->save();
 
-        if (!empty($data->order_details->order_comments)){
+        if (!empty($data->order_details->order_comments)) {
             $old_message = \Message::getMessageByCartId((int) $cartId);
-            if ($old_message){
+            if ($old_message) {
                 $update_message = new \Message((int) $old_message['id_message']);
                 $update_message->message = \pSQL($data->order_details->order_comments);
                 $update_message->update();
-            }else{
+            } else {
                 $update_message = new \Message();
                 $update_message->message = \pSQL($data->order_details->order_comments);
                 $update_message->id_cart = $cartId;
                 $update_message->add();
             }
-
-
         }
 
         $paymentModuleName = 'inpostizi';
@@ -61,7 +59,7 @@ class Create
         $orderMessage->save();
 
         $order = new \Order($payment_module->currentOrder);
-        $order->id_carrier = (int)\Configuration::get('INPOST_PAY_payment_' . strtolower($data->delivery->delivery_type));
+        $order->id_carrier = (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($data->delivery->delivery_type));
 
         $free = false;
         foreach ($cart->getCartRules() as $rule) {
@@ -74,10 +72,8 @@ class Create
             $order->refreshShippingCost();
         }
 
-
         $orderCarrierId = (int) $order->getIdOrderCarrier();
         if ($orderCarrierId > 0) {
-
             $additionalDeliveryOprionsPrice = 0.0;
             if (isset($data->delivery->delivery_codes) && is_array($data->delivery->delivery_codes)) {
                 foreach ($data->delivery->delivery_codes as $additionalDeliveryOprion) {
@@ -101,9 +97,9 @@ class Create
         }
 
         if (\Context::getContext()->customer->isLogged()) {
-            $link = \Context::getContext()->link->getPageLink('history') . "?controller=history&inpost-thank-you-insert=true";
+            $link = \Context::getContext()->link->getPageLink('history') . '?controller=history&inpost-thank-you-insert=true';
         } else {
-            $link = \Context::getContext()->link->getPageLink('guest-tracking') . "?controller=guest-tracking&inpost-thank-you-insert=true";
+            $link = \Context::getContext()->link->getPageLink('guest-tracking') . '?controller=guest-tracking&inpost-thank-you-insert=true';
         }
 
         CartSession::setCartOrderRedirectUrl($basketId, $link);
@@ -121,7 +117,7 @@ class Create
                 $model->phone = $data->delivery->phone_number->phone;
                 $model->add();
             } catch (\Exception $e) {
-                \izi\prestashop\Logger::log($e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
+                \izi\prestashop\Logger::log($e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
             }
         }
 
@@ -160,7 +156,7 @@ class Create
 
     public function createInvoiceAddress($invoiceDetails, $accountInfo)
     {
-        $address1 = $invoiceDetails->street . " " . $invoiceDetails->building . " " . ($invoiceDetails->flat ?? '');
+        $address1 = $invoiceDetails->street . ' ' . $invoiceDetails->building . ' ' . ($invoiceDetails->flat ?? '');
 
         $address = new \Address();
         $address->alias = $address1;
@@ -209,6 +205,7 @@ class Create
             $customer->passwd = 'no password';
             $customer->add();
         }
+
         return $customer->id;
     }
 }

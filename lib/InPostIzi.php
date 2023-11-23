@@ -2,8 +2,6 @@
 
 namespace izi;
 
-use izi\BindingProvider;
-
 class InPostIzi
 {
     const ENVIRONMENT_DEVELOP = 1;
@@ -135,7 +133,7 @@ class InPostIzi
 
     public function basketPut($forceUnbound = false, $justStore = false)
     {
-        self::$loggerClass::Log('PERFORMING PUT WITH PARAMETERS: $forceUnbound = ' . (int)$forceUnbound . ', $justStore = ' . (int)$justStore . ' self::$blockPut = ' . (int)self::$blockPut);
+        self::$loggerClass::Log('PERFORMING PUT WITH PARAMETERS: $forceUnbound = ' . (int) $forceUnbound . ', $justStore = ' . (int) $justStore . ' self::$blockPut = ' . (int) self::$blockPut);
         if (!self::$blockPut) {
             $data = $this->getBasket()->encode();
 
@@ -156,6 +154,7 @@ class InPostIzi
                 $forceUnbound = print_r((int) $forceUnbound, true);
                 $basketLinkedForLog = print_r((int) $basketLinkedForLog, true);
                 self::$loggerClass::response('', "NO put: forceUnbound:{$forceUnbound} binding->basket_linked:{$basketLinkedForLog}");
+
                 return;
             }
 
@@ -180,6 +179,7 @@ class InPostIzi
         if (self::$tokenCache) {
             return self::$tokenCache->getCachedToken();
         }
+
         return null;
     }
 
@@ -200,7 +200,7 @@ class InPostIzi
         $basket = $this->getBasket();
         $orderRespanse = $this->controller->orderPost($this->getOrder()->toArray());
 
-        Storage::insertSession("sameBasket", $basket->compareProduct($orderRespanse->products));
+        Storage::insertSession('sameBasket', $basket->compareProduct($orderRespanse->products));
     }
 
     public static function getInstance()
@@ -281,7 +281,7 @@ class InPostIzi
         $bindingPlace = " binding_place=\"{$bindingPlace}\" ";
 
         if ($productId) {
-            $html = '<inpost-izi-button ' . $bindingPlace . $float . $cart . $dark . $yellow . $count . $inpost_basket_id . ' ' . $variationHtml . ' name="' . $name . '" masked_phone_number="' . $maskedPhoneNumber   . '" data-product-id="' . $productId . '" language="pl" ' . $basketId . '></inpost-izi-button>';
+            $html = '<inpost-izi-button ' . $bindingPlace . $float . $cart . $dark . $yellow . $count . $inpost_basket_id . ' ' . $variationHtml . ' name="' . $name . '" masked_phone_number="' . $maskedPhoneNumber . '" data-product-id="' . $productId . '" language="pl" ' . $basketId . '></inpost-izi-button>';
         } else {
             $html = '<inpost-izi-button ' . $bindingPlace . $float . $cart . $dark . $yellow . $count . $inpost_basket_id . ' ' . $variationHtml . ' name="' . $name . '" masked_phone_number="' . $maskedPhoneNumber . '" language="pl" ' . $basketId . '></inpost-izi-button>';
         }
@@ -291,6 +291,7 @@ class InPostIzi
         if ($echo) {
             echo $html;
         }
+
         return $html;
     }
 }

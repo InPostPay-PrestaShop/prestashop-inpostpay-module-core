@@ -2,9 +2,6 @@
 
 namespace izi\prestashop;
 
-use izi\BasketIdentification;
-use izi\Storage;
-
 class PrestashopOrder
 {
     private $orderId;
@@ -27,8 +24,8 @@ class PrestashopOrder
         $this->basketId = $basketId;
         $this->order = new \Order($orderId);
 
-        $this->deliveryDetails = new \Address((int)($this->order->id_address_delivery));
-        $this->customer = new \Customer((int)($this->deliveryDetails->id_customer));
+        $this->deliveryDetails = new \Address((int) ($this->order->id_address_delivery));
+        $this->customer = new \Customer((int) ($this->deliveryDetails->id_customer));
     }
 
     public static function getOrder($orderId, $basketId)
@@ -51,6 +48,7 @@ class PrestashopOrder
         $data = CartSession::getOrderData($this->orderId);
         if ($data) {
             $data = json_decode($data);
+
             return $data->consents;
         }
 
@@ -66,34 +64,35 @@ class PrestashopOrder
         $selectedAdditional = explode(',', \Configuration::get('INPOST_PAY_terms_options_required_additional'));
         $requiredAdditionalText = \Configuration::get('INPOST_PAY_terms_options_required_additional_text');
 
-        foreach (\CMS::getCMSPages((int)\Configuration::get('PS_LANG_DEFAULT'), 1, true) as $page) {
+        foreach (\CMS::getCMSPages((int) \Configuration::get('PS_LANG_DEFAULT'), 1, true) as $page) {
             $link = $context->link->getCMSLink($page['id_cms'], $page['link_rewrite']);
             if (in_array($link, $selectedRequired)) {
                 $consents[] = [
-                    "consent_id" => count($consents) + 1,
-                    "consent_link" => $link,
-                    "consent_description" => $requiredText,
-                    "consent_version" => 1,
-                    "requirement_type" => "REQUIRED_ALWAYS"
+                    'consent_id' => count($consents) + 1,
+                    'consent_link' => $link,
+                    'consent_description' => $requiredText,
+                    'consent_version' => 1,
+                    'requirement_type' => 'REQUIRED_ALWAYS',
                 ];
-            } else if (in_array($link, $selectedRequiredOnce)) {
+            } elseif (in_array($link, $selectedRequiredOnce)) {
                 $consents[] = [
-                    "consent_id" => count($consents) + 1,
-                    "consent_link" => $link,
-                    "consent_description" => $requiredOnceText,
-                    "consent_version" => 1,
-                    "requirement_type" => "REQUIRED_ONCE"
+                    'consent_id' => count($consents) + 1,
+                    'consent_link' => $link,
+                    'consent_description' => $requiredOnceText,
+                    'consent_version' => 1,
+                    'requirement_type' => 'REQUIRED_ONCE',
                 ];
-            } else if (in_array($link, $selectedAdditional)) {
+            } elseif (in_array($link, $selectedAdditional)) {
                 $consents[] = [
-                    "consent_id" => count($consents) + 1,
-                    "consent_link" => $link,
-                    "consent_description" => $requiredAdditionalText,
-                    "consent_version" => 1,
-                    "requirement_type" => "OPTIONAL"
+                    'consent_id' => count($consents) + 1,
+                    'consent_link' => $link,
+                    'consent_description' => $requiredAdditionalText,
+                    'consent_version' => 1,
+                    'requirement_type' => 'OPTIONAL',
                 ];
             }
         }
+
         return $consents;
     }
 
@@ -135,6 +134,7 @@ class PrestashopOrder
 
             return $basket->products;
         }
+
         return [];
     }
 
@@ -152,7 +152,7 @@ class PrestashopOrder
     public function readCartProductPromoPrice($item)
     {
         $productSimple = $item->get_product();
-        $quantity = $item->get_quantity();;
+        $quantity = $item->get_quantity();
         $price = new \izi\item\Price();
 
         $priceIncludingTax = wc_get_price_including_tax($productSimple);
@@ -176,8 +176,8 @@ class PrestashopOrder
         $quantity = $item->get_quantity();
         $price = new \izi\item\Price();
 
-        $priceIncludingTax = wc_get_price_including_tax($productSimple, ["price" => $productSimple->get_regular_price()]);
-        $priceExcludingTax = wc_get_price_excluding_tax($productSimple, ["price" => $productSimple->get_regular_price()]);
+        $priceIncludingTax = wc_get_price_including_tax($productSimple, ['price' => $productSimple->get_regular_price()]);
+        $priceExcludingTax = wc_get_price_excluding_tax($productSimple, ['price' => $productSimple->get_regular_price()]);
         $vat = $priceExcludingTax - $priceExcludingTax;
 
         $price->gross = number_format($priceIncludingTax, 2);
@@ -195,6 +195,7 @@ class PrestashopOrder
     {
         $quantity = $this->readStockQuantity($item->get_product());
         $quantity->quantity = $item->get_quantity();
+
         return $quantity;
     }
 
@@ -202,8 +203,8 @@ class PrestashopOrder
     {
         $quantity = new \izi\item\Quantity();
 
-        $quantity->quantity_type = "INTEGER";
-        $quantity->quantity_unit = "pcs";
+        $quantity->quantity_type = 'INTEGER';
+        $quantity->quantity_unit = 'pcs';
 
         $availableQuantity = $productSimple->get_stock_quantity();
         if ($availableQuantity) {
@@ -295,10 +296,10 @@ class PrestashopOrder
 
         $variant->variant_id = $attribute->get_id();
         $variant->variant_name = $attribute->get_name();
-        $variant->variant_values = implode(", ", $attribute->get_options());
+        $variant->variant_values = implode(', ', $attribute->get_options());
 
-        $variant->variant_description = "";
-        $variant->variant_type = "";
+        $variant->variant_description = '';
+        $variant->variant_type = '';
 
         return $variant;
     }
@@ -308,7 +309,7 @@ class PrestashopOrder
         $clientAddress = new \izi\item\order\ClientAddress();
 
         $clientAddress->country_code = 'PL'; //$this->order->get_billing_country();
-        $clientAddress->address = $this->deliveryDetails->address1 . " " . $this->deliveryDetails->address2;
+        $clientAddress->address = $this->deliveryDetails->address1 . ' ' . $this->deliveryDetails->address2;
         $clientAddress->city = $this->deliveryDetails->city;
         $clientAddress->postal_code = $this->deliveryDetails->postcode;
 
@@ -325,6 +326,7 @@ class PrestashopOrder
             }
         }
         $invoiceDetails = new \izi\item\order\InvoiceDetails();
+
         return $invoiceDetails;
     }
 
@@ -336,7 +338,7 @@ class PrestashopOrder
 
         $additionalDeliveryOprionDictionary = [
             'PWW' => 'Paczka w Weekend',
-            'COD' => 'Pobranie'
+            'COD' => 'Pobranie',
         ];
         $additionalDeliveryOprionsName = [];
         foreach ($deliveryCodes as $code) {
@@ -347,12 +349,12 @@ class PrestashopOrder
             $gross = $net * 1.23;
             $additionalDeliveryOprionsName[] = $additionalDeliveryOprionDictionary[$code];
             $delivery->delivery_options = [[
-                "delivery_name" => $additionalDeliveryOprionDictionary[$code],
-                "delivery_code_value" => $code,
+                'delivery_name' => $additionalDeliveryOprionDictionary[$code],
+                'delivery_code_value' => $code,
                 'delivery_option_price' => [
-                    "net" => $net,
-                    "gross" => number_format($gross, 2),
-                    "vat" => number_format($gross - $net, 2)
+                    'net' => $net,
+                    'gross' => number_format($gross, 2),
+                    'vat' => number_format($gross - $net, 2),
                 ],
             ]];
         }
@@ -403,21 +405,22 @@ class PrestashopOrder
             $order = json_decode($order);
             if (isset($order->delivery, $order->delivery->delivery_address)) {
                 return $order->delivery->delivery_address;
-            } else if (isset($order->account_info)) {
+            } elseif (isset($order->account_info)) {
                 $deliveryAddress = new \izi\item\order\DeliveryAddress();
                 $deliveryAddress->name = $order->account_info->name . ' ' . $order->account_info->surname;
                 $deliveryAddress->country_code = $order->account_info->client_address->country_code;
                 $deliveryAddress->address = $order->account_info->client_address->address;
                 $deliveryAddress->city = $order->account_info->client_address->city;
                 $deliveryAddress->postal_code = $order->account_info->client_address->postal_code;
-                return  $deliveryAddress;
+
+                return $deliveryAddress;
             }
         }
         $deliveryAddress = new \izi\item\order\DeliveryAddress();
 
-        $deliveryAddress->name = $this->customer->firstname . " " . $this->customer->lastname;
+        $deliveryAddress->name = $this->customer->firstname . ' ' . $this->customer->lastname;
         $deliveryAddress->country_code = 'PL';
-        $deliveryAddress->address = $this->deliveryDetails->address1 . " " . $this->deliveryDetails->address2;
+        $deliveryAddress->address = $this->deliveryDetails->address1 . ' ' . $this->deliveryDetails->address2;
         $deliveryAddress->city = $this->deliveryDetails->city;
         $deliveryAddress->postal_code = $this->deliveryDetails->postcode;
 
@@ -450,7 +453,7 @@ class PrestashopOrder
     {
         $array = explode(' ', $this->order->getCustomer()->getAddresses((int) \Configuration::get('PS_LANG_DEFAULT'))['0']['phone']);
 
-        return [array_shift($array), implode(" ", $array)];
+        return [array_shift($array), implode(' ', $array)];
     }
 
     private function readComments()
@@ -529,7 +532,7 @@ class PrestashopOrder
             return $basket->summary->basket_hash;
         }
 
-        return "";
+        return '';
     }
 
     public function readPaymentType()

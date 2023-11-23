@@ -4,7 +4,6 @@ namespace izi;
 
 class Controller extends Remote
 {
-
     public static $addToCart;
 
     public function __construct()
@@ -14,9 +13,10 @@ class Controller extends Remote
 
     public function basketBindingDelete()
     {
-        Storage::insertSession("basketLinked", false);
+        Storage::insertSession('basketLinked', false);
         $response = parent::basketBindingDelete();
         BasketIdentification::drop();
+
         return $response;
     }
 
@@ -30,6 +30,7 @@ class Controller extends Remote
             $response = parent::browserBindingDelete($browserId);
             Storage::eraseSession('BrowserId');
         }
+
         return $response;
     }
 
@@ -55,9 +56,9 @@ class Controller extends Remote
 
     public function basketBindingPost($prefix = null, $number = null)
     {
-        Storage::insertSession("basketLinked", true);
+        Storage::insertSession('basketLinked', true);
         $binding = $this->basketBindingGet(true);
-        if (isset($binding) && isset($binding->browser_trusted) && $binding->browser_trusted) {
+        if (isset($binding, $binding->browser_trusted) && $binding->browser_trusted) {
             InPostIzi::getLoggerClass()::log('browser is trusted');
 //            InPostIzi::getCartSessionClass()::setConfirmationToCart(BasketIdentification::get(), json_encode($binding->client_details));
             $izi = InPostIzi::getInstance();
@@ -67,6 +68,7 @@ class Controller extends Remote
             }
             $izi->basketPut(true);
             Storage::eraseSession('binding_get');
+
             return [];
         }
         InPostIzi::getLoggerClass()::log('browser is not trusted');
@@ -75,6 +77,7 @@ class Controller extends Remote
             $response = new \stdClass();
         }
         $response->basketId = $this->basketId;
+
         return $response;
     }
 
@@ -92,7 +95,7 @@ class Controller extends Remote
                 if (is_string($data) && strlen($data) > 10) {
                     return $data;
                 }
-                $ticks++;
+                ++$ticks;
                 usleep(300000);
             }
         }
@@ -122,23 +125,24 @@ class Controller extends Remote
             $model = InPostIzi::getCartSessionClass()::getObjectById($id);
             if (!$model || !$model->id) {
                 usleep(300000);
+
                 return [];
             }
             $redirectUrl = isset($model->confirmation_response) && $model->confirmation_response == 'deleted' ? 'deleted' : (isset($model) ? $model->redirect_url : '');
             if ($redirectUrl && $redirectUrl != 'deleted') {
                 if (!InPostIzi::getCartSessionClass()::getRedirectedById($id)) {
                     InPostIzi::getCartSessionClass()::setRedirectedById($id, 1);
+
                     return [
                         'action' => 'redirect',
-                        'redirect' => $redirectUrl
+                        'redirect' => $redirectUrl,
                     ]; // Removed json_encode
                 }
-            } else if ('deleted' === $redirectUrl) {
+            } elseif ('deleted' === $redirectUrl) {
                 return [
-                    'action' => 'delete'
+                    'action' => 'delete',
                 ];
-            } else if ($model->coupons == 1) {
-
+            } elseif ($model->coupons == 1) {
                 if (method_exists($model, 'save')) {
                     $model->coupons = 0;
                     $model->save();
@@ -146,15 +150,16 @@ class Controller extends Remote
                     InPostIzi::getCartSessionClass()::setBasketCouponsById($id, 0);
                 }
                 InPostIzi::getLoggerClass()::log('SENDING REFRESH');
+
                 return [
-                    'action' => 'refresh'
+                    'action' => 'refresh',
                 ];
-            } else if (method_exists(InPostIzi::getCartSessionClass(), 'refresh') && InPostIzi::getCartSessionClass()::refresh($id)) {
+            } elseif (method_exists(InPostIzi::getCartSessionClass(), 'refresh') && InPostIzi::getCartSessionClass()::refresh($id)) {
                 return [
-                    'action' => 'refresh'
+                    'action' => 'refresh',
                 ];
             }
-            $ticks++;
+            ++$ticks;
             usleep(300000);
         }
 
@@ -163,6 +168,6 @@ class Controller extends Remote
 
     public function getSignatureKeys($force = false)
     {
-        return $this->request("v1/izi/signing-keys/public", "GET");
+        return $this->request('v1/izi/signing-keys/public', 'GET');
     }
 }

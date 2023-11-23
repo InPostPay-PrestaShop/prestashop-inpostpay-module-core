@@ -14,7 +14,7 @@ class BasketConfirmation extends \izi\prestashop\requests\EventStream
         session_write_close();
         $response = [];
         $this->sendHelloMessage();
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < 1000; ++$i) {
             if (connection_aborted() || time() - $start > 10) {
                 exit();
             }

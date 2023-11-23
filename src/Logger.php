@@ -1,4 +1,5 @@
 <?php
+
 namespace izi\prestashop;
 
 class Logger
@@ -32,7 +33,7 @@ class Logger
     private static function write($filename, $data)
     {
 //        if (defined('IZI_LOGGER')) {
-            file_put_contents(__DIR__ . '/' . $filename, date('Y-m-d H:i:s') . PHP_EOL . $data . PHP_EOL . PHP_EOL, FILE_APPEND);
+        file_put_contents(__DIR__ . '/' . $filename, date('Y-m-d H:i:s') . PHP_EOL . $data . PHP_EOL . PHP_EOL, FILE_APPEND);
 //        }
     }
 }

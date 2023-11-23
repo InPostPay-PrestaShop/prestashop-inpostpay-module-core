@@ -2,9 +2,8 @@
 
 namespace izi\prestashop;
 
-use izi\BasketIdentification;
-use izi\Storage;
 use izi\PriceNumber;
+use izi\Storage;
 
 class PrestashopBasket extends PrestashopBaseMap
 {
@@ -142,8 +141,9 @@ class PrestashopBasket extends PrestashopBaseMap
     {
         $product = new \izi\item\Product();
 
-        if ($prestashopProduct->id)
-        $product->product_id = $prestashopProduct->id . '.' . $variation;
+        if ($prestashopProduct->id) {
+            $product->product_id = $prestashopProduct->id . '.' . $variation;
+        }
         $product->product_category = $prestashopProduct->getDefaultCategory();
         $product->ean = $prestashopProduct->reference;
         $product->product_name = $prestashopProduct->name;
@@ -173,7 +173,7 @@ class PrestashopBasket extends PrestashopBaseMap
 
         $img = $prestashopProduct->getCover($prestashopProduct->id);
         if ($img) {
-            return \Context::getContext()->link->getImageLink($linkRewrite, (int)$img['id_image'], $image_type);
+            return \Context::getContext()->link->getImageLink($linkRewrite, (int) $img['id_image'], $image_type);
         }
 
         return '';
@@ -211,10 +211,10 @@ class PrestashopBasket extends PrestashopBaseMap
             $array[] = $attribute['attribute_name'];
         }
 
-        $variant->variant_values = implode(", ", $array);
+        $variant->variant_values = implode(', ', $array);
 
-        $variant->variant_description = "";
-        $variant->variant_type = "";
+        $variant->variant_description = '';
+        $variant->variant_type = '';
 
         return $variant;
     }
@@ -232,8 +232,8 @@ class PrestashopBasket extends PrestashopBaseMap
     {
         $quantity = new \izi\item\Quantity();
 
-        $quantity->quantity_type = "INTEGER";
-        $quantity->quantity_unit = "pcs";
+        $quantity->quantity_type = 'INTEGER';
+        $quantity->quantity_unit = 'pcs';
 
         $availableQuantity = \StockAvailable::getQuantityAvailableByProduct($prestashopProduct->id, $productData['id_product_attribute']);
 
@@ -264,7 +264,6 @@ class PrestashopBasket extends PrestashopBaseMap
         return $promoCode;
     }
 
-
     public function mapSummary($cart)
     {
         $summary = new \izi\item\Summary();
@@ -282,12 +281,12 @@ class PrestashopBasket extends PrestashopBaseMap
             if (self::$couponError) {
                 $summary->basket_notice = [
                     'type' => 'ERROR',
-                    'description' => 'Kod jest nieaktywny lub nieprawidłowy'
+                    'description' => 'Kod jest nieaktywny lub nieprawidłowy',
                 ];
             } else {
                 $summary->basket_notice = [
                     'type' => 'ATTENTION',
-                    'description' => 'Kod został aktywowany'
+                    'description' => 'Kod został aktywowany',
                 ];
             }
         }
@@ -407,7 +406,7 @@ class PrestashopBasket extends PrestashopBaseMap
             foreach ($relatedProducts as $relatedProduct) {
                 $this->relatedProductIds[] = [
                     'id' => $relatedProduct['id_product'],
-                    'variation' => $relatedProduct['id_product_attribute']
+                    'variation' => $relatedProduct['id_product_attribute'],
                 ];
             }
         }
@@ -427,34 +426,35 @@ class PrestashopBasket extends PrestashopBaseMap
         $selectedAdditional = explode(',', \Configuration::get('INPOST_PAY_terms_options_additional'));
         $requiredAdditionalText = \Configuration::get('INPOST_PAY_terms_options_additional_text');
 
-        foreach (\CMS::getCMSPages((int)\Configuration::get('PS_LANG_DEFAULT'), 1, true) as $page) {
+        foreach (\CMS::getCMSPages((int) \Configuration::get('PS_LANG_DEFAULT'), 1, true) as $page) {
             $link = $context->link->getCMSLink($page['id_cms'], $page['link_rewrite']);
             if (in_array($link, $selectedRequired)) {
                 $consents[] = [
-                    "consent_id" => count($consents) + 1,
-                    "consent_link" => $link,
-                    "consent_description" => $requiredText,
-                    "consent_version" => 1,
-                    "requirement_type" => "REQUIRED_ALWAYS"
+                    'consent_id' => count($consents) + 1,
+                    'consent_link' => $link,
+                    'consent_description' => $requiredText,
+                    'consent_version' => 1,
+                    'requirement_type' => 'REQUIRED_ALWAYS',
                 ];
-            } else if (in_array($link, $selectedRequiredOnce)) {
+            } elseif (in_array($link, $selectedRequiredOnce)) {
                 $consents[] = [
-                    "consent_id" => count($consents) + 1,
-                    "consent_link" => $link,
-                    "consent_description" => $requiredOnceText,
-                    "consent_version" => 1,
-                    "requirement_type" => "REQUIRED_ONCE"
+                    'consent_id' => count($consents) + 1,
+                    'consent_link' => $link,
+                    'consent_description' => $requiredOnceText,
+                    'consent_version' => 1,
+                    'requirement_type' => 'REQUIRED_ONCE',
                 ];
-            } else if (in_array($link, $selectedAdditional)) {
+            } elseif (in_array($link, $selectedAdditional)) {
                 $consents[] = [
-                    "consent_id" => count($consents) + 1,
-                    "consent_link" => $link,
-                    "consent_description" => $requiredAdditionalText,
-                    "consent_version" => 1,
-                    "requirement_type" => "OPTIONAL"
+                    'consent_id' => count($consents) + 1,
+                    'consent_link' => $link,
+                    'consent_description' => $requiredAdditionalText,
+                    'consent_version' => 1,
+                    'requirement_type' => 'OPTIONAL',
                 ];
             }
         }
+
         return $consents;
     }
 
@@ -478,6 +478,7 @@ class PrestashopBasket extends PrestashopBaseMap
         if (\Configuration::get('INPOST_PAY_payment_inpost')) {
             $methods[] = 'CASH_ON_DELIVERY';
         }
+
         return $methods;
     }
 }

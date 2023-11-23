@@ -8,7 +8,7 @@ class InpostiziBasketSession extends \ObjectModel
         'table' => 'inpostizi_basket_session',
         'primary' => 'id',
         'multilang' => false,
-        'fields' => array(
+        'fields' => [
             'session_id' => ['type' => self::TYPE_STRING, 'allow_null' => false, 'value' => null],
             'confirmation_response' => ['type' => self::TYPE_STRING, 'allow_null' => true, 'value' => null],
             'cart_id' => ['type' => self::TYPE_STRING, 'allow_null' => false, 'value' => null],
@@ -20,6 +20,6 @@ class InpostiziBasketSession extends \ObjectModel
             'coupons' => ['type' => self::TYPE_STRING, 'allow_null' => true, 'value' => null],
             'event' => ['type' => self::TYPE_INT, 'allow_null' => true, 'value' => null],
             'redirected' => ['type' => self::TYPE_BOOL, 'allow_null' => true, 'value' => null],
-        )
+        ],
     ];
 }

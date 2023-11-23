@@ -11,6 +11,7 @@ class BindingProvider
         if (!self::$binding) {
             self::$binding = InpostIziPayPrestashop::getInstance()->getController()->basketBindingGet();
         }
+
         return self::$binding;
     }
 }

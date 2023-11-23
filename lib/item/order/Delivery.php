@@ -2,8 +2,6 @@
 
 namespace izi\item\order;
 
-use izi\item\Price;
-
 class Delivery extends \izi\Item
 {
     protected $delivery_type;
