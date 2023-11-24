@@ -7,10 +7,16 @@ use izi\prestashop\Exception\BasketNotFoundException;
 use izi\prestashop\Exception\InternalServerErrorException;
 use izi\prestashop\Logger;
 use izi\prestashop\rest\SignatureVerification;
+use izi\prestashop\traits\CarrierFinderTrait;
 
 class Create
 {
-    public function handleRequest($data): ?int
+    use CarrierFinderTrait;
+
+    /**
+     * @return int|null
+     */
+    public function handleRequest($data)
     {
         $signature = new SignatureVerification();
         $signature->check();
@@ -28,7 +34,9 @@ class Create
             throw new BasketNotFoundException('There already exists an order for this basket.');
         }
 
-        $carrierId = $this->getCarrierId($data->delivery->delivery_type);
+        if (null === $carrierId = $this->getCarrierId($data->delivery->delivery_type)) {
+            throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $data->delivery->delivery_type));
+        }
 
         $customerId = $this->createCustomer($data->account_info);
         $cart->id_customer = $customerId;
@@ -222,16 +230,5 @@ class Create
         }
 
         return $customer->id;
-    }
-
-    private function getCarrierId(string $delivery_type): int
-    {
-        $referenceId = (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($delivery_type));
-        $carrier = \Carrier::getCarrierByReference($referenceId);
-        if (false === $carrier) {
-            throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $delivery_type));
-        }
-
-        return $carrier->id;
     }
 }

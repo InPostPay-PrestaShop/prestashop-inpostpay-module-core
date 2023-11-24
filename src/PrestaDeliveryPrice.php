@@ -2,27 +2,37 @@
 
 namespace izi\prestashop;
 
+use izi\prestashop\traits\CarrierFinderTrait;
+
 class PrestaDeliveryPrice
 {
-    public function mapDelivery($cart)
+    use CarrierFinderTrait;
+
+    public function mapDelivery(\Cart $cart)
     {
         $options = [];
 
+        $free = null;
+
         foreach (['apm', 'courier'] as $deliveryType) {
-            $type = \Configuration::get('INPOST_PAY_payment_' . $deliveryType);
-            $gross = 0.0;
-            $net = 0.0;
-            $free = false;
+            if (null === $carrierId = $this->getCarrierId($deliveryType)) {
+                continue;
+            }
+
             try {
-                foreach ($cart->getCartRules() as $rule) {
-                    if ($rule['free_shipping']) {
-                        $free = true;
-                        break;
-                    }
+                if (!$this->isDeliveryOptionAvailable($cart, $carrierId)) {
+                    continue;
                 }
+
+                if (!isset($free)) {
+                    $free = $this->hasFreeShippingCartRule($cart);
+                }
+
                 if (!$free) {
-                    $gross = $cart->getPackageShippingCost($type, true);
-                    $net = $cart->getPackageShippingCost($type, false);
+                    $gross = $cart->getPackageShippingCost($carrierId);
+                    $net = $cart->getPackageShippingCost($carrierId, false);
+                } else {
+                    $gross = $net = 0.0;
                 }
             } catch (\Exception $e) {
                 Logger::log("EXCEPTION IN DELIVERY PRICE {$e->getMessage()}");
@@ -66,9 +76,9 @@ class PrestaDeliveryPrice
     public function mapDeliveryOptions($deliveryType)
     {
         $data = [];
-        $pwwPrice = floatval(\Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_pww'));
+        $pwwPrice = (float) \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_pww');
         $pwwPriceAvailable = $this->optionAvailability('pww', $deliveryType);
-        $codPrice = floatval(\Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_cod'));
+        $codPrice = (float) \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_cod');
         $codPriceAvailable = $this->optionAvailability('cod', $deliveryType);
 
         Logger::log("CENA PWW {$pwwPrice}, DOSTEPNOPSC PWW {$pwwPriceAvailable}");
@@ -93,7 +103,13 @@ class PrestaDeliveryPrice
         return $data;
     }
 
-    private function optionAvailability(string $option, string $deliveryType): bool
+    /**
+     * @param string $option
+     * @param string $deliveryType
+     *
+     * @return bool
+     */
+    private function optionAvailability($option, $deliveryType)
     {
         $dayOfWeek = date('N');
         $hour = date('H');
@@ -103,24 +119,55 @@ class PrestaDeliveryPrice
         $hourFrom = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_from_time');
         $hourTo = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_to_time');
 
-        if ($dayOfWeek < $dayFrom) {
+        if ($dayOfWeek < $dayFrom || $dayOfWeek > $dayTo) {
             return false;
-        }
-        if ($dayOfWeek == $dayFrom) {
-            if ($hour < $hourFrom) {
-                return false;
-            }
         }
 
-        if ($dayOfWeek > $dayTo) {
+        if ($dayOfWeek === $dayFrom && $hour < $hourFrom) {
             return false;
         }
-        if ($dayOfWeek == $dayTo) {
-            if ($hour > $hourTo) {
-                return false;
-            }
+
+        if ($dayOfWeek === $dayTo && $hour > $hourTo) {
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @param int $carrierId
+     *
+     * @return bool
+     */
+    private function isDeliveryOptionAvailable(\Cart $cart, $carrierId)
+    {
+        $deliveryOptionList = $cart->getDeliveryOptionList();
+        $addressId = (int) $cart->id_address_delivery;
+
+        if (!isset($deliveryOptionList[$addressId])) {
+            return false;
+        }
+
+        foreach ($deliveryOptionList[$addressId] as $option) {
+            if (isset($option['carrier_list'][$carrierId]) && 1 === count($option['carrier_list'])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    private function hasFreeShippingCartRule(\Cart $cart)
+    {
+        foreach ($cart->getCartRules() as $rule) {
+            if ($rule['free_shipping']) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
