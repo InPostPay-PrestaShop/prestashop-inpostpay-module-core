@@ -3,163 +3,186 @@
 namespace izi\prestashop;
 
 use izi\item\Quantity;
-use izi\PriceNumber;
+use izi\prestashop\traits\PriceFactoryTrait;
 use izi\Storage;
 
 class PrestashopBasket extends PrestashopBaseMap
 {
-    protected $basketBasePriceNet = 0;
-    protected $basketBasePriceGross = 0;
-    protected $basketBasePriceVat = 0;
+    use PriceFactoryTrait;
 
-    protected $basketPromoPriceNet = 0;
-    protected $basketPromoPriceGross = 0;
-    protected $basketPromoPriceVat = 0;
-
-    protected $relatedProductIds = [];
+    private $cart;
 
     public static $hasCoupons = false;
     public static $couponError = false;
 
-    public static function getBasket($cart = null)
+    public function __construct(\Cart $cart)
     {
-        $prestashopBasket = new self();
-
-        if ($cart == null) {
-            return $prestashopBasket->mapBasket(\Context::getContext()->cart);
-        }
-
-        return $prestashopBasket->mapBasket($cart);
+        $this->cart = $cart;
     }
 
-    public function mapBasket($cart)
+    /**
+     * @return \izi\item\Basket
+     */
+    public static function getBasket(\Cart $cart = null)
+    {
+        if (null === $cart) {
+            $cart = \Context::getContext()->cart;
+        }
+
+        return (new self($cart))->mapBasket();
+    }
+
+    /**
+     * @return \izi\item\Basket
+     */
+    public function mapBasket()
     {
         $basket = new \izi\item\Basket();
-        if (!$cart) {
+
+        if (!\Validate::isLoadedObject($this->cart)) {
             return $basket;
         }
 
-        $basket->products = $this->mapProducts($cart->getProducts(), $cart->id_lang);
-        $basket->summary = $this->mapSummary($cart);
+        $cart = $this->cart;
+        $cartProducts = $cart->getProducts();
 
-        $basket->promo_codes = $this->mapPromoCodes($cart);
-        $deliveryPrice = new PrestaDeliveryPrice();
-        $basket->delivery = $deliveryPrice->mapDelivery($cart);
+        $basket->products = $this->mapProducts($cartProducts);
+        $basket->summary = $this->mapSummary($basket->products);
+
+        $basket->promo_codes = $this->mapPromoCodes();
+        $basket->delivery = (new PrestaDeliveryPrice())->mapDelivery($cart);
         $basket->consents = $this->mapConsents();
 
-        $basket->related_products = $this->mapRelatedProducts($cart->id_lang, $cart->getProducts());
-
-        $browserId = Storage::findSession('BrowserId');
-        if (!$browserId && isset($_COOKIE['BrowserId'])) {
-            $browserId = $_COOKIE['BrowserId'];
-        }
-        Logger::log('BROWSER_ID: ' . $browserId);
-        if ($browserId) {
-            $basket->browser_id = $browserId;
-        } else {
-            //            Logger::log('COOKIE: ' . print_r($_COOKIE, true));
-            //            Logger::log('SESSION: ' . print_r($_SESSION, true));
-        }
+        $basket->related_products = $this->mapRelatedProducts($cartProducts);
+        $basket->browser_id = $this->getBrowserId();
 
         return $basket;
     }
 
-    public function mapProducts($products, $idLang)
+    /**
+     * @return \izi\item\BasketProduct[]
+     */
+    public function mapProducts(array $products)
     {
-        $array = [];
+        $result = [];
 
         foreach ($products as $product) {
             try {
-                $array[] = $this->mapCartProduct($product, $idLang);
+                $result[] = $this->mapCartProduct($product);
             } catch (\Exception $e) {
                 Logger::log($e->getMessage());
             }
         }
 
-        return $array;
+        return $result;
     }
 
-    public function mapCartProduct($productData, $idLang)
+    /**
+     * @return \izi\item\BasketProduct
+     */
+    public function mapCartProduct(array $productData)
     {
-        $prestashopProduct = new \Product($productData['id_product'], true, $idLang);
+        $prestashopProduct = new \Product($productData['id_product'], false, $this->cart->id_lang);
 
-        $product = $this->mapProductData($prestashopProduct, $idLang, $productData, $productData['id_product_attribute']);
+        $product = $this->mapProductData($prestashopProduct, $productData);
 
-        $this->collectRelatedProductIds($prestashopProduct, $idLang);
-
-        $product->quantity = $this->readQuantity($productData, $prestashopProduct, $idLang);
-        $product->base_price = $this->readCartProductBasePrice($prestashopProduct, $productData);
-        $product->promo_price = $this->readCartProductPromoPrice($prestashopProduct, $productData);
+        $product->quantity = $this->readQuantity($productData, $prestashopProduct);
+        $product->base_price = $this->readCartProductBasePrice($productData);
+        $product->promo_price = $this->readCartProductPromoPrice($productData);
 
         return $product;
     }
 
-    public function readCartProductBasePrice($prestashopProduct, $productData)
+    /**
+     * @return \izi\item\Price
+     */
+    public function readCartProductBasePrice(array $productData)
     {
-        $price = new \izi\item\Price();
+        $gross = isset($productData['price_without_reduction'])
+            ? $productData['price_without_reduction']
+            : $this->calculateProductPrice(
+                $productData['id_product'],
+                $productData['id_product_attribute'],
+                true,
+                false,
+                $productData['cart_quantity'],
+                $productData['id_customization']
+            );
 
-        $gross = $prestashopProduct->getPriceWithoutReduct(false, null, 6);
-        $net = $prestashopProduct->getPriceWithoutReduct(true, null, 6);
+        $net = isset($productData['price_without_reduction_without_tax'])
+            ? $productData['price_without_reduction_without_tax']
+            : $this->calculateProductPrice(
+                $productData['id_product'],
+                $productData['id_product_attribute'],
+                false,
+                false,
+                $productData['cart_quantity'],
+                $productData['id_customization']
+            );
 
-        $basketGross = PriceNumber::parse($gross);
-        $basketNet = PriceNumber::parse($net);
+        $price = $this->createPrice($net, $gross);
 
-        $this->basketBasePriceGross += $basketGross * $productData['cart_quantity'];
-        $this->basketBasePriceNet += $basketNet * $productData['cart_quantity'];
-        $this->basketBasePriceVat += ($basketGross - $basketNet) * $productData['cart_quantity'];
-
-        $price->gross = number_format($gross, 2, '.', '');
-        $price->net = number_format($net, 2, '.', '');
-        $theTax = $this->makeTax($gross, $net);
-        Logger::log("THE TAX IS {$theTax}");
-        $price->vat = number_format($theTax, 2, '.', '');
+        Logger::log("THE TAX IS {$price->vat}");
 
         return $price;
     }
 
-    public function readCartProductPromoPrice($prestashopProduct, $productData)
+    /**
+     * @return \izi\item\Price
+     */
+    public function readCartProductPromoPrice(array $productData)
     {
-        $price = new \izi\item\Price();
+        $gross = isset($productData['price_with_reduction'])
+            ? $productData['price_with_reduction']
+            : $this->calculateProductPrice(
+                $productData['id_product'],
+                $productData['id_product_attribute'],
+                true,
+                true,
+                $productData['cart_quantity'],
+                $productData['id_customization']
+            );
 
-        $gross = $prestashopProduct->getPrice(true, null, 6);
-        $net = $prestashopProduct->getPrice(false, null, 6);
+        $net = isset($productData['price_with_reduction_without_tax'])
+            ? $productData['price_with_reduction_tax']
+            : $this->calculateProductPrice(
+                $productData['id_product'],
+                $productData['id_product_attribute'],
+                false,
+                true,
+                $productData['cart_quantity'],
+                $productData['id_customization']
+            );
 
-        $basketGross = PriceNumber::parse($gross);
-        $basketNet = PriceNumber::parse($net);
-
-        $this->basketPromoPriceGross += $basketGross * $productData['cart_quantity'];
-        $this->basketPromoPriceNet += $basketNet * $productData['cart_quantity'];
-        $this->basketPromoPriceVat += ($basketGross - $basketNet) * $productData['cart_quantity'];
-
-        $price->gross = number_format($gross, 2, '.', '');
-        $price->net = number_format($net, 2, '.', '');
-        $price->vat = number_format($this->makeTax($gross, $net), 2, '.', '');
-
-        return $price;
+        return $this->createPrice($net, $gross);
     }
 
-    public function mapProductData($prestashopProduct, $idLang, $rawData, $variation)
+    /**
+     * @return \izi\item\BasketProduct
+     */
+    public function mapProductData(\Product $prestashopProduct, array $productData)
     {
         $product = new \izi\item\BasketProduct();
+        $combinationId = array_key_exists('id_product_attribute', $productData) ? $productData['id_product_attribute'] : 0;
 
         if ($prestashopProduct->id) {
-            $product->product_id = $prestashopProduct->id . '.' . $variation;
+            $product->product_id = $prestashopProduct->id . '.' . (int) $combinationId;
         }
         $product->product_category = $prestashopProduct->getDefaultCategory();
-        $product->ean = $prestashopProduct->reference;
+        $product->ean = isset($productData['ean13']) ? $productData['ean13'] : $prestashopProduct->ean13;
         $product->product_name = $prestashopProduct->name;
-        $product->product_description = substr(strip_tags($prestashopProduct->description), 0, 1000);
-        $product->product_link = \Context::getContext()->link->getProductLink($prestashopProduct->id);
+        $product->product_description = \Tools::substr(trim(strip_tags($prestashopProduct->description)), 0, 1000);
+        $product->product_link = \Context::getContext()->link->getProductLink($prestashopProduct, null, null, null, $this->cart->id_lang, null, $combinationId);
 
-        $product->product_image = $this->readProductImage($prestashopProduct, ($rawData['id_product_attribute'] ?? null));
+        $product->product_image = $this->readProductImage($prestashopProduct, $combinationId);
 
-        $product->variants = $this->mapProductVariables($prestashopProduct, $idLang);
-        $product->product_attributes = []; //$this->mapProductAttributes($prestashopProduct);
+        $product->variants = $this->mapProductVariables($prestashopProduct);
+        $product->product_attributes = [];
 
         return $product;
     }
 
-    public function readProductImage($prestashopProduct, $attributeId)
+    public function readProductImage(\Product $prestashopProduct, $attributeId)
     {
         $image_type = 'small_default';
         $linkRewrite = isset($prestashopProduct->link_rewrite) ? $prestashopProduct->link_rewrite : $prestashopProduct->name;
@@ -180,12 +203,12 @@ class PrestashopBasket extends PrestashopBaseMap
         return '';
     }
 
-    public function mapProductVariables($prestashopProduct, $id_lang)
+    public function mapProductVariables(\Product $prestashopProduct)
     {
-        $array = [];
+        $result = [];
 
         $map = [];
-        foreach ($prestashopProduct->getAttributeCombinations($id_lang, true) as $attribute) {
+        foreach ($prestashopProduct->getAttributeCombinations($this->cart->id_lang, true) as $attribute) {
             if (!isset($map[$attribute['id_attribute_group']]) || !is_array($map[$attribute['id_attribute_group']])) {
                 $map[$attribute['id_attribute_group']] = [];
             }
@@ -194,10 +217,10 @@ class PrestashopBasket extends PrestashopBaseMap
         }
 
         foreach ($map as $item) {
-            $array[] = $this->mapProductVariable($item);
+            $result[] = $this->mapProductVariable($item);
         }
 
-        return $array;
+        return $result;
     }
 
     public function mapProductVariable($item)
@@ -207,12 +230,12 @@ class PrestashopBasket extends PrestashopBaseMap
         $variant->variant_id = $item[0]['id_attribute_group'];
         $variant->variant_name = $item[0]['group_name'];
 
-        $array = [];
+        $variantValues = [];
         foreach ($item as $attribute) {
-            $array[] = $attribute['attribute_name'];
+            $variantValues[] = $attribute['attribute_name'];
         }
 
-        $variant->variant_values = implode(', ', $array);
+        $variant->variant_values = implode(', ', $variantValues);
 
         $variant->variant_description = '';
         $variant->variant_type = '';
@@ -220,42 +243,66 @@ class PrestashopBasket extends PrestashopBaseMap
         return $variant;
     }
 
-    public function readQuantity($productData, $prestashopProduct, $idLang)
+    /**
+     * @return \izi\item\BasketQuantity
+     */
+    public function readQuantity(array $productData, \Product $prestashopProduct)
     {
-        $quantity = $this->readStockQuantity($prestashopProduct, $idLang, $productData);
-
-        $quantity->quantity = $productData['cart_quantity'];
+        $quantity = $this->readStockQuantity($prestashopProduct, $productData);
+        $quantity->quantity = (int) $productData['cart_quantity'];
 
         return $quantity;
     }
 
-    public function readStockQuantity($prestashopProduct, $idLang, $productData)
+    /**
+     * @return \izi\item\BasketQuantity
+     */
+    public function readStockQuantity(\Product $prestashopProduct, array $productData)
     {
         $quantity = new \izi\item\BasketQuantity();
 
         $quantity->quantity_type = Quantity::INTEGER;
         $quantity->quantity_unit = 'pcs';
 
-        $availableQuantity = \StockAvailable::getQuantityAvailableByProduct($prestashopProduct->id, $productData['id_product_attribute']);
+        if (!isset($productData['allow_oosp'])) {
+            $outOfStock = \StockAvailable::outOfStock($prestashopProduct->id);
+            $productData['allow_oosp'] = \Product::isAvailableWhenOutOfStock($outOfStock);
+        }
 
-        $quantity->available_quantity = $availableQuantity ?: 99;
-        $quantity->max_quantity = $availableQuantity ?: 99;
+        if (!$productData['allow_oosp']) {
+            $availableQuantity = isset($productData['quantity_available'])
+                ? (int) $productData['quantity_available']
+                : \StockAvailable::getQuantityAvailableByProduct($prestashopProduct->id, $productData['id_product_attribute']);
+
+            if (0 > $availableQuantity) {
+                $availableQuantity = 0;
+            }
+
+            $quantity->available_quantity = $availableQuantity;
+            $quantity->max_quantity = $availableQuantity;
+        }
 
         return $quantity;
     }
 
-    public function mapPromoCodes($cart)
+    /**
+     * @return \izi\item\PromoCode[]
+     */
+    public function mapPromoCodes()
     {
-        $array = [];
+        $result = [];
 
-        foreach ($cart->getCartRules() as $rule) {
-            $array[] = $this->mapPromoCode($rule);
+        foreach ($this->cart->getCartRules() as $rule) {
+            $result[] = $this->mapPromoCode($rule);
         }
 
-        return $array;
+        return $result;
     }
 
-    public function mapPromoCode($rule)
+    /**
+     * @return \izi\item\PromoCode
+     */
+    public function mapPromoCode(array $rule)
     {
         $promoCode = new \izi\item\PromoCode();
 
@@ -265,15 +312,20 @@ class PrestashopBasket extends PrestashopBaseMap
         return $promoCode;
     }
 
-    public function mapSummary($cart)
+    /**
+     * @param \izi\item\BasketProduct[]
+     *
+     * @return \izi\item\Summary
+     */
+    public function mapSummary(array $products)
     {
         $summary = new \izi\item\Summary();
 
-        $summary->basket_base_price = $this->readSummaryBasketBasePrice($cart);
-        $summary->basket_final_price = $this->readSummaryBasketFinalPrice($cart);
-        $summary->basket_promo_price = $this->readSummaryBasketPromoPrice($cart);
+        $summary->basket_base_price = $this->readSummaryBasketBasePrice($products);
+        $summary->basket_final_price = $this->readSummaryBasketFinalPrice();
+        $summary->basket_promo_price = $this->readSummaryBasketPromoPrice();
 
-        $summary->currency = \Context::getContext()->currency->iso_code;
+        $summary->currency = 'PLN';
         $summary->basket_expiration_date = $this->readBasketExpirationDate();
         $summary->basket_additional_information = '';
         $summary->payment_type = $this->readPaymentType();
@@ -300,117 +352,157 @@ class PrestashopBasket extends PrestashopBaseMap
         return date("Y-m-d\TH:i:s.000\Z", strtotime('+2 days'));
     }
 
-    public function readSummaryBasketBasePrice($cart)
+    /**
+     * @param \izi\item\BasketProduct[] $products
+     *
+     * @return \izi\item\Price
+     */
+    public function readSummaryBasketBasePrice(array $products)
     {
-        $price = new \izi\item\Price();
+        $net = array_reduce($products, function ($sum, \izi\item\BasketProduct $product) {
+            return $sum + $this->calculateRowTotal($product->base_price->net, $product->quantity->quantity);
+        }, 0.);
 
-        $price->gross = number_format(PriceNumber::toFloat($this->basketBasePriceGross), 2, '.', '');
-        $price->net = number_format(PriceNumber::toFloat($this->basketBasePriceNet), 2, '.', '');
-        $price->vat = number_format(PriceNumber::toFloat($this->basketBasePriceVat), 2, '.', '');
+        $gross = array_reduce($products, function ($sum, \izi\item\BasketProduct $product) {
+            return $sum + $this->calculateRowTotal($product->base_price->gross, $product->quantity->quantity);
+        }, 0.);
 
-        return $price;
+        return $this->createPrice($net, $gross);
     }
 
-    public function readSummaryBasketPromoPrice($cart)
+    /**
+     * @return \izi\item\Price
+     */
+    public function readSummaryBasketPromoPrice()
     {
-        $price = new \izi\item\Price();
+        $gross = $this->cart->getOrderTotal(true, \Cart::ONLY_PRODUCTS);
+        $net = $this->cart->getOrderTotal(false, \Cart::ONLY_PRODUCTS);
 
-        $price->gross = number_format(PriceNumber::toFloat($this->basketPromoPriceGross), 2, '.', '');
-        $price->net = number_format(PriceNumber::toFloat($this->basketPromoPriceNet), 2, '.', '');
-        $price->vat = number_format(PriceNumber::toFloat($this->basketPromoPriceVat), 2, '.', '');
-
-        return $price;
+        return $this->createPrice($net, $gross);
     }
 
-    public function readSummaryBasketFinalPrice($cart)
+    public function readSummaryBasketFinalPrice()
     {
-        $price = new \izi\item\Price();
+        $gross = $this->cart->getOrderTotal(true, \Cart::BOTH_WITHOUT_SHIPPING);
+        $net = $this->cart->getOrderTotal(false, \Cart::BOTH_WITHOUT_SHIPPING);
 
-        $gross = $cart->getOrderTotal(true, \Cart::BOTH_WITHOUT_SHIPPING);
-        $net = $cart->getOrderTotal(false, \Cart::BOTH_WITHOUT_SHIPPING);
-
-        $price->gross = number_format($gross, 2, '.', '');
-        $price->net = number_format($net, 2, '.', '');
-        $price->vat = number_format($this->makeTax($gross, $net), 2, '.', '');
-
-        return $price;
+        return $this->createPrice($net, $gross);
     }
 
-    public function makeTax($gross, $net)
+    /**
+     * @return \izi\item\BasketProduct[]
+     */
+    public function mapRelatedProducts(array $cartProducts)
     {
-        return number_format($gross - $net, 6, '.', '');
-    }
+        $result = $cartProductsById = $relatedProductsById = [];
 
-    public function mapRelatedProducts($id_lang, $cartContents)
-    {
-        $array = [];
-
-        foreach ($this->relatedProductIds as $value) {
-            foreach ($cartContents as $productData) {
-                if ($productData['id_product'] == $value['id']) {
-                    continue 2;
-                }
+        foreach ($cartProducts as $cartProduct) {
+            if (isset($cartProductsById[$cartProduct['id_product']])) {
+                continue;
             }
-            $array[] = $this->mapRelatedProduct($value['id'], $id_lang, $value['variation']);
+
+            $cartProductsById[$cartProduct['id_product']] = $cartProduct;
+            $prestashopProduct = new \Product($cartProduct['id_product'], false, $this->cart->id_lang);
+
+            foreach ($prestashopProduct->getAccessories($this->cart->id_lang) as $accessory) {
+                if ($accessory['customizable']) {
+                    continue;
+                }
+
+                $relatedProductsById[$accessory['id_product']] = $accessory;
+            }
         }
 
-        return $array;
+        $relatedProducts = array_diff_key($relatedProductsById, $cartProductsById);
+
+        foreach ($relatedProducts as $relatedProduct) {
+            $result[] = $this->mapRelatedProduct($relatedProduct);
+        }
+
+        return $result;
     }
 
-    public function mapRelatedProduct($productId, $idLang, $variation)
+    /**
+     * @return \izi\item\BasketProduct
+     */
+    public function mapRelatedProduct(array $productData)
     {
-        $prestashopProduct = new \Product($productId, false, $idLang);
+        $prestashopProduct = new \Product($productData['id_product'], false, $this->cart->id_lang);
 
-        $product = $this->mapProductData($prestashopProduct, $idLang, [], $variation);
-        $product->base_price = $this->readRelatedProductBasePrice($prestashopProduct);
-        $product->promo_price = $this->readRelatedProductPromoPrice($prestashopProduct);
+        $quantity = isset($productData['min_quantity']) ? (int) $productData['min_quantity'] : $prestashopProduct->minimal_quantity;
 
-        $product->quantity = $this->readStockQuantity($prestashopProduct, $idLang, ['id_product_attribute' => 0]);
-        $product->quantity->quantity = 1;
+        $product = $this->mapProductData($prestashopProduct, $productData);
+        $product->base_price = $this->readRelatedProductBasePrice($productData, $quantity);
+        $product->promo_price = $this->readRelatedProductPromoPrice($productData, $quantity);
+
+        if (isset($productData['quantity'])) {
+            $productData['quantity_available'] = $productData['quantity'];
+        }
+
+        $product->quantity = $this->readStockQuantity($prestashopProduct, $productData);
+        $product->quantity->quantity = $quantity;
 
         return $product;
     }
 
-    public function readRelatedProductBasePrice($prestashopProduct)
+    /**
+     * @param int $quantity
+     *
+     * @return \izi\item\Price
+     */
+    public function readRelatedProductBasePrice(array $productData, $quantity)
     {
-        $price = new \izi\item\Price();
+        $gross = isset($productData['price_without_reduction'])
+            ? $productData['price_without_reduction']
+            : $this->calculateProductPrice(
+                $productData['id_product'],
+                $productData['id_product_attribute'],
+                true,
+                false,
+                $quantity
+            );
 
-        $gross = $prestashopProduct->getPriceWithoutReduct(false, null, 6);
-        $net = $prestashopProduct->getPriceWithoutReduct(true, null, 6);
+        $net = isset($productData['price_without_reduction_without_tax'])
+            ? $productData['price_without_reduction_without_tax']
+            : $this->calculateProductPrice(
+                $productData['id_product'],
+                $productData['id_product_attribute'],
+                false,
+                false,
+                $quantity
+            );
 
-        $price->gross = number_format($gross, 2, '.', '');
-        $price->net = number_format($net, 2, '.', '');
-        $price->vat = number_format($this->makeTax($gross, $net), 2, '.', '');
-
-        return $price;
+        return $this->createPrice($net, $gross);
     }
 
-    public function readRelatedProductPromoPrice($prestashopProduct)
+    /**
+     * @param int $quantity
+     *
+     * @return \izi\item\Price
+     */
+    public function readRelatedProductPromoPrice(array $productData, $quantity)
     {
-        $price = new \izi\item\Price();
+        $gross = isset($productData['price'])
+            ? $productData['price']
+            : $this->calculateProductPrice(
+                $productData['id_product'],
+                $productData['id_product_attribute'],
+                true,
+                true,
+                $quantity
+            );
 
-        $gross = $prestashopProduct->getPrice(true, null, 6);
-        $net = $prestashopProduct->getPrice(false, null, 6);
+        $net = isset($productData['price_tax_exc'])
+            ? $productData['price_tax_exc']
+            : $this->calculateProductPrice(
+                $productData['id_product'],
+                $productData['id_product_attribute'],
+                false,
+                true,
+                $quantity
+            );
 
-        $price->gross = number_format($gross, 2, '.', '');
-        $price->net = number_format($net, 2, '.', '');
-        $price->vat = number_format($this->makeTax($gross, $net), 2, '.', '');
-
-        return $price;
-    }
-
-    public function collectRelatedProductIds($prestashopProduct, $idLang)
-    {
-        $relatedProducts = $prestashopProduct->getAccessories($idLang);
-
-        if (!empty($relatedProducts)) {
-            foreach ($relatedProducts as $relatedProduct) {
-                $this->relatedProductIds[] = [
-                    'id' => $relatedProduct['id_product'],
-                    'variation' => $relatedProduct['id_product_attribute'],
-                ];
-            }
-        }
+        return $this->createPrice($net, $gross);
     }
 
     public function mapConsents()
@@ -481,5 +573,93 @@ class PrestashopBasket extends PrestashopBaseMap
         }
 
         return $methods;
+    }
+
+    private function getBrowserId()
+    {
+        $browserId = Storage::findSession('BrowserId');
+        if (!$browserId && isset($_COOKIE['BrowserId'])) {
+            $browserId = $_COOKIE['BrowserId'];
+        }
+        Logger::log('BROWSER_ID: ' . $browserId);
+
+        return $browserId ?: null;
+    }
+
+    /**
+     * @param int $productId
+     * @param int|null $combinationId
+     * @param int|null $customizationId
+     * @param int $quantity
+     * @param bool $withTax
+     * @param bool $withReduction
+     *
+     * @return float|null
+     */
+    private function calculateProductPrice(
+        $productId,
+        $combinationId,
+        $withTax = true,
+        $withReduction = true,
+        $quantity = 1,
+        $customizationId = null
+    ) {
+        return \Product::getPriceStatic(
+            $productId,
+            $withTax,
+            $combinationId,
+            6,
+            null,
+            false,
+            $withReduction,
+            $quantity,
+            false,
+            $this->cart->id_customer,
+            $this->cart->id,
+            null,
+            $specificPrice,
+            true,
+            true,
+            null,
+            true,
+            $customizationId
+        );
+    }
+
+    /**
+     * @param float $price
+     * @param int $quantity
+     *
+     * @return float
+     */
+    private function calculateRowTotal($price, $quantity)
+    {
+        switch (\Configuration::get('PS_ROUND_TYPE')) {
+            case \Order::ROUND_TOTAL:
+                return (float) $price * $quantity;
+            case \Order::ROUND_LINE:
+                return (float) \Tools::ps_round($price * $quantity, $this->getPriceComputingPrecision());
+            case \Order::ROUND_ITEM:
+            default:
+                return (float) \Tools::ps_round($price, $this->getPriceComputingPrecision()) * $quantity;
+        }
+    }
+
+    /**
+     * @return int
+     */
+    private function getPriceComputingPrecision()
+    {
+        $context = \Context::getContext();
+
+        if (is_callable($context, 'getComputingPrecision')) {
+            return $context->getComputingPrecision();
+        }
+
+        if (defined('_PS_PRICE_COMPUTE_PRECISION_')) {
+            return _PS_PRICE_COMPUTE_PRECISION_;
+        }
+
+        return 2;
     }
 }

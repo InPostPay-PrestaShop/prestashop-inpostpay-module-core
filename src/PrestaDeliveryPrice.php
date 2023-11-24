@@ -3,9 +3,11 @@
 namespace izi\prestashop;
 
 use izi\prestashop\traits\CarrierFinderTrait;
+use izi\prestashop\traits\PriceFactoryTrait;
 
 class PrestaDeliveryPrice
 {
+    use PriceFactoryTrait;
     use CarrierFinderTrait;
 
     public function mapDelivery(\Cart $cart)
@@ -43,34 +45,16 @@ class PrestaDeliveryPrice
             $delivery->delivery_type = strtoupper($deliveryType);
             $delivery->delivery_date = date("Y-m-d\T12:00:00.000\Z", strtotime(' + 2 day'));
             $delivery->delivery_options = $this->mapDeliveryOptions($deliveryType);
-            $delivery->delivery_price = $this->mapDeliveryPrice($net, $gross);
+            $delivery->delivery_price = $this->createPrice($net, $gross);
             $options[] = $delivery;
         }
 
         return $options;
     }
 
-    public function mapDeliveryPrice($net, $gross)
-    {
-        $price = new \izi\item\Price();
-        $vat = $gross - $net;
-        $price->gross = number_format($gross, 2, '.', '');
-        $price->net = number_format($net, 2, '.', '');
-        $price->vat = number_format($vat, 2, '.', '');
-
-        return $price;
-    }
-
     public function mapDeliveryOptionPrice($net)
     {
-        $price = new \izi\item\Price();
-        $gross = $net * 1.23;
-        $vat = $gross - $net;
-        $price->gross = number_format($gross, 2, '.', '');
-        $price->net = number_format($net, 2, '.', '');
-        $price->vat = number_format($vat, 2, '.', '');
-
-        return $price;
+        return $this->createPrice($net, $net * 1.23);
     }
 
     public function mapDeliveryOptions($deliveryType)
