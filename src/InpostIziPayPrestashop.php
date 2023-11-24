@@ -16,10 +16,7 @@ class InpostIziPayPrestashop extends \izi\InPostIzi
         $tokenCache = new TokenCache();
         InPostIzi::setTokenCacheObject($tokenCache);
         \izi\Storage::initialize();
-        $dir = __DIR__ . '/data/';
-        if (!file_exists($dir)) {
-            mkdir($dir);
-        }
+
         parent::__construct();
     }
 

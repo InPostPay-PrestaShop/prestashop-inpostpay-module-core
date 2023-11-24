@@ -120,11 +120,7 @@ class PrestashopBasket extends PrestashopBaseMap
                 $productData['id_customization']
             );
 
-        $price = $this->createPrice($net, $gross);
-
-        Logger::log("THE TAX IS {$price->vat}");
-
-        return $price;
+        return $this->createPrice($net, $gross);
     }
 
     /**
@@ -144,7 +140,7 @@ class PrestashopBasket extends PrestashopBaseMap
             );
 
         $net = isset($productData['price_with_reduction_without_tax'])
-            ? $productData['price_with_reduction_tax']
+            ? $productData['price_with_reduction_without_tax']
             : $this->calculateProductPrice(
                 $productData['id_product'],
                 $productData['id_product_attribute'],
@@ -323,7 +319,15 @@ class PrestashopBasket extends PrestashopBaseMap
 
         $summary->basket_base_price = $this->readSummaryBasketBasePrice($products);
         $summary->basket_final_price = $this->readSummaryBasketFinalPrice();
-        $summary->basket_promo_price = $this->readSummaryBasketPromoPrice();
+
+        if (
+            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_REDUCTION, false) ||
+            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_GIFT, false)
+        ) {
+            $summary->basket_promo_price = $this->readSummaryBasketPromoPrice();
+        } else {
+            $summary->basket_promo_price = clone $summary->basket_final_price;
+        }
 
         $summary->currency = 'PLN';
         $summary->basket_expiration_date = $this->readBasketExpirationDate();

@@ -2,24 +2,18 @@
 
 namespace izi\prestashop;
 
-use izi\item\BasketProduct;
 use izi\item\order\OrderProduct;
+use izi\prestashop\traits\PriceFactoryTrait;
 
 class PrestashopOrder
 {
+    use PriceFactoryTrait;
+
     private $orderId;
     private $basketId;
     private $order;
     private $customer;
     private $deliveryDetails;
-
-    private $orderBasePriceNet = 0.0;
-    private $orderBasePriceGross = 0.0;
-    private $orderBasePriceVat = 0.0;
-
-    private $orderPromoPriceNet = 0.0;
-    private $orderPromoPriceGross = 0.0;
-    private $orderPromoPriceVat = 0.0;
 
     public function __construct($orderId, $basketId)
     {
@@ -27,8 +21,8 @@ class PrestashopOrder
         $this->basketId = $basketId;
         $this->order = new \Order($orderId);
 
-        $this->deliveryDetails = new \Address((int) ($this->order->id_address_delivery));
-        $this->customer = new \Customer((int) ($this->deliveryDetails->id_customer));
+        $this->deliveryDetails = new \Address((int) $this->order->id_address_delivery);
+        $this->customer = new \Customer((int) $this->order->id_customer);
     }
 
     public static function getOrder($orderId, $basketId)
@@ -40,7 +34,7 @@ class PrestashopOrder
         $order->invoice_details = $prestashopOrder->mapInvoiceDetails();
         $order->delivery = $prestashopOrder->mapDelivery();
         $order->products = $prestashopOrder->mapProducts();
-        $order->order_details = $prestashopOrder->mapOrderDetails($order->delivery->delivery_price);
+        $order->order_details = $prestashopOrder->mapOrderDetails();
         $order->consents = $prestashopOrder->mapConsents();
 
         return $order;
@@ -126,19 +120,9 @@ class PrestashopOrder
             return [];
         }
 
-        $basket = json_decode($basket);
+        $basket = json_decode($basket, false);
 
-        foreach ($basket->products as $product) {
-            $this->orderBasePriceNet += $product->base_price->net;
-            $this->orderBasePriceGross += $product->base_price->gross;
-            $this->orderBasePriceVat += $product->base_price->vat;
-
-            $this->orderPromoPriceNet += $product->promo_price->net;
-            $this->orderPromoPriceGross += $product->promo_price->gross;
-            $this->orderPromoPriceVat += $product->promo_price->vat;
-        }
-
-        return array_map(static function ($product): OrderProduct {
+        return array_map(static function ($product) {
             return OrderProduct::fromBasketProduct($product);
         }, $basket->products);
     }
@@ -157,43 +141,21 @@ class PrestashopOrder
     public function readCartProductPromoPrice($item)
     {
         $productSimple = $item->get_product();
-        $quantity = $item->get_quantity();
-        $price = new \izi\item\Price();
 
-        $priceIncludingTax = wc_get_price_including_tax($productSimple);
-        $priceExcludingTax = wc_get_price_excluding_tax($productSimple);
-        $vat = $priceExcludingTax - $priceExcludingTax;
+        $gross = wc_get_price_including_tax($productSimple);
+        $net = wc_get_price_excluding_tax($productSimple);
 
-        $price->net = number_format($priceExcludingTax, 2);
-        $price->gross = number_format($priceIncludingTax, 2);
-        $price->vat = number_format($vat, 2);
-
-        $this->orderPromoPriceNet += $priceExcludingTax * $quantity;
-        $this->orderPromoPriceGross += $priceIncludingTax * $quantity;
-        $this->orderPromoPriceVat += $vat * $quantity;
-
-        return $price;
+        return $this->createPrice($net, $gross);
     }
 
     public function readCartProductBasePrice($item)
     {
         $productSimple = $item->get_product();
-        $quantity = $item->get_quantity();
-        $price = new \izi\item\Price();
 
-        $priceIncludingTax = wc_get_price_including_tax($productSimple, ['price' => $productSimple->get_regular_price()]);
-        $priceExcludingTax = wc_get_price_excluding_tax($productSimple, ['price' => $productSimple->get_regular_price()]);
-        $vat = $priceExcludingTax - $priceExcludingTax;
+        $gross = wc_get_price_including_tax($productSimple, ['price' => $productSimple->get_regular_price()]);
+        $net = wc_get_price_excluding_tax($productSimple, ['price' => $productSimple->get_regular_price()]);
 
-        $price->gross = number_format($priceIncludingTax, 2);
-        $price->net = number_format($priceExcludingTax, 2);
-        $price->vat = number_format($vat, 2);
-
-        $this->orderBasePriceNet += $priceExcludingTax * $quantity;
-        $this->orderBasePriceGross += $priceIncludingTax * $quantity;
-        $this->orderBasePriceVat += $vat * $quantity;
-
-        return $price;
+        return $this->createPrice($net, $gross);
     }
 
     public function readQuantity($item)
@@ -299,7 +261,7 @@ class PrestashopOrder
     {
         $clientAddress = new \izi\item\order\ClientAddress();
 
-        $clientAddress->country_code = 'PL'; //$this->order->get_billing_country();
+        $clientAddress->country_code = \Country::getIsoById($this->deliveryDetails->id_country);
         $clientAddress->address = $this->deliveryDetails->address1 . ' ' . $this->deliveryDetails->address2;
         $clientAddress->city = $this->deliveryDetails->city;
         $clientAddress->postal_code = $this->deliveryDetails->postcode;
@@ -395,7 +357,9 @@ class PrestashopOrder
             $order = json_decode($order);
             if (isset($order->delivery, $order->delivery->delivery_address)) {
                 return $order->delivery->delivery_address;
-            } elseif (isset($order->account_info)) {
+            }
+
+            if (isset($order->account_info)) {
                 $deliveryAddress = new \izi\item\order\DeliveryAddress();
                 $deliveryAddress->name = $order->account_info->name . ' ' . $order->account_info->surname;
                 $deliveryAddress->country_code = $order->account_info->client_address->country_code;
@@ -441,17 +405,15 @@ class PrestashopOrder
 
     public function readPhone()
     {
-        $array = explode(' ', $this->order->getCustomer()->getAddresses((int) \Configuration::get('PS_LANG_DEFAULT'))['0']['phone']);
-
-        return [array_shift($array), implode(' ', $array)];
+        return explode(' ', $this->deliveryDetails->phone, 2);
     }
 
     private function readComments()
     {
-        return ''; //$this->order->get_customer_note();
+        return $this->order->getFirstMessage();
     }
 
-    public function mapOrderDetails($deliveryPrice)
+    public function mapOrderDetails()
     {
         $orderDetails = new \izi\item\order\OrderDetails();
 
@@ -461,67 +423,31 @@ class PrestashopOrder
         $orderDetails->order_creation_date = date("Y-m-d\TH:i:s.000\Z", strtotime($this->order->date_add));
         $orderDetails->basket_id = $this->basketId;
 
-        $orderDetails->order_merchant_status_description = 'Oczekuje na płatność'; //StatusTranslator::paymentStatusToText($orderDetails->payment_status);
-        $orderDetails->order_base_price = $this->readSummaryOrderPromoPrice();
-//        $orderDetails->order_promo_price = $this->readSummaryOrderPromoPrice();
-//        $order_promo_price = $this->readSummaryOrderPromoPrice();
-        $orderDetails->order_final_price = $this->readSummaryOrderFinalPrice($orderDetails->order_base_price, $deliveryPrice);
+        $orderDetails->order_merchant_status_description = 'Oczekuje na płatność';
+        $orderDetails->order_base_price = $this->readSummaryOrderBasePrice();
+        $orderDetails->order_final_price = $this->readSummaryOrderFinalPrice();
         $orderDetails->delivery_references_list = [''];
-        $orderDetails->currency = 'PLN'; //$this->order->get_order_currency();
+        $orderDetails->currency = 'PLN';
         $orderDetails->payment_type = $this->readPaymentType();
 
         return $orderDetails;
     }
 
-    public function readSummaryOrderFinalPrice($promoPrice, $deliveryPrice)
+    public function readSummaryOrderFinalPrice()
     {
-        $price = new \izi\item\Price();
-
-        $couponsWorth = 0.0;
-
-        $price->gross = number_format($this->order->total_paid_tax_incl, 2, '.', '');
-        $price->net = number_format($this->order->total_paid_tax_excl, 2, '.', '');
-        $price->vat = number_format($this->order->total_paid_tax_incl - $this->order->total_paid_tax_excl, 2, '.', '');
-
-        return $price;
-    }
-
-    public function readSummaryOrderPromoPrice()
-    {
-        $price = new \izi\item\Price();
-
-        $gross = $this->order->total_paid_tax_incl - $this->order->total_shipping_tax_incl;
-        $price->gross = number_format($gross, 2, '.', '');
-        $net = $this->order->total_paid_tax_excl - $this->order->total_shipping_tax_excl;
-        $price->net = number_format($net, 2, '.', '');
-        $price->vat = number_format($gross - $net, 2, '.', '');
-
-        return $price;
+        return $this->createPrice($this->order->total_paid_tax_excl, $this->order->total_paid_tax_incl);
     }
 
     public function readSummaryOrderBasePrice()
     {
-        $price = new \izi\item\Price();
+        $gross = $this->order->total_paid_tax_incl - $this->order->total_shipping_tax_incl;
+        $net = $this->order->total_paid_tax_excl - $this->order->total_shipping_tax_excl;
 
-        $price->gross = number_format($this->orderBasePriceGross, 2, '.', '');
-        $price->net = number_format($this->orderBasePriceNet, 2, '.', '');
-        $price->vat = number_format($this->orderBasePriceVat, 2, '.', '');
-
-        return $price;
-    }
-
-    public function getBasketHash()
-    {
-        $basket = (new \izi\Remote($this->orderId))->basketGet();
-        if (isset($basket->summary)) {
-            return $basket->summary->basket_hash;
-        }
-
-        return '';
+        return $this->createPrice($net, $gross);
     }
 
     public function readPaymentType()
     {
-        return 'BLIK_CODE'; //get_post_meta($this->orderId, 'izi_payment_type', true);
+        return 'BLIK_CODE';
     }
 }

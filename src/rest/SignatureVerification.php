@@ -48,8 +48,6 @@ class SignatureVerification
         if (!$authorized) {
             http_response_code(401);
             die(json_encode(['error_code' => 'INVALID_SIGNATURE']));
-        } else {
-            return true;
         }
     }
 

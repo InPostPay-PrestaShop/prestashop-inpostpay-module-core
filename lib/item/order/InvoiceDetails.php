@@ -4,6 +4,9 @@ namespace izi\item\order;
 
 class InvoiceDetails extends \izi\Item
 {
+    const LEGAL_FORM_COMPANY = 'COMPANY';
+    const LEGAL_FORM_PERSON = 'PERSON';
+
     protected $legal_form;
     protected $country_code;
     protected $tax_id_prefix;
