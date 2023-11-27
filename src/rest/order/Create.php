@@ -148,7 +148,7 @@ class Create
 
         // TODO find an existing address
 
-        $address->alias = \Tools::substr($address->address1, 32);
+        $address->alias = \Tools::substr($address->address1, 0, 32);
 
         if (!$address->add()) {
             throw new InternalServerErrorException('Could not create delivery address.');
@@ -183,7 +183,7 @@ class Create
 
         // TODO find an existing address
 
-        $address->alias = \Tools::substr($address->address1 . ' ' . $address->address2, 32);
+        $address->alias = \Tools::substr($address->address1 . ' ' . $address->address2, 0, 32);
 
         if (!$address->add()) {
             throw new InternalServerErrorException('Could not create invoice address.');
