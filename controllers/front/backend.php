@@ -291,7 +291,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         $cartId = CartSession::getSessionId($basketId);
         $cart = new \Cart($cartId);
         if (!$cart->id_currency) {
-            $cart->id_currency = \Configuration::get('PS_CURRENCY_DEFAULT');
+            $cart->id_currency = \Currency::getIdByIsoCode('PLN');
         }
         if (!$cart->id_lang) {
             $cart->id_lang = \Configuration::get('PS_LANG_DEFAULT');

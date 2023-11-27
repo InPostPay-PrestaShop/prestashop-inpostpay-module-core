@@ -15,6 +15,8 @@ class PrestashopOrder
     private $customer;
     private $deliveryDetails;
 
+    private $orderData;
+
     public function __construct($orderId, $basketId)
     {
         $this->orderId = $orderId;
@@ -42,51 +44,36 @@ class PrestashopOrder
 
     public function mapConsents()
     {
-        $data = CartSession::getOrderData($this->orderId);
-        if ($data) {
-            $data = json_decode($data);
-
+        if ($data = $this->getOrderData()) {
             return $data->consents;
         }
 
         $consents = [];
-        $context = \Context::getContext();
 
-        $selectedRequired = explode(',', \Configuration::get('INPOST_PAY_terms_options_required'));
-        $requiredText = \Configuration::get('INPOST_PAY_terms_options_required_text');
+        $selectedRequired = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required'));
+        $selectedRequiredOnce = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required_once'));
+        $selectedAdditional = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required_additional'));
 
-        $selectedRequiredOnce = explode(',', \Configuration::get('INPOST_PAY_terms_options_required_once'));
-        $requiredOnceText = \Configuration::get('INPOST_PAY_terms_options_required_once_text');
+        $cmsPages = \CMS::getCMSPages($this->order->id_lang, null, true, $this->order->id_shop);
+        $consentId = 1;
 
-        $selectedAdditional = explode(',', \Configuration::get('INPOST_PAY_terms_options_required_additional'));
-        $requiredAdditionalText = \Configuration::get('INPOST_PAY_terms_options_required_additional_text');
+        foreach ($cmsPages as $page) {
+            $cmsId = $page['id_cms'];
 
-        foreach (\CMS::getCMSPages((int) \Configuration::get('PS_LANG_DEFAULT'), 1, true) as $page) {
-            $link = $context->link->getCMSLink($page['id_cms'], $page['link_rewrite']);
-            if (in_array($link, $selectedRequired)) {
+            if (in_array($cmsId, $selectedRequired, false)) {
                 $consents[] = [
-                    'consent_id' => count($consents) + 1,
-                    'consent_link' => $link,
-                    'consent_description' => $requiredText,
+                    'consent_id' => $consentId++,
                     'consent_version' => 1,
-                    'requirement_type' => 'REQUIRED_ALWAYS',
+                    'is_accepted' => true,
                 ];
-            } elseif (in_array($link, $selectedRequiredOnce)) {
+            } elseif (in_array($cmsId, $selectedRequiredOnce, false)) {
                 $consents[] = [
-                    'consent_id' => count($consents) + 1,
-                    'consent_link' => $link,
-                    'consent_description' => $requiredOnceText,
+                    'consent_id' => $consentId++,
                     'consent_version' => 1,
-                    'requirement_type' => 'REQUIRED_ONCE',
+                    'is_accepted' => true,
                 ];
-            } elseif (in_array($link, $selectedAdditional)) {
-                $consents[] = [
-                    'consent_id' => count($consents) + 1,
-                    'consent_link' => $link,
-                    'consent_description' => $requiredAdditionalText,
-                    'consent_version' => 1,
-                    'requirement_type' => 'OPTIONAL',
-                ];
+            } elseif (in_array($cmsId, $selectedAdditional, false)) {
+                ++$consentId;
             }
         }
 
@@ -95,13 +82,12 @@ class PrestashopOrder
 
     public function mapAccountInfo()
     {
-        $order = CartSession::getOrderData($this->orderId);
-        if ($order) {
-            $order = json_decode($order);
-            if (isset($order->account_info)) {
-                return $order->account_info;
-            }
+        $data = $this->getOrderData();
+
+        if ($data && isset($data->account_info)) {
+            return $data->account_info;
         }
+
         $accountInfo = new \izi\item\order\AccountInfo();
 
         $accountInfo->name = $this->customer->firstname;
@@ -271,12 +257,10 @@ class PrestashopOrder
 
     public function mapInvoiceDetails()
     {
-        $data = CartSession::getOrderData($this->orderId);
-        if ($data) {
-            $data = json_decode($data);
-            if (isset($data->invoice_details)) {
-                return $data->invoice_details;
-            }
+        $data = $this->getOrderData();
+
+        if ($data && isset($data->invoice_details)) {
+            return $data->invoice_details;
         }
 
         return null;
@@ -311,10 +295,7 @@ class PrestashopOrder
             ]];
         }
 
-        $data = CartSession::getOrderData($this->orderId);
-        if ($data) {
-            $data = json_decode($data);
-        }
+        $data = $this->getOrderData();
 
         $delivery->delivery_type = $data->delivery->delivery_type;
         $this->setDeliveryPrice($delivery);
@@ -352,24 +333,23 @@ class PrestashopOrder
 
     public function mapDeliveryAddress()
     {
-        $order = CartSession::getOrderData($this->orderId);
-        if ($order) {
-            $order = json_decode($order);
-            if (isset($order->delivery, $order->delivery->delivery_address)) {
-                return $order->delivery->delivery_address;
+        if ($data = $this->getOrderData()) {
+            if (isset($data->delivery, $data->delivery->delivery_address)) {
+                return $data->delivery->delivery_address;
             }
 
-            if (isset($order->account_info)) {
+            if (isset($data->account_info)) {
                 $deliveryAddress = new \izi\item\order\DeliveryAddress();
-                $deliveryAddress->name = $order->account_info->name . ' ' . $order->account_info->surname;
-                $deliveryAddress->country_code = $order->account_info->client_address->country_code;
-                $deliveryAddress->address = $order->account_info->client_address->address;
-                $deliveryAddress->city = $order->account_info->client_address->city;
-                $deliveryAddress->postal_code = $order->account_info->client_address->postal_code;
+                $deliveryAddress->name = $data->account_info->name . ' ' . $data->account_info->surname;
+                $deliveryAddress->country_code = $data->account_info->client_address->country_code;
+                $deliveryAddress->address = $data->account_info->client_address->address;
+                $deliveryAddress->city = $data->account_info->client_address->city;
+                $deliveryAddress->postal_code = $data->account_info->client_address->postal_code;
 
                 return $deliveryAddress;
             }
         }
+
         $deliveryAddress = new \izi\item\order\DeliveryAddress();
 
         $deliveryAddress->name = $this->customer->firstname . ' ' . $this->customer->lastname;
@@ -410,7 +390,7 @@ class PrestashopOrder
 
     private function readComments()
     {
-        return $this->order->getFirstMessage();
+        return $this->order->getFirstMessage() ?: null;
     }
 
     public function mapOrderDetails()
@@ -419,7 +399,7 @@ class PrestashopOrder
 
         $orderDetails->order_comments = $this->readComments();
         $orderDetails->order_id = $this->orderId;
-        $orderDetails->pos_id = \Configuration::get('INPOST_PAY_pos_id');
+        $orderDetails->pos_id = $this->getConfiguration('INPOST_PAY_pos_id');
         $orderDetails->order_creation_date = date("Y-m-d\TH:i:s.000\Z", strtotime($this->order->date_add));
         $orderDetails->basket_id = $this->basketId;
 
@@ -449,5 +429,33 @@ class PrestashopOrder
     public function readPaymentType()
     {
         return 'BLIK_CODE';
+    }
+
+    /**
+     * @param $key
+     *
+     * @return false|string
+     */
+    private function getConfiguration($key)
+    {
+        return \Configuration::get($key, null, null, $this->order->id_shop);
+    }
+
+    /**
+     * @return \StdClass|null
+     */
+    private function getOrderData()
+    {
+        if (isset($this->orderData)) {
+            return $this->orderData;
+        }
+
+        if (!$data = CartSession::getOrderData($this->orderId)) {
+            $this->orderData = false;
+        } else {
+            $this->orderData = json_decode($data, false);
+        }
+
+        return $this->orderData ?: null;
     }
 }

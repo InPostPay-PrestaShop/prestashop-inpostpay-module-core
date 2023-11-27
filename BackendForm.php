@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @mixin \Module
+ */
 trait BackendForm
 {
     protected function apiFormFields()
@@ -92,8 +95,7 @@ trait BackendForm
             ],
         ];
 
-        $states = new OrderState();
-        foreach ($states->getOrderStates((int) Configuration::get('PS_LANG_DEFAULT')) as $status) {
+        foreach (\OrderState::getOrderStates($this->context->language->id) as $status) {
             $fieldName = 'INPOST_PAY_status_translation_' . $status['id_order_state'];
             if (!\Configuration::get($fieldName)) {
                 \Configuration::updateValue($fieldName, $status['name']);
@@ -117,7 +119,7 @@ trait BackendForm
 
     protected function consentsFormFields()
     {
-        $fields = [
+        return [
             [
                 'type' => 'select',
                 'label' => $this->l('Zgody Wymagane'),
@@ -167,13 +169,11 @@ trait BackendForm
                 'name' => 'INPOST_PAY_terms_options_additional_text',
             ],
         ];
-
-        return $fields;
     }
 
     protected function paymentFormFields()
     {
-        $fields = [
+        return [
             [
                 'type' => 'select',
                 'label' => $this->l('Kurier'),
@@ -379,8 +379,6 @@ trait BackendForm
                 ],
             ],
         ];
-
-        return $fields;
     }
 
     protected function guiFormFields()
@@ -447,7 +445,7 @@ trait BackendForm
                     'name' => 'name',
                 ],
             ];
-            if ($place == 'cart') {
+            if ($place === 'cart') {
                 foreach (['up', 'down', 'left', 'right'] as $direction) {
                     $fields[] = [
                         'type' => 'text',
@@ -470,8 +468,6 @@ trait BackendForm
             $this->paymentFormFields(),
             $this->guiFormFields()
         );
-
-        return $fields;
     }
 
     public function getContent()
@@ -480,10 +476,10 @@ trait BackendForm
         if (Tools::isSubmit('submit' . $this->name)) {
             foreach ($this->formFields() as $field) {
                 $configValue = Tools::getValue($field['name']);
-                if ($field['name'] == 'INPOST_PAY_client_secret' && $configValue == '*****') {
+                if ($field['name'] === 'INPOST_PAY_client_secret' && $configValue === '*****') {
                     continue;
                 }
-                if (isset($field['multiple']) && $field['multiple'] == true) {
+                if (isset($field['multiple']) && $field['multiple']) {
                     if (is_array($configValue)) {
                         Configuration::updateValue($field['name'], implode(',', $configValue));
                     } else {
@@ -525,7 +521,7 @@ trait BackendForm
         $helper->default_form_language = (int) Configuration::get('PS_LANG_DEFAULT');
 
         foreach ($this->formFields() as $field) {
-            if ($field['name'] == 'INPOST_PAY_client_secret') {
+            if ($field['name'] === 'INPOST_PAY_client_secret') {
                 $helper->tpl_vars['fields_value'][$field['name']] = \Configuration::get($field['name']) ? '*****' : '';
             } elseif (isset($field['multiple']) && $field['multiple'] == true) {
                 $helper->tpl_vars['fields_value'][$field['name'] . '[]'] = explode(',', \Configuration::get($field['name']));
@@ -560,7 +556,7 @@ trait BackendForm
 
     protected function ShowOptions(): array
     {
-        $options = [
+        return [
             [
                 'id_option' => 1,
                 'name' => 'Testerom',
@@ -570,16 +566,21 @@ trait BackendForm
                 'name' => 'Wszystkim',
             ],
         ];
-
-        return $options;
     }
 
     protected function TermsOptions()
     {
+        $shopId = \Shop::CONTEXT_SHOP === \Shop::getContext()
+            ? $this->context->shop->id
+            : null;
+
+        $cmsPages = CMS::getCMSPages($this->context->language->id, null, true, $shopId);
+
         $options = [];
-        foreach (CMS::getCMSPages((int) Configuration::get('PS_LANG_DEFAULT'), 1, true) as $page) {
-            $options[] = [
-                'id_option' => $this->context->link->getCMSLink($page['id_cms'], $page['link_rewrite']),
+
+        foreach ($cmsPages as $page) {
+            $options[$page['id_cms']] = [
+                'id_option' => $page['id_cms'],
                 'name' => $page['meta_title'],
             ];
         }
@@ -590,8 +591,8 @@ trait BackendForm
     protected function StatusOptions()
     {
         $options = [];
-        $states = new OrderState();
-        foreach ($states->getOrderStates((int) Configuration::get('PS_LANG_DEFAULT')) as $status) {
+
+        foreach (\OrderState::getOrderStates($this->context->language->id) as $status) {
             $options[] = [
                 'id_option' => $status['id_order_state'],
                 'name' => $status['name'],
@@ -604,8 +605,8 @@ trait BackendForm
     protected function DeliveryOptions()
     {
         $options = [];
-        $table_name = '`' . _DB_PREFIX_ . 'carrier`';
-        $carrierList = Db::getInstance()->executeS('select id_reference, name from ' . $table_name . ' WHERE deleted = 0');
+
+        $carrierList = Db::getInstance()->executeS('select id_reference, name from `' . _DB_PREFIX_ . 'carrier` WHERE deleted = 0');
         foreach ($carrierList as $carrier) {
             $options[] = [
                 'id_option' => $carrier['id_reference'],
@@ -644,7 +645,7 @@ trait BackendForm
 
     protected function AlignmentOptions(): array
     {
-        $options = [
+        return [
             [
                 'id_option' => 'left',
                 'name' => 'Do lewej',
@@ -658,13 +659,11 @@ trait BackendForm
                 'name' => 'Do prawej',
             ],
         ];
-
-        return $options;
     }
 
     protected function BackgroundOptions(): array
     {
-        $options = [
+        return [
             [
                 'id_option' => 'light',
                 'name' => 'Jasne',
@@ -674,13 +673,11 @@ trait BackendForm
                 'name' => 'Ciemne',
             ],
         ];
-
-        return $options;
     }
 
     protected function VariantOptions(): array
     {
-        $options = [
+        return [
             [
                 'id_option' => 'black',
                 'name' => 'Czarny',
@@ -690,7 +687,5 @@ trait BackendForm
                 'name' => 'Żółty',
             ],
         ];
-
-        return $options;
     }
 }

@@ -514,36 +514,42 @@ class PrestashopBasket extends PrestashopBaseMap
         $consents = [];
         $context = \Context::getContext();
 
-        $selectedRequired = explode(',', \Configuration::get('INPOST_PAY_terms_options_required'));
-        $requiredText = \Configuration::get('INPOST_PAY_terms_options_required_text');
+        $selectedRequired = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required'));
+        $requiredText = $this->getConfiguration('INPOST_PAY_terms_options_required_text');
 
-        $selectedRequiredOnce = explode(',', \Configuration::get('INPOST_PAY_terms_options_required_once'));
-        $requiredOnceText = \Configuration::get('INPOST_PAY_terms_options_required_once_text');
+        $selectedRequiredOnce = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required_once'));
+        $requiredOnceText = $this->getConfiguration('INPOST_PAY_terms_options_required_once_text');
 
-        $selectedAdditional = explode(',', \Configuration::get('INPOST_PAY_terms_options_additional'));
-        $requiredAdditionalText = \Configuration::get('INPOST_PAY_terms_options_additional_text');
+        $selectedAdditional = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_additional'));
+        $requiredAdditionalText = $this->getConfiguration('INPOST_PAY_terms_options_additional_text');
 
-        foreach (\CMS::getCMSPages((int) \Configuration::get('PS_LANG_DEFAULT'), 1, true) as $page) {
-            $link = $context->link->getCMSLink($page['id_cms'], $page['link_rewrite']);
-            if (in_array($link, $selectedRequired)) {
+        $cmsPages = \CMS::getCMSPages($this->cart->id_lang, null, true, $this->cart->id_shop);
+
+        $consentId = 1;
+
+        foreach ($cmsPages as $page) {
+            $cmsId = $page['id_cms'];
+            $link = $context->link->getCMSLink($cmsId, $page['link_rewrite'], null, $this->cart->id_lang, $this->cart->id_shop);
+
+            if (in_array($cmsId, $selectedRequired, false)) {
                 $consents[] = [
-                    'consent_id' => count($consents) + 1,
+                    'consent_id' => $consentId++,
                     'consent_link' => $link,
                     'consent_description' => $requiredText,
                     'consent_version' => 1,
                     'requirement_type' => 'REQUIRED_ALWAYS',
                 ];
-            } elseif (in_array($link, $selectedRequiredOnce)) {
+            } elseif (in_array($cmsId, $selectedRequiredOnce, false)) {
                 $consents[] = [
-                    'consent_id' => count($consents) + 1,
+                    'consent_id' => $consentId++,
                     'consent_link' => $link,
                     'consent_description' => $requiredOnceText,
                     'consent_version' => 1,
                     'requirement_type' => 'REQUIRED_ONCE',
                 ];
-            } elseif (in_array($link, $selectedAdditional)) {
+            } elseif (in_array($cmsId, $selectedAdditional, false)) {
                 $consents[] = [
-                    'consent_id' => count($consents) + 1,
+                    'consent_id' => $consentId++,
                     'consent_link' => $link,
                     'consent_description' => $requiredAdditionalText,
                     'consent_version' => 1,
@@ -559,7 +565,7 @@ class PrestashopBasket extends PrestashopBaseMap
     {
         $methods = [];
 
-        if (\Configuration::get('INPOST_PAY_payment_aion')) {
+        if ($this->getConfiguration('INPOST_PAY_payment_aion')) {
             $methods = [
                 'CARD',
                 'CARD_TOKEN',
@@ -572,7 +578,7 @@ class PrestashopBasket extends PrestashopBaseMap
                 'DEFERRED_PAYMENT',
             ];
         }
-        if (\Configuration::get('INPOST_PAY_payment_inpost')) {
+        if ($this->getConfiguration('INPOST_PAY_payment_inpost')) {
             $methods[] = 'CASH_ON_DELIVERY';
         }
 
@@ -638,7 +644,7 @@ class PrestashopBasket extends PrestashopBaseMap
      */
     private function calculateRowTotal($price, $quantity)
     {
-        switch (\Configuration::get('PS_ROUND_TYPE')) {
+        switch ($this->getConfiguration('PS_ROUND_TYPE')) {
             case \Order::ROUND_TOTAL:
                 return (float) $price * $quantity;
             case \Order::ROUND_LINE:
@@ -665,5 +671,15 @@ class PrestashopBasket extends PrestashopBaseMap
         }
 
         return 2;
+    }
+
+    /**
+     * @param $key
+     *
+     * @return false|string
+     */
+    private function getConfiguration($key)
+    {
+        return \Configuration::get($key, null, null, $this->cart->id_shop);
     }
 }
