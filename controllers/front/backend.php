@@ -299,29 +299,10 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         switch ($json->event_type) {
             case self::EVENT_TYPE_PRODUCTS_QUANTITY:
                 foreach ($json->quantity_event_data as $eventData) {
-                    $product_id = explode('.', $eventData->product_id)[0];
-                    $variation_id = explode('.', $eventData->product_id)[1];
-                    foreach ($cart->getProducts() as $product) {
-                        if (
-                            $product['id_product'] != $product_id
-                            || $product['id_product_attribute'] != $variation_id
-                        ) {
-                            continue;
-                        }
-                        if ($eventData->quantity->quantity == 0) {
-                            $cart->deleteProduct((int) $product_id, $product['id_product_attribute']);
-                            break;
-                        } else {
-                            try {
-                                $currentQty = $this->getCartQuantity($cart, (int) $product_id, $product['id_product_attribute']);
-                                $diff = ((int) $eventData->quantity->quantity) - $currentQty;
-                                \izi\prestashop\Logger::log("CAME: {$eventData->quantity->quantity}; CURRENT: {$currentQty}; SETTING: {$diff}");
-                                $cart->updateQty(abs($diff), (int) $product_id, $product['id_product_attribute'], false, ($diff > 0 ? 'up' : 'down'));
-                            } catch (\Exception $e) {
-                                \izi\prestashop\Logger::log($e->getMessage());
-                            }
-                            break;
-                        }
+                    try {
+                        $this->updateCartQuantity($cart, $eventData);
+                    } catch (\Exception $e) {
+                        \izi\prestashop\Logger::log($e->getMessage());
                     }
                 }
                 break;
@@ -360,7 +341,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
                     $productAttribute = explode('.', $json->related_products_event_data[0]->product_id)[1];
                     $cart->updateQty(1, $productId, $productAttribute);
                 }
-            break;
+                break;
         }
         $cart->save();
         $data = PrestashopBasket::getBasket($cart)->encode();
@@ -371,14 +352,53 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         die($data);
     }
 
-    private function getCartQuantity($cart, $productId, $attribute)
+    private function updateCartQuantity(\Cart $cart, $eventData)
+    {
+        list($productId, $combinationId, $customizationId) = array_map('intval', explode('.', $eventData->product_id));
+
+        if (0 === $currentQuantity = $this->getCartQuantity($cart, $productId, $combinationId, $customizationId)) {
+            return;
+        }
+
+        if (0 >= $eventData->quantity->quantity) {
+            $cart->deleteProduct($productId, $combinationId, $customizationId);
+        } else {
+            $diff = (int) $eventData->quantity->quantity - $currentQuantity;
+            \izi\prestashop\Logger::log("CAME: {$eventData->quantity->quantity}; CURRENT: {$currentQuantity}; SETTING: {$diff}");
+
+            if (0 === $diff) {
+                return;
+            }
+
+            $cart->updateQty(
+                abs($diff),
+                $productId,
+                $combinationId,
+                $customizationId,
+                $diff > 0 ? 'up' : 'down',
+                0,
+                new \Shop($cart->getShopId())
+            );
+        }
+    }
+
+    /**
+     * @param int $productId
+     * @param int $combinationId
+     * @param int $customizationId
+     *
+     * @return int
+     */
+    private function getCartQuantity(\Cart $cart, $productId, $combinationId, $customizationId)
     {
         $products = $cart->getProducts(true);
 
-        \izi\prestashop\Logger::log('PRODUCTS:' . print_r($products, true));
-
         foreach ($products as $product) {
-            if ($product['id_product'] == $productId && (($attribute && $product['id_product_attribute'] == $attribute) || !$attribute)) {
+            if (
+                $productId === (int) $product['id_product'] &&
+                $combinationId === (int) $product['id_product_attribute'] &&
+                $customizationId === (int) $product['id_combination']
+            ) {
                 return (int) $product['cart_quantity'];
             }
         }

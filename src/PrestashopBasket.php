@@ -159,11 +159,11 @@ class PrestashopBasket extends PrestashopBaseMap
     public function mapProductData(\Product $prestashopProduct, array $productData)
     {
         $product = new \izi\item\BasketProduct();
-        $combinationId = array_key_exists('id_product_attribute', $productData) ? $productData['id_product_attribute'] : 0;
 
-        if ($prestashopProduct->id) {
-            $product->product_id = $prestashopProduct->id . '.' . (int) $combinationId;
-        }
+        $combinationId = array_key_exists('id_product_attribute', $productData) ? $productData['id_product_attribute'] : 0;
+        $customizationId = array_key_exists('id_customization', $productData) ? $productData['id_customization'] : 0;
+
+        $product->product_id = $prestashopProduct->id . '.' . (int) $combinationId . '.' . (int) $customizationId;
         $product->product_category = $prestashopProduct->getDefaultCategory();
         $product->ean = isset($productData['ean13']) ? $productData['ean13'] : $prestashopProduct->ean13;
         $product->product_name = $prestashopProduct->name;
@@ -184,7 +184,7 @@ class PrestashopBasket extends PrestashopBaseMap
         $linkRewrite = isset($prestashopProduct->link_rewrite) ? $prestashopProduct->link_rewrite : $prestashopProduct->name;
         if ($attributeId) {
             $db = \Db::getInstance(_PS_USE_SQL_SLAVE_);
-            $request = 'SELECT `id_image` FROM `' . _DB_PREFIX_ . 'product_attribute_image` WHERE id_product_attribute = "' . $attributeId . '";';
+            $request = 'SELECT `id_image` FROM `' . _DB_PREFIX_ . 'product_attribute_image` WHERE id_product_attribute = "' . (int) $attributeId . '";';
             $imageId = $db->getValue($request, false);
             if ($imageId) {
                 return \Context::getContext()->link->getImageLink($linkRewrite, $imageId, $image_type);
@@ -409,8 +409,8 @@ class PrestashopBasket extends PrestashopBaseMap
             $prestashopProduct = new \Product($cartProduct['id_product'], false, $this->cart->id_lang);
 
             foreach ($prestashopProduct->getAccessories($this->cart->id_lang) as $accessory) {
-                if ($accessory['customizable']) {
-                    continue;
+                if ($accessory['customizable'] > 1) {
+                    continue; // product requires customization
                 }
 
                 $relatedProductsById[$accessory['id_product']] = $accessory;
