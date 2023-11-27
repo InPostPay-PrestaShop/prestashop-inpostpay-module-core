@@ -290,12 +290,20 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         $json = json_decode($json);
         $cartId = CartSession::getSessionId($basketId);
         $cart = new \Cart($cartId);
+
+        // TODO handle cart not found
+
         if (!$cart->id_currency) {
             $cart->id_currency = \Currency::getIdByIsoCode('PLN');
         }
         if (!$cart->id_lang) {
             $cart->id_lang = \Configuration::get('PS_LANG_DEFAULT');
         }
+
+        $this->context->cart = $cart;
+        $this->context->customer = new \Customer($cart->id_customer);
+        $this->context->currency = \Currency::getCurrencyInstance($cart->id_currency);
+
         switch ($json->event_type) {
             case self::EVENT_TYPE_PRODUCTS_QUANTITY:
                 foreach ($json->quantity_event_data as $eventData) {
@@ -377,7 +385,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
                 $customizationId,
                 $diff > 0 ? 'up' : 'down',
                 0,
-                new \Shop($cart->getShopId())
+                new \Shop($cart->id_shop)
             );
         }
     }
@@ -397,7 +405,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             if (
                 $productId === (int) $product['id_product'] &&
                 $combinationId === (int) $product['id_product_attribute'] &&
-                $customizationId === (int) $product['id_combination']
+                $customizationId === (int) $product['id_customization']
             ) {
                 return (int) $product['cart_quantity'];
             }
