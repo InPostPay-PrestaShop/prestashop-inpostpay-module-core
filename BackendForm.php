@@ -85,6 +85,16 @@ trait BackendForm
             ],
             [
                 'type' => 'select',
+                'label' => $this->l('Początkowy status zamówienia utworzonego przez InPost Pay'),
+                'name' => 'INPOST_PAY_INITIAL_OS_ID',
+                'options' => [
+                    'query' => $this->StatusOptions(),
+                    'id' => 'id_option',
+                    'name' => 'name',
+                ],
+            ],
+            [
+                'type' => 'select',
                 'label' => $this->l('Statusy dla zamówienia opłaconego przez InPost Pay'),
                 'name' => 'INPOST_PAY_authorized_payment',
                 'options' => [

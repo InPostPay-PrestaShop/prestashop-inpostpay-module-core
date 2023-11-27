@@ -20,8 +20,8 @@ class Inpostizi extends PaymentModule
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->tab = 'checkout';
-        $this->version = '1.3.14';
+        $this->tab = 'payments_gateways';
+        $this->version = '1.3.15';
 
         $this->ps_versions_compliancy = [
             'min' => '1.7.0.0',
@@ -29,6 +29,8 @@ class Inpostizi extends PaymentModule
         ];
 
         parent::__construct();
+
+        $this->displayName = $this->l('InPost Pay');
     }
 
     /**

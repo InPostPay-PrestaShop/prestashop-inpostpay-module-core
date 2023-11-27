@@ -77,9 +77,9 @@ class Create
         $payment_module = \Module::getInstanceByName('inpostizi');
         $payment_module->validateOrder(
             $cart->id,
-            \Configuration::get('PS_OS_BANKWIRE'), // TODO custom order status
+            (int) \Configuration::get('INPOST_PAY_INITIAL_OS_ID'),
             $cart->getOrderTotal(),
-            'Inpost Pay',
+            $payment_module->displayName,
             null,
             [],
             null,
@@ -137,16 +137,18 @@ class Create
     private function createDeliveryAddress($delivery, \Customer $customer)
     {
         $address = new \Address();
+        $address->id_customer = $customer->id;
         $address->firstname = $delivery->name;
         $address->lastname = $delivery->surname;
-        $address->city = $delivery->client_address->city;
-        $address->id_customer = $customer->id;
         $address->id_country = $this->getCountryId($delivery->client_address->country_code);
-        $address->address1 = $delivery->client_address->address;
+        $address->city = $delivery->client_address->city;
         $address->postcode = $delivery->client_address->postal_code;
+        $address->address1 = $delivery->client_address->address;
         $address->phone = $delivery->phone_number->country_prefix . ' ' . $delivery->phone_number->phone;
 
-        // TODO find an existing address
+        if ($addressId = $this->getExistingAddressId($customer, $address)) {
+            return $addressId;
+        }
 
         $address->alias = \Tools::substr($address->address1, 0, 32);
 
@@ -160,17 +162,17 @@ class Create
     private function createInvoiceAddress($invoiceDetails, $accountInfo, \Customer $customer)
     {
         $address = new \Address();
+        $address->id_customer = $customer->id;
         $address->firstname = !empty($invoiceDetails->name) ? $invoiceDetails->name : $accountInfo->surname;
         $address->lastname = !empty($invoiceDetails->surname) ? $invoiceDetails->surname : $accountInfo->surname;
-        $address->city = $invoiceDetails->city;
-        $address->id_customer = $customer->id;
         $address->id_country = $this->getCountryId($invoiceDetails->country_code);
+        $address->city = $invoiceDetails->city;
+        $address->postcode = $invoiceDetails->postal_code;
         $address->address1 = $invoiceDetails->street;
         $address->address2 = $invoiceDetails->building;
         if (!empty($invoiceDetails->flat)) {
             $address->address2 .= ' / ' . $invoiceDetails->flat;
         }
-        $address->postcode = $invoiceDetails->postal_code;
 
         if (InvoiceDetails::LEGAL_FORM_COMPANY === $invoiceDetails->legal_form) {
             $address->company = $invoiceDetails->company_name;
@@ -181,7 +183,9 @@ class Create
             }
         }
 
-        // TODO find an existing address
+        if ($addressId = $this->getExistingAddressId($customer, $address, ['phone'])) {
+            return $addressId;
+        }
 
         $address->alias = \Tools::substr($address->address1 . ' ' . $address->address2, 0, 32);
 
@@ -190,6 +194,49 @@ class Create
         }
 
         return $address->id;
+    }
+
+    private function getExistingAddressId(\Customer $customer, \Address $address, array $ignoreFields = [])
+    {
+        if ($customer->is_guest) {
+            return null;
+        }
+
+        if (!$addresses = $customer->getAddresses((int) \Configuration::get('PS_LANG_DEFAULT'))) {
+            return null;
+        }
+
+        foreach ($addresses as $data) {
+            if ($this->isSameAddress($address, $data, $ignoreFields)) {
+                return (int) $data['id_address'];
+            }
+        }
+
+        return null;
+    }
+
+    private function isSameAddress(\Address $address, array $data, array $ignoreFields)
+    {
+        $comparedFields = array_diff([
+            'firstname',
+            'lastname',
+            'id_country',
+            'city',
+            'postcode',
+            'address1',
+            'address2',
+            'company',
+            'vat_number',
+            'phone',
+        ], $ignoreFields);
+
+        foreach ($comparedFields as $field) {
+            if ($data[$field] != $address->{$field}) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

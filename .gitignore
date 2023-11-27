@@ -1,3 +1,4 @@
 vendor/
 inpostizi.zip
 src/*.log
+config_*.xml
