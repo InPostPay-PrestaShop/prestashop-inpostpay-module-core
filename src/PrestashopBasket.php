@@ -29,6 +29,10 @@ class PrestashopBasket extends PrestashopBaseMap
             $cart = \Context::getContext()->cart;
         }
 
+        if (null === $cart) {
+            $cart = new \Cart();
+        }
+
         return (new self($cart))->mapBasket();
     }
 
@@ -265,7 +269,9 @@ class PrestashopBasket extends PrestashopBaseMap
             $productData['allow_oosp'] = \Product::isAvailableWhenOutOfStock($outOfStock);
         }
 
-        if (!$productData['allow_oosp']) {
+        if ($productData['allow_oosp']) {
+            $availableQuantity = 9999;
+        } else {
             $availableQuantity = isset($productData['quantity_available'])
                 ? (int) $productData['quantity_available']
                 : \StockAvailable::getQuantityAvailableByProduct($prestashopProduct->id, $productData['id_product_attribute']);
@@ -273,10 +279,10 @@ class PrestashopBasket extends PrestashopBaseMap
             if (0 > $availableQuantity) {
                 $availableQuantity = 0;
             }
-
-            $quantity->available_quantity = $availableQuantity;
-            $quantity->max_quantity = $availableQuantity;
         }
+
+        $quantity->available_quantity = $availableQuantity;
+        $quantity->max_quantity = $availableQuantity;
 
         return $quantity;
     }
@@ -433,7 +439,9 @@ class PrestashopBasket extends PrestashopBaseMap
     {
         $prestashopProduct = new \Product($productData['id_product'], false, $this->cart->id_lang);
 
-        $quantity = isset($productData['min_quantity']) ? (int) $productData['min_quantity'] : $prestashopProduct->minimal_quantity;
+        $quantity = !empty($productData['id_product_attribute'])
+            ? (new \Combination($productData['id_product_attribute']))->minimal_quantity
+            : $prestashopProduct->minimal_quantity;
 
         $product = $this->mapProductData($prestashopProduct, $productData);
         $product->base_price = $this->readRelatedProductBasePrice($productData, $quantity);

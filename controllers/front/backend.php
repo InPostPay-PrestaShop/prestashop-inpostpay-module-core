@@ -344,10 +344,8 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
                 PrestashopBasket::$couponError = $this->couponError;
                 break;
             case self::EVENT_TYPE_RELATED_PRODUCTS:
-                if (isset($json->related_products_event_data[0], $json->related_products_event_data[0]->product_id)) {
-                    $productId = explode('.', $json->related_products_event_data[0]->product_id)[0];
-                    $productAttribute = explode('.', $json->related_products_event_data[0]->product_id)[1];
-                    $cart->updateQty(1, $productId, $productAttribute);
+                foreach ($json->related_products_event_data as $eventData) {
+                    $this->addRelatedProduct($cart, $eventData);
                 }
                 break;
         }
@@ -388,6 +386,21 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
                 new \Shop($cart->id_shop)
             );
         }
+    }
+
+    private function addRelatedProduct(\Cart $cart, $eventData)
+    {
+        list($productId, $combinationId) = array_map('intval', explode('.', $eventData->product_id));
+
+        $cart->updateQty(
+            (int) $eventData->quantity->quantity,
+            $productId,
+            $combinationId,
+            0,
+            'up',
+            0,
+            new \Shop($cart->id_shop)
+        );
     }
 
     /**
