@@ -4,7 +4,12 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-function upgrade_module_1_3_15()
+/**
+ * @param \inpostizi $module
+ *
+ * @return bool
+ */
+function upgrade_module_1_3_15(\Module $module)
 {
     foreach (['INPOST_PAY_payment_courier', 'INPOST_PAY_payment_courier_cod'] as $key) {
         $carrierId = \Configuration::get($key);
@@ -17,5 +22,6 @@ function upgrade_module_1_3_15()
         }
     }
 
-    return \Configuration::updateValue('INPOST_PAY_INITIAL_OS_ID', \Configuration::get('PS_OS_BANKWIRE'));
+    return $module->registerHook('displayPaymentReturn')
+        && \Configuration::updateValue('INPOST_PAY_INITIAL_OS_ID', \Configuration::get('PS_OS_WS_PAYMENT'));
 }

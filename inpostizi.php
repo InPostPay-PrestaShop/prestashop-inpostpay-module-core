@@ -115,7 +115,8 @@ class Inpostizi extends PaymentModule
             $this->registerHook('actionCartUpdateQuantityBefore') &&
             $this->registerHook('displayProductActions') &&
             $this->registerHook('paymentOptions') &&
-            $this->registerHook('actionObjectInPostShipmentModelUpdateAfter');
+            $this->registerHook('actionObjectInPostShipmentModelUpdateAfter') &&
+            $this->registerHook('displayPaymentReturn');
     }
 
     public function uninstall()
@@ -366,6 +367,20 @@ class Inpostizi extends PaymentModule
     {
         \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController()->basketBindingDelete();
         \izi\BasketIdentification::drop();
+    }
+
+    /**
+     * @param array{order: \Order} $params
+     *
+     * @return string
+     */
+    public function hookDisplayPaymentReturn(array $params)
+    {
+        if ($this->name !== $params['order']->module) {
+            return '';
+        }
+
+        return '<inpost-thank-you/>';
     }
 }
 

@@ -87,8 +87,11 @@ class Create
             $cart->secure_key
         );
 
-        $link = \Context::getContext()->link->getPageLink($customer->is_guest ? 'guest-tracking' : 'history', null, $cart->id_lang, [
-            'inpost-thank-you-insert' => 'true',
+        $link = \Context::getContext()->link->getPageLink('order-confirmation', null, $cart->id_lang, [
+            'id_cart' => $cart->id,
+            'id_module' => $payment_module->id,
+            'id_order' => $payment_module->currentOrder,
+            'key' => $cart->secure_key,
         ]);
 
         CartSession::setCartOrderRedirectUrl($data->order_details->basket_id, $link);
