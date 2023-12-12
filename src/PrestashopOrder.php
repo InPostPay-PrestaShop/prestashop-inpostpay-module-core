@@ -17,27 +17,30 @@ class PrestashopOrder
 
     private $orderData;
 
-    public function __construct($orderId, $basketId)
+    public function __construct(\Order $order, string $basketId)
     {
-        $this->orderId = $orderId;
+        $this->order = $order;
         $this->basketId = $basketId;
-        $this->order = new \Order($orderId);
 
         $this->deliveryDetails = new \Address((int) $this->order->id_address_delivery);
         $this->customer = new \Customer((int) $this->order->id_customer);
     }
 
-    public static function getOrder($orderId, $basketId)
+    public static function getOrder(\Order $order, string $basketId): \izi\item\order\Order
     {
-        $prestashopOrder = new self($orderId, $basketId);
+        return (new self($order, $basketId))->mapOrder();
+    }
+
+    public function mapOrder(): \izi\item\order\Order
+    {
         $order = new \izi\item\order\Order();
 
-        $order->account_info = $prestashopOrder->mapAccountInfo();
-        $order->invoice_details = $prestashopOrder->mapInvoiceDetails();
-        $order->delivery = $prestashopOrder->mapDelivery();
-        $order->products = $prestashopOrder->mapProducts();
-        $order->order_details = $prestashopOrder->mapOrderDetails();
-        $order->consents = $prestashopOrder->mapConsents();
+        $order->account_info = $this->mapAccountInfo();
+        $order->invoice_details = $this->mapInvoiceDetails();
+        $order->delivery = $this->mapDelivery();
+        $order->products = $this->mapProducts();
+        $order->order_details = $this->mapOrderDetails();
+        $order->consents = $this->mapConsents();
 
         return $order;
     }
@@ -297,7 +300,7 @@ class PrestashopOrder
 
         $data = $this->getOrderData();
 
-        $delivery->delivery_type = $data->delivery->delivery_type;
+        $delivery->delivery_type = $data && isset($data->delivery->delivery_type) ? $data->delivery->delivery_type : 'COURIER';
         $this->setDeliveryPrice($delivery);
 
         $delivery->mail = $this->order->getCustomer()->email;
@@ -398,12 +401,12 @@ class PrestashopOrder
         $orderDetails = new \izi\item\order\OrderDetails();
 
         $orderDetails->order_comments = $this->readComments();
-        $orderDetails->order_id = $this->orderId;
+        $orderDetails->order_id = $this->order->id;
         $orderDetails->pos_id = $this->getConfiguration('INPOST_PAY_pos_id');
         $orderDetails->order_creation_date = date("Y-m-d\TH:i:s.000\Z", strtotime($this->order->date_add));
         $orderDetails->basket_id = $this->basketId;
 
-        $orderDetails->order_merchant_status_description = 'Oczekuje na płatność';
+        $orderDetails->order_merchant_status_description = (new \OrderState($this->order->current_state, $this->order->id_lang))->name;
         $orderDetails->order_base_price = $this->readSummaryOrderBasePrice();
         $orderDetails->order_final_price = $this->readSummaryOrderFinalPrice();
         $orderDetails->delivery_references_list = [''];
@@ -450,7 +453,7 @@ class PrestashopOrder
             return $this->orderData;
         }
 
-        if (!$data = CartSession::getOrderData($this->orderId)) {
+        if (!$data = CartSession::getOrderData($this->order->id)) {
             $this->orderData = false;
         } else {
             $this->orderData = json_decode($data, false);

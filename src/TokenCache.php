@@ -2,12 +2,14 @@
 
 namespace izi\prestashop;
 
-class TokenCache
+use izi\interfaces\TokenCacheInterface;
+
+class TokenCache implements TokenCacheInterface
 {
-    public function getCachedToken()
+    public function getCachedToken(): ?string
     {
         $date = \Configuration::get('izi_keyclock_token_date');
-        $maxInterval = intval(\Configuration::get('izi_keyclock_token_expiration'));
+        $maxInterval = (int) \Configuration::get('izi_keyclock_token_expiration');
         if (!$date) {
             Logger::log('TOKEN: No date for token');
 
@@ -28,13 +30,13 @@ class TokenCache
         }
         Logger::log('TOKEN: all good');
 
-        return \Configuration::get('izi_keyclock_token');
+        return (string) \Configuration::get('izi_keyclock_token');
     }
 
-    public function setCachedToken($token, $expiration)
+    public function setCachedToken(?string $token, ?int $expiresIn)
     {
         \Configuration::updateValue('izi_keyclock_token', $token);
         \Configuration::updateValue('izi_keyclock_token_date', date('Y-m-d H:i:00'));
-        \Configuration::updateValue('izi_keyclock_token_expiration', $expiration);
+        \Configuration::updateValue('izi_keyclock_token_expiration', $expiresIn);
     }
 }

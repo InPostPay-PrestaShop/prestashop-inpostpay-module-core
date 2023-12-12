@@ -2,16 +2,16 @@
 
 namespace izi;
 
+use izi\item\Basket;
+
 class Remote extends Connection
 {
     protected $basketId;
-    public static $done = false;
 
     public function __construct($basketId = null)
     {
         if ($basketId === null) {
             $this->basketId = BasketIdentification::get();
-            // InPostIzi::getLoggerClass()::log("BASKET ID IN Remote Class {$this->basketId}");
         } else {
             $this->basketId = $basketId;
         }
@@ -23,20 +23,10 @@ class Remote extends Connection
         return $this->request("v1/izi/basket/{$this->basketId}");
     }
 
-    public function basketPut($data, $raw = false)
+    public function basketPut(Basket $basket)
     {
-        if (self::$done) {
-            return;
-        }
-        self::$done = true;
-        $toSend = '';
-        if ($raw) {
-            $toSend = $data;
-        } else {
-            $toSend = json_decode($data);
-        }
-        list($response, $code) = $this->request("v1/izi/basket/{$this->basketId}", 'PUT', $toSend, true, $raw);
-        InPostIzi::getLoggerClass()::response($data, 'Merchant sends basket put for ' . $this->basketId);
+        list($response, $code) = $this->request("v1/izi/basket/{$basket->getId()}", 'PUT', $basket, true);
+        InPostIzi::getLoggerClass()::response('Merchant sends basket put for ' . $basket->getId());
         InPostIzi::getLoggerClass()::response($code, 'Basket app code for basket put');
         InPostIzi::getLoggerClass()::response(json_encode($response), 'Basket app response for basket put');
 
@@ -70,16 +60,19 @@ class Remote extends Connection
         if (!$browserId && isset($_COOKIE['BrowserId'])) {
             $browserId = $_COOKIE['BrowserId'];
         }
-        $getParam = '';
-        if ($browserId) {
-            $getParam = '?browser_id=' . $browserId;
-        }
 
         InPostIzi::getLoggerClass()::log('GET BINDING FROM REMOTE');
-        $response = $this->request("v1/izi/basket/{$this->basketId}/binding{$getParam}");
+        $response = $this->getBasketBinding($this->basketId, $browserId);
         Storage::insertSession('binding_get', json_encode($response));
 
         return $response;
+    }
+
+    public function getBasketBinding(string $basketId, string $browserId = null)
+    {
+        $query = $browserId ? '?browser_id=' . $browserId : '';
+
+        return $this->request("v1/izi/basket/{$basketId}/binding{$query}");
     }
 
     public function basketBindingPost($prefix = null, $number = null)
@@ -101,7 +94,7 @@ class Remote extends Connection
                 'binding_method' => 'PHONE',
                 'binding_place' => ($_GET['binding_place'] == '' ? null : $_GET['binding_place']),
                 'phone_number' => [
-                    'country_prefix' => '+48',
+                    'country_prefix' => '+' . ltrim($prefix, '+'),
                     'phone' => $number,
                 ],
                 'browser' => $browserArray,
@@ -115,32 +108,13 @@ class Remote extends Connection
         }
     }
 
-    public function basketBindingDelete()
+    public function basketBindingDelete(string $basketId)
     {
-        return $this->request("v1/izi/basket/{$this->basketId}/binding", 'DELETE');
+        return $this->request("v1/izi/basket/{$basketId}/binding", 'DELETE');
     }
 
     public function browserBindingDelete($browserId)
     {
         return $this->request("v1/izi/browser/{$browserId}/binding", 'DELETE');
-    }
-
-    public function basketConfirmation($data)
-    {
-        return $this->request("v1/private/izi/basket/binding/{$this->basketId}/confirmation", 'POST', $data);
-    }
-
-    public function orderPost($data)
-    {
-        $respanse = $this->request('v1/private/izi/inpostpay-order', 'POST', $data);
-
-        $this->orderId = $respanse->order_id;
-
-        return $respanse;
-    }
-
-    public function orderGet()
-    {
-        return $this->request("/inpostpay-order/{$this->orderId}");
     }
 }

@@ -4,6 +4,17 @@ namespace izi\prestashop\models;
 
 class InpostiziBasketSession extends \ObjectModel
 {
+    public $session_id;
+    public $confirmation_response;
+    public $cart_id;
+    public $order_id;
+    public $order_details;
+    public $redirect_url;
+    public $basket_cache;
+    public $coupons;
+    public $event;
+    public $redirected;
+
     public static $definition = [
         'table' => 'inpostizi_basket_session',
         'primary' => 'id',
@@ -16,7 +27,6 @@ class InpostiziBasketSession extends \ObjectModel
             'order_details' => ['type' => self::TYPE_STRING, 'allow_null' => true, 'value' => null],
             'redirect_url' => ['type' => self::TYPE_STRING, 'allow_null' => true, 'value' => null],
             'basket_cache' => ['type' => self::TYPE_STRING, 'allow_null' => true, 'value' => null],
-            'basket_cached' => ['type' => self::TYPE_STRING, 'allow_null' => true, 'value' => null],
             'coupons' => ['type' => self::TYPE_STRING, 'allow_null' => true, 'value' => null],
             'event' => ['type' => self::TYPE_INT, 'allow_null' => true, 'value' => null],
             'redirected' => ['type' => self::TYPE_BOOL, 'allow_null' => true, 'value' => null],

@@ -2,78 +2,108 @@
 
 namespace izi\prestashop\rest;
 
-use izi\prestashop\InpostIziPayPrestashop;
-use izi\prestashop\Logger;
+use izi\prestashop\DTO\SigningKeyData;
+use izi\prestashop\rest\Exception\InvalidSignatureException;
+use izi\prestashop\Service\SigningKeysService;
+use izi\prestashop\SystemClock;
+use Psr\Clock\ClockInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class SignatureVerification
 {
-    public function check()
+    private $signingKeysService;
+    private $clock;
+
+    public function __construct(SigningKeysService $signingKeysService = null, ClockInterface $clock = null)
     {
-        Logger::log('SignatureVerification 1!');
-        $authorized = false;
+        $this->signingKeysService = $signingKeysService ?? new SigningKeysService();
+        $this->clock = $clock ?? SystemClock::fromSystemTimezone();
+    }
 
-        $headers = \getallheaders();
-        $headers = array_change_key_case($headers);
-        $request_key_hash = (!empty($headers['x-public-key-hash'])) ? $headers['x-public-key-hash'] : '';
-        $request_signature = (!empty($headers['x-signature'])) ? $headers['x-signature'] : '';
-        $request_time = (!empty($headers['x-signature-timestamp'])) ? $headers['x-signature-timestamp'] : '';
-        $request_ver = (!empty($headers['x-public-key-ver'])) ? $headers['x-public-key-ver'] : '';
-        $cached_keys = $this->getSignatureKeys();
-        if (!empty($cached_keys->hashes) && !in_array($request_key_hash, $cached_keys->hashes)) {
-            $cached_keys = $this->getSignatureKeys(true);
-        }
-        if (!empty($cached_keys->hashes) && in_array($request_key_hash, $cached_keys->hashes)) {
-            $body = file_get_contents('php://input');
-            $request_body = (!empty($body)) ? $body : '';
-            $request_body_hash = hash('sha256', $request_body, true);
-            $digest = base64_encode($request_body_hash);
-            $mechant_id = $cached_keys->merchant_external_id;
-            $generated_signature = base64_encode("$digest,$mechant_id,$request_ver,$request_time");
-            $api_key = (!empty($cached_keys->public_keys[0]->public_key_base64)) ? $cached_keys->public_keys[0]->public_key_base64 : '';
+    public function check(Request $request): void
+    {
+        $publicKeyHash = $this->getHeader($request, 'x-public-key-hash');
+        $publicKeyVersion = $this->getHeader($request, 'x-public-key-ver');
+        $signature = $this->getHeader($request, 'x-signature');
+        $signatureTimestamp = $this->getHeader($request, 'x-signature-timestamp');
 
-            $publicKey = "-----BEGIN PUBLIC KEY-----\n" . $api_key . "\n-----END PUBLIC KEY-----";
-            $publicKeyResource = openssl_get_publickey($publicKey);
+        $keyData = $this->getSigningKeyData($publicKeyVersion, $publicKeyHash);
+        $publicKey = $this->extractPublicKey($keyData->getKey()->public_key_base64);
 
-            if ($publicKeyResource !== false) {
-                $verifyResult = openssl_verify($generated_signature, base64_decode($request_signature), $publicKeyResource, OPENSSL_ALGO_SHA256);
-                if ($verifyResult === 1) {
-                    $request_timestamp = strtotime($request_time);
-                    if ($request_timestamp >= time() - 240) {
-                        $authorized = true;
-                    }
-                }
-            }
+        $data = $this->generateData($request->getContent(), $keyData->getMerchantId(), $publicKeyVersion, $signatureTimestamp);
+        $this->verifySignature($data, $signature, $publicKey);
+
+        $this->checkTimestamp($signatureTimestamp);
+    }
+
+    private function getHeader(Request $request, string $name): string
+    {
+        if (!$request->headers->has($name)) {
+            throw InvalidSignatureException::missingHeader($name);
         }
 
-        if (!$authorized) {
-            http_response_code(401);
-            die(json_encode(['error_code' => 'INVALID_SIGNATURE']));
+        return $request->headers->get($name);
+    }
+
+    private function getSigningKeyData(string $keyVersion, string $keyHash): SigningKeyData
+    {
+        $keyData = $this->signingKeysService->getKeyData($keyVersion);
+
+        if (null === $keyData) {
+            throw new InvalidSignatureException('Public key version not found.');
+        }
+
+        if ($keyHash !== $keyData->getKey()->hash) {
+            throw new InvalidSignatureException('Public key hash mismatch.');
+        }
+
+        return $keyData;
+    }
+
+    private function generateData(string $body, string $merchantId, string $publicKeyVersion, string $signatureTimestamp): string
+    {
+        $digest = base64_encode(hash('sha256', $body, true));
+
+        return base64_encode("$digest,$merchantId,$publicKeyVersion,$signatureTimestamp");
+    }
+
+    private function extractPublicKey(string $base64EncodedKey)
+    {
+        $pemFormattedKey = "-----BEGIN PUBLIC KEY-----\n" . $base64EncodedKey . "\n-----END PUBLIC KEY-----";
+        $publicKey = openssl_pkey_get_public($pemFormattedKey);
+
+        if (false === $publicKey) {
+            throw new \RuntimeException(sprintf('Could not extract public key: %s.', openssl_error_string()));
+        }
+
+        return $publicKey;
+    }
+
+    /**
+     * @param resource $publicKey
+     */
+    private function verifySignature(string $data, string $signature, $publicKey): void
+    {
+        $result = openssl_verify($data, base64_decode($signature), $publicKey, OPENSSL_ALGO_SHA256);
+
+        switch ($result) {
+            case -1:
+                throw new \RuntimeException(sprintf('Could not verify signature: %s.', openssl_error_string()));
+            case 0:
+                throw new InvalidSignatureException('Signature mismatch.');
+            default:
+                break;
         }
     }
 
-    private function getSignatureKeys($force = false)
+    private function checkTimestamp(string $signatureTimestamp): void
     {
-        $keys = $force ? '' : \Configuration::get('izi_signing_keys_json');
-        if ($keys) {
-            $keys = json_decode($keys, false);
-        }
-        $cacheDay = \Configuration::get('izi_keyclock_token_date');
-        if (!$keys || $cacheDay != date('Y-m-d')) {
-            $response = InpostIziPayPrestashop::getInstance()->getController()->getSignatureKeys();
-
-            if (!empty($response) && !empty($response->public_keys)) {
-                $hashes = [];
-                foreach ($response->public_keys as $key => $value) {
-                    $hashes[] = hash('sha256', $value->public_key_base64);
-                }
-                $response->hashes = $hashes;
-
-                \Configuration::updateValue('izi_signing_keys_json', json_encode($response));
-                \Configuration::updateValue('izi_signing_keys_json_date', date('Y-m-d'));
-                $keys = $response;
-            }
+        if (false === $signatureTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.uP', $signatureTimestamp)) {
+            throw new InvalidSignatureException('Malformed timestamp.');
         }
 
-        return $keys;
+        if ($signatureTime < $this->clock->now()->sub(new \DateInterval('PT240S'))) {
+            throw new InvalidSignatureException('Signature expired.');
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace izi;
 
-class Item
+abstract class Item implements \JsonSerializable
 {
     public function __set($property, $value)
     {
@@ -22,7 +22,7 @@ class Item
         }
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         $vars = get_object_vars($this);
 
@@ -50,16 +50,6 @@ class Item
         return json_encode($data, JSON_UNESCAPED_UNICODE);
     }
 
-    public function getProducts()
-    {
-        return $this->toArray()['products'];
-    }
-
-    public function compareProduct($product)
-    {
-        return json_encode($this->getProducts()) === json_encode($product);
-    }
-
     /**
      * @param $property
      *
@@ -69,5 +59,10 @@ class Item
     {
         $class = get_class($this);
         throw new \ErrorException("Property not existing {$property} in {$class}");
+    }
+
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
     }
 }

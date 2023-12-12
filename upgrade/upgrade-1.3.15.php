@@ -23,5 +23,8 @@ function upgrade_module_1_3_15(\Module $module)
     }
 
     return $module->registerHook('displayPaymentReturn')
-        && \Configuration::updateValue('INPOST_PAY_INITIAL_OS_ID', \Configuration::get('PS_OS_WS_PAYMENT'));
+        && $module->registerHook('actionAjaxDieCartControllerDisplayAjaxUpdateBefore')
+        && $module->unregisterHook('actionPresentCart')
+        && $module->unregisterHook('actionCartUpdateQuantityBefore')
+        && \Configuration::updateValue('INPOST_PAY_INITIAL_OS_ID', \Configuration::get('PS_OS_BANKWIRE'));
 }

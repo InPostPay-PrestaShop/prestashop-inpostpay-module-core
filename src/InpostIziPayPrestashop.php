@@ -3,6 +3,7 @@
 namespace izi\prestashop;
 
 use izi\InPostIzi;
+use izi\item\Basket;
 
 class InpostIziPayPrestashop extends \izi\InPostIzi
 {
@@ -29,8 +30,8 @@ class InpostIziPayPrestashop extends \izi\InPostIzi
         return self::$instance;
     }
 
-    public function getBasket()
+    public function getBasket(): Basket
     {
-        return PrestashopBasket::getBasket();
+        return PrestashopBasket::createForCustomerContext();
     }
 }

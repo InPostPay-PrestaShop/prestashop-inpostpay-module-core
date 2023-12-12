@@ -2,50 +2,41 @@
 
 namespace izi\prestashop;
 
+use izi\BasketIdentification;
+use izi\item\Basket;
 use izi\item\Quantity;
 use izi\prestashop\traits\PriceFactoryTrait;
 use izi\Storage;
 
-class PrestashopBasket extends PrestashopBaseMap
+class PrestashopBasket
 {
     use PriceFactoryTrait;
 
+    private $basketId;
     private $cart;
 
-    public static $hasCoupons = false;
-    public static $couponError = false;
-
-    public function __construct(\Cart $cart)
+    public function __construct(string $basketId, \Cart $cart)
     {
+        $this->basketId = $basketId;
         $this->cart = $cart;
     }
 
-    /**
-     * @return \izi\item\Basket
-     */
-    public static function getBasket(\Cart $cart = null)
+    public static function createForCart(\Cart $cart, string $basketId): Basket
     {
-        if (null === $cart) {
-            $cart = \Context::getContext()->cart;
-        }
-
-        if (null === $cart) {
-            $cart = new \Cart();
-        }
-
-        return (new self($cart))->mapBasket();
+        return (new self($basketId, $cart))->mapBasket();
     }
 
-    /**
-     * @return \izi\item\Basket
-     */
-    public function mapBasket()
+    public static function createForCustomerContext(): Basket
     {
-        $basket = new \izi\item\Basket();
+        $cart = \Context::getContext()->cart ?? new \Cart();
+        $basketId = BasketIdentification::get();
 
-        if (!\Validate::isLoadedObject($this->cart)) {
-            return $basket;
-        }
+        return self::createForCart($cart, $basketId);
+    }
+
+    public function mapBasket(): Basket
+    {
+        $basket = new Basket($this->basketId);
 
         $cart = $this->cart;
         $cartProducts = $cart->getProducts();
@@ -66,7 +57,7 @@ class PrestashopBasket extends PrestashopBaseMap
     /**
      * @return \izi\item\BasketProduct[]
      */
-    public function mapProducts(array $products)
+    public function mapProducts(array $products): array
     {
         $result = [];
 
@@ -81,10 +72,7 @@ class PrestashopBasket extends PrestashopBaseMap
         return $result;
     }
 
-    /**
-     * @return \izi\item\BasketProduct
-     */
-    public function mapCartProduct(array $productData)
+    public function mapCartProduct(array $productData): \izi\item\BasketProduct
     {
         $prestashopProduct = new \Product($productData['id_product'], false, $this->cart->id_lang);
 
@@ -97,77 +85,60 @@ class PrestashopBasket extends PrestashopBaseMap
         return $product;
     }
 
-    /**
-     * @return \izi\item\Price
-     */
-    public function readCartProductBasePrice(array $productData)
+    public function readCartProductBasePrice(array $productData): \izi\item\Price
     {
-        $gross = isset($productData['price_without_reduction'])
-            ? $productData['price_without_reduction']
-            : $this->calculateProductPrice(
-                $productData['id_product'],
-                $productData['id_product_attribute'],
-                true,
-                false,
-                $productData['cart_quantity'],
-                $productData['id_customization']
-            );
+        $gross = $productData['price_without_reduction'] ?? $this->calculateProductPrice(
+            $productData['id_product'],
+            $productData['id_product_attribute'],
+            true,
+            false,
+            $productData['cart_quantity'],
+            $productData['id_customization']
+        );
 
-        $net = isset($productData['price_without_reduction_without_tax'])
-            ? $productData['price_without_reduction_without_tax']
-            : $this->calculateProductPrice(
-                $productData['id_product'],
-                $productData['id_product_attribute'],
-                false,
-                false,
-                $productData['cart_quantity'],
-                $productData['id_customization']
-            );
+        $net = $productData['price_without_reduction_without_tax'] ?? $this->calculateProductPrice(
+            $productData['id_product'],
+            $productData['id_product_attribute'],
+            false,
+            false,
+            $productData['cart_quantity'],
+            $productData['id_customization']
+        );
 
         return $this->createPrice($net, $gross);
     }
 
-    /**
-     * @return \izi\item\Price
-     */
-    public function readCartProductPromoPrice(array $productData)
+    public function readCartProductPromoPrice(array $productData): \izi\item\Price
     {
-        $gross = isset($productData['price_with_reduction'])
-            ? $productData['price_with_reduction']
-            : $this->calculateProductPrice(
-                $productData['id_product'],
-                $productData['id_product_attribute'],
-                true,
-                true,
-                $productData['cart_quantity'],
-                $productData['id_customization']
-            );
+        $gross = $productData['price_with_reduction'] ?? $this->calculateProductPrice(
+            $productData['id_product'],
+            $productData['id_product_attribute'],
+            true,
+            true,
+            $productData['cart_quantity'],
+            $productData['id_customization']
+        );
 
-        $net = isset($productData['price_with_reduction_without_tax'])
-            ? $productData['price_with_reduction_without_tax']
-            : $this->calculateProductPrice(
-                $productData['id_product'],
-                $productData['id_product_attribute'],
-                false,
-                true,
-                $productData['cart_quantity'],
-                $productData['id_customization']
-            );
+        $net = $productData['price_with_reduction_without_tax'] ?? $this->calculateProductPrice(
+            $productData['id_product'],
+            $productData['id_product_attribute'],
+            false,
+            true,
+            $productData['cart_quantity'],
+            $productData['id_customization']
+        );
 
         return $this->createPrice($net, $gross);
     }
 
-    /**
-     * @return \izi\item\BasketProduct
-     */
-    public function mapProductData(\Product $prestashopProduct, array $productData)
+    public function mapProductData(\Product $prestashopProduct, array $productData): \izi\item\BasketProduct
     {
         $product = new \izi\item\BasketProduct();
 
-        $combinationId = array_key_exists('id_product_attribute', $productData) ? $productData['id_product_attribute'] : 0;
-        $customizationId = array_key_exists('id_customization', $productData) ? $productData['id_customization'] : 0;
+        $combinationId = array_key_exists('id_product_attribute', $productData) ? (int) $productData['id_product_attribute'] : 0;
+        $customizationId = array_key_exists('id_customization', $productData) ? (int) $productData['id_customization'] : 0;
 
-        $product->product_id = $prestashopProduct->id . '.' . (int) $combinationId . '.' . (int) $customizationId;
+        $product->product_id = $prestashopProduct->id . '.' . $combinationId . '.' . $customizationId;
         $product->product_category = $prestashopProduct->getDefaultCategory();
         $product->ean = isset($productData['ean13']) ? $productData['ean13'] : $prestashopProduct->ean13;
         $product->product_name = $prestashopProduct->name;
@@ -182,10 +153,10 @@ class PrestashopBasket extends PrestashopBaseMap
         return $product;
     }
 
-    public function readProductImage(\Product $prestashopProduct, $attributeId)
+    public function readProductImage(\Product $prestashopProduct, int $attributeId): string
     {
         $image_type = 'small_default';
-        $linkRewrite = isset($prestashopProduct->link_rewrite) ? $prestashopProduct->link_rewrite : $prestashopProduct->name;
+        $linkRewrite = $prestashopProduct->link_rewrite ?? $prestashopProduct->name;
         if ($attributeId) {
             $db = \Db::getInstance(_PS_USE_SQL_SLAVE_);
             $request = 'SELECT `id_image` FROM `' . _DB_PREFIX_ . 'product_attribute_image` WHERE id_product_attribute = "' . (int) $attributeId . '";';
@@ -203,12 +174,15 @@ class PrestashopBasket extends PrestashopBaseMap
         return '';
     }
 
-    public function mapProductVariables(\Product $prestashopProduct)
+    /**
+     * @return \izi\item\Variant[]
+     */
+    public function mapProductVariables(\Product $prestashopProduct): array
     {
         $result = [];
 
         $map = [];
-        foreach ($prestashopProduct->getAttributeCombinations($this->cart->id_lang, true) as $attribute) {
+        foreach ($prestashopProduct->getAttributeCombinations($this->cart->id_lang) as $attribute) {
             if (!isset($map[$attribute['id_attribute_group']]) || !is_array($map[$attribute['id_attribute_group']])) {
                 $map[$attribute['id_attribute_group']] = [];
             }
@@ -223,7 +197,7 @@ class PrestashopBasket extends PrestashopBaseMap
         return $result;
     }
 
-    public function mapProductVariable($item)
+    public function mapProductVariable($item): \izi\item\Variant
     {
         $variant = new \izi\item\Variant();
 
@@ -290,7 +264,7 @@ class PrestashopBasket extends PrestashopBaseMap
     /**
      * @return \izi\item\PromoCode[]
      */
-    public function mapPromoCodes()
+    public function mapPromoCodes(): array
     {
         $result = [];
 
@@ -301,25 +275,20 @@ class PrestashopBasket extends PrestashopBaseMap
         return $result;
     }
 
-    /**
-     * @return \izi\item\PromoCode
-     */
-    public function mapPromoCode(array $rule)
+    public function mapPromoCode(array $rule): \izi\item\PromoCode
     {
         $promoCode = new \izi\item\PromoCode();
 
-        $promoCode->name = $rule['description'];
-        $promoCode->promo_code_value = $rule['code'];
+        $promoCode->name = $rule['name'];
+        $promoCode->promo_code_value = $rule['code'] ?: $rule['name'];
 
         return $promoCode;
     }
 
     /**
      * @param \izi\item\BasketProduct[]
-     *
-     * @return \izi\item\Summary
      */
-    public function mapSummary(array $products)
+    public function mapSummary(array $products): \izi\item\Summary
     {
         $summary = new \izi\item\Summary();
 
@@ -332,27 +301,13 @@ class PrestashopBasket extends PrestashopBaseMap
         ) {
             $summary->basket_promo_price = $this->readSummaryBasketPromoPrice();
         } else {
-            $summary->basket_promo_price = clone $summary->basket_final_price;
+            $summary->basket_promo_price = clone $summary->basket_final_price; // avoid inconsistent rounding by \Cart::getOrderTotal()
         }
 
         $summary->currency = 'PLN';
         $summary->basket_expiration_date = $this->readBasketExpirationDate();
         $summary->basket_additional_information = '';
         $summary->payment_type = $this->readPaymentType();
-
-        if (self::$hasCoupons) {
-            if (self::$couponError) {
-                $summary->basket_notice = [
-                    'type' => 'ERROR',
-                    'description' => 'Kod jest nieaktywny lub nieprawidłowy',
-                ];
-            } else {
-                $summary->basket_notice = [
-                    'type' => 'ATTENTION',
-                    'description' => 'Kod został aktywowany',
-                ];
-            }
-        }
 
         return $summary;
     }
@@ -364,10 +319,8 @@ class PrestashopBasket extends PrestashopBaseMap
 
     /**
      * @param \izi\item\BasketProduct[] $products
-     *
-     * @return \izi\item\Price
      */
-    public function readSummaryBasketBasePrice(array $products)
+    public function readSummaryBasketBasePrice(array $products): \izi\item\Price
     {
         $net = array_reduce($products, function ($sum, \izi\item\BasketProduct $product) {
             return $sum + $this->calculateRowTotal($product->base_price->net, $product->quantity->quantity);
@@ -380,10 +333,7 @@ class PrestashopBasket extends PrestashopBaseMap
         return $this->createPrice($net, $gross);
     }
 
-    /**
-     * @return \izi\item\Price
-     */
-    public function readSummaryBasketPromoPrice()
+    public function readSummaryBasketPromoPrice(): \izi\item\Price
     {
         $gross = $this->cart->getOrderTotal(true, \Cart::ONLY_PRODUCTS);
         $net = $this->cart->getOrderTotal(false, \Cart::ONLY_PRODUCTS);
@@ -391,7 +341,7 @@ class PrestashopBasket extends PrestashopBaseMap
         return $this->createPrice($net, $gross);
     }
 
-    public function readSummaryBasketFinalPrice()
+    public function readSummaryBasketFinalPrice(): \izi\item\Price
     {
         $gross = $this->cart->getOrderTotal(true, \Cart::BOTH_WITHOUT_SHIPPING);
         $net = $this->cart->getOrderTotal(false, \Cart::BOTH_WITHOUT_SHIPPING);
@@ -402,7 +352,7 @@ class PrestashopBasket extends PrestashopBaseMap
     /**
      * @return \izi\item\BasketProduct[]
      */
-    public function mapRelatedProducts(array $cartProducts)
+    public function mapRelatedProducts(array $cartProducts): array
     {
         $result = $cartProductsById = $relatedProductsById = [];
 
@@ -432,10 +382,7 @@ class PrestashopBasket extends PrestashopBaseMap
         return $result;
     }
 
-    /**
-     * @return \izi\item\BasketProduct
-     */
-    public function mapRelatedProduct(array $productData)
+    public function mapRelatedProduct(array $productData): \izi\item\BasketProduct
     {
         $prestashopProduct = new \Product($productData['id_product'], false, $this->cart->id_lang);
 
@@ -457,67 +404,49 @@ class PrestashopBasket extends PrestashopBaseMap
         return $product;
     }
 
-    /**
-     * @param int $quantity
-     *
-     * @return \izi\item\Price
-     */
-    public function readRelatedProductBasePrice(array $productData, $quantity)
+    public function readRelatedProductBasePrice(array $productData, int $quantity): \izi\item\Price
     {
-        $gross = isset($productData['price_without_reduction'])
-            ? $productData['price_without_reduction']
-            : $this->calculateProductPrice(
-                $productData['id_product'],
-                $productData['id_product_attribute'],
-                true,
-                false,
-                $quantity
-            );
+        $gross = $productData['price_without_reduction'] ?? $this->calculateProductPrice(
+            $productData['id_product'],
+            $productData['id_product_attribute'],
+            true,
+            false,
+            $quantity
+        );
 
-        $net = isset($productData['price_without_reduction_without_tax'])
-            ? $productData['price_without_reduction_without_tax']
-            : $this->calculateProductPrice(
-                $productData['id_product'],
-                $productData['id_product_attribute'],
-                false,
-                false,
-                $quantity
-            );
+        $net = $productData['price_without_reduction_without_tax'] ?? $this->calculateProductPrice(
+            $productData['id_product'],
+            $productData['id_product_attribute'],
+            false,
+            false,
+            $quantity
+        );
 
         return $this->createPrice($net, $gross);
     }
 
-    /**
-     * @param int $quantity
-     *
-     * @return \izi\item\Price
-     */
-    public function readRelatedProductPromoPrice(array $productData, $quantity)
+    public function readRelatedProductPromoPrice(array $productData, int $quantity): \izi\item\Price
     {
-        $gross = isset($productData['price'])
-            ? $productData['price']
-            : $this->calculateProductPrice(
-                $productData['id_product'],
-                $productData['id_product_attribute'],
-                true,
-                true,
-                $quantity
-            );
+        $gross = $productData['price'] ?? $this->calculateProductPrice(
+            $productData['id_product'],
+            $productData['id_product_attribute'],
+            true,
+            true,
+            $quantity
+        );
 
-        $net = isset($productData['price_tax_exc'])
-            ? $productData['price_tax_exc']
-            : $this->calculateProductPrice(
-                $productData['id_product'],
-                $productData['id_product_attribute'],
-                false,
-                true,
-                $quantity
-            );
+        $net = $productData['price_tax_exc'] ?? $this->calculateProductPrice(
+            $productData['id_product'],
+            $productData['id_product_attribute'],
+            false,
+            true,
+            $quantity
+        );
 
         return $this->createPrice($net, $gross);
     }
 
-    public function mapConsents()
+    public function mapConsents(): array
     {
         $consents = [];
         $context = \Context::getContext();
@@ -569,7 +498,7 @@ class PrestashopBasket extends PrestashopBaseMap
         return $consents;
     }
 
-    public function readPaymentType()
+    public function readPaymentType(): array
     {
         $methods = [];
 
@@ -604,24 +533,14 @@ class PrestashopBasket extends PrestashopBaseMap
         return $browserId ?: null;
     }
 
-    /**
-     * @param int $productId
-     * @param int|null $combinationId
-     * @param int|null $customizationId
-     * @param int $quantity
-     * @param bool $withTax
-     * @param bool $withReduction
-     *
-     * @return float|null
-     */
     private function calculateProductPrice(
-        $productId,
-        $combinationId,
-        $withTax = true,
-        $withReduction = true,
-        $quantity = 1,
-        $customizationId = null
-    ) {
+        int $productId,
+        int $combinationId = null,
+        bool $withTax = true,
+        bool $withReduction = true,
+        int $quantity = 1,
+        int $customizationId = null
+    ): ?float {
         return \Product::getPriceStatic(
             $productId,
             $withTax,
@@ -644,13 +563,7 @@ class PrestashopBasket extends PrestashopBaseMap
         );
     }
 
-    /**
-     * @param float $price
-     * @param int $quantity
-     *
-     * @return float
-     */
-    private function calculateRowTotal($price, $quantity)
+    private function calculateRowTotal(float $price, int $quantity): float
     {
         switch ($this->getConfiguration('PS_ROUND_TYPE')) {
             case \Order::ROUND_TOTAL:
@@ -663,10 +576,7 @@ class PrestashopBasket extends PrestashopBaseMap
         }
     }
 
-    /**
-     * @return int
-     */
-    private function getPriceComputingPrecision()
+    private function getPriceComputingPrecision(): int
     {
         $context = \Context::getContext();
 
@@ -682,11 +592,9 @@ class PrestashopBasket extends PrestashopBaseMap
     }
 
     /**
-     * @param $key
-     *
      * @return false|string
      */
-    private function getConfiguration($key)
+    private function getConfiguration(string $key)
     {
         return \Configuration::get($key, null, null, $this->cart->id_shop);
     }

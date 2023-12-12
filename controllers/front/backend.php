@@ -1,440 +1,263 @@
 <?php
 
-use izi\BasketIdentification;
-use izi\BindingProvider;
-use izi\InPostIzi;
-use izi\prestashop\CartSession;
-use izi\prestashop\Exception\ApiException;
-use izi\prestashop\Exception\InternalServerErrorException;
-use izi\prestashop\PrestashopBasket;
+use izi\prestashop\Controller\Api\BasketController;
+use izi\prestashop\Controller\Api\OrderController;
+use izi\prestashop\Controller\MerchantController;
+use izi\prestashop\rest\Exception\ApiException;
+use izi\prestashop\rest\Exception\InternalServerErrorException;
 use izi\prestashop\rest\SignatureVerification;
-use izi\Storage;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class InpostIziBackendModuleFrontController extends ModuleFrontController
 {
-    const EVENT_TYPE_PROMO_CODES = 'PROMO_CODES';
-    const EVENT_TYPE_PRODUCTS_QUANTITY = 'PRODUCTS_QUANTITY';
-    const EVENT_TYPE_RELATED_PRODUCTS = 'RELATED_PRODUCTS';
+    private const MERCHANT_ROUTES = [
+        [
+            'path' => '/inpost/v1/izi/merchant/basket/get/link',
+            'controller' => [MerchantController::class, 'getLink'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/merchant/basket/confirmation',
+            'controller' => [MerchantController::class, 'checkBindingConfirmation'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/merchant/basket/delete/binding',
+            'controller' => [MerchantController::class, 'deleteBinding'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/merchant/order/confirmation/get',
+            'controller' => [MerchantController::class, 'checkOrderConfirmation'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/merchant/basket/post/binding/{prefix}/{number}',
+            'prefix' => '/inpost/v1/izi/merchant/basket/post/binding',
+            'regex' => '#^/inpost/v1/izi/merchant/basket/post/binding(?:/(?<prefix>.+?)(?:/(?<number>.+?))?)?$#',
+            'controller' => [MerchantController::class, 'bindCart'],
+        ],
+    ];
 
-    protected $hasCoupons = false;
-    protected $couponError = false;
+    private const API_ROUTES = [
+        [
+            'path' => '/inpost/v1/izi/order',
+            'methods' => ['POST'],
+            'controller' => [OrderController::class, 'create'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/order/{orderId}',
+            'methods' => ['GET'],
+            'prefix' => '/inpost/v1/izi/order/',
+            'regex' => '#^/inpost/v1/izi/order/(?<orderId>\d+)$#',
+            'controller' => [OrderController::class, 'get'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/order/{orderId}/event',
+            'methods' => ['POST'],
+            'prefix' => '/inpost/v1/izi/order/',
+            'regex' => '#^/inpost/v1/izi/order/(?<orderId>\d+)/event$#',
+            'controller' => [OrderController::class, 'update'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/basket/{basketId}',
+            'methods' => ['GET'],
+            'prefix' => '/inpost/v1/izi/basket/',
+            'regex' => '#^/inpost/v1/izi/basket/(?<basketId>.+)$#',
+            'controller' => [BasketController::class, 'get'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/basket/{basketId}/confirmation',
+            'methods' => ['POST'],
+            'prefix' => '/inpost/v1/izi/basket/',
+            'regex' => '#^/inpost/v1/izi/basket/(?<basketId>.+)/confirmation$#',
+            'controller' => [BasketController::class, 'confirm'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/basket/{basketId}/event',
+            'methods' => ['POST'],
+            'prefix' => '/inpost/v1/izi/basket/',
+            'regex' => '#^/inpost/v1/izi/basket/(?<basketId>.+)/event$#',
+            'controller' => [BasketController::class, 'update'],
+        ],
+        [
+            'path' => '/inpost/v1/izi/basket/{basketId}/binding',
+            'methods' => ['DELETE'],
+            'prefix' => '/inpost/v1/izi/basket/',
+            'regex' => '#^/inpost/v1/izi/basket/(?<basketId>.+)/binding$#',
+            'controller' => [BasketController::class, 'deleteBinding'],
+        ],
+    ];
 
-    public function displayAjax()
+    protected $content_only = true;
+
+    public function postProcess()
     {
-        $this->display();
+        $request = Request::createFromGlobals();
+
+        $response = $this->handle($request);
+        $response->send();
+
+        exit;
     }
 
-    public function display()
+    private function handle(Request $request): Response
     {
-        header('Content-type: application/json');
-        \izi\prestashop\Logger::log('request na ' . Tools::getValue('path') . '     FULL: ' . $_SERVER['REQUEST_URI']);
+        $path = $this->getPath($request);
 
-        $originStringPath = urldecode(Tools::getValue('path'));
-        $path = explode('/', explode('?', $originStringPath)[0]);
-
-        $confirmationRequest = [];
-        preg_match('/inpost\/v1\/izi\/basket\/(.*)\/confirmation/', $originStringPath, $confirmationRequest);
-
-        $getBasketRequest = [];
-        preg_match('/inpost\/v1\/izi\/basket\/(.*)/', $originStringPath, $getBasketRequest);
-
-        $deleteBasketRequest = [];
-        preg_match('/inpost\/v1\/izi\/basket\/(.*)\/binding/', $originStringPath, $deleteBasketRequest);
-
-        $basketeventRequest = [];
-        preg_match('/inpost\/v1\/izi\/basket\/(.*)\/event/', $originStringPath, $basketeventRequest);
-
-        $orderEventRequest = [];
-        preg_match('/inpost\/v1\/izi\/order\/(.*)\/event/', $originStringPath, $orderEventRequest);
-
-        if (strpos($originStringPath, 'add-product') === 0) {
-            $this->addProductToCart();
-        } elseif (strpos($originStringPath, 'inpost/v1/izi/merchant/basket/get/link') === 0) {
-            \izi\prestashop\InpostIziPayPrestashop::getInstance();
-            $binding = BindingProvider::getBinding();
-
-            if (!isset($binding->inpost_basket_id)) {
-                return [
-                    'link' => '',
-                    'inpost_basket_id' => '',
-                ];
-            }
-            $inpost_basket_id = $binding->inpost_basket_id;
-            $link = \izi\InPostIzi::getLinkUrl() . '?basket_id=' . $inpost_basket_id;
-
-            die(json_encode([
-                'link' => $link,
-                'inpost_basket_id' => $inpost_basket_id,
-            ]));
-        } elseif (strpos($originStringPath, 'inpost/v1/izi/merchant/basket/post/binding') === 0) {
-            $this->bindCarts($path);
-        } elseif (strpos($originStringPath, 'inpost/v1/izi/merchant/order/confirmation/get') === 0) {
-            \izi\prestashop\InpostIziPayPrestashop::getInstance();
-            (new \izi\prestashop\requests\merchant\OrderConfirmation())->send();
-        } elseif (strpos($originStringPath, 'inpost/v1/izi/merchant/basket/confirmation') === 0) {
-            \izi\prestashop\InpostIziPayPrestashop::getInstance();
-            (new \izi\prestashop\requests\merchant\BasketConfirmation())->send();
-        } elseif (strpos($originStringPath, 'inpost/v1/izi/merchant/basket/delete/binding') === 0) {
-            $response = \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController()->basketBindingDelete();
-            \izi\BasketIdentification::drop();
-            $context = \Context::getContext();
-            $id_cart = $context->cookie->__get('id_cart');
-            $cart = new \Cart($id_cart);
-            \izi\InPostIzi::unblockPut();
-            $data = PrestashopBasket::getBasket($cart)->encode();
-            $basketId = \izi\BasketIdentification::get();
-            $jsonResponse = json_encode(json_decode($data));
-            CartSession::storeCurrent();
-            CartSession::setBasketCacheById($basketId, $jsonResponse);
-            \izi\prestashop\Logger::log("Saved {$basketId} for {$jsonResponse}");
-            die(json_encode($response));
-        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && count($confirmationRequest) == 2) {
-            $this->baConfirmation($confirmationRequest[1]);
-        } elseif ($_SERVER['REQUEST_METHOD'] === 'GET' && count($getBasketRequest) == 2) {
-            $this->baBasketGet($getBasketRequest[1]);
-        } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE' && count($deleteBasketRequest) == 2) {
-            \izi\prestashop\InpostIziPayPrestashop::getInstance();
-            (new izi\prestashop\requests\basket\Delete())->handleRequest($deleteBasketRequest[1]);
-        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && count($basketeventRequest) == 2 && count($orderEventRequest) != 2) {
-            $this->cartUpdate($basketeventRequest[1]);
-        } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && count($orderEventRequest) == 2) {
-            $signature = new SignatureVerification();
-            $signature->check();
-            $id = $orderEventRequest[1];
-            $data = file_get_contents('php://input');
-            \izi\prestashop\Logger::response($data, 'Order update request came!');
-            $date = date('Y-m-d H:i:s');
-            $data = json_decode($data);
-
-            \Configuration::get('INPOST_PAY_authorized_payment');
-            $order = new Order($id);
-            if (!$order) {
-                http_response_code(404);
-                die(json_encode([
-                    'error_code' => '404',
-                    'error_message' => 'Order Not Found',
-                ]));
-            }
-            $setToStatus = $order->current_state;
-            $statusString = '';
-            if ($data->event_data->payment_status == 'AUTHORIZED') {
-                $setToStatus = (int) \Configuration::get('INPOST_PAY_authorized_payment');
-                $order->setCurrentState($setToStatus);
-                $order->save();
-                $statusString = 'Opłacono';
-            } else {
-            }
-            \izi\prestashop\Logger::log("STATUS ORDERU {$id} ZMIENIONO NA {$setToStatus}");
-
-            $states = new OrderState();
-            foreach ($states->getOrderStates((int) Configuration::get('PS_LANG_DEFAULT')) as $status) {
-                if ($status['id_order_state'] == $setToStatus) {
-                    $statusString = $status['name'];
-                }
+        try {
+            if (0 === strpos($path, '/inpost/v1/izi/merchant/')) {
+                return $this->handleCustomerRequest($request, $path);
             }
 
-            $data = [
-                'order_merchant_status_description' => $statusString,
-            ];
-            die(json_encode($data));
-        } elseif (strpos($originStringPath, 'inpost/v1/izi/order/') === 0) {
-            $signature = new SignatureVerification();
-            $signature->check();
-            $orderId = array_pop($path);
-            $basketId = CartSession::getBasketIdByOrderId($orderId);
-            $orderGetResponse = \izi\prestashop\PrestashopOrder::getOrder($orderId, $basketId)->encode();
-            \izi\prestashop\Logger::response($orderGetResponse, 'Order get response');
-            die($orderGetResponse);
-        } elseif (strpos($originStringPath, 'inpost/v1/izi/order') === 0) {
-            $signature = new SignatureVerification();
-            $signature->check();
-            $orderCreateResponse = '';
-            try {
-                $json = file_get_contents('php://input');
-                \izi\prestashop\Logger::response($json, 'Order create came');
-                $json = json_decode($json);
-                \izi\InPostIzi::blockPut();
-                $orderId = (new izi\prestashop\rest\order\Create())->handleRequest($json);
-                $orderCreateResponse = \izi\prestashop\PrestashopOrder::getOrder($orderId, $json->order_details->basket_id)->encode();
-                \izi\prestashop\Logger::response($orderCreateResponse, 'Order create response');
-            } catch (\Throwable $t) {
-                $this->handleError($t);
-            }
-            \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController()->basketBindingDelete();
-            \izi\BasketIdentification::drop();
-            die($orderCreateResponse);
+            return $this->handleApiRequest($request, $path);
+        } catch (\Throwable $throwable) {
+            $this->logError($throwable);
+
+            throw $throwable;
         }
-//        else if ($path[0] === "bakset" && $_SERVER['REQUEST_METHOD'] === "GET") {
-//            die($this->ajaxRender((new izi\prestashop\rest\basket\Get())->handleRequest($path[1])));
-//        }
-        die(json_encode([
-            'access' => 'denied',
-            'path' => $originStringPath,
-        ]));
     }
 
-    protected function addProductToCart(): void
+    private function handleCustomerRequest(Request $request, $path): Response
     {
-        $context = \Context::getContext();
-        $id_cart = $context->cookie->__get('id_cart');
-        $cart = null;
-        if ($id_cart) {
-            $cart = new \Cart($id_cart);
-        } else {
-            $cart = new \Cart();
-            $cart->id_currency = $context->cookie->id_currency;
-            $cart->id_lang = (int) \Configuration::get('PS_LANG_DEFAULT');
-            $cart->save();
-        }
-        $id_product = $_GET['product_id'];
-        $quantity = 1;
+        [$controller, $params] = $this->resolveController($request, $path, self::MERCHANT_ROUTES);
 
-        $status = $cart->updateQty($quantity, $id_product, null, false);
-        die(json_encode(['status' => (int) $status]));
+        return null === $controller
+            ? $this->createNotFoundResponse($request, $path)
+            : $this->callController($controller, $request, $params);
     }
 
-    /**
-     * @param $path
-     */
-    protected function bindCarts($path): void
+    private function handleApiRequest(Request $request, string $path): Response
     {
-        \izi\prestashop\InpostIziPayPrestashop::getInstance();
-        CartSession::forceBasketStore();
-        $browserId = Storage::findSession('BrowserId');
-        if (!$browserId && isset($_COOKIE['BrowserId'])) {
-            $browserId = $_COOKIE['BrowserId'];
-        }
-        if ($browserId) {
-            \izi\prestashop\Logger::log('MAM BROWSER ID, WYSYŁAM KOSZYK');
-            Storage::eraseSession('binding_get');
-            $binding = BindingProvider::getBinding(true);
-            if ($binding && isset($binding->browser_trusted) && $binding->browser_trusted) {
-                \izi\prestashop\Logger::log('pre basket send');
-                \izi\InpostIzi::unblockPut();
+        $method = $request->getMethod();
 
-                $basket = InPostIzi::getCartSessionClass()::getBasketCacheById(BasketIdentification::get());
-                if (!$basket) {
-                    $izi = \izi\prestashop\InpostIziPayPrestashop::getInstance();
-                    \izi\prestashop\CartSession::storeCurrent();
-                    $izi->basketPut(false, true);
-                }
-                $response = \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController()->basketBindingPost();
-                $binding = BindingProvider::getBinding(true);
-                foreach ($binding->client_details as $innerKey => $innerData) {
-                    $binding->$innerKey = $innerData;
-                }
-                CartSession::setConfirmationToCart(\izi\BasketIdentification::get(), json_encode($binding));
-                \izi\prestashop\Logger::log('post basket send and binding is ' . json_encode($binding));
-                die(json_encode($response));
-            }
+        \izi\prestashop\Logger::response($request->getContent(), sprintf('Request: [%s %s]     URI: %s', $method, $path, $request->server->get('REQUEST_URI', $path)));
+
+        try {
+            (new SignatureVerification())->check($request);
+            [$controller, $params] = $this->resolveController($request, $path, self::API_ROUTES);
+
+            /** @var JsonResponse $response */
+            $response = null === $controller
+                ? $this->createNotFoundResponse($request, $path, true)
+                : $this->callController($controller, $request, $params);
+        } catch (\Throwable $throwable) {
+            $response = $this->handleApiError($throwable);
         }
-        \izi\prestashop\Logger::log('NIE MAM PRZEGLĄDARKI I :(');
-        $prefix = $path[7] ?? '-';
-        $number = $path[8] ?? '-';
-        \izi\prestashop\Logger::log('Prefix to: ' . $prefix);
-        \izi\prestashop\Logger::log('Numer telefonu to: ' . $number);
-        if ($prefix == '-') {
-            $prefix = null;
-        }
-        if ($number == '-') {
-            $number = null;
-        }
-        $response = \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController()->basketBindingPost($prefix, $number);
-        die(json_encode((array) $response));
+
+        \izi\prestashop\Logger::response($response->getContent(), sprintf('Response: [%s %s]', $method, $path));
+
+        return $response->setEncodingOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JsonResponse::DEFAULT_ENCODING_OPTIONS);
     }
 
-    protected function merchantConfirmation(): void
+    private function handleApiError(\Throwable $throwable): Response
     {
-        $response = \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController()->basketBindingGetInterval();
-        if (!is_string($response)) {
-            $response = json_encode($response);
+        if (!$throwable instanceof ApiException) {
+            $throwable = InternalServerErrorException::create($throwable);
         }
-        die($response);
+
+        if ($throwable instanceof InternalServerErrorException && $previous = $throwable->getPrevious()) {
+            $this->logError($previous);
+        }
+
+        return new JsonResponse([
+            'error_code' => $throwable->getErrorCode(),
+            'error_message' => $throwable->getMessage(),
+        ], $throwable->getStatusCode());
     }
 
-    /**
-     * @param $cartId
-     */
-    protected function baBasketGet($cartId)
+    private function getPath(Request $request): string
     {
-        $signature = new SignatureVerification();
-        $signature->check();
-        $basketJson = \izi\prestashop\CartSession::getBasketCacheById($cartId);
-        \izi\prestashop\Logger::log('basket get dla ' . $cartId);
-        die($basketJson);
+        if (null === $path = $request->query->get('path')) {
+            return '/';
+        }
+
+        $path = rawurldecode($path);
+
+        if ('/' !== $path[0]) {
+            $path = '/' . $path;
+        }
+
+        return rtrim($path, '/');
     }
 
-    protected function baConfirmation($cartId): void
+    private function logError(\Throwable $throwable): void
     {
-        $signature = new SignatureVerification();
-        $signature->check();
-        \izi\prestashop\Logger::log('confirm przyszedł');
-        $basketJson = \izi\prestashop\CartSession::getBasketCacheById($cartId);
-        \izi\prestashop\Logger::response($basketJson, 'CONFIRM BASKET ' . $cartId);
-
-        $data = file_get_contents('php://input');
-        \izi\prestashop\CartSession::setConfirmationToCart($cartId, $data);
-        die($basketJson);
+        \izi\prestashop\Logger::log($throwable->getMessage() . ' at ' . $throwable->getFile() . ':' . $throwable->getLine());
     }
 
-    /**
-     * @param $basketeventRequest
-     */
-    protected function cartUpdate($basketeventRequest): void
+    private function resolveController(Request $request, string $path, array $routes): array
     {
-        $signature = new SignatureVerification();
-        $signature->check();
-        $json = file_get_contents('php://input');
-        \izi\prestashop\Logger::response($json, 'Basket update request came!');
-        $basketId = $basketeventRequest;
-        $json = json_decode($json);
-        $cartId = CartSession::getSessionId($basketId);
-        $cart = new \Cart($cartId);
+        $method = $request->getMethod();
 
-        // TODO handle cart not found
-
-        if (!$cart->id_currency) {
-            $cart->id_currency = \Currency::getIdByIsoCode('PLN');
-        }
-        if (!$cart->id_lang) {
-            $cart->id_lang = \Configuration::get('PS_LANG_DEFAULT');
-        }
-
-        $this->context->cart = $cart;
-        $this->context->customer = new \Customer($cart->id_customer);
-        $this->context->currency = \Currency::getCurrencyInstance($cart->id_currency);
-
-        switch ($json->event_type) {
-            case self::EVENT_TYPE_PRODUCTS_QUANTITY:
-                foreach ($json->quantity_event_data as $eventData) {
-                    try {
-                        $this->updateCartQuantity($cart, $eventData);
-                    } catch (\Exception $e) {
-                        \izi\prestashop\Logger::log($e->getMessage());
-                    }
-                }
-                break;
-            case self::EVENT_TYPE_PROMO_CODES:
-                $this->hasCoupons = true;
-                $appliedCodes = [];
-                if (isset($json->promo_codes_event_data)) {
-                    PrestashopBasket::$hasCoupons = $this->hasCoupons;
-                    foreach ($json->promo_codes_event_data as $eventData) {
-                        foreach ($cart->getCartRules() as $rule) {
-                            if ($rule['code'] == $eventData->promo_code_value) {
-                                $appliedCodes[] = $eventData->promo_code_value;
-                                continue 2;
-                            }
-                        }
-                        $cartRule = new \CartRule(\CartRule::getIdByCode($eventData->promo_code_value));
-                        if (!$cart->addCartRule($cartRule->id)) {
-                            $this->couponError = true;
-                            \izi\prestashop\Logger::Log('CART RULE ERROR: ' . $eventData->promo_code_value);
-                        } else {
-                            izi\prestashop\Logger::Log('CART RULE SUCCESS: ' . $eventData->promo_code_value);
-                        }
-                        $appliedCodes[] = $eventData->promo_code_value;
-                    }
-                    foreach ($cart->getCartRules() as $rule) {
-                        if (!in_array($rule['code'], $appliedCodes)) {
-                            $cart->removeCartRule($rule['id_cart_rule']);
-                        }
-                    }
-                }
-                PrestashopBasket::$couponError = $this->couponError;
-                break;
-            case self::EVENT_TYPE_RELATED_PRODUCTS:
-                foreach ($json->related_products_event_data as $eventData) {
-                    $this->addRelatedProduct($cart, $eventData);
-                }
-                break;
-        }
-        $cart->save();
-        $data = PrestashopBasket::getBasket($cart)->encode();
-
-        CartSession::setBasketCacheById($basketId, json_encode(json_decode($data)));
-        CartSession::setBasketCouponsById($basketId, 1);
-        \izi\prestashop\Logger::response($data, 'RESPONSE FOR EVENT');
-        die($data);
-    }
-
-    private function updateCartQuantity(\Cart $cart, $eventData)
-    {
-        list($productId, $combinationId, $customizationId) = array_map('intval', explode('.', $eventData->product_id));
-
-        if (0 === $currentQuantity = $this->getCartQuantity($cart, $productId, $combinationId, $customizationId)) {
-            return;
-        }
-
-        if (0 >= $eventData->quantity->quantity) {
-            $cart->deleteProduct($productId, $combinationId, $customizationId);
-        } else {
-            $diff = (int) $eventData->quantity->quantity - $currentQuantity;
-            \izi\prestashop\Logger::log("CAME: {$eventData->quantity->quantity}; CURRENT: {$currentQuantity}; SETTING: {$diff}");
-
-            if (0 === $diff) {
-                return;
+        foreach ($routes as $route) {
+            if (isset($route['methods']) && !in_array($method, $route['methods'], true)) {
+                continue;
             }
 
-            $cart->updateQty(
-                abs($diff),
-                $productId,
-                $combinationId,
-                $customizationId,
-                $diff > 0 ? 'up' : 'down',
-                0,
-                new \Shop($cart->id_shop)
-            );
-        }
-    }
-
-    private function addRelatedProduct(\Cart $cart, $eventData)
-    {
-        list($productId, $combinationId) = array_map('intval', explode('.', $eventData->product_id));
-
-        $cart->updateQty(
-            (int) $eventData->quantity->quantity,
-            $productId,
-            $combinationId,
-            0,
-            'up',
-            0,
-            new \Shop($cart->id_shop)
-        );
-    }
-
-    /**
-     * @param int $productId
-     * @param int $combinationId
-     * @param int $customizationId
-     *
-     * @return int
-     */
-    private function getCartQuantity(\Cart $cart, $productId, $combinationId, $customizationId)
-    {
-        $products = $cart->getProducts(true);
-
-        foreach ($products as $product) {
-            if (
-                $productId === (int) $product['id_product'] &&
-                $combinationId === (int) $product['id_product_attribute'] &&
-                $customizationId === (int) $product['id_customization']
-            ) {
-                return (int) $product['cart_quantity'];
+            if (isset($route['prefix']) && 0 !== strpos($path, $route['prefix'])) {
+                continue;
             }
+
+            if (!isset($route['regex']) && $path !== $route['path']) {
+                continue;
+            }
+
+            if (isset($route['regex']) && !preg_match($route['regex'], $path, $params)) {
+                continue;
+            }
+
+            return [$route['controller'], $params ?? []];
         }
 
-        return 0;
+        return [null, []];
     }
 
-    private function handleError(\Throwable $error): void
+    private function callController(array $controller, Request $request, array $pathParams): Response
     {
-        \izi\prestashop\Logger::log($error->getMessage() . ' at ' . $error->getFile() . ':' . $error->getLine());
+        $arguments = $this->resolveControllerArguments($controller, $request, $pathParams);
+        $controller = [new $controller[0](), $controller[1]];
 
-        if (!$error instanceof ApiException) {
-            $error = new InternalServerErrorException('Something went wrong. Please try again later.');
+        return $controller(...$arguments);
+    }
+
+    private function resolveControllerArguments(array $controller, Request $request, array $pathParams): array
+    {
+        $reflection = new \ReflectionMethod($controller[0], $controller[1]);
+
+        return array_map(function (\ReflectionParameter $param) use ($request, $pathParams) {
+            return $this->resolveControllerArgument($param, $request, $pathParams);
+        }, $reflection->getParameters());
+    }
+
+    private function resolveControllerArgument(\ReflectionParameter $param, Request $request, array $pathParams)
+    {
+        $type = $param->getType();
+
+        if (null !== $type && Request::class === $type->getName()) {
+            return $request;
         }
 
-        $error->sendResponse();
+        $paramName = $param->getName();
+
+        if (isset($pathParams[$paramName])) {
+            return $pathParams[$paramName];
+        }
+
+        if ($param->isDefaultValueAvailable()) {
+            return $param->getDefaultValue();
+        }
+
+        throw new \LogicException(sprintf('Cannot determine controller parameter value for argument "%s".', $paramName));
+    }
+
+    private function createNotFoundResponse(Request $request, string $path, bool $json = false): Response
+    {
+        $message = sprintf('No route found for "%s %s"', $request->getMethod(), $path);
+
+        return $json || in_array('application/json', $request->getAcceptableContentTypes(), true)
+            ? new JsonResponse([
+                'error_code' => 'NOT_FOUND',
+                'error_message' => $message,
+            ], 404)
+            : new Response($message, 404);
     }
 }

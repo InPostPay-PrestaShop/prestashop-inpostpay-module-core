@@ -3,9 +3,10 @@
 namespace izi\prestashop;
 
 use izi\BasketIdentification;
+use izi\interfaces\ICartSession;
 use izi\prestashop\models\InpostiziBasketSession;
 
-class CartSession
+class CartSession implements ICartSession
 {
     public static function storeCurrent(): void
     {
@@ -23,8 +24,6 @@ class CartSession
             $model->order_id = null;
             $model->redirect_url = '';
             $model->basket_cache = '';
-            $model->basket_cached = '';
-            $model->coupons = '';
             $model->redirected = 0;
             $model->order_details = '';
             $model->event = null;
@@ -57,9 +56,8 @@ class CartSession
         Logger::log('ORDER DATA SQL ' . $sql);
     }
 
-    public static function getOrderData($orderId)
+    public static function getOrderData(int $orderId)
     {
-        $orderId = (int) $orderId;
         $sql = 'SELECT order_details FROM ' . _DB_PREFIX_ . InpostiziBasketSession::$definition['table'] . ' where order_id = "' . $orderId . '"';
         $row = \Db::getInstance()->getRow($sql);
 
@@ -117,10 +115,10 @@ class CartSession
     public static function getBasketIdByOrderId($oid)
     {
         $oid = (int) $oid;
-        $sql = 'SELECT cartId FROM ' . _DB_PREFIX_ . InpostiziBasketSession::$definition['table'] . ' where order_id = "' . $oid . '"';
+        $sql = 'SELECT cart_id FROM ' . _DB_PREFIX_ . InpostiziBasketSession::$definition['table'] . ' where order_id = "' . $oid . '"';
         $row = \Db::getInstance()->getRow($sql);
 
-        return isset($row['cartId']) ? $row['cartId'] : '';
+        return isset($row['cart_id']) ? $row['cart_id'] : '';
     }
 
     public static function setBasketCacheById($cartId, $data)
@@ -137,10 +135,6 @@ class CartSession
         $redirected = (int) $redirected;
         $sql = 'UPDATE ' . _DB_PREFIX_ . InpostiziBasketSession::$definition['table'] . ' SET redirected = "' . $redirected . '" WHERE cart_id = "' . $cartId . '"';
         \Db::getInstance()->execute($sql);
-    }
-
-    public static function setBasketCachedById($data)
-    {
     }
 
     public static function getSessionId($cartId): ?string
@@ -199,8 +193,9 @@ class CartSession
 
     public static function forceBasketStore()
     {
-        $basket = PrestashopBasket::getBasket()->encode();
-        CartSession::setBasketCacheById(BasketIdentification::get(), json_encode(json_decode($basket)));
+        $basket = PrestashopBasket::createForCustomerContext();
+
+        CartSession::setBasketCacheById($basket->getId(), json_encode($basket));
     }
 
     public static function deleteByCartId($cartId): void
@@ -208,5 +203,29 @@ class CartSession
         $cartId = pSQL($cartId);
         $sql = 'UPDATE ' . _DB_PREFIX_ . InpostiziBasketSession::$definition['table'] . ' SET redirect_url = "deleted" WHERE cart_id = "' . $cartId . '"';
         \Db::getInstance()->execute($sql);
+    }
+
+    public static function getBasketIdByCartId(int $cartId): ?string
+    {
+        if (0 >= $cartId) {
+            return null;
+        }
+
+        $qb = (new \DbQuery())
+            ->select('cart_id')
+            ->from(InpostiziBasketSession::$definition['table'])
+            ->where('session_id = ' . $cartId);
+
+        $db = \Db::getInstance();
+
+        if (false !== $result = $db->getValue($qb)) {
+            return $result;
+        }
+
+        if ($errorCode = $db->getNumberError()) {
+            throw new \PrestaShopDatabaseException($db->getMsgError(), $errorCode);
+        }
+
+        return null;
     }
 }

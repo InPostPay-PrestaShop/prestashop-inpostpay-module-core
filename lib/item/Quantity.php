@@ -4,8 +4,8 @@ namespace izi\item;
 
 abstract class Quantity extends \izi\Item
 {
-    const DECIMAL = 'DECIMAL';
-    const INTEGER = 'INTEGER';
+    public const DECIMAL = 'DECIMAL';
+    public const INTEGER = 'INTEGER';
 
     /**
      * @var int|float

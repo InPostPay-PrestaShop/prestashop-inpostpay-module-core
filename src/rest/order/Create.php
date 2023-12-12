@@ -4,8 +4,8 @@ namespace izi\prestashop\rest\order;
 
 use izi\item\order\InvoiceDetails;
 use izi\prestashop\CartSession;
-use izi\prestashop\Exception\BasketNotFoundException;
-use izi\prestashop\Exception\InternalServerErrorException;
+use izi\prestashop\rest\Exception\BasketNotFoundException;
+use izi\prestashop\rest\Exception\InternalServerErrorException;
 use izi\prestashop\traits\CarrierFinderTrait;
 
 class Create
@@ -13,13 +13,15 @@ class Create
     use CarrierFinderTrait;
 
     /**
-     * @return int created order identifier
+     * @param object $data
+     *
+     * @return int order identifier
      */
-    public function handleRequest($data)
+    public function handleRequest($data): int
     {
         $cart = $this->getCart($data->order_details->basket_id);
 
-        if ($order = $this->getOrderByCart($cart)) {
+        if (\Validate::isLoadedObject($order = $this->getOrderByCart($cart))) {
             if ('inpostizi' !== $order->module) {
                 throw new BasketNotFoundException('There already exists an order for this basket.');
             }
@@ -30,28 +32,18 @@ class Create
         return $this->createOrder($cart, $data);
     }
 
-    /**
-     * @param string $basketId
-     *
-     * @return \Cart
-     */
-    private function getCart($basketId)
+    private function getCart(string $basketId): \Cart
     {
         $cartId = CartSession::getSessionId($basketId);
 
         if (!$cartId || !\Validate::isLoadedObject($cart = new \Cart($cartId))) {
-            throw new BasketNotFoundException('Basket not found.');
+            throw BasketNotFoundException::create();
         }
 
         return $cart;
     }
 
-    /**
-     * @param \Cart $cart
-     *
-     * @return \Order|null
-     */
-    private function getOrderByCart(\Cart $cart)
+    private function getOrderByCart(\Cart $cart): ?\Order
     {
         if (is_callable([\Order::class, 'getByCartId'])) {
             return \Order::getByCartId($cart->id);
@@ -62,7 +54,7 @@ class Create
         return $orderId ? new \Order($orderId) : null;
     }
 
-    private function createOrder(\Cart $cart, $data)
+    private function createOrder(\Cart $cart, $data): int
     {
         if (null === $carrierId = $this->getCarrierId($data->delivery->delivery_type)) {
             throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $data->delivery->delivery_type));
@@ -102,7 +94,7 @@ class Create
         return $payment_module->currentOrder;
     }
 
-    private function updateCart(\Cart $cart, $data, \Customer $customer, $carrierId)
+    private function updateCart(\Cart $cart, $data, \Customer $customer, int $carrierId): void
     {
         $cart->id_customer = $customer->id;
         $cart->secure_key = $customer->secure_key;
@@ -127,17 +119,12 @@ class Create
         $this->updateCartMessage($cart->id, $data);
     }
 
-    /**
-     * @param string $code
-     *
-     * @return int|null
-     */
-    private function getCountryId($code)
+    private function getCountryId(string $code): ?int
     {
         return \Country::getByIso(strtoupper($code)) ?: null;
     }
 
-    private function createDeliveryAddress($delivery, \Customer $customer)
+    private function createDeliveryAddress($delivery, \Customer $customer): int
     {
         $address = new \Address();
         $address->id_customer = $customer->id;
@@ -162,7 +149,7 @@ class Create
         return $address->id;
     }
 
-    private function createInvoiceAddress($invoiceDetails, $accountInfo, \Customer $customer)
+    private function createInvoiceAddress($invoiceDetails, $accountInfo, \Customer $customer): int
     {
         $address = new \Address();
         $address->id_customer = $customer->id;
@@ -199,7 +186,7 @@ class Create
         return $address->id;
     }
 
-    private function getExistingAddressId(\Customer $customer, \Address $address, array $ignoreFields = [])
+    private function getExistingAddressId(\Customer $customer, \Address $address, array $ignoreFields = []): ?int
     {
         if ($customer->is_guest) {
             return null;
@@ -218,7 +205,7 @@ class Create
         return null;
     }
 
-    private function isSameAddress(\Address $address, array $data, array $ignoreFields)
+    private function isSameAddress(\Address $address, array $data, array $ignoreFields): bool
     {
         $comparedFields = array_diff([
             'firstname',
@@ -242,10 +229,7 @@ class Create
         return true;
     }
 
-    /**
-     * @return \Customer
-     */
-    private function getOrCreateCustomer(\Cart $cart, $accountInfo)
+    private function getOrCreateCustomer(\Cart $cart, $accountInfo): \Customer
     {
         $customer = new \Customer($cart->id_customer);
 
@@ -272,7 +256,7 @@ class Create
         return $customer;
     }
 
-    private function adjustHandlingCost($data)
+    private function adjustHandlingCost($data): void
     {
         if (0. === $deliveryOptionsCost = $this->getAdditionalDeliveryOptionsCost($data->delivery)) {
             return;
@@ -284,10 +268,7 @@ class Create
         \Cart::resetStaticCache();
     }
 
-    /**
-     * @return float
-     */
-    private function getAdditionalDeliveryOptionsCost($deliveryData)
+    private function getAdditionalDeliveryOptionsCost($deliveryData): float
     {
         if (
             !isset($deliveryData->delivery_codes) ||
@@ -308,10 +289,7 @@ class Create
         return $additionalCosts;
     }
 
-    /**
-     * @param int $cartId
-     */
-    private function updateCartMessage($cartId, $data)
+    private function updateCartMessage(int $cartId, $data): void
     {
         if (empty($data->order_details->order_comments)) {
             return;
@@ -333,7 +311,7 @@ class Create
         }
     }
 
-    private function saveCarrierModuleData($cartId, $delivery)
+    private function saveCarrierModuleData(int $cartId, $delivery): void
     {
         if (!class_exists(\InPostCartChoiceModel::class)) {
             return;

@@ -4,13 +4,7 @@ namespace izi\prestashop\traits;
 
 trait PriceFactoryTrait
 {
-    /**
-     * @param float $net
-     * @param float $gross
-     *
-     * @return \izi\item\Price
-     */
-    private function createPrice($net, $gross)
+    private function createPrice(float $net, float $gross): \izi\item\Price
     {
         $net = \Tools::ps_round($net, 2);
         $gross = \Tools::ps_round($gross, 2);
@@ -25,12 +19,7 @@ trait PriceFactoryTrait
         return $price;
     }
 
-    /**
-     * @param float $price
-     *
-     * @return string
-     */
-    private function formatPrice($price)
+    private function formatPrice(float $price): string
     {
         return number_format($price, 2, '.', '');
     }

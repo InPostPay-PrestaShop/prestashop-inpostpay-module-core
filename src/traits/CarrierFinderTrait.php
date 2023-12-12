@@ -6,10 +6,8 @@ trait CarrierFinderTrait
 {
     /**
      * @param "apm"|"courier" $delivery_type
-     *
-     * @return int|null
      */
-    private function getCarrierId($delivery_type)
+    private function getCarrierId(string $delivery_type): ?int
     {
         if (0 >= $referenceId = (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($delivery_type))) {
             return null;
@@ -21,6 +19,6 @@ trait CarrierFinderTrait
             return null;
         }
 
-        return $carrier->id;
+        return (int) $carrier->id;
     }
 }

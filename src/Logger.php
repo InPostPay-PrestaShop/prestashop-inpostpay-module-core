@@ -2,38 +2,33 @@
 
 namespace izi\prestashop;
 
-class Logger
+use izi\interfaces\LoggerInterface;
+
+class Logger implements LoggerInterface
 {
-    public static function log($data)
+    public static function log(string $message): void
     {
-        self::write('general.log', $data);
+        self::write('general.log', $message);
     }
 
-    public static function spam($data)
+    public static function response(string $message, string $header = ''): void
     {
-        self::write('spam.log', $data);
+        if ('' !== $header) {
+            $message = $header . PHP_EOL . $message;
+        }
+
+        self::write('response.log', $message);
     }
 
-    public static function response($data, $header = '')
+    public static function request(string $url, string $method, string $payload, int $length, string $response, int $code): void
     {
-        self::write('response.log', $header . PHP_EOL . $data);
+        $message = "URL: {$url}\nMETHOD: {$method}\nLENGTH:{$length}\nDATA:\n{$payload}\n\nRESPONSE CODE: {$code}\nRESPONSE:\n{$response}";
+
+        self::write('request.log', $message);
     }
 
-    public static function dataRead($data, $header = '')
+    private static function write(string $filename, string $data): void
     {
-        self::write('data.log', $header . PHP_EOL . $data);
-    }
-
-    public static function request($url, $type, $data, $length, $response, $code, $header = '')
-    {
-        $data = "URL: {$url}\nMETHOD: {$type}\nLENGTH:{$length}\nDATA:\n{$data}\n\nRESPONSE CODE: {$code}\nRESPONSE:\n{$response}\n\n";
-        self::write('request.log', $header . PHP_EOL . $data);
-    }
-
-    private static function write($filename, $data)
-    {
-//        if (defined('IZI_LOGGER')) {
         file_put_contents(__DIR__ . '/' . $filename, date('Y-m-d H:i:s') . PHP_EOL . $data . PHP_EOL . PHP_EOL, FILE_APPEND);
-//        }
     }
 }

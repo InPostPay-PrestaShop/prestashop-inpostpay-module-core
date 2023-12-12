@@ -49,8 +49,7 @@ class Fetcher
         $this->curlJoinHeaders($headers);
         $data = $this->execute($url);
 
-        InPostIzi::getLoggerClass()::request($url, $type, json_encode($payload
-        ), $payloadLength, json_encode($data[0]), $data[1]);
+        InPostIzi::getLoggerClass()::request($url, $type, json_encode($payload), $payloadLength, json_encode($data[0]), $data[1]);
 
         return $withCode ? $data : $data[0];
     }

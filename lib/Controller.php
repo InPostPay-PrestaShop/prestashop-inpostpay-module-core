@@ -4,20 +4,13 @@ namespace izi;
 
 class Controller extends Remote
 {
-    public static $addToCart;
-
-    public function __construct()
+    public function basketBindingDelete(string $basketId = null)
     {
-        parent::__construct();
-    }
+        if (null === $basketId) {
+            $basketId = BasketIdentification::get();
+        }
 
-    public function basketBindingDelete()
-    {
-        Storage::insertSession('basketLinked', false);
-        $response = parent::basketBindingDelete();
-        BasketIdentification::drop();
-
-        return $response;
+        return parent::basketBindingDelete($basketId);
     }
 
     public function browserBindingDelete($browserId = null)
@@ -36,15 +29,6 @@ class Controller extends Remote
 
     public function basketBindingGet($force = false)
     {
-//        if ($force) {
-//            if (method_exists(InPostIzi::getLoggerClass(), 'spam')) {
-//                ob_start();
-//                debug_print_backtrace(0, 3);
-//                $trace = ob_get_contents();
-//                ob_end_clean();
-//                InPostIzi::getLoggerClass()::spam($trace);
-//            }
-//        }
         $response = parent::basketBindingGet($force);
 
         if (isset($response, $this->basketId)) {
@@ -56,16 +40,12 @@ class Controller extends Remote
 
     public function basketBindingPost($prefix = null, $number = null)
     {
-        Storage::insertSession('basketLinked', true);
         $binding = $this->basketBindingGet(true);
-        if (isset($binding, $binding->browser_trusted) && $binding->browser_trusted) {
+        if (isset($binding->browser_trusted) && $binding->browser_trusted) {
             InPostIzi::getLoggerClass()::log('browser is trusted');
 //            InPostIzi::getCartSessionClass()::setConfirmationToCart(BasketIdentification::get(), json_encode($binding->client_details));
             $izi = InPostIzi::getInstance();
             Storage::eraseSession('binding_get');
-            if (method_exists(InPostIzi::getCartSessionClass(), 'initiateWCCart')) {
-                InPostIzi::getCartSessionClass()::initiateWCCart();
-            }
             $izi->basketPut(true);
             Storage::eraseSession('binding_get');
 
@@ -101,17 +81,6 @@ class Controller extends Remote
         }
 
         return [];
-    }
-
-    private function putBasket()
-    {
-        if (function_exists('did_action')) {
-            if (!did_action('woocommerce_load_cart_from_session') && function_exists('wc_load_cart')) {
-                wc_load_cart();
-            }
-        }
-        $izi = InPostIzi::getInstance();
-        $izi->basketPut();
     }
 
     public function orderGetInterval($id = '')
@@ -166,8 +135,8 @@ class Controller extends Remote
         return [];
     }
 
-    public function getSignatureKeys($force = false)
+    public function getSignatureKeys()
     {
-        return $this->request('v1/izi/signing-keys/public', 'GET');
+        return $this->request('v1/izi/signing-keys/public');
     }
 }

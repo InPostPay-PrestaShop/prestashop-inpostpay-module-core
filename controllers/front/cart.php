@@ -2,22 +2,18 @@
 
 class InpostIziCartModuleFrontController extends ModuleFrontController
 {
+    protected $content_only;
+
     public function displayAjax()
     {
-        return $this->display();
+        $this->display();
     }
 
     public function display()
     {
         header('Content-type: application/json');
-        $context = \Context::getContext();
-        $id_cart = $context->cookie->id_cart;
-        if ($id_cart == '') {
-            $id_cart = \Tools::getValue('id_cart');
-        }
 
-        $theCart = new \Cart($id_cart);
-        $products = $theCart->getProducts(true);
+        $products = $this->context->cart->getProducts();
         $nbTotalProducts = 0;
 
         foreach ($products as $product) {

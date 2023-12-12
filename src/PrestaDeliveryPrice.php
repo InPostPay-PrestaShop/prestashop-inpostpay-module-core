@@ -118,12 +118,7 @@ class PrestaDeliveryPrice
         return true;
     }
 
-    /**
-     * @param int $carrierId
-     *
-     * @return bool
-     */
-    private function isDeliveryOptionAvailable(\Cart $cart, $carrierId)
+    private function isDeliveryOptionAvailable(\Cart $cart, int $carrierId): bool
     {
         $deliveryOptionList = $cart->getDeliveryOptionList();
         $addressId = (int) $cart->id_address_delivery;
@@ -141,17 +136,8 @@ class PrestaDeliveryPrice
         return false;
     }
 
-    /**
-     * @return bool
-     */
-    private function hasFreeShippingCartRule(\Cart $cart)
+    private function hasFreeShippingCartRule(\Cart $cart): bool
     {
-        foreach ($cart->getCartRules() as $rule) {
-            if ($rule['free_shipping']) {
-                return true;
-            }
-        }
-
-        return false;
+        return [] !== $cart->getCartRules(\CartRule::FILTER_ACTION_SHIPPING, false);
     }
 }

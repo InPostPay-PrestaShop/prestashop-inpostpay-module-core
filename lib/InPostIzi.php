@@ -2,7 +2,12 @@
 
 namespace izi;
 
-class InPostIzi
+use izi\interfaces\ICartSession;
+use izi\interfaces\LoggerInterface;
+use izi\interfaces\TokenCacheInterface;
+use izi\item\Basket;
+
+abstract class InPostIzi
 {
     const ENVIRONMENT_DEVELOP = 1;
     const ENVIRONMENT_PRODUCTION = 2;
@@ -23,10 +28,20 @@ class InPostIzi
 
     private static $environment;
 
+    /**
+     * @var class-string<ICartSession>|ICartSession
+     */
     private static $cartSessionClass;
+
+    /**
+     * @var class-string<LoggerInterface>|LoggerInterface
+     */
     private static $loggerClass;
 
-    private static $tokenCache = null;
+    /**
+     * @var TokenCacheInterface|null
+     */
+    private static $tokenCache;
 
     public function __construct()
     {
@@ -38,21 +53,33 @@ class InPostIzi
         return $this->controller;
     }
 
+    /**
+     * @param class-string<ICartSession> $class
+     */
     public static function setCartSessionClass($class)
     {
         self::$cartSessionClass = $class;
     }
 
+    /**
+     * @return class-string<ICartSession>|ICartSession
+     */
     public static function getCartSessionClass()
     {
         return self::$cartSessionClass;
     }
 
+    /**
+     * @param class-string<LoggerInterface> $class
+     */
     public static function setLoggerClass($class)
     {
         self::$loggerClass = $class;
     }
 
+    /**
+     * @return class-string<LoggerInterface>|LoggerInterface
+     */
     public static function getLoggerClass()
     {
         return self::$loggerClass;
@@ -113,11 +140,6 @@ class InPostIzi
 
     public static function blockPut()
     {
-        //        ob_start();
-        //        debug_print_backtrace(0, 1);
-        //        $trace = ob_get_contents();
-        //        ob_end_clean();
-        //        self::$loggerClass::log($trace);
         self::$blockPut = true;
     }
 
@@ -131,45 +153,45 @@ class InPostIzi
         $this->controller->orderEvent($orderId, $status, $refList);
     }
 
-    public function basketPut($forceUnbound = false, $justStore = false)
+    public function basketPut(bool $forceUnbound = false, bool $justStore = false, Basket $basket = null)
     {
-        self::$loggerClass::Log('PERFORMING PUT WITH PARAMETERS: $forceUnbound = ' . (int) $forceUnbound . ', $justStore = ' . (int) $justStore . ' self::$blockPut = ' . (int) self::$blockPut);
-        if (!self::$blockPut) {
-            $data = $this->getBasket()->encode();
+        self::$loggerClass::log('PERFORMING PUT WITH PARAMETERS: $forceUnbound = ' . (int) $forceUnbound . ', $justStore = ' . (int) $justStore . ' self::$blockPut = ' . (int) self::$blockPut);
 
-            self::getCartSessionClass()::setBasketCacheById(BasketIdentification::get(), $data);
-            self::getCartSessionClass()::setBasketCachedById(BasketIdentification::get());
-
-            if ($justStore) {
-                return;
-            }
-
-            $binding = BindingProvider::getBinding(); //!! removed true
-            $basketLinkedForLog = false;
-            if (isset($binding->basket_linked)) {
-                $basketLinkedForLog = $binding->basket_linked;
-            }
-
-            if (!$forceUnbound && (!$binding || !$basketLinkedForLog)) {
-                $forceUnbound = print_r((int) $forceUnbound, true);
-                $basketLinkedForLog = print_r((int) $basketLinkedForLog, true);
-                self::$loggerClass::response('', "NO put: forceUnbound:{$forceUnbound} binding->basket_linked:{$basketLinkedForLog}");
-
-                return;
-            }
-
-            self::$loggerClass::response('', "Performing put: forceUnbound:{$forceUnbound} binding->basket_linked:{$basketLinkedForLog}");
-
-            $basket = InPostIzi::getCartSessionClass()::getBasketCacheById(BasketIdentification::get());
-            $basket = str_replace('\/', '/', mb_convert_encoding($basket, 'UTF-8'));
-            self::getCartSessionClass()::setBasketCacheById(BasketIdentification::get(), $basket);
-            $this->controller->basketPut($basket, true);
-        } else {
-            InPostIzi::getLoggerClass()::log('Block PUT');
+        if (self::$blockPut) {
+            return;
         }
+
+        if (null === $basket) {
+            $basket = $this->getBasket();
+        }
+
+        $data = str_replace('\/', '/', mb_convert_encoding($basket->encode(), 'UTF-8'));
+
+        self::getCartSessionClass()::setBasketCacheById($basket->getId(), $data);
+
+        if ($justStore) {
+            return;
+        }
+
+        if (3 < func_num_args()) {
+            $binding = BindingProvider::getBinding();
+            $basketLinked = $binding->basket_linked ?? false;
+        } else {
+            $basketLinked = $this->isLinked($basket->getId());
+        }
+
+        if (!$forceUnbound && !$basketLinked) {
+            self::$loggerClass::response('NO put: forceUnbound:0 binding->basket_linked:0');
+
+            return;
+        }
+
+        self::$loggerClass::response(sprintf('Performing put: forceUnbound:%d binding->basket_linked:%d', (int) $forceUnbound, (int) $basketLinked));
+
+        $this->controller->basketPut($basket);
     }
 
-    public static function setTokenCacheObject($object)
+    public static function setTokenCacheObject(TokenCacheInterface $object = null)
     {
         self::$tokenCache = $object;
     }
@@ -186,21 +208,13 @@ class InPostIzi
     public static function setCachedToken($token, $expiration)
     {
         if (self::$tokenCache) {
-            return self::$tokenCache->setCachedToken($token, $expiration);
+            self::$tokenCache->setCachedToken($token ?: null, $expiration ?: null);
         }
     }
 
     public static function print()
     {
         echo '<inpost-izi-button language="pl"></inpost-izi-button>';
-    }
-
-    public function sendOrder()
-    {
-        $basket = $this->getBasket();
-        $orderRespanse = $this->controller->orderPost($this->getOrder()->toArray());
-
-        Storage::insertSession('sameBasket', $basket->compareProduct($orderRespanse->products));
     }
 
     public static function getInstance()
@@ -293,5 +307,19 @@ class InPostIzi
         }
 
         return $html;
+    }
+
+    abstract public function getBasket(): Basket;
+
+    private function isLinked(string $basketId): bool
+    {
+        $confirmation = self::getCartSessionClass()::getCartConfirmation($basketId);
+        if (!$confirmation) {
+            return false;
+        }
+
+        $binding = json_decode($confirmation, false);
+
+        return $binding->basket_linked ?? false;
     }
 }
