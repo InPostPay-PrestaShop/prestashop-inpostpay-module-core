@@ -43,6 +43,7 @@ class MerchantController
 
     public function bindCart(string $prefix = null, string $number = null): JsonResponse
     {
+        \izi\prestashop\CartSession::storeCurrent();
         CartSession::forceBasketStore();
         $browserId = Storage::findSession('BrowserId');
         if (!$browserId && isset($_COOKIE['BrowserId'])) {
@@ -57,7 +58,6 @@ class MerchantController
 
                 $basket = InPostIzi::getCartSessionClass()::getBasketCacheById(BasketIdentification::get());
                 if (!$basket) {
-                    \izi\prestashop\CartSession::storeCurrent();
                     $this->application->basketPut(false, true);
                 }
                 $response = \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController()->basketBindingPost();
