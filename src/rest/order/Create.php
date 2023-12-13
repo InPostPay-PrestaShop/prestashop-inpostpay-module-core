@@ -7,10 +7,18 @@ use izi\prestashop\CartSession;
 use izi\prestashop\rest\Exception\BasketNotFoundException;
 use izi\prestashop\rest\Exception\InternalServerErrorException;
 use izi\prestashop\traits\CarrierFinderTrait;
+use PrestaShop\PrestaShop\Core\Crypto\Hashing;
 
 class Create
 {
     use CarrierFinderTrait;
+
+    private $crypto;
+
+    public function __construct(Hashing $crypto = null)
+    {
+        $this->crypto = $crypto ?? new Hashing();
+    }
 
     /**
      * @param object $data
@@ -99,7 +107,7 @@ class Create
         $cart->id_customer = $customer->id;
         $cart->secure_key = $customer->secure_key;
 
-        $deliveryAddressId = $this->createDeliveryAddress($data->account_info, $customer);
+        $deliveryAddressId = $this->createDeliveryAddress($data->account_info, $customer, $data->delivery->delivery_address ?? null);
 
         $cart->updateAddressId($cart->id_address_delivery, $deliveryAddressId);
         $cart->setDeliveryOption([$deliveryAddressId => $carrierId . ',']);
@@ -124,17 +132,23 @@ class Create
         return \Country::getByIso(strtoupper($code)) ?: null;
     }
 
-    private function createDeliveryAddress($delivery, \Customer $customer): int
+    private function createDeliveryAddress($accountInfo, \Customer $customer, $deliveryAddress = null): int
     {
         $address = new \Address();
+
         $address->id_customer = $customer->id;
-        $address->firstname = $delivery->name;
-        $address->lastname = $delivery->surname;
-        $address->id_country = $this->getCountryId($delivery->client_address->country_code);
-        $address->city = $delivery->client_address->city;
-        $address->postcode = $delivery->client_address->postal_code;
-        $address->address1 = $delivery->client_address->address;
-        $address->phone = $delivery->phone_number->country_prefix . ' ' . $delivery->phone_number->phone;
+        $address->phone = $accountInfo->phone_number->country_prefix . ' ' . $accountInfo->phone_number->phone;
+
+        if (null !== $deliveryAddress) {
+            $this->fillWithDeliveryAddressData($address, $deliveryAddress);
+        }
+
+        $address->firstname = $address->firstname ?? $accountInfo->name;
+        $address->lastname = $address->lastname ?? $accountInfo->surname;
+        $address->id_country = $address->id_country ?? $this->getCountryId($accountInfo->client_address->country_code);
+        $address->city = $address->city ?? $accountInfo->client_address->city;
+        $address->postcode = $address->postcode ?? $accountInfo->client_address->postal_code;
+        $address->address1 = $address->address1 ?? $accountInfo->client_address->address;
 
         if ($addressId = $this->getExistingAddressId($customer, $address)) {
             return $addressId;
@@ -147,6 +161,20 @@ class Create
         }
 
         return $address->id;
+    }
+
+    private function fillWithDeliveryAddressData(\Address $address, $deliveryAddress): void
+    {
+        if (isset($deliveryAddress->name)) {
+            $name = preg_split('/\s+/', $deliveryAddress->name, 2, PREG_SPLIT_NO_EMPTY);
+            $address->firstname = $name[0];
+            $address->lastname = $name[1] ?? '-';
+        }
+
+        $address->id_country = $this->getCountryId($deliveryAddress->country_code);
+        $address->city = $deliveryAddress->city ?? null;
+        $address->postcode = $deliveryAddress->postcode ?? null;
+        $address->address1 = $deliveryAddress->address ?? null;
     }
 
     private function createInvoiceAddress($invoiceDetails, $accountInfo, \Customer $customer): int
@@ -242,8 +270,10 @@ class Create
         $customer->firstname = $accountInfo->surname;
 
         if (!\Validate::isLoadedObject($customer)) {
+            $password = \Tools::passwdGen(8, 'RANDOM');
+
             $customer->id_lang = $cart->id_lang;
-            $customer->passwd = 'no password'; // TODO hash random password
+            $customer->passwd = $this->crypto->hash($password);
             $customer->is_guest = true;
 
             if (!$customer->add()) {
