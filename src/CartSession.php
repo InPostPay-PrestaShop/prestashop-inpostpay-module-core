@@ -146,13 +146,17 @@ class CartSession implements ICartSession
         return isset($row['session_id']) ? $row['session_id'] : '';
     }
 
-    public static function getObjectById($cartId)
+    /**
+     * @return InpostiziBasketSession|null
+     */
+    public static function getObjectById(string $basketId)
     {
-        $cartId = pSQL($cartId);
-        $sql = 'SELECT * FROM ' . _DB_PREFIX_ . InpostiziBasketSession::$definition['table'] . ' where cart_id = "' . $cartId . '"';
-        $row = \Db::getInstance()->getRow($sql);
+        /** @var InpostiziBasketSession|false $session */
+        $session = (new \PrestaShopCollection(InpostiziBasketSession::class))
+            ->where('cart_id', '=', $basketId)
+            ->getFirst();
 
-        return isset($row['id']) ? (object) $row : '';
+        return false === $session ? null : $session;
     }
 
     public static function dropCartConfirmation($cartId): void

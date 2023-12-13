@@ -6,6 +6,7 @@ use izi\BasketIdentification;
 use izi\BindingProvider;
 use izi\InPostIzi;
 use izi\prestashop\CartSession;
+use izi\prestashop\models\InpostiziBasketSession;
 use izi\prestashop\PrestashopBasket;
 use izi\Storage;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -81,6 +82,13 @@ class MerchantController
 
     public function checkOrderConfirmation()
     {
+        /** @var InpostiziBasketSession $session */
+        $session = CartSession::getObjectById(BasketIdentification::get());
+
+        if ($session && $session->order_id) {
+            $this->updateCustomer($session->order_id);
+        }
+
         (new \izi\prestashop\requests\merchant\OrderConfirmation())->send();
     }
 
@@ -102,5 +110,24 @@ class MerchantController
         \izi\prestashop\Logger::log("Saved {$basketId} for {$jsonResponse}");
 
         return new JsonResponse($response);
+    }
+
+    private function updateCustomer(int $orderId): void
+    {
+        $order = new \Order($orderId);
+        if (!\Validate::isLoadedObject($order)) {
+            return;
+        }
+
+        if ((int) $this->context->customer->id === (int) $order->id_customer) {
+            return;
+        }
+
+        $customer = new \Customer($order->id_customer);
+        if (!\Validate::isLoadedObject($customer) || !$customer->is_guest) {
+            return;
+        }
+
+        $this->context->updateCustomer($customer);
     }
 }
