@@ -181,7 +181,7 @@ class Create
     {
         $address = new \Address();
         $address->id_customer = $customer->id;
-        $address->firstname = !empty($invoiceDetails->name) ? $invoiceDetails->name : $accountInfo->surname;
+        $address->firstname = !empty($invoiceDetails->name) ? $invoiceDetails->name : $accountInfo->name;
         $address->lastname = !empty($invoiceDetails->surname) ? $invoiceDetails->surname : $accountInfo->surname;
         $address->id_country = $this->getCountryId($invoiceDetails->country_code);
         $address->city = $invoiceDetails->city;
