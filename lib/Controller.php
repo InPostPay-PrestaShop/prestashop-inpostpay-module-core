@@ -4,13 +4,13 @@ namespace izi;
 
 class Controller extends Remote
 {
-    public function basketBindingDelete(string $basketId = null)
+    public function basketBindingDelete(string $basketId = null, bool $ordered = false)
     {
         if (null === $basketId) {
             $basketId = BasketIdentification::get();
         }
 
-        return parent::basketBindingDelete($basketId);
+        return parent::basketBindingDelete($basketId, $ordered);
     }
 
     public function browserBindingDelete($browserId = null)

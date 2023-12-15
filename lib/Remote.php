@@ -108,9 +108,11 @@ class Remote extends Connection
         }
     }
 
-    public function basketBindingDelete(string $basketId)
+    public function basketBindingDelete(string $basketId, bool $ordered = false)
     {
-        return $this->request("v1/izi/basket/{$basketId}/binding", 'DELETE');
+        $query = $ordered ? '?if_basket_realized=1' : '';
+
+        return $this->request("v1/izi/basket/{$basketId}/binding{$query}", 'DELETE');
     }
 
     public function browserBindingDelete($browserId)

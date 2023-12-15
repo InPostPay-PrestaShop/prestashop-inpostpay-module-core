@@ -382,7 +382,7 @@ class Inpostizi extends PaymentModule
         $controller = \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController();
 
         if ($this->name !== $params['order']->module) {
-            $controller->basketBindingDelete($basketId);
+            $controller->basketBindingDelete($basketId, true);
         }
 
         if ($basketId === \izi\BasketIdentification::get()) {
@@ -424,13 +424,13 @@ class Inpostizi extends PaymentModule
         foreach ($this->updatedCartIds as $cartId) {
             try {
                 $this->upsertCartData($cartId);
-            } catch (\Throwable $throwable) {
+            } catch (\Exception $exception) {
                 \izi\prestashop\Logger::log(sprintf(
                     'Could not update basket #%d: %s at %s:%d.',
                     $cartId,
-                    $throwable->getMessage(),
-                    $throwable->getFile(),
-                    $throwable->getLine()
+                    $exception->getMessage(),
+                    $exception->getFile(),
+                    $exception->getLine()
                 ));
             }
         }
