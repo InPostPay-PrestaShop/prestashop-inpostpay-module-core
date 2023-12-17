@@ -140,7 +140,7 @@ class PrestashopBasket
 
         $product->product_id = $prestashopProduct->id . '.' . $combinationId . '.' . $customizationId;
         $product->product_category = $prestashopProduct->getDefaultCategory();
-        $product->ean = isset($productData['ean13']) ? $productData['ean13'] : $prestashopProduct->ean13;
+        $product->ean = $productData['ean13'] ?? $prestashopProduct->ean13;
         $product->product_name = $prestashopProduct->name;
         $product->product_description = \Tools::substr(trim(strip_tags($prestashopProduct->description)), 0, 1000);
         $product->product_link = \Context::getContext()->link->getProductLink($prestashopProduct, null, null, null, $this->cart->id_lang, null, $combinationId);
@@ -153,25 +153,15 @@ class PrestashopBasket
         return $product;
     }
 
-    public function readProductImage(\Product $prestashopProduct, int $attributeId): string
+    public function readProductImage(\Product $product, int $combinationId): string
     {
-        $image_type = 'small_default';
-        $linkRewrite = $prestashopProduct->link_rewrite ?? $prestashopProduct->name;
-        if ($attributeId) {
-            $db = \Db::getInstance(_PS_USE_SQL_SLAVE_);
-            $request = 'SELECT `id_image` FROM `' . _DB_PREFIX_ . 'product_attribute_image` WHERE id_product_attribute = "' . (int) $attributeId . '";';
-            $imageId = $db->getValue($request, false);
-            if ($imageId) {
-                return \Context::getContext()->link->getImageLink($linkRewrite, $imageId, $image_type);
-            }
+        if (null === $imageId = $this->getDefaultImageId($product->id, $combinationId)) {
+            return '';
         }
 
-        $img = $prestashopProduct->getCover($prestashopProduct->id);
-        if ($img) {
-            return \Context::getContext()->link->getImageLink($linkRewrite, (int) $img['id_image'], $image_type);
-        }
+        $linkRewrite = $product->link_rewrite ?? \Tools::str2url($product->name);
 
-        return '';
+        return \Context::getContext()->link->getImageLink($linkRewrite, $imageId, 'small_default');
     }
 
     /**
@@ -597,5 +587,36 @@ class PrestashopBasket
     private function getConfiguration(string $key)
     {
         return \Configuration::get($key, null, null, $this->cart->id_shop);
+    }
+
+    private function getDefaultImageId(int $productId, int $combinationId): ?int
+    {
+        if ($imageId = $this->getDefaultCombinationImageId($combinationId)) {
+            return $imageId;
+        }
+
+        $cover = \Product::getCover($productId);
+
+        return isset($cover['id_image']) ? (int) $cover['id_image'] : null;
+    }
+
+    private function getDefaultCombinationImageId(int $combinationId): ?int
+    {
+        if (0 >= $combinationId) {
+            return null;
+        }
+
+        $query = (new \DbQuery())
+            ->select('pai.id_image')
+            ->from('product_attribute_image', 'pai')
+            ->innerJoin('image', 'i', 'i.id_image = pai.id_image')
+            ->join(\Shop::addSqlAssociation('image', 'i'))
+            ->where('pai.id_product_attribute = ' . $combinationId)
+            ->orderBy('image_shop.cover DESC')
+            ->orderBy('i.position ASC');
+
+        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
+
+        return false === $result ? null : (int) $result;
     }
 }
