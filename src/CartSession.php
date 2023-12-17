@@ -19,7 +19,6 @@ class CartSession implements ICartSession
             $model = new InpostiziBasketSession($row['id']);
         } else {
             Logger::log("MODEL NOT FOUND ($cartId)" . print_r($row, true));
-            Logger::log("SQL $sql");
             $model->confirmation_response = '';
             $model->order_id = null;
             $model->redirect_url = '';
@@ -53,7 +52,6 @@ class CartSession implements ICartSession
         Logger::log('SAVING ORDER DATA');
         $sql = 'UPDATE ' . _DB_PREFIX_ . InpostiziBasketSession::$definition['table'] . ' SET order_details = "' . $orderDetails . '", order_id = "' . $orderId . '" WHERE cart_id = "' . $cartId . '"';
         \Db::getInstance()->execute($sql);
-        Logger::log('ORDER DATA SQL ' . $sql);
     }
 
     public static function getOrderData(int $orderId)
@@ -182,7 +180,7 @@ class CartSession implements ICartSession
 
         $request = "UPDATE {$table_name} SET coupons= ${data} WHERE cart_id = \"{$cartId}\"";
         $db->execute($request);
-        Logger::log("SETTING EVENT {$data} FOR {$cartId} {$request}");
+        Logger::log("SETTING EVENT {$data} FOR {$cartId}");
     }
 
     public static function getBasketCouponsById($cartId): ?string
