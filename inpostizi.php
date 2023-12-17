@@ -335,6 +335,10 @@ class Inpostizi extends PaymentModule
      */
     public function hookActionCartSave(array $params)
     {
+        if (!isset($params['cart']) || !$params['cart'] instanceof \Cart) {
+            return;
+        }
+
         if ($this->context->controller instanceof \ModuleFrontControllerCore && $this === $this->context->controller->module) {
             return;
         }
