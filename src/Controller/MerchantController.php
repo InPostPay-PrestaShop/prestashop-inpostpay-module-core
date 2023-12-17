@@ -6,10 +6,9 @@ use izi\BasketIdentification;
 use izi\BindingProvider;
 use izi\InPostIzi;
 use izi\prestashop\CartSession;
-use izi\prestashop\models\InpostiziBasketSession;
-use izi\prestashop\PrestashopBasket;
 use izi\Storage;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class MerchantController
 {
@@ -42,9 +41,13 @@ class MerchantController
         ]);
     }
 
-    public function bindCart(string $prefix = null, string $number = null): JsonResponse
+    public function bindCart(string $prefix = null, string $number = null): Response
     {
-        \izi\prestashop\CartSession::storeCurrent();
+        if (!\Validate::isLoadedObject($this->context->cart)) {
+            return new Response('Cart does not exist.', 400);
+        }
+
+        CartSession::storeCurrent();
         CartSession::forceBasketStore();
         $browserId = Storage::findSession('BrowserId');
         if (!$browserId && isset($_COOKIE['BrowserId'])) {
@@ -82,10 +85,10 @@ class MerchantController
 
     public function checkOrderConfirmation()
     {
-        /** @var InpostiziBasketSession $session */
-        $session = CartSession::getObjectById(BasketIdentification::get());
+        $basketId = BasketIdentification::get();
+        $session = CartSession::getByBasketId($basketId);
 
-        if ($session && $session->order_id) {
+        if (null !== $session && $session->order_id) {
             $this->updateCustomer($session->order_id);
         }
 
@@ -99,17 +102,12 @@ class MerchantController
 
     public function deleteBinding(): JsonResponse
     {
-        $response = $this->application->getController()->basketBindingDelete();
-        \izi\BasketIdentification::drop();
-        $cart = $this->context->cart;
         $basketId = \izi\BasketIdentification::get();
-        $data = PrestashopBasket::createForCart($cart, $basketId)->encode();
-        $jsonResponse = json_encode(json_decode($data));
-        CartSession::storeCurrent();
-        CartSession::setBasketCacheById($basketId, $jsonResponse);
-        \izi\prestashop\Logger::log("Saved {$basketId} for {$jsonResponse}");
+        $response = $this->application->getController()->basketBindingDelete();
+        CartSession::dropCartConfirmation($basketId);
+        \izi\BasketIdentification::drop();
 
-        return new JsonResponse($response);
+        return new JsonResponse(null, 204);
     }
 
     private function updateCustomer(int $orderId): void

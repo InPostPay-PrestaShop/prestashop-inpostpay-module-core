@@ -65,7 +65,7 @@ class BasketController extends ApiController
 
     public function deleteBinding(string $basketId): JsonResponse
     {
-        CartSession::deleteByCartId($basketId);
+        CartSession::deleteByBasketId($basketId);
 
         return new JsonResponse();
     }
@@ -79,7 +79,7 @@ class BasketController extends ApiController
 
     private function getCartByBasketId(string $basketId): \Cart
     {
-        $cartId = CartSession::getSessionId($basketId);
+        $cartId = CartSession::getCartIdByBasketId($basketId);
 
         if (!$cartId || !\Validate::isLoadedObject($cart = new \Cart($cartId))) {
             throw BasketNotFoundException::create();

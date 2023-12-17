@@ -32,17 +32,23 @@ class Storage
         }
     }
 
-    public static function insertSession($key, $value)
+    /**
+     * @param mixed $value
+     */
+    public static function insertSession(string $key, $value)
     {
         $_SESSION[$key] = $value;
     }
 
-    public static function issetSession($key)
+    public static function issetSession(string $key): bool
     {
         return isset($_SESSION[$key]);
     }
 
-    public static function findSession($key)
+    /**
+     * @return mixed|null
+     */
+    public static function findSession(string $key)
     {
         if (self::issetSession($key)) {
             return $_SESSION[$key];
@@ -51,7 +57,7 @@ class Storage
         return null;
     }
 
-    public static function eraseSession($key)
+    public static function eraseSession(string $key)
     {
         unset($_SESSION[$key]);
     }

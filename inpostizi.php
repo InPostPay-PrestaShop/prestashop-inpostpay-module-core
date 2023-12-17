@@ -1,6 +1,12 @@
 <?php
 
+use izi\BasketIdentification;
+use izi\prestashop\BindingProvider;
+use izi\prestashop\CartSession;
 use izi\prestashop\InpostIziPayPrestashop;
+use izi\prestashop\Logger;
+use izi\prestashop\PrestashopBasket;
+use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -9,13 +15,10 @@ if (!defined('_PS_VERSION_')) {
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/BackendForm.php';
 
-use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
-
 class Inpostizi extends PaymentModule
 {
     use BackendForm;
 
-    private $firstRender = true;
     private $updatedCartIds = [];
 
     public function __construct()
@@ -27,7 +30,7 @@ class Inpostizi extends PaymentModule
 
         $this->ps_versions_compliancy = [
             'min' => '1.7.0.0',
-            'max' => '1.7.99.99',
+            'max' => '1.7.8.99',
         ];
 
         parent::__construct();
@@ -48,20 +51,33 @@ class Inpostizi extends PaymentModule
 
         Db::getInstance()->execute('
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'inpostizi_basket_session` (
-                id mediumint(9) NOT NULL AUTO_INCREMENT,
-                session_id TEXT,
+                id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
+                session_id INT(10) UNSIGNED NOT NULL,
+                cart_id VARCHAR(255) NOT NULL,
                 confirmation_response TEXT,
-                cart_id VARCHAR(255),
-                order_id INTEGER,
+                order_id INT(10) UNSIGNED,
                 order_details TEXT,
                 redirect_url VARCHAR(255),
                 basket_cache TEXT,
                 coupons TEXT,
                 event BIT(1),
-                redirected SMALLINT(1) DEFAULT 0,
-                PRIMARY KEY  (id)
-            ) DEFAULT CHARSET=utf8;
+                redirected TINYINT(1) DEFAULT 0,
+                PRIMARY KEY (`id`),
+                FOREIGN KEY (`session_id`)
+                    REFERENCES `' . _DB_PREFIX_ . 'cart` (`id_cart`)
+                    ON DELETE SET NULL,
+                FOREIGN KEY (`order_id`)
+                    REFERENCES `' . _DB_PREFIX_ . 'orders` (`id_order`)
+                    ON DELETE CASCADE,
+                CONSTRAINT `session_id_unique` UNIQUE (`session_id`),
+                CONSTRAINT `cart_id_unique` UNIQUE (`cart_id`)
+            )
+            ENGINE = ' . _MYSQL_ENGINE_ . '
+            CHARSET = utf8
+            COLLATE = utf8_general_ci;
         ');
+
+        // TODO existing DB schema update
 
         if (Shop::isFeatureActive()) {
             Shop::setContext(Shop::CONTEXT_ALL);
@@ -79,7 +95,8 @@ class Inpostizi extends PaymentModule
             $this->registerHook('paymentOptions') &&
             $this->registerHook('actionObjectInPostShipmentModelUpdateAfter') &&
             $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('actionAjaxDieCartControllerDisplayAjaxUpdateBefore');
+            $this->registerHook('actionAjaxDieCartControllerDisplayAjaxUpdateBefore') &&
+            $this->registerHook('actionObjectCartDeleteBefore');
     }
 
     /**
@@ -252,6 +269,28 @@ class Inpostizi extends PaymentModule
         $this->onCartUpdated($params['cart']);
     }
 
+    /**
+     * @param array{object: \Cart} $params
+     */
+    public function hookActionObjectCartDeleteBefore(array $params)
+    {
+        $cart = isset($params['object']) ? $params['object'] : null;
+
+        if (!$cart instanceof \Cart || !\Validate::isLoadedObject($cart)) {
+            return;
+        }
+
+        $session = CartSession::getByCartId($cart->id);
+
+        if (null === $session || null === $session->confirmation_response) {
+            return;
+        }
+
+        InpostIziPayPrestashop::getInstance()
+            ->getController()
+            ->basketBindingDelete($session->cart_id);
+    }
+
     public function hookActionAjaxDieCartControllerDisplayAjaxUpdateBefore(array $params)
     {
         if (!\Tools::getIsset('addDiscount') && !\Tools::getIsset('deleteDiscount')) {
@@ -263,8 +302,7 @@ class Inpostizi extends PaymentModule
 
     public function hookDisplayAdminOrderSide(array $params)
     {
-        $orderData = \izi\prestashop\CartSession::getOrderData($params['id_order']);
-        if (!$orderData) {
+        if (!$orderData = CartSession::getOrderData($params['id_order'])) {
             return '';
         }
 
@@ -283,20 +321,20 @@ class Inpostizi extends PaymentModule
      */
     public function hookDisplayOrderConfirmation(array $params)
     {
-        $basketId = \izi\prestashop\CartSession::getBasketIdByCartId($params['order']->id_cart);
+        $basketId = CartSession::getBasketIdByCartId($params['order']->id_cart);
 
         if (null === $basketId) {
             return;
         }
 
-        $controller = \izi\prestashop\InpostIziPayPrestashop::getInstance()->getController();
+        $controller = InpostIziPayPrestashop::getInstance()->getController();
 
         if ($this->name !== $params['order']->module) {
             $controller->basketBindingDelete($basketId, true);
         }
 
-        if ($basketId === \izi\BasketIdentification::get()) {
-            \izi\BasketIdentification::drop();
+        if ($basketId === BasketIdentification::get()) {
+            BasketIdentification::drop();
         }
     }
 
@@ -331,40 +369,19 @@ class Inpostizi extends PaymentModule
 
         $alreadyShown = true;
 
-        if (!$this->checkCurrency($this->context->currency->id)) {
+        if (!$this->shouldRenderWidget()) {
             return '';
         }
 
-        if ($this->firstRender) {
-            InpostIziPayPrestashop::getInstance()->getController()->basketBindingGet(true);
-            $this->firstRender = false;
-        }
+        InpostIziPayPrestashop::getInstance()->getController()->basketBindingGet(true);
 
-        \izi\prestashop\Logger::log('Display button start!');
-        if (!isset($_COOKIE['izi_show']) && isset($_GET['showIzi']) && $_GET['showIzi'] == 'true') {
-            $_COOKIE['izi_show'] = 'true';
-            setcookie('izi_show', 'true');
-        }
-        \izi\prestashop\Logger::log('Cookie present!');
-        $hideFunctionality = \Configuration::get('INPOST_PAY_show_izi') == 2 ? 'shown' : 'hidden';
-        $show = $_COOKIE['izi_show'] ?? null;
-        if ('hidden' === $hideFunctionality && !$show) {
-            return '';
-        }
-        $binding = \izi\prestashop\BindingProvider::getBinding();
+        $binding = BindingProvider::getBinding();
         $maskedPhoneNumber = ($binding && isset($binding->basket_linked) && $binding->basket_linked) && isset($binding->client_details, $binding->client_details->masked_phone_number) ? $binding->client_details->masked_phone_number : '';
         $name = ($binding && isset($binding->basket_linked) && $binding->basket_linked) && isset($binding->client_details, $binding->client_details->name) ? $binding->client_details->name : '';
         $inpost_basket_id = ($binding && isset($binding->basket_linked) && $binding->basket_linked) && isset($binding->inpost_basket_id) ? $binding->inpost_basket_id : '';
 
-        $context = \Context::getContext();
-        $id_cart = $context->cookie->id_cart;
-
-        if ($id_cart == '') {
-            $id_cart = \Tools::getValue('id_cart');
-        }
-
-        $theCart = new \Cart($id_cart);
-        $products = $theCart->getProducts(true);
+        $theCart = isset($this->context->cart) ? $this->context->cart : new \Cart();
+        $products = $theCart->getProducts();
         $nbTotalProducts = 0;
 
         foreach ($products as $product) {
@@ -425,6 +442,32 @@ class Inpostizi extends PaymentModule
         return false;
     }
 
+    /**
+     * @return bool
+     */
+    private function shouldRenderWidget()
+    {
+        if (!$this->checkCurrency($this->context->currency->id)) {
+            return false;
+        }
+
+        if (2 === (int) \Configuration::get('INPOST_PAY_show_izi')) {
+            return true;
+        }
+
+        if (!empty($this->context->cookie->izi_show)) {
+            return true;
+        }
+
+        if (!isset($_GET['showIzi']) || 'true' !== $_GET['showIzi']) {
+            return false;
+        }
+
+        $this->context->cookie->izi_show = true;
+
+        return true;
+    }
+
     private function onCartUpdated(\Cart $cart)
     {
         if (0 >= $cartId = (int) $cart->id) {
@@ -440,13 +483,13 @@ class Inpostizi extends PaymentModule
         $this->updatedCartIds[$cartId] = $cartId;
     }
 
-    private function sendUpdatedCartsData(): void
+    private function sendUpdatedCartsData()
     {
         foreach ($this->updatedCartIds as $cartId) {
             try {
                 $this->upsertCartData($cartId);
             } catch (\Exception $exception) {
-                \izi\prestashop\Logger::log(sprintf(
+                Logger::log(sprintf(
                     'Could not update basket #%d: %s at %s:%d.',
                     $cartId,
                     $exception->getMessage(),
@@ -457,34 +500,54 @@ class Inpostizi extends PaymentModule
         }
     }
 
-    private function upsertCartData(int $cartId)
+    /**
+     * @param int $cartId
+     */
+    private function upsertCartData($cartId)
     {
         if (!\Validate::isLoadedObject($cart = new \Cart($cartId))) {
             return;
         }
 
-        $izi = \izi\prestashop\InpostIziPayPrestashop::getInstance();
+        $izi = InpostIziPayPrestashop::getInstance();
 
         if (null === $basketId = $this->getBasketId($cartId)) {
             return;
         }
 
-        \izi\prestashop\Logger::log(sprintf('Sending updated cart #%d data.', $cartId));
+        Logger::log(sprintf('Sending updated cart #%d data.', $cartId));
 
-        $basket = \izi\prestashop\PrestashopBasket::createForCart($cart, $basketId);
+        $basket = PrestashopBasket::createForCart($cart, $basketId);
 
         $izi->basketPut(false, false, $basket);
     }
 
-    private function getBasketId(int $cartId)
+    /**
+     * @param int $cartId
+     *
+     * @return string|null
+     */
+    private function getBasketId($cartId)
     {
-        if (!$this->context->controller instanceof \FrontControllerCore || $cartId !== (int) $this->context->cart->id) {
-            return \izi\prestashop\CartSession::getBasketIdByCartId($cartId);
+        $basketId = CartSession::getBasketIdByCartId($cartId);
+
+        if (null !== $basketId || !$this->context->controller instanceof \FrontControllerCore || $cartId !== (int) $this->context->cart->id) {
+            return $basketId;
         }
 
-        \izi\prestashop\CartSession::storeCurrent();
+        $currentBasketId = BasketIdentification::get();
+        $session = CartSession::getByBasketId($currentBasketId);
 
-        return \izi\BasketIdentification::get();
+        if (null === $session) {
+            return null;
+        }
+
+        // customer switched his current cart (e.g. using the reorder option)
+        $session->session_id = $cartId;
+        $session->basket_cache = null;
+        $session->update(true);
+
+        return $currentBasketId;
     }
 
     private function onShipmentUpdated($data)
@@ -507,6 +570,6 @@ class Inpostizi extends PaymentModule
         $izi = InpostIziPayPrestashop::getInstance();
         $status = 'Wysłano';
         $izi->orderEvent($orderId, $status, $numbers);
-        \izi\prestashop\Logger::log('TRACKING NUMBERS: ' . print_r($numbers, true));
+        Logger::log('TRACKING NUMBERS: ' . print_r($numbers, true));
     }
 }

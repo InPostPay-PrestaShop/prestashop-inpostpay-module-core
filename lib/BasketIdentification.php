@@ -4,23 +4,37 @@ namespace izi;
 
 class BasketIdentification
 {
-    const INPOSTIZI_BASKET_ID = 'inpostizi_basket_id';
+    public const INPOSTIZI_BASKET_ID = 'inpostizi_basket_id';
 
-    public static function get()
+    public static function store(string $basketId): void
     {
-        $identificationStored = Storage::findSession(self::INPOSTIZI_BASKET_ID);
-        if ($identificationStored && InPostIzi::getCartSessionClass()::getRedirectedById($identificationStored) != 0) {
-            Storage::eraseSession(self::INPOSTIZI_BASKET_ID);
-        }
-        $identificationStored = Storage::findSession(self::INPOSTIZI_BASKET_ID);
-        if ($identificationStored) {
-            return $identificationStored;
+        Storage::insertSession(self::INPOSTIZI_BASKET_ID, $basketId);
+        Storage::eraseSession('binding_get');
+    }
+
+    public static function exists(): bool
+    {
+        return Storage::issetSession(self::INPOSTIZI_BASKET_ID);
+    }
+
+    public static function get(): string
+    {
+        $basketId = Storage::findSession(self::INPOSTIZI_BASKET_ID);
+
+        if (null === $basketId && $currentBasketId = InPostIzi::getCartSessionClass()::getCurrentBasketId()) {
+            self::store($currentBasketId);
+
+            return $currentBasketId;
         }
 
-        $identificationGenerated = IdentificationGenerator::generate();
-        Storage::insertSession(self::INPOSTIZI_BASKET_ID, $identificationGenerated);
+        if (is_string($basketId) && !InPostIzi::getCartSessionClass()::getRedirectedById($basketId)) {
+            return $basketId;
+        }
 
-        return $identificationGenerated;
+        $newBasketId = IdentificationGenerator::generate();
+        self::store($newBasketId);
+
+        return $newBasketId;
     }
 
     public static function drop()

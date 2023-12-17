@@ -42,7 +42,7 @@ class Create
 
     private function getCart(string $basketId): \Cart
     {
-        $cartId = CartSession::getSessionId($basketId);
+        $cartId = CartSession::getCartIdByBasketId($basketId);
 
         if (!$cartId || !\Validate::isLoadedObject($cart = new \Cart($cartId))) {
             throw BasketNotFoundException::create();
@@ -94,7 +94,7 @@ class Create
             'key' => $cart->secure_key,
         ]);
 
-        CartSession::setCartOrderRedirectUrl($data->order_details->basket_id, $link);
+        CartSession::setRedirectUrl($data->order_details->basket_id, $link);
         CartSession::setOrderData($data->order_details->basket_id, $payment_module->currentOrder, json_encode($data));
 
         $this->saveCarrierModuleData($cart->id, $data->delivery);

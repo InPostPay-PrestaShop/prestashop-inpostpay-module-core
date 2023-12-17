@@ -321,7 +321,7 @@ class PrestashopOrder
     {
         $wooDeliveryPrice = new PrestaDeliveryPrice();
 
-        $cartId = CartSession::getSessionId($this->basketId);
+        $cartId = CartSession::getCartIdByBasketId($this->basketId);
         $cart = new \Cart($cartId);
 
         $delivery = $wooDeliveryPrice->mapDelivery($cart);

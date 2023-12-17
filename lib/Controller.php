@@ -91,16 +91,16 @@ class Controller extends Remote
         }
 
         while ($ticks < 2) {
-            $model = InPostIzi::getCartSessionClass()::getObjectById($id);
+            $model = InPostIzi::getCartSessionClass()::getByBasketId($id);
             if (!$model || !$model->id) {
                 usleep(300000);
 
                 return [];
             }
-            $redirectUrl = isset($model->confirmation_response) && $model->confirmation_response == 'deleted' ? 'deleted' : (isset($model) ? $model->redirect_url : '');
-            if ($redirectUrl && $redirectUrl != 'deleted') {
+            $redirectUrl = isset($model->confirmation_response) && 'deleted' === $model->confirmation_response ? 'deleted' : $model->redirect_url;
+            if ($redirectUrl && 'deleted' !== $redirectUrl) {
                 if (!InPostIzi::getCartSessionClass()::getRedirectedById($id)) {
-                    InPostIzi::getCartSessionClass()::setRedirectedById($id, 1);
+                    InPostIzi::getCartSessionClass()::setRedirectedById($id, true);
 
                     return [
                         'action' => 'redirect',

@@ -23,6 +23,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         ],
         [
             'path' => '/inpost/v1/izi/merchant/basket/delete/binding',
+            'methods' => ['DELETE'],
             'controller' => [MerchantController::class, 'deleteBinding'],
         ],
         [
