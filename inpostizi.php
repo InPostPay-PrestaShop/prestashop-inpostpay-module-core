@@ -1,6 +1,7 @@
 <?php
 
 use izi\BasketIdentification;
+use izi\item\Basket;
 use izi\prestashop\BindingProvider;
 use izi\prestashop\CartSession;
 use izi\prestashop\InpostIziPayPrestashop;
@@ -496,7 +497,7 @@ class Inpostizi extends PaymentModule
 
         Logger::log(sprintf('Sending updated cart #%d data.', $cartId));
 
-        $basket = PrestashopBasket::createForCart($cart, $basketId);
+        $basket = $this->getBasketData($cart, $basketId);
 
         $izi->basketPut(false, false, $basket);
     }
@@ -527,6 +528,33 @@ class Inpostizi extends PaymentModule
         $session->update(true);
 
         return $currentBasketId;
+    }
+
+    /**
+     * @param Cart $cart
+     * @param string $basketId
+     *
+     * @return Basket
+     */
+    private function getBasketData(\Cart $cart, $basketId)
+    {
+        $currency = $this->context->currency;
+
+        if ('PLN' === $this->context->currency->iso_code) {
+            return PrestashopBasket::createForCart($cart, $basketId);
+        }
+
+        $currencyId = \Currency::getIdByIsoCode('PLN');
+        $cart->id_currency = $currencyId;
+        $this->context->currency = \Currency::getCurrencyInstance($currencyId);
+
+        try {
+            $cart->getProducts(true, false, null, true, true);
+
+            return PrestashopBasket::createForCart($cart, $basketId);
+        } finally {
+            $this->context->currency = $currency;
+        }
     }
 
     private function onShipmentUpdated($data)

@@ -39,7 +39,7 @@ class PrestashopBasket
         $basket = new Basket($this->basketId);
 
         $cart = $this->cart;
-        $cartProducts = $cart->getProducts();
+        $cartProducts = $cart->getProducts(false, false, null, true, true);
 
         $basket->products = $this->mapProducts($cartProducts);
         $basket->summary = $this->mapSummary($basket->products);
@@ -258,7 +258,7 @@ class PrestashopBasket
     {
         $result = [];
 
-        foreach ($this->cart->getCartRules() as $rule) {
+        foreach ($this->cart->getCartRules(\CartRule::FILTER_ACTION_ALL, true, true) as $rule) {
             $result[] = $this->mapPromoCode($rule);
         }
 
@@ -286,8 +286,8 @@ class PrestashopBasket
         $summary->basket_final_price = $this->readSummaryBasketFinalPrice();
 
         if (
-            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_REDUCTION, false) ||
-            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_GIFT, false)
+            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_REDUCTION, false, true) ||
+            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_GIFT, false, true)
         ) {
             $summary->basket_promo_price = $this->readSummaryBasketPromoPrice();
         } else {
@@ -325,16 +325,16 @@ class PrestashopBasket
 
     public function readSummaryBasketPromoPrice(): \izi\item\Price
     {
-        $gross = $this->cart->getOrderTotal(true, \Cart::ONLY_PRODUCTS);
-        $net = $this->cart->getOrderTotal(false, \Cart::ONLY_PRODUCTS);
+        $gross = $this->cart->getOrderTotal(true, \Cart::ONLY_PRODUCTS, null, null, false, true);
+        $net = $this->cart->getOrderTotal(false, \Cart::ONLY_PRODUCTS, null, null, false, true);
 
         return $this->createPrice($net, $gross);
     }
 
     public function readSummaryBasketFinalPrice(): \izi\item\Price
     {
-        $gross = $this->cart->getOrderTotal(true, \Cart::BOTH_WITHOUT_SHIPPING);
-        $net = $this->cart->getOrderTotal(false, \Cart::BOTH_WITHOUT_SHIPPING);
+        $gross = $this->cart->getOrderTotal(true, \Cart::BOTH_WITHOUT_SHIPPING, null, null, false, true);
+        $net = $this->cart->getOrderTotal(false, \Cart::BOTH_WITHOUT_SHIPPING, null, null, false, true);
 
         return $this->createPrice($net, $gross);
     }
