@@ -4,6 +4,7 @@ use izi\BasketIdentification;
 use izi\prestashop\BindingProvider;
 use izi\prestashop\CartSession;
 use izi\prestashop\InpostIziPayPrestashop;
+use izi\prestashop\Installer\DatabaseInstaller;
 use izi\prestashop\Logger;
 use izi\prestashop\PrestashopBasket;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
@@ -24,7 +25,7 @@ class Inpostizi extends PaymentModule
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.3.15';
+        $this->version = '1.4.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -49,35 +50,13 @@ class Inpostizi extends PaymentModule
             return false;
         }
 
-        Db::getInstance()->execute('
-            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'inpostizi_basket_session` (
-                id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
-                session_id INT(10) UNSIGNED NOT NULL,
-                cart_id VARCHAR(255) NOT NULL,
-                confirmation_response TEXT,
-                order_id INT(10) UNSIGNED,
-                order_details TEXT,
-                redirect_url VARCHAR(255),
-                basket_cache TEXT,
-                coupons TEXT,
-                event BIT(1),
-                redirected TINYINT(1) DEFAULT 0,
-                PRIMARY KEY (`id`),
-                FOREIGN KEY (`session_id`)
-                    REFERENCES `' . _DB_PREFIX_ . 'cart` (`id_cart`)
-                    ON DELETE SET NULL,
-                FOREIGN KEY (`order_id`)
-                    REFERENCES `' . _DB_PREFIX_ . 'orders` (`id_order`)
-                    ON DELETE CASCADE,
-                CONSTRAINT `session_id_unique` UNIQUE (`session_id`),
-                CONSTRAINT `cart_id_unique` UNIQUE (`cart_id`)
-            )
-            ENGINE = ' . _MYSQL_ENGINE_ . '
-            CHARSET = utf8
-            COLLATE = utf8_general_ci;
-        ');
+        $dbInstaller = new DatabaseInstaller();
 
-        // TODO existing DB schema update
+        if (!$dbInstaller->install($this)) {
+            $this->_errors[] = $this->l('Could not update the database schema.');
+
+            return false;
+        }
 
         if (Shop::isFeatureActive()) {
             Shop::setContext(Shop::CONTEXT_ALL);

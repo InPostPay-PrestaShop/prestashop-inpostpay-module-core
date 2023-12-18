@@ -15,7 +15,6 @@ class InpostiziBasketSession extends \ObjectModel
     public $redirect_url;
     public $basket_cache;
     public $coupons;
-    public $event;
     public $redirected = false;
 
     public static $definition = [
@@ -30,7 +29,6 @@ class InpostiziBasketSession extends \ObjectModel
             'redirect_url' => ['type' => self::TYPE_STRING, 'allow_null' => true],
             'basket_cache' => ['type' => self::TYPE_STRING, 'allow_null' => true],
             'coupons' => ['type' => self::TYPE_STRING, 'allow_null' => true],
-            'event' => ['type' => self::TYPE_INT, 'allow_null' => true],
             'redirected' => ['type' => self::TYPE_BOOL],
         ],
     ];

@@ -23,12 +23,8 @@ function upgrade_module_1_3_15(\Module $module)
         }
     }
 
-    // TODO DB schema update
-
     return $module->registerHook('displayPaymentReturn')
         && $module->registerHook('actionAjaxDieCartControllerDisplayAjaxUpdateBefore')
-        && $module->registerHook('actionObjectCartDeleteBefore')
         && $module->unregisterHook('actionPresentCart')
-        && $module->unregisterHook('actionCartUpdateQuantityBefore')
-        && \Configuration::updateValue('INPOST_PAY_INITIAL_OS_ID', \Configuration::get('PS_OS_BANKWIRE'));
+        && $module->unregisterHook('actionCartUpdateQuantityBefore');
 }
