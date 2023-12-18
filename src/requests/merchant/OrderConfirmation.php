@@ -40,7 +40,10 @@ class OrderConfirmation extends \izi\prestashop\requests\EventStream
         if ($this->needsRetry($response, $basketId)) {
             $this->retry(300);
         } else {
-            CartSession::setRedirectedById($basketId, true);
+            if ('redirect' === $response['action']) {
+                CartSession::setRedirectedById($basketId, true);
+            }
+
             $this->sendEventMessage('message', $response);
         }
 
