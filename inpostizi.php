@@ -549,11 +549,12 @@ class Inpostizi extends PaymentModule
         $this->context->currency = \Currency::getCurrencyInstance($currencyId);
 
         try {
-            $cart->getProducts(true, false, null, true, true);
+            \Cache::clean('getPackageShippingCost_' . (int) $cart->id . '_*');
 
             return PrestashopBasket::createForCart($cart, $basketId);
         } finally {
             $this->context->currency = $currency;
+            \Cache::clean('getPackageShippingCost_' . (int) $cart->id . '_*');
         }
     }
 
