@@ -318,8 +318,8 @@ abstract class InPostIzi
             return false;
         }
 
-        $binding = json_decode($confirmation, false);
+        $confirmation = json_decode($confirmation, false);
 
-        return $binding->basket_linked ?? false;
+        return 'SUCCESS' === ($confirmation->status ?? null);
     }
 }

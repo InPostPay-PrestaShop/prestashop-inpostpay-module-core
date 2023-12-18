@@ -164,8 +164,12 @@ class CartSession implements ICartSession
     public static function deleteByBasketId(string $basketId): void
     {
         $basketId = pSQL($basketId);
-        $sql = 'UPDATE ' . _DB_PREFIX_ . InpostiziBasketSession::$definition['table'] . ' SET redirect_url = "deleted" WHERE cart_id = "' . $basketId . '"';
-        \Db::getInstance()->execute($sql);
+
+        \Db::getInstance()->execute('
+            UPDATE ' . _DB_PREFIX_ . InpostiziBasketSession::$definition['table'] . '
+            SET confirmation_response = NULL, redirect_url = "deleted"
+            WHERE cart_id = "' . $basketId . '"
+        ');
     }
 
     public static function getByCartId(int $cartId)
