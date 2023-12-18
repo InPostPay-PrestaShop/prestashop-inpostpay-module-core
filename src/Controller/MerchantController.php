@@ -85,14 +85,8 @@ class MerchantController
 
     public function checkOrderConfirmation()
     {
-        $basketId = BasketIdentification::get();
-        $session = CartSession::getByBasketId($basketId);
-
-        if (null !== $session && $session->order_id) {
-            $this->updateCustomer($session->order_id);
-        }
-
-        (new \izi\prestashop\requests\merchant\OrderConfirmation())->send();
+        $handler = new \izi\prestashop\requests\merchant\OrderConfirmation($this->context);
+        $handler->send();
     }
 
     public function checkBindingConfirmation()
@@ -108,24 +102,5 @@ class MerchantController
         \izi\BasketIdentification::drop();
 
         return new JsonResponse(null, 204);
-    }
-
-    private function updateCustomer(int $orderId): void
-    {
-        $order = new \Order($orderId);
-        if (!\Validate::isLoadedObject($order)) {
-            return;
-        }
-
-        if ((int) $this->context->customer->id === (int) $order->id_customer) {
-            return;
-        }
-
-        $customer = new \Customer($order->id_customer);
-        if (!\Validate::isLoadedObject($customer) || !$customer->is_guest) {
-            return;
-        }
-
-        $this->context->updateCustomer($customer);
     }
 }

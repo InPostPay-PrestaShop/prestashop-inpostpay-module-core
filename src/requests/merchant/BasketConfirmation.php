@@ -9,10 +9,11 @@ class BasketConfirmation extends \izi\prestashop\requests\EventStream
 {
     public function send()
     {
+        $this->sseHeaders();
+
         $start = time();
         $id = BasketIdentification::get();
         session_write_close();
-        $response = [];
         $this->sendHelloMessage();
         for ($i = 0; $i < 1000; ++$i) {
             if (connection_aborted() || time() - $start > 10) {

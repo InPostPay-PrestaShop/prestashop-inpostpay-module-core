@@ -4,11 +4,6 @@ namespace izi\prestashop\requests;
 
 abstract class EventStream extends Base
 {
-    public function __construct()
-    {
-        $this->sseHeaders();
-    }
-
     protected function sseHeaders()
     {
         @ini_set('zlib.output_compression', 0);
@@ -38,5 +33,10 @@ abstract class EventStream extends Base
     protected function sendHelloMessage()
     {
         echo ": start\n\n";
+    }
+
+    protected function retry(int $delayMs)
+    {
+        echo "retry: $delayMs\n\n";
     }
 }

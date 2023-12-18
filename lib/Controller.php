@@ -99,14 +99,10 @@ class Controller extends Remote
             }
             $redirectUrl = isset($model->confirmation_response) && 'deleted' === $model->confirmation_response ? 'deleted' : $model->redirect_url;
             if ($redirectUrl && 'deleted' !== $redirectUrl) {
-                if (!InPostIzi::getCartSessionClass()::getRedirectedById($id)) {
-                    InPostIzi::getCartSessionClass()::setRedirectedById($id, true);
-
-                    return [
-                        'action' => 'redirect',
-                        'redirect' => $redirectUrl,
-                    ]; // Removed json_encode
-                }
+                return [
+                    'action' => 'redirect',
+                    'redirect' => $redirectUrl,
+                ]; // Removed json_encode
             } elseif ('deleted' === $redirectUrl) {
                 return [
                     'action' => 'delete',
