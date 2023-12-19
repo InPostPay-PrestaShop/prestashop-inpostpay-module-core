@@ -320,6 +320,6 @@ abstract class InPostIzi
 
         $confirmation = json_decode($confirmation, false);
 
-        return 'SUCCESS' === ($confirmation->status ?? null);
+        return ($confirmation->basket_linked ?? false) || 'SUCCESS' === ($confirmation->status ?? null);
     }
 }
