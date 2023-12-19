@@ -266,8 +266,8 @@ class Create
         }
 
         $customer->email = $accountInfo->mail;
-        $customer->lastname = $accountInfo->name;
-        $customer->firstname = $accountInfo->surname;
+        $customer->firstname = $accountInfo->name;
+        $customer->lastname = $accountInfo->surname;
 
         if (!\Validate::isLoadedObject($customer)) {
             $password = \Tools::passwdGen(8, 'RANDOM');
