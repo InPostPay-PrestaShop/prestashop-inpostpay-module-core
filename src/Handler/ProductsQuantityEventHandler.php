@@ -46,31 +46,18 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
             return 0 >= $quantity ? null : $this->module->l('Product is no longer in your cart.', self::TRANSLATION_SOURCE);
         }
 
-        if (0 >= $quantity && !$cart->deleteProduct($productId, $combinationId, $customizationId)) {
-            throw new \RuntimeException(sprintf('Could not delete product [%d-%d-%d] from cart #%d.', $productId, $combinationId, $customizationId, $cart->id));
+        if (0 >= $quantity) {
+            $this->deleteProduct($cart, $productId, $combinationId, $customizationId);
+
+            return null;
         }
 
         if (0 === $deltaQuantity = $quantity - $currentQuantity) {
             return null;
         }
 
-        $product = new \Product($productId, false, $cart->id_lang);
-        $minimalQuantity = 0 === $combinationId
-            ? $product->minimal_quantity
-            : (new \Combination($combinationId))->minimal_quantity;
-
-        if ($quantity < $minimalQuantity) {
-            return $this->translator->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
-                '%product%' => $product->name,
-                '%quantity%' => $minimalQuantity,
-            ], 'Shop.Notifications.Error');
-        }
-
-        $availableQuantity = $this->getAvailableQuantity($cart, $productId, $combinationId, $customizationId);
-        if (null !== $availableQuantity && $quantity > $availableQuantity) {
-            return $this->translator->trans('The available purchase order quantity for this product is %quantity%.', [
-                '%quantity%' => $availableQuantity,
-            ], 'Shop.Notifications.Error');
+        if (null !== $error = $this->checkQuantity($cart, $productId, $combinationId, $customizationId, $quantity)) {
+            return $error;
         }
 
         $result = $cart->updateQty(
@@ -104,6 +91,39 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
         }
 
         return 0;
+    }
+
+    private function deleteProduct(\Cart $cart, int $productId, int $combinationId, int $customizationId): void
+    {
+        if ($cart->deleteProduct($productId, $combinationId, $customizationId)) {
+            return;
+        }
+
+        throw new \RuntimeException(sprintf('Could not delete product [%d-%d-%d] from cart #%d.', $productId, $combinationId, $customizationId, $cart->id));
+    }
+
+    private function checkQuantity(\Cart $cart, int $productId, int $combinationId, int $customizationId, int $quantity): ?string
+    {
+        $product = new \Product($productId, false, $cart->id_lang);
+        $minimalQuantity = 0 === $combinationId
+            ? $product->minimal_quantity
+            : (new \Combination($combinationId))->minimal_quantity;
+
+        if ($quantity < $minimalQuantity) {
+            return $this->translator->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
+                '%product%' => $product->name,
+                '%quantity%' => $minimalQuantity,
+            ], 'Shop.Notifications.Error');
+        }
+
+        $availableQuantity = $this->getAvailableQuantity($cart, $productId, $combinationId, $customizationId);
+        if (null !== $availableQuantity && $quantity > $availableQuantity) {
+            return $this->translator->trans('The available purchase order quantity for this product is %quantity%.', [
+                '%quantity%' => $availableQuantity,
+            ], 'Shop.Notifications.Error');
+        }
+
+        return null;
     }
 
     private function getAvailableQuantity(\Cart $cart, int $productId, int $combinationId, int $customizationId): ?int
