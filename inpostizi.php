@@ -215,7 +215,7 @@ class Inpostizi extends PaymentModule
     {
         $this->context->controller->registerJavascript(
             'inpostizi-javascript',
-            $this->_path . 'views/js/prestashopizi.js',
+            "modules/$this->name/views/js/prestashopizi.js",
             [
                 'position' => 'bottom',
                 'priority' => 101,
