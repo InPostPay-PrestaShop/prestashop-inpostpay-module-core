@@ -2,9 +2,9 @@
 
 namespace izi\prestashop\rest\Exception;
 
-final class BadRequestException extends ApiException
+final class MalformedRequestException extends ApiException
 {
-    public const ERROR_CODE = 'BAD_REQUEST';
+    public const ERROR_CODE = 'MALFORMED_REQUEST';
 
     public function getErrorCode(): string
     {
@@ -16,7 +16,7 @@ final class BadRequestException extends ApiException
         return 400;
     }
 
-    public static function malformedRequest(): self
+    public static function create(): self
     {
         return new self('Malformed request');
     }

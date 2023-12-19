@@ -2,7 +2,7 @@
 
 namespace izi\prestashop\Controller\Api;
 
-use izi\prestashop\rest\Exception\BadRequestException;
+use izi\prestashop\rest\Exception\MalformedRequestException;
 use Symfony\Component\HttpFoundation\Request;
 
 abstract class ApiController
@@ -12,7 +12,7 @@ abstract class ApiController
         $data = json_decode($request->getContent(), false);
 
         if (JSON_ERROR_NONE !== json_last_error()) {
-            throw BadRequestException::malformedRequest();
+            throw MalformedRequestException::create();
         }
 
         return $data;

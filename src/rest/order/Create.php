@@ -5,19 +5,27 @@ namespace izi\prestashop\rest\order;
 use izi\item\order\InvoiceDetails;
 use izi\prestashop\CartSession;
 use izi\prestashop\rest\Exception\BasketNotFoundException;
+use izi\prestashop\rest\Exception\CannotCreateOrderException;
 use izi\prestashop\rest\Exception\InternalServerErrorException;
 use izi\prestashop\traits\CarrierFinderTrait;
+use izi\prestashop\traits\CartContextSetterTrait;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
 
 class Create
 {
     use CarrierFinderTrait;
+    use CartContextSetterTrait;
+
+    private const TRANSLATION_SOURCE = 'create';
 
     private $crypto;
+    private $module;
 
-    public function __construct(Hashing $crypto = null)
+    public function __construct(\Context $context = null, Hashing $crypto = null, \PaymentModule $module = null)
     {
+        $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
+        $this->module = $module ?? \Module::getInstanceByName('inpostizi');
     }
 
     /**
@@ -29,9 +37,9 @@ class Create
     {
         $cart = $this->getCart($data->order_details->basket_id);
 
-        if (\Validate::isLoadedObject($order = $this->getOrderByCart($cart))) {
+        if ($order = $this->getOrderByCart($cart)) {
             if ('inpostizi' !== $order->module) {
-                throw new BasketNotFoundException('There already exists an order for this basket.');
+                throw new CannotCreateOrderException($this->module->l('There already exists an order for this basket.', self::TRANSLATION_SOURCE));
             }
 
             return $order->id;
@@ -69,17 +77,17 @@ class Create
         }
 
         $customer = $this->getOrCreateCustomer($cart, $data->account_info);
+
+        $this->setUpContext($cart);
         $this->updateCart($cart, $data, $customer, $carrierId);
-
         $this->adjustHandlingCost($data);
+        $this->validateCart($cart);
 
-        /** @var \Inpostizi $payment_module */
-        $payment_module = \Module::getInstanceByName('inpostizi');
-        $payment_module->validateOrder(
+        $this->module->validateOrder(
             $cart->id,
             (int) \Configuration::get('INPOST_PAY_INITIAL_OS_ID'),
             $cart->getOrderTotal(),
-            $payment_module->displayName,
+            $this->module->displayName,
             null,
             [],
             null,
@@ -89,28 +97,25 @@ class Create
 
         $link = \Context::getContext()->link->getPageLink('order-confirmation', null, $cart->id_lang, [
             'id_cart' => $cart->id,
-            'id_module' => $payment_module->id,
-            'id_order' => $payment_module->currentOrder,
+            'id_module' => $this->module->id,
+            'id_order' => $this->module->currentOrder,
             'key' => $cart->secure_key,
         ]);
 
         CartSession::setRedirectUrl($data->order_details->basket_id, $link);
-        CartSession::setOrderData($data->order_details->basket_id, $payment_module->currentOrder, json_encode($data));
+        CartSession::setOrderData($data->order_details->basket_id, $this->module->currentOrder, json_encode($data));
 
         $this->saveCarrierModuleData($cart->id, $data->delivery);
 
-        return $payment_module->currentOrder;
+        return $this->module->currentOrder;
     }
 
     private function updateCart(\Cart $cart, $data, \Customer $customer, int $carrierId): void
     {
-        $cart->id_customer = $customer->id;
-        $cart->secure_key = $customer->secure_key;
-
         $deliveryAddressId = $this->createDeliveryAddress($data->account_info, $customer, $data->delivery->delivery_address ?? null);
 
         $cart->updateAddressId($cart->id_address_delivery, $deliveryAddressId);
-        $cart->setDeliveryOption([$deliveryAddressId => $carrierId . ',']);
+        $this->setDeliveryOption($cart, [$deliveryAddressId => $carrierId . ',']);
 
         if (isset($data->invoice_details)) {
             $cart->id_address_invoice = $this->createInvoiceAddress($data->invoice_details, $data->account_info, $customer);
@@ -118,13 +123,22 @@ class Create
             $cart->id_address_invoice = $deliveryAddressId;
         }
 
-        $cart->id_currency = \Currency::getIdByIsoCode('PLN');
-
         if (!$cart->update()) {
             throw new InternalServerErrorException('Could not update cart data.');
         }
 
         $this->updateCartMessage($cart->id, $data);
+    }
+
+    private function setDeliveryOption(\Cart $cart, array $deliveryOption): void
+    {
+        $cart->setDeliveryOption($deliveryOption);
+
+        if ($deliveryOption === $cart->getDeliveryOption(null, true)) {
+            return;
+        }
+
+        throw new CannotCreateOrderException($this->module->l('The selected delivery option is not available.', self::TRANSLATION_SOURCE));
     }
 
     private function getCountryId(string $code): ?int
@@ -283,6 +297,9 @@ class Create
             throw new InternalServerErrorException('Could not update customer account.');
         }
 
+        $cart->id_customer = $customer->id;
+        $cart->secure_key = $customer->secure_key;
+
         return $customer;
     }
 
@@ -308,15 +325,22 @@ class Create
             return 0.;
         }
 
-        $additionalCosts = 0.;
+        $additionalCostsPln = 0.;
         foreach ($deliveryData->delivery_codes as $optionCode) {
             $configKey = sprintf('INPOST_PAY_payment_%s_%s', strtolower($deliveryData->delivery_type), strtolower($optionCode));
-            $additionalCosts += (float) str_replace(',', '.', \Configuration::get($configKey));
+            $additionalCostsPln += (float) str_replace(',', '.', \Configuration::get($configKey));
         }
 
-        // TODO convert to default currency?
+        if (0. >= $additionalCostsPln) {
+            return 0.;
+        }
 
-        return $additionalCosts;
+        $defaultCurrency = \Currency::getDefaultCurrency();
+        if ('PLN' === $defaultCurrency->iso_code) {
+            return $additionalCostsPln;
+        }
+
+        return \Tools::convertPriceFull($additionalCostsPln, $this->context->currency, $defaultCurrency);
     }
 
     private function updateCartMessage(int $cartId, $data): void
@@ -360,5 +384,76 @@ class Create
         } catch (\Exception $e) {
             \izi\prestashop\Logger::log($e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
         }
+    }
+
+    private function validateCart(\Cart $cart): void
+    {
+        $products = $cart->getProducts();
+
+        if ([] === $products) {
+            throw new CannotCreateOrderException($this->context->getTranslator()->trans('Cart is empty', [], 'Shop.Notifications.Error'));
+        }
+
+        $this->checkMinimalPurchaseAmount($cart);
+
+        foreach ($products as $product) {
+            if ($product['minimal_quantity'] > $product['cart_quantity']) {
+                throw new CannotCreateOrderException($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
+                    '%product%' => $product['name'],
+                    '%quantity%' => $product['minimal_quantity'],
+                ], 'Shop.Notifications.Error'));
+            }
+        }
+
+        if (true === $product = $cart->checkQuantities(true)) {
+            return;
+        }
+
+        if ($product['active']) {
+            throw new CannotCreateOrderException($this->context->getTranslator()->trans('%product% is no longer available in this quantity. You cannot proceed with your order until the quantity is adjusted.', [
+                '%product%' => $product['name'],
+            ], 'Shop.Notifications.Error'));
+        }
+
+        throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', [
+            '%product%' => $product['name'],
+        ], 'Shop.Notifications.Error'));
+    }
+
+    private function checkMinimalPurchaseAmount(\Cart $cart): void
+    {
+        if (0. >= $minimalPurchase = $this->getMinimalPurchaseAmount()) {
+            return;
+        }
+
+        $productsTotalExcludingTax = $cart->getOrderTotal(false, \Cart::ONLY_PRODUCTS);
+        if ($minimalPurchase <= $productsTotalExcludingTax) {
+            return;
+        }
+
+        throw new CannotCreateOrderException($this->context->getTranslator()->trans('A minimum shopping cart total of %amount% (tax excl.) is required to validate your order. Current cart total is %total% (tax excl.).', [
+            '%amount%' => $this->formatPrice($minimalPurchase),
+            '%total%' => $this->formatPrice($productsTotalExcludingTax),
+        ], 'Shop.Theme.Checkout'));
+    }
+
+    private function getMinimalPurchaseAmount(): float
+    {
+        $minimalPurchase = (float) \Tools::convertPrice((float) \Configuration::get('PS_PURCHASE_MINIMUM'), $this->context->currency);
+
+        \Hook::exec('overrideMinimalPurchasePrice', [
+            'minimalPurchase' => &$minimalPurchase,
+        ]);
+
+        return $minimalPurchase;
+    }
+
+    private function formatPrice(float $price): string
+    {
+        if (!is_callable([\Tools::class, 'getContextLocale'])) {
+            return \Tools::displayPrice($price, $this->context->currency);
+        }
+
+        return \Tools::getContextLocale($this->context)->formatPrice($price, 'PLN');
     }
 }
