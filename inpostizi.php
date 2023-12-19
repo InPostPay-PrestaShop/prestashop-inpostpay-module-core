@@ -356,9 +356,15 @@ class Inpostizi extends PaymentModule
         InpostIziPayPrestashop::getInstance()->getController()->basketBindingGet(true);
 
         $binding = BindingProvider::getBinding();
-        $maskedPhoneNumber = ($binding && isset($binding->basket_linked) && $binding->basket_linked) && isset($binding->client_details, $binding->client_details->masked_phone_number) ? $binding->client_details->masked_phone_number : '';
-        $name = ($binding && isset($binding->basket_linked) && $binding->basket_linked) && isset($binding->client_details, $binding->client_details->name) ? $binding->client_details->name : '';
-        $inpost_basket_id = ($binding && isset($binding->basket_linked) && $binding->basket_linked) && isset($binding->inpost_basket_id) ? $binding->inpost_basket_id : '';
+        $isBasketLinked = $binding && isset($binding->basket_linked) && $binding->basket_linked;
+
+        if (!$isBasketLinked && !$this->checkCurrency($this->context->currency->id)) {
+            return '';
+        }
+
+        $maskedPhoneNumber = $isBasketLinked && isset($binding->client_details->masked_phone_number) ? $binding->client_details->masked_phone_number : '';
+        $name = $isBasketLinked && isset($binding->client_details->name) ? $binding->client_details->name : '';
+        $inpost_basket_id = $isBasketLinked && isset($binding->inpost_basket_id) ? $binding->inpost_basket_id : '';
 
         $theCart = isset($this->context->cart) ? $this->context->cart : new \Cart();
         $products = $theCart->getProducts();
@@ -427,10 +433,6 @@ class Inpostizi extends PaymentModule
      */
     private function shouldRenderWidget()
     {
-        if (!$this->checkCurrency($this->context->currency->id)) {
-            return false;
-        }
-
         if (2 === (int) \Configuration::get('INPOST_PAY_show_izi')) {
             return true;
         }
