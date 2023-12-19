@@ -348,7 +348,7 @@ class Create
         }
 
         try {
-            $model = new \InPostCartChoiceModel();
+            $model = new \InPostCartChoiceModel($cartId);
             $model->id = $cartId;
             $model->service = 'APM' === $delivery->delivery_type ? 'inpost_locker_standard' : 'inpost_courier_standard';
             if ('APM' === $delivery->delivery_type) {
@@ -356,7 +356,7 @@ class Create
             }
             $model->email = $delivery->mail;
             $model->phone = $delivery->phone_number->phone;
-            $model->add();
+            $model->save();
         } catch (\Exception $e) {
             \izi\prestashop\Logger::log($e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
         }
