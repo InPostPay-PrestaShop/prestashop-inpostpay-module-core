@@ -344,6 +344,12 @@ class PrestashopBasket
      */
     public function mapRelatedProducts(array $cartProducts): array
     {
+        $limit = $this->getRelatedProductsLimit();
+
+        if (null !== $limit && 0 >= $limit) {
+            return [];
+        }
+
         $result = $cartProductsById = $relatedProductsById = [];
 
         foreach ($cartProducts as $cartProduct) {
@@ -364,6 +370,9 @@ class PrestashopBasket
         }
 
         $relatedProducts = array_diff_key($relatedProductsById, $cartProductsById);
+        if (null !== $limit) {
+            $relatedProducts = array_slice($relatedProducts, 0, $limit);
+        }
 
         foreach ($relatedProducts as $relatedProduct) {
             $result[] = $this->mapRelatedProduct($relatedProduct);
@@ -618,5 +627,14 @@ class PrestashopBasket
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
 
         return false === $result ? null : (int) $result;
+    }
+
+    private function getRelatedProductsLimit(): ?int
+    {
+        $config = $this->getConfiguration('INPOST_PAY_related_count');
+
+        return false === $config || '' === $config
+            ? null
+            : (int) $config;
     }
 }
