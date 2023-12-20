@@ -395,21 +395,21 @@ trait BackendForm
     {
         $fields = [];
         $translations = [
-            'cart' => 'koszyk',
-            'list' => 'lista',
-            'details' => 'karta produktu',
+            'cart' => $this->l('koszyk'),
+            'list' => $this->l('lista'),
+            'details' => $this->l('karta produktu'),
         ];
 
         $translationsDirection = [
-            'up' => 'Góra',
-            'down' => 'Dół',
-            'left' => 'Lewo',
-            'right' => 'Prawo',
+            'up' => $this->l('Góra'),
+            'down' => $this->l('Dół'),
+            'left' => $this->l('Lewo'),
+            'right' => $this->l('Prawo'),
         ];
         foreach (['cart', 'details'] as $place) {
             $fields[] = [
                 'type' => 'switch',
-                'label' => $this->l('Wyświetlaj ' . $translations[$place]),
+                'label' => sprintf($this->l('Wyświetlaj %s'), $translations[$place]),
                 'name' => 'INPOST_PAY_show_button_' . $place,
                 'is_bool' => true,
                 'values' => [
@@ -459,7 +459,7 @@ trait BackendForm
                 foreach (['up', 'down', 'left', 'right'] as $direction) {
                     $fields[] = [
                         'type' => 'text',
-                        'label' => $this->l('Margines ' . $translationsDirection[$direction]),
+                        'label' => sprintf($this->l('Margines %s'), $translationsDirection[$direction]),
                         'name' => 'INPOST_PAY_margin_' . $place . '_' . $direction,
                         'size' => 20,
                     ];
@@ -533,7 +533,7 @@ trait BackendForm
         foreach ($this->formFields() as $field) {
             if ($field['name'] === 'INPOST_PAY_client_secret') {
                 $helper->tpl_vars['fields_value'][$field['name']] = \Configuration::get($field['name']) ? '*****' : '';
-            } elseif (isset($field['multiple']) && $field['multiple'] == true) {
+            } elseif (isset($field['multiple']) && $field['multiple']) {
                 $helper->tpl_vars['fields_value'][$field['name'] . '[]'] = explode(',', \Configuration::get($field['name']));
             } else {
                 $helper->tpl_vars['fields_value'][$field['name']] = \Configuration::get($field['name']);
