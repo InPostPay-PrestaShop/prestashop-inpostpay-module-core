@@ -24,6 +24,10 @@ function handleDOMLoaded() {
     prestashop.on("updateCart", function (event) {
       updateCount(event?.resp?.cart.products_count || prestashop.cart.products_count || 0);
     });
+
+    prestashop.on("updatedProduct", function (event) {
+      window.handleInpostIziButtons();
+    });
   }
 
   let cartButton = window.document.querySelector('.cart-grid  #inpostizi_block_home');
