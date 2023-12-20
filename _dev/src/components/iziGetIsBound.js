@@ -6,7 +6,7 @@ function setupEventSource(resolve) {
   }
 
   eventSource = new EventSource(
-    `/?&fc=module&module=inpostizi&controller=backend&path=inpost/v1/izi/merchant/basket/confirmation`
+    `index.php?fc=module&module=inpostizi&controller=backend&path=inpost/v1/izi/merchant/basket/confirmation`
   );
 
   eventSource.onmessage = (event) => {
