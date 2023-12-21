@@ -64,7 +64,6 @@ trait BackendForm
                     ],
                 ],
             ],
-
             [
                 'type' => 'switch',
                 'label' => $this->l('Włącz płatność przy odbiorze zgodnie z podpisaną umową z InPost'),
@@ -552,7 +551,10 @@ trait BackendForm
         foreach ($this->formFields() as $field) {
             if (!empty($field['lang'])) {
                 foreach ($helper->languages as $language) {
-                    $helper->tpl_vars['fields_value'][$field['name']][$language['id_lang']] = \Configuration::get($field['name'], $language['id_lang']);
+                    $helper->tpl_vars['fields_value'][$field['name']][$language['id_lang']] = \Tools::getValue(
+                        sprintf('%s_%d', $field['name'], $language['id_lang']),
+                        \Configuration::get($field['name'], $language['id_lang'])
+                    );
                 }
             } elseif ($field['name'] === 'INPOST_PAY_client_secret') {
                 $helper->tpl_vars['fields_value'][$field['name']] = \Configuration::get($field['name']) ? '*****' : '';
