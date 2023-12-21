@@ -33,7 +33,10 @@ class Remote extends Connection
         return $response;
     }
 
-    public function orderEvent($orderId, $status, $refList)
+    /**
+     * @param string|int $orderId
+     */
+    public function orderEvent($orderId, string $status, array $refList)
     {
         $data = [
             'event_id' => time(),

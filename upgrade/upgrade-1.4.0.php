@@ -21,5 +21,6 @@ function upgrade_module_1_4_0(\Module $module)
 
     return $dbInstaller->install($module)
         && $module->registerHook('actionObjectCartDeleteBefore')
+        && $module->registerHook('actionObjectInPostShipmentModelUpdateBefore')
         && \Configuration::updateValue('INPOST_PAY_INITIAL_OS_ID', \Configuration::get('PS_OS_BANKWIRE'));
 }

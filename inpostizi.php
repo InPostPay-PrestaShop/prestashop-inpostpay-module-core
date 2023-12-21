@@ -24,6 +24,7 @@ class Inpostizi extends PaymentModule
     use OrderStatusDescriberTrait;
 
     private $updatedCartIds = [];
+    private $shipmentUpdated = false;
 
     public function __construct()
     {
@@ -68,18 +69,19 @@ class Inpostizi extends PaymentModule
 
         return parent::install() &&
             $this->registerHook('actionFrontControllerSetMedia') &&
+            $this->registerHook('displayProductActions') &&
             $this->registerHook('displayFooterProduct') &&
-            $this->registerHook('displayOrderConfirmation') &&
             $this->registerHook('displayShoppingCartFooter') &&
             $this->registerHook('actionCartSave') &&
+            $this->registerHook('actionAjaxDieCartControllerDisplayAjaxUpdateBefore') &&
+            $this->registerHook('actionObjectCartDeleteBefore') &&
+            $this->registerHook('paymentOptions') &&
+            $this->registerHook('displayPaymentReturn') &&
+            $this->registerHook('displayOrderConfirmation') &&
             $this->registerHook('displayAdminOrderSide') &&
             $this->registerHook('actionObjectInPostShipmentModelAddAfter') &&
-            $this->registerHook('displayProductActions') &&
-            $this->registerHook('paymentOptions') &&
-            $this->registerHook('actionObjectInPostShipmentModelUpdateAfter') &&
-            $this->registerHook('displayPaymentReturn') &&
-            $this->registerHook('actionAjaxDieCartControllerDisplayAjaxUpdateBefore') &&
-            $this->registerHook('actionObjectCartDeleteBefore');
+            $this->registerHook('actionObjectInPostShipmentModelUpdateBefore') &&
+            $this->registerHook('actionObjectInPostShipmentModelUpdateAfter');
     }
 
     /**
@@ -110,14 +112,58 @@ class Inpostizi extends PaymentModule
         return \Db::getInstance()->insert('module_currency', $data);
     }
 
-    public function hookActionObjectInPostShipmentModelAddAfter($params)
+    /**
+     * @param array{object: \InPostShipmentModel} $params
+     */
+    public function hookActionObjectInPostShipmentModelAddAfter(array $params)
     {
-        $this->onShipmentUpdated($params);
+        if (!isset($params['object']) || !$params['object'] instanceof \InPostShipmentModel) {
+            return;
+        }
+
+        $shipment = $params['object'];
+
+        if (empty($shipment->tracking_number)) {
+            return;
+        }
+
+        $this->onShipmentUpdated($shipment);
     }
 
-    public function hookActionObjectInPostShipmentModelUpdateAfter($params)
+    /**
+     * @param array{object: \InPostShipmentModel} $params
+     */
+    public function hookActionObjectInPostShipmentModelUpdateBefore(array $params)
     {
-        $this->onShipmentUpdated($params);
+        if (!isset($params['object']) || !$params['object'] instanceof \InPostShipmentModel) {
+            return;
+        }
+
+        $shipment = $params['object'];
+
+        if (empty($shipment->tracking_number) || 0 >= $shipment->id) {
+            return;
+        }
+
+        $previousState = new \InPostShipmentModel($shipment->id);
+        if (!\Validate::isLoadedObject($previousState)) {
+            return;
+        }
+
+        $this->shipmentUpdated = $previousState->tracking_number !== $shipment->tracking_number;
+    }
+
+    /**
+     * @param array{object: \InPostShipmentModel} $params
+     */
+    public function hookActionObjectInPostShipmentModelUpdateAfter(array $params)
+    {
+        if (!$this->shipmentUpdated) {
+            return;
+        }
+
+        $this->shipmentUpdated = false;
+        $this->onShipmentUpdated($params['object']);
     }
 
     public function hookDisplayProductActions(array $params)
@@ -563,26 +609,28 @@ class Inpostizi extends PaymentModule
         }
     }
 
-    private function onShipmentUpdated($data)
+    private function onShipmentUpdated(\InPostShipmentModel $shipment)
     {
-        if (!class_exists('InPostShipmentModel')) {
-            return;
-        }
-        $orderId = $data['object']->id_order;
+        $order = $shipment->getOrder();
 
-        $units = new \PrestaShopCollection(InPostShipmentModel::class);
-        $units->where('id_order', '=', $orderId);
-        $units = $units->getResults();
-        if (!count($units)) {
+        if (null === CartSession::getByCartId($order->id_cart)) {
             return;
         }
-        $numbers = [];
-        foreach ($units as $shipment) {
-            $numbers[] = $shipment->tracking_number;
+
+        $shipments = (new \PrestaShopCollection(\InPostShipmentModel::class))
+            ->where('id_order', '=', $order->id)
+            ->sqlWhere('tracking_number IS NOT NULL')
+            ->getResults();
+
+        if (empty($shipments)) {
+            return;
         }
-        $izi = InpostIziPayPrestashop::getInstance();
-        $status = $this->getStatusDescription(new \Order($orderId));
-        $izi->orderEvent($orderId, $status, $numbers);
-        Logger::log('TRACKING NUMBERS: ' . print_r($numbers, true));
+
+        $trackingNumbers = array_map(static function (\InPostShipmentModel $shipment) {
+            return $shipment->tracking_number;
+        }, $shipments);
+        $status = $this->getStatusDescription($order);
+
+        InpostIziPayPrestashop::getInstance()->orderEvent($order->id, $status, $trackingNumbers);
     }
 }

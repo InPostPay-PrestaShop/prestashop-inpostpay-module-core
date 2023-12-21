@@ -148,7 +148,7 @@ abstract class InPostIzi
         self::$blockPut = false;
     }
 
-    public function orderEvent($orderId, $status, $refList)
+    public function orderEvent($orderId, string $status, array $refList)
     {
         $this->controller->orderEvent($orderId, $status, $refList);
     }
