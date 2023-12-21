@@ -344,35 +344,11 @@ class PrestashopBasket
      */
     public function mapRelatedProducts(array $cartProducts): array
     {
-        $limit = $this->getRelatedProductsLimit();
-
-        if (null !== $limit && 0 >= $limit) {
+        if ([] === $relatedProducts = $this->getRelatedProducts($cartProducts)) {
             return [];
         }
 
-        $result = $cartProductsById = $relatedProductsById = [];
-
-        foreach ($cartProducts as $cartProduct) {
-            if (isset($cartProductsById[$cartProduct['id_product']])) {
-                continue;
-            }
-
-            $cartProductsById[$cartProduct['id_product']] = $cartProduct;
-            $prestashopProduct = new \Product($cartProduct['id_product'], false, $this->cart->id_lang);
-
-            foreach ($prestashopProduct->getAccessories($this->cart->id_lang) as $accessory) {
-                if ($accessory['customizable'] > 1) {
-                    continue; // product requires customization
-                }
-
-                $relatedProductsById[$accessory['id_product']] = $accessory;
-            }
-        }
-
-        $relatedProducts = array_diff_key($relatedProductsById, $cartProductsById);
-        if (null !== $limit) {
-            $relatedProducts = array_slice($relatedProducts, 0, $limit);
-        }
+        $result = [];
 
         foreach ($relatedProducts as $relatedProduct) {
             $result[] = $this->mapRelatedProduct($relatedProduct);
@@ -627,6 +603,47 @@ class PrestashopBasket
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
 
         return false === $result ? null : (int) $result;
+    }
+
+    private function getRelatedProducts(array $cartProducts): array
+    {
+        if ([] === $cartProducts) {
+            return [];
+        }
+
+        $limit = $this->getRelatedProductsLimit();
+
+        if (null !== $limit && 0 >= $limit) {
+            return [];
+        }
+
+        $cartProductsById = $relatedProductsById = [];
+
+        foreach ($cartProducts as $cartProduct) {
+            $cartProductsById[$cartProduct['id_product']] = $cartProduct;
+        }
+
+        foreach ($cartProductsById as $productId => $cartProduct) {
+            $product = new \Product($productId, false, $this->cart->id_lang);
+
+            foreach ($product->getAccessories($this->cart->id_lang) as $accessory) {
+                $accessoryId = $accessory['id_product'];
+                if (isset($relatedProductsById[$accessoryId]) || isset($cartProductsById[$accessoryId])) {
+                    continue;
+                }
+
+                if ($accessory['customizable'] > 1) {
+                    continue; // product requires customization
+                }
+
+                $relatedProductsById[$accessoryId] = $accessory;
+                if (null !== $limit && 0 === --$limit) {
+                    return $relatedProductsById;
+                }
+            }
+        }
+
+        return $relatedProductsById;
     }
 
     private function getRelatedProductsLimit(): ?int
