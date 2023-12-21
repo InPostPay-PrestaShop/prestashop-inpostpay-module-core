@@ -32,19 +32,19 @@ trait BackendForm
                 'type' => 'text',
                 'label' => $this->l('Client ID'),
                 'name' => 'INPOST_PAY_client_id',
-                'size' => 20,
+                'class' => 'fixed-width-xl',
             ],
             [
                 'type' => 'text',
                 'label' => $this->l('Client Secret'),
                 'name' => 'INPOST_PAY_client_secret',
-                'size' => 20,
+                'class' => 'fixed-width-xl',
             ],
             [
                 'type' => 'text',
                 'label' => $this->l('POS ID'),
                 'name' => 'INPOST_PAY_pos_id',
-                'size' => 20,
+                'class' => 'fixed-width-xl',
             ],
             [
                 'type' => 'switch',
@@ -85,6 +85,7 @@ trait BackendForm
             ],
             [
                 'type' => 'select',
+                'class' => 'fixed-width-xxl',
                 'label' => $this->l('Początkowy status zamówienia utworzonego przez InPost Pay'),
                 'name' => 'INPOST_PAY_INITIAL_OS_ID',
                 'options' => [
@@ -95,6 +96,7 @@ trait BackendForm
             ],
             [
                 'type' => 'select',
+                'class' => 'fixed-width-xxl',
                 'label' => $this->l('Statusy dla zamówienia opłaconego przez InPost Pay'),
                 'name' => 'INPOST_PAY_authorized_payment',
                 'options' => [
@@ -112,6 +114,7 @@ trait BackendForm
                 'name' => sprintf('INPOST_PAY_OS_DESCRIPTION_%d', $status['id_order_state']),
                 'lang' => true,
                 'hint' => $this->l('Leave empty to use the order state name'),
+                'col' => 4,
             ];
         }
 
@@ -119,6 +122,7 @@ trait BackendForm
             'type' => 'text',
             'label' => $this->l('Maksymalna liczba produktów sugerowanych'),
             'name' => 'INPOST_PAY_related_count',
+            'class' => 'text-right fixed-width-xl',
         ];
 
         return $fields;
@@ -129,6 +133,7 @@ trait BackendForm
         return [
             [
                 'type' => 'select',
+                'class' => 'fixed-width-xxl',
                 'label' => $this->l('Zgody Wymagane'),
                 'name' => 'INPOST_PAY_terms_options_required',
                 'multiple' => true,
@@ -145,6 +150,7 @@ trait BackendForm
             ],
             [
                 'type' => 'select',
+                'class' => 'fixed-width-xxl',
                 'label' => $this->l('Zgody Wymagane Raz'),
                 'name' => 'INPOST_PAY_terms_options_required_once',
                 'multiple' => true,
@@ -161,6 +167,7 @@ trait BackendForm
             ],
             [
                 'type' => 'select',
+                'class' => 'fixed-width-xxl',
                 'label' => $this->l('Zgody Dodatkowe'),
                 'name' => 'INPOST_PAY_terms_options_additional',
                 'multiple' => true,
@@ -183,6 +190,7 @@ trait BackendForm
         return [
             [
                 'type' => 'select',
+                'class' => 'fixed-width-xxl',
                 'label' => $this->l('Kurier'),
                 'name' => 'INPOST_PAY_payment_courier',
                 'options' => [
@@ -195,7 +203,8 @@ trait BackendForm
                 'type' => 'text',
                 'label' => $this->l('Kurier paczka w weekend netto'),
                 'name' => 'INPOST_PAY_payment_courier_pww',
-                'size' => 20,
+                'class' => 'text-right fixed-width-xl',
+                'suffix' => 'PLN',
             ],
             [
                 'type' => 'select',
@@ -241,7 +250,8 @@ trait BackendForm
                 'type' => 'text',
                 'label' => $this->l('Kurier pobranie netto'),
                 'name' => 'INPOST_PAY_payment_courier_cod',
-                'size' => 20,
+                'class' => 'text-right fixed-width-xl',
+                'suffix' => 'PLN',
             ],
             [
                 'type' => 'select',
@@ -285,6 +295,7 @@ trait BackendForm
             ],
             [
                 'type' => 'select',
+                'class' => 'fixed-width-xxl',
                 'label' => $this->l('Paczkomat'),
                 'name' => 'INPOST_PAY_payment_apm',
                 'options' => [
@@ -297,7 +308,8 @@ trait BackendForm
                 'type' => 'text',
                 'label' => $this->l('Paczkomat paczka w weekend netto'),
                 'name' => 'INPOST_PAY_payment_apm_pww',
-                'size' => 20,
+                'class' => 'text-right fixed-width-xl',
+                'suffix' => 'PLN',
             ],
             [
                 'type' => 'select',
@@ -343,7 +355,8 @@ trait BackendForm
                 'type' => 'text',
                 'label' => $this->l('Paczkomat pobranie netto'),
                 'name' => 'INPOST_PAY_payment_apm_cod',
-                'size' => 20,
+                'class' => 'text-right fixed-width-xl',
+                'suffix' => 'PLN',
             ],
             [
                 'type' => 'select',
@@ -458,7 +471,7 @@ trait BackendForm
                         'type' => 'text',
                         'label' => sprintf($this->l('Margines %s'), $translationsDirection[$direction]),
                         'name' => 'INPOST_PAY_margin_' . $place . '_' . $direction,
-                        'size' => 20,
+                        'class' => 'text-right fixed-width-xl',
                     ];
                 }
             }

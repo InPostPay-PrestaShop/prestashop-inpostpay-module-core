@@ -31,6 +31,7 @@ class Inpostizi extends PaymentModule
         $this->version = '1.4.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
+        $this->bootstrap = true;
 
         $this->ps_versions_compliancy = [
             'min' => '1.7.0.0',
