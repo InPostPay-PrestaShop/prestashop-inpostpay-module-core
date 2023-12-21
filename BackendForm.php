@@ -106,15 +106,12 @@ trait BackendForm
         ];
 
         foreach (\OrderState::getOrderStates($this->context->language->id) as $status) {
-            $fieldName = 'INPOST_PAY_status_translation_' . $status['id_order_state'];
-            if (!\Configuration::get($fieldName)) {
-                \Configuration::updateValue($fieldName, $status['name']);
-            }
-
             $fields[] = [
                 'type' => 'text',
                 'label' => $status['name'],
-                'name' => $fieldName,
+                'name' => sprintf('INPOST_PAY_OS_DESCRIPTION_%d', $status['id_order_state']),
+                'lang' => true,
+                'hint' => $this->l('Leave empty to use the order state name'),
             ];
         }
 
@@ -484,8 +481,16 @@ trait BackendForm
     {
         $output = '';
         if (Tools::isSubmit('submit' . $this->name)) {
+            $languageIds = \Language::getLanguages(false, false, true);
             foreach ($this->formFields() as $field) {
-                $configValue = Tools::getValue($field['name']);
+                if (!empty($field['lang'])) {
+                    $configValue = [];
+                    foreach ($languageIds as $languageId) {
+                        $configValue[$languageId] = trim(\Tools::getValue(sprintf('%s_%d', $field['name'], $languageId))) ?: null;
+                    }
+                } else {
+                    $configValue = Tools::getValue($field['name']);
+                }
                 if ($field['name'] === 'INPOST_PAY_client_secret' && $configValue === '*****') {
                     continue;
                 }
@@ -528,10 +533,15 @@ trait BackendForm
         $helper->token = Tools::getAdminTokenLite('AdminModules');
         $helper->currentIndex = AdminController::$currentIndex . '&' . http_build_query(['configure' => $this->name]);
         $helper->submit_action = 'submit' . $this->name;
-        $helper->default_form_language = (int) Configuration::get('PS_LANG_DEFAULT');
+        $helper->languages = $this->context->controller->getLanguages();
+        $helper->default_form_language = $this->context->language->id;
 
         foreach ($this->formFields() as $field) {
-            if ($field['name'] === 'INPOST_PAY_client_secret') {
+            if (!empty($field['lang'])) {
+                foreach ($helper->languages as $language) {
+                    $helper->tpl_vars['fields_value'][$field['name']][$language['id_lang']] = \Configuration::get($field['name'], $language['id_lang']);
+                }
+            } elseif ($field['name'] === 'INPOST_PAY_client_secret') {
                 $helper->tpl_vars['fields_value'][$field['name']] = \Configuration::get($field['name']) ? '*****' : '';
             } elseif (isset($field['multiple']) && $field['multiple']) {
                 $helper->tpl_vars['fields_value'][$field['name'] . '[]'] = explode(',', \Configuration::get($field['name']));

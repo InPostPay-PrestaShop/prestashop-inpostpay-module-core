@@ -3,10 +3,12 @@
 namespace izi\prestashop;
 
 use izi\item\order\OrderProduct;
+use izi\prestashop\traits\OrderStatusDescriberTrait;
 use izi\prestashop\traits\PriceFactoryTrait;
 
 class PrestashopOrder
 {
+    use OrderStatusDescriberTrait;
     use PriceFactoryTrait;
 
     private $orderId;
@@ -406,10 +408,10 @@ class PrestashopOrder
         $orderDetails->order_creation_date = date("Y-m-d\TH:i:s.000\Z", strtotime($this->order->date_add));
         $orderDetails->basket_id = $this->basketId;
 
-        $orderDetails->order_merchant_status_description = (new \OrderState($this->order->current_state, $this->order->id_lang))->name;
+        $orderDetails->order_merchant_status_description = $this->getStatusDescription($this->order);
         $orderDetails->order_base_price = $this->readSummaryOrderBasePrice();
         $orderDetails->order_final_price = $this->readSummaryOrderFinalPrice();
-        $orderDetails->delivery_references_list = [''];
+        $orderDetails->delivery_references_list = [];
         $orderDetails->currency = 'PLN';
         $orderDetails->payment_type = $this->readPaymentType();
 
@@ -435,13 +437,11 @@ class PrestashopOrder
     }
 
     /**
-     * @param $key
-     *
      * @return false|string
      */
-    private function getConfiguration($key)
+    private function getConfiguration(string $key, int $languageId = null)
     {
-        return \Configuration::get($key, null, null, $this->order->id_shop);
+        return \Configuration::get($key, $languageId, null, $this->order->id_shop);
     }
 
     /**

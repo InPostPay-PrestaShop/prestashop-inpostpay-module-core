@@ -6,11 +6,14 @@ use izi\prestashop\CartSession;
 use izi\prestashop\PrestashopOrder;
 use izi\prestashop\rest\Exception\OrderNotFoundException;
 use izi\prestashop\rest\order\Create;
+use izi\prestashop\traits\OrderStatusDescriberTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class OrderController extends ApiController
 {
+    use OrderStatusDescriberTrait;
+
     public function create(Request $request): JsonResponse
     {
         $data = $this->decodeRequest($request);
@@ -47,10 +50,8 @@ class OrderController extends ApiController
         $data = $this->decodeRequest($request);
         $this->updateOrderStatus($order, $data);
 
-        $orderState = new \OrderState($order->current_state, $order->id_lang);
-
         return new JsonResponse([
-            'order_merchant_status_description' => $orderState->name,
+            'order_merchant_status_description' => $this->getStatusDescription($order),
         ]);
     }
 

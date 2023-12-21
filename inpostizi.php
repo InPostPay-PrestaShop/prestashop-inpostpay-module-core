@@ -8,6 +8,7 @@ use izi\prestashop\InpostIziPayPrestashop;
 use izi\prestashop\Installer\DatabaseInstaller;
 use izi\prestashop\Logger;
 use izi\prestashop\PrestashopBasket;
+use izi\prestashop\traits\OrderStatusDescriberTrait;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 if (!defined('_PS_VERSION_')) {
@@ -20,6 +21,7 @@ require_once __DIR__ . '/BackendForm.php';
 class Inpostizi extends PaymentModule
 {
     use BackendForm;
+    use OrderStatusDescriberTrait;
 
     private $updatedCartIds = [];
 
@@ -578,7 +580,7 @@ class Inpostizi extends PaymentModule
             $numbers[] = $shipment->tracking_number;
         }
         $izi = InpostIziPayPrestashop::getInstance();
-        $status = 'Wysłano';
+        $status = $this->getStatusDescription(new \Order($orderId));
         $izi->orderEvent($orderId, $status, $numbers);
         Logger::log('TRACKING NUMBERS: ' . print_r($numbers, true));
     }
