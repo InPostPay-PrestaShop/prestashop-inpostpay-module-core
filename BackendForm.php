@@ -112,7 +112,7 @@ trait BackendForm
                 'label' => $status['name'],
                 'name' => sprintf('INPOST_PAY_OS_DESCRIPTION_%d', $status['id_order_state']),
                 'lang' => true,
-                'hint' => $this->l('Leave empty to use the order state name'),
+                'hint' => $this->l('If left empty the order state name will be presented.', 'backendform'),
                 'col' => 4,
             ];
         }
@@ -122,6 +122,7 @@ trait BackendForm
             'label' => $this->l('Maksymalna liczba produktów sugerowanych'),
             'name' => 'INPOST_PAY_related_count',
             'class' => 'text-right fixed-width-xl',
+            'hint' => $this->l('If left empty the number of related products will not be limited.', 'backendform'),
         ];
 
         return $fields;
@@ -517,7 +518,7 @@ trait BackendForm
                 }
             }
 
-            $output = $this->displayConfirmation($this->l('Settings updated'));
+            $output = $this->displayConfirmation($this->l('Settings updated', 'backendform'));
         }
 
         return $output . $this->displayForm();
@@ -532,8 +533,8 @@ trait BackendForm
                 ],
                 'input' => $this->formFields(),
                 'submit' => [
-                    'title' => $this->l('Save'),
-                    'class' => 'btn btn-default',
+                    'title' => $this->l('Save', 'backendform'),
+                    'icon' => 'process-icon-save',
                 ],
             ],
         ];
