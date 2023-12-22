@@ -1,5 +1,9 @@
 <?php
 
+use izi\prestashop\Widget\Alignment;
+use izi\prestashop\Widget\FrameStyle;
+use izi\prestashop\Widget\Variant;
+
 /**
  * @mixin \Module
  */
@@ -465,12 +469,39 @@ trait BackendForm
                     'name' => 'name',
                 ],
             ];
+            $fields[] = [
+                'type' => 'select',
+                'label' => $this->l('Styl rogów'),
+                'name' => 'INPOST_PAY_frame_style_' . $place,
+                'options' => [
+                    'query' => $this->getFrameStyleChoices(),
+                    'id' => 'id_option',
+                    'name' => 'name',
+                ],
+            ];
+            $fields[] = [
+                'type' => 'text',
+                'label' => $this->l('Minimalna szerokość'),
+                'name' => 'INPOST_PAY_min_width_' . $place,
+                'hint' => $this->l('Valid values range: 220 - 600 px', 'backendform'),
+                'class' => 'text-right fixed-width-xl',
+                'suffix' => 'px',
+            ];
+            $fields[] = [
+                'type' => 'text',
+                'label' => $this->l('Maksymalna szerokość'),
+                'name' => 'INPOST_PAY_max_width_' . $place,
+                'hint' => $this->l('Valid values range: 220 - 600 px', 'backendform'),
+                'class' => 'text-right fixed-width-xl',
+                'suffix' => 'px',
+            ];
             if ($place === 'cart') {
                 foreach (['up', 'down', 'left', 'right'] as $direction) {
                     $fields[] = [
                         'type' => 'text',
                         'label' => sprintf($this->l('Margines %s'), $translationsDirection[$direction]),
                         'name' => 'INPOST_PAY_margin_' . $place . '_' . $direction,
+                        'suffix' => 'px',
                         'class' => 'text-right fixed-width-xl',
                     ];
                 }
@@ -683,15 +714,15 @@ trait BackendForm
     {
         return [
             [
-                'id_option' => 'left',
+                'id_option' => Alignment::Left()->value,
                 'name' => 'Do lewej',
             ],
             [
-                'id_option' => 'center',
+                'id_option' => Alignment::Center(),
                 'name' => 'Do środka',
             ],
             [
-                'id_option' => 'right',
+                'id_option' => Alignment::Right()->value,
                 'name' => 'Do prawej',
             ],
         ];
@@ -701,11 +732,11 @@ trait BackendForm
     {
         return [
             [
-                'id_option' => 'light',
+                'id_option' => 0,
                 'name' => 'Jasne',
             ],
             [
-                'id_option' => 'dark',
+                'id_option' => 1,
                 'name' => 'Ciemne',
             ],
         ];
@@ -715,12 +746,30 @@ trait BackendForm
     {
         return [
             [
-                'id_option' => 'black',
-                'name' => 'Czarny',
+                'id_option' => Variant::Primary()->value,
+                'name' => 'Żółty',
             ],
             [
-                'id_option' => 'yellow',
-                'name' => 'Żółty',
+                'id_option' => Variant::Secondary()->value,
+                'name' => 'Czarny',
+            ],
+        ];
+    }
+
+    protected function getFrameStyleChoices(): array
+    {
+        return [
+            [
+                'id_option' => null,
+                'name' => 'Prostokątne',
+            ],
+            [
+                'id_option' => FrameStyle::Rounded()->value,
+                'name' => 'Małe zaokrąglenie',
+            ],
+            [
+                'id_option' => FrameStyle::Round()->value,
+                'name' => 'Duże zaokrąglenie',
             ],
         ];
     }

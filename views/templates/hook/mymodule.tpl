@@ -1,6 +1,13 @@
-<!-- Block mymodule -->
-<div style="{$style}" id="inpostizi_block_home" class="block">
-    {$mymodule_izi_html nofilter}
-    <div class="clearfix"></div>
+<div
+  id="inpostizi_block_home"
+  {if [] !== $styles}
+    style="{foreach $styles as $name => $value}{$name|escape:'html'}:{$value|escape:'html'};{/foreach}"
+  {/if}
+>
+  <inpost-izi-button
+    {foreach $attributes as $name => $value}
+      {$name|escape:'html'}="{$value|escape:'html'}"
+    {/foreach}
+  />
+  <div class="clearfix"></div>
 </div>
-<!-- /Block mymodule -->

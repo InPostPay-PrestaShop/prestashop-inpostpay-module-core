@@ -2,6 +2,7 @@
 
 use izi\prestashop\Installer\Database\Version_1_4_0;
 use izi\prestashop\Installer\DatabaseInstaller;
+use izi\prestashop\Widget\Variant;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -14,13 +15,24 @@ if (!defined('_PS_VERSION_')) {
  */
 function upgrade_module_1_4_0(\Module $module)
 {
-    $migration = new Version_1_4_0(\Db::getInstance());
+    $db = \Db::getInstance();
+    $migration = new Version_1_4_0($db);
     $dbInstaller = new DatabaseInstaller([$migration]);
 
-    \Db::getInstance()->delete('configuration', 'name LIKE "INPOST_PAY_status_translation_%"');
+    $db->delete('configuration', 'name LIKE "INPOST_PAY_status_translation_%"');
+    $db->execute(sprintf('
+        UPDATE `%sconfiguration`
+        SET `value` = (`value` = "dark")
+        WHERE `name` IN ("INPOST_PAY_background_cart", "INPOST_PAY_background_details")
+    ', _DB_PREFIX_));
+    $db->execute(sprintf('
+        UPDATE `%sconfiguration`
+        SET `value` = IF(`value` = "yellow", "%s", "%s")
+        WHERE `name` IN ("INPOST_PAY_variant_cart", "INPOST_PAY_variant_details")
+    ', _DB_PREFIX_, Variant::Primary()->value, Variant::Secondary()->value));
 
     return $dbInstaller->install($module)
         && $module->registerHook('actionObjectCartDeleteBefore')
         && $module->registerHook('actionObjectInPostShipmentModelUpdateBefore')
-        && \Configuration::updateValue('INPOST_PAY_INITIAL_OS_ID', \Configuration::get('PS_OS_BANKWIRE'));
+        && \Configuration::updateGlobalValue('INPOST_PAY_INITIAL_OS_ID', \Configuration::get('PS_OS_BANKWIRE'));
 }

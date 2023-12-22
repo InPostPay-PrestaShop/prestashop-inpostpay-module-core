@@ -4,11 +4,16 @@ use izi\BasketIdentification;
 use izi\item\Basket;
 use izi\prestashop\BindingProvider;
 use izi\prestashop\CartSession;
+use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\InpostIziPayPrestashop;
 use izi\prestashop\Installer\DatabaseInstaller;
 use izi\prestashop\Logger;
 use izi\prestashop\PrestashopBasket;
 use izi\prestashop\traits\OrderStatusDescriberTrait;
+use izi\prestashop\Widget\Alignment;
+use izi\prestashop\Widget\FrameStyle;
+use izi\prestashop\Widget\Variant;
+use izi\prestashop\WidgetConfiguration;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
 if (!defined('_PS_VERSION_')) {
@@ -172,15 +177,9 @@ class Inpostizi extends PaymentModule
             return '';
         }
 
-        return $this->showInpostiziBindButton(
-            $params['product']->id,
-            '',
-            'dark' === \Configuration::get('INPOST_PAY_background_details'),
-            'yellow' === \Configuration::get('INPOST_PAY_variant_details'),
-            false,
-            \Configuration::get('INPOST_PAY_alignment_details'),
-            \izi\InPostIzi::BINDING_PLACE_PRODUCT_CARD
-        );
+        $config = $this->createWidgetConfigurationForProduct($params['product']->id);
+
+        return $this->renderInPostPayWidget($config);
     }
 
     public function hookDisplayFooterProduct(array $params)
@@ -189,15 +188,10 @@ class Inpostizi extends PaymentModule
             return '';
         }
 
-        return $this->showInpostiziBindButton(
-            is_array($params['product']) ? $params['product']['id'] : $params['product']->id,
-            '',
-            'dark' === \Configuration::get('INPOST_PAY_background_details'),
-            'yellow' === \Configuration::get('INPOST_PAY_variant_details'),
-            false,
-            \Configuration::get('INPOST_PAY_alignment_details'),
-            \izi\InPostIzi::BINDING_PLACE_PRODUCT_CARD
-        );
+        $productId = is_array($params['product']) ? $params['product']['id'] : $params['product']->id;
+        $config = $this->createWidgetConfigurationForProduct($productId);
+
+        return $this->renderInPostPayWidget($config);
     }
 
     public function hookDisplayShoppingCart()
@@ -211,15 +205,10 @@ class Inpostizi extends PaymentModule
             return '';
         }
 
-        return $this->showInpostiziBindButton(
-            null,
-            '',
-            'dark' === \Configuration::get('INPOST_PAY_background_cart'),
-            'yellow' === \Configuration::get('INPOST_PAY_variant_cart'),
-            true,
-            \Configuration::get('INPOST_PAY_alignment_cart'),
-            \izi\InPostIzi::BINDING_PLACE_BASKET_SUMMARY
-        );
+        $config = $this->createWidgetConfigurationForCart();
+        $styles = iterator_to_array($this->getCartWidgetStyles());
+
+        return $this->renderInPostPayWidget($config, $styles);
     }
 
     /**
@@ -237,17 +226,11 @@ class Inpostizi extends PaymentModule
 
         $paymentOptions = [];
 
-        $button = $this->showInpostiziBindButton(
-            null,
-            '',
-            'dark' === \Configuration::get('INPOST_PAY_background_cart'),
-            'yellow' === \Configuration::get('INPOST_PAY_variant_cart'),
-            true,
-            \Configuration::get('INPOST_PAY_alignment_cart'),
-            \izi\InPostIzi::BINDING_PLACE_ORDER_CREATE
-        );
+        $config = $this
+            ->createWidgetConfigurationForCart()
+            ->setBindingPlace(BindingPlace::OrderCreate());
 
-        if ('' === $button) {
+        if ('' === $button = $this->renderInPostPayWidget($config)) {
             return [];
         }
 
@@ -262,6 +245,8 @@ class Inpostizi extends PaymentModule
 
     public function hookActionFrontControllerSetMedia()
     {
+        InpostIziPayPrestashop::getInstance();
+
         $this->context->controller->registerJavascript(
             'inpostizi-javascript',
             "modules/$this->name/views/js/prestashopizi.js",
@@ -273,7 +258,7 @@ class Inpostizi extends PaymentModule
 
         $this->context->controller->registerJavascript(
             'inpostizi.js',
-            'https://izi.inpost.pl/inpostizi.js',
+            InpostIziPayPrestashop::getJsUrl(),
             [
                 'position' => 'bottom',
                 'priority' => 100,
@@ -337,7 +322,7 @@ class Inpostizi extends PaymentModule
 
         $orderData = json_decode($orderData, false);
 
-        $this->context->smarty->assign([
+        $this->smarty->assign([
             'delivery' => 'APM' === $orderData->delivery->delivery_type ? 'Paczkomat' : 'Kurier',
             'apm' => 'APM' === $orderData->delivery->delivery_type ? $orderData->delivery->delivery_point : '',
         ]);
@@ -381,15 +366,8 @@ class Inpostizi extends PaymentModule
         return '<inpost-thank-you/>';
     }
 
-    private function showInpostiziBindButton(
-        $productId,
-        $variationId = '',
-        $dark = false,
-        $yellow = false,
-        $cart = false,
-        $float = 'left',
-        $bindingPlace = ''
-    ) {
+    private function renderInPostPayWidget(WidgetConfiguration $config, array $styles = [])
+    {
         static $alreadyShown;
 
         if ($alreadyShown) {
@@ -411,44 +389,29 @@ class Inpostizi extends PaymentModule
             return '';
         }
 
-        $maskedPhoneNumber = $isBasketLinked && isset($binding->client_details->masked_phone_number) ? $binding->client_details->masked_phone_number : '';
-        $name = $isBasketLinked && isset($binding->client_details->name) ? $binding->client_details->name : '';
-        $inpost_basket_id = $isBasketLinked && isset($binding->inpost_basket_id) ? $binding->inpost_basket_id : '';
+        $maskedPhoneNumber = $isBasketLinked && isset($binding->client_details->masked_phone_number) ? $binding->client_details->masked_phone_number : null;
+        $name = $isBasketLinked && isset($binding->client_details->name) ? $binding->client_details->name : null;
+//        $inpost_basket_id = $isBasketLinked && isset($binding->inpost_basket_id) ? $binding->inpost_basket_id : '';
 
-        $theCart = isset($this->context->cart) ? $this->context->cart : new \Cart();
-        $products = $theCart->getProducts();
-        $nbTotalProducts = 0;
+        $basketId = BasketIdentification::get();
 
-        foreach ($products as $product) {
-            $nbTotalProducts += (int) $product['cart_quantity'];
+        if (null !== CartSession::getCartOrderRedirectUrl($basketId)) {
+            BasketIdentification::drop();
+            $basketId = BasketIdentification::get();
         }
 
-        $html = \izi\InPostIzi::render(
-            $productId,
-            $name,
-            $maskedPhoneNumber,
-            $inpost_basket_id,
-            false,
-            false,
-            $variationId,
-            $nbTotalProducts,
-            $dark,
-            $yellow,
-            $cart,
-            $float,
-            $bindingPlace
-        );
-
-        $style = '';
-        if ($cart) {
-            $style .= (\Configuration::get('INPOST_PAY_margin_cart_left') ? 'margin-left: ' . \Configuration::get('INPOST_PAY_margin_cart_left') . 'px;' : '');
-            $style .= (\Configuration::get('INPOST_PAY_margin_cart_right') ? 'margin-right: ' . \Configuration::get('INPOST_PAY_margin_cart_right') . 'px;' : '');
-            $style .= (\Configuration::get('INPOST_PAY_margin_cart_up') ? 'margin-top: ' . \Configuration::get('INPOST_PAY_margin_cart_up') . 'px;' : '');
-            $style .= (\Configuration::get('INPOST_PAY_margin_cart_down') ? 'margin-bottom: ' . \Configuration::get('INPOST_PAY_margin_cart_down') . 'px;' : '');
+        if (!CartSession::getCartConfirmation($basketId)) {
+            $maskedPhoneNumber = null;
         }
-        $this->context->smarty->assign([
-            'style' => $style,
-            'mymodule_izi_html' => $html,
+
+        $config
+            ->setName($name)
+            ->setMaskedPhoneNumber($maskedPhoneNumber)
+            ->setCount($this->getCartProductsCount());
+
+        $this->smarty->assign([
+            'styles' => $styles,
+            'attributes' => $config,
         ]);
 
         return $this->display(__FILE__, 'mymodule.tpl');
@@ -632,5 +595,90 @@ class Inpostizi extends PaymentModule
         $status = $this->getStatusDescription($order);
 
         InpostIziPayPrestashop::getInstance()->orderEvent($order->id, $status, $trackingNumbers);
+    }
+
+    /**
+     * @param int $productId
+     *
+     * @return WidgetConfiguration
+     */
+    private function createWidgetConfigurationForProduct($productId)
+    {
+        $minWidth = $this->getWidgetWidth((int) \Configuration::get('INPOST_PAY_min_width_cart'));
+        $maxWidth = $this->getWidgetWidth((int) \Configuration::get('INPOST_PAY_max_width_cart'));
+
+        return (new WidgetConfiguration(BindingPlace::ProductCard(), false))
+            ->setProductId((string) $productId)
+            ->setLanguage(\izi\prestashop\Widget\Language::tryFrom($this->context->language->iso_code) ?? \izi\prestashop\Widget\Language::En())
+            ->setVariant(Variant::tryFrom((string) \Configuration::get('INPOST_PAY_variant_details')) ?? Variant::Secondary())
+            ->setDarkMode((bool) \Configuration::get('INPOST_PAY_background_details'))
+            ->setAlignment(Alignment::tryFrom((string) \Configuration::get('INPOST_PAY_alignment_details')))
+            ->setFrameStyle(FrameStyle::tryFrom((string) \Configuration::get('INPOST_PAY_frame_style_details')))
+            ->setMinWidth($minWidth)
+            ->setMaxWidth($maxWidth);
+    }
+
+    /**
+     * @return WidgetConfiguration
+     */
+    private function createWidgetConfigurationForCart()
+    {
+        $minWidth = $this->getWidgetWidth((int) \Configuration::get('INPOST_PAY_min_width_cart'));
+        $maxWidth = $this->getWidgetWidth((int) \Configuration::get('INPOST_PAY_max_width_cart'));
+
+        return (new WidgetConfiguration(BindingPlace::BasketSummary(), true))
+            ->setLanguage(\izi\prestashop\Widget\Language::tryFrom($this->context->language->iso_code) ?? \izi\prestashop\Widget\Language::En())
+            ->setVariant(Variant::tryFrom((string) \Configuration::get('INPOST_PAY_variant_cart')) ?? Variant::Secondary())
+            ->setDarkMode((bool) \Configuration::get('INPOST_PAY_background_cart'))
+            ->setAlignment(Alignment::tryFrom((string) \Configuration::get('INPOST_PAY_alignment_cart')))
+            ->setFrameStyle(FrameStyle::tryFrom((string) \Configuration::get('INPOST_PAY_frame_style_cart')))
+            ->setMinWidth($minWidth)
+            ->setMaxWidth($maxWidth);
+    }
+
+    /**
+     * @return \Generator<string, string>
+     */
+    private function getCartWidgetStyles()
+    {
+        if (0 < $marginLeft = (int) \Configuration::get('INPOST_PAY_margin_cart_left')) {
+            yield 'margin-left' => sprintf('%dpx', $marginLeft);
+        }
+
+        if (0 < $marginRight = (int) \Configuration::get('INPOST_PAY_margin_cart_right')) {
+            yield 'margin-right' => sprintf('%dpx', $marginRight);
+        }
+
+        if (0 < $marginTop = (int) \Configuration::get('INPOST_PAY_margin_cart_up')) {
+            yield 'margin-top' => sprintf('%dpx', $marginTop);
+        }
+
+        if (0 < $marginBottom = (int) \Configuration::get('INPOST_PAY_margin_cart_down')) {
+            yield 'margin-bottom' => sprintf('%dpx', $marginBottom);
+        }
+    }
+
+    /**
+     * @param int $width
+     *
+     * @return int|null
+     */
+    private function getWidgetWidth($width)
+    {
+        return WidgetConfiguration::WIDTH_MIN_PX <= $width && WidgetConfiguration::WIDTH_MAX_PX >= $width ? $width : null;
+    }
+
+    /**
+     * @return int|null
+     */
+    private function getCartProductsCount()
+    {
+        if (!isset($this->context->cart)) {
+            return null;
+        }
+
+        return array_reduce($this->context->cart->getProducts(), static function ($count, array $product) {
+            return $count + (int) $product['cart_quantity'];
+        }, 0);
     }
 }
