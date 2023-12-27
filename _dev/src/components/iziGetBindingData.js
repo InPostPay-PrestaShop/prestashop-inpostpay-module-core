@@ -1,6 +1,6 @@
 import Server from "../commn/Server";
 
-const BASE_URL = "index.php?fc=module&module=inpostizi&controller=backend&path=inpost/v1/izi/merchant/basket/post/binding/";
+const BASE_URL = prestashop.urls.base_url + "index.php?fc=module&module=inpostizi&controller=backend&path=inpost/v1/izi/merchant/basket/post/binding/";
 
 // Deprecated function, use iziGetPayData instead
 

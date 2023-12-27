@@ -1,5 +1,5 @@
 let eventSource;
-const url = "index.php?fc=module&module=inpostizi&controller=backend&path=inpost/v1/izi/merchant/order/confirmation/get";
+const url = prestashop.urls.base_url + "index.php?fc=module&module=inpostizi&controller=backend&path=inpost/v1/izi/merchant/order/confirmation/get";
 
 function setupEventSource(url, resolve) {
   if (!eventSource) {
