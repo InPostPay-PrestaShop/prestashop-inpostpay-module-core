@@ -718,7 +718,7 @@ trait BackendForm
                 'name' => 'Do lewej',
             ],
             [
-                'id_option' => Alignment::Center(),
+                'id_option' => Alignment::Center()->value,
                 'name' => 'Do środka',
             ],
             [
