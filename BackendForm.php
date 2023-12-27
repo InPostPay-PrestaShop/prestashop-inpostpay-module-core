@@ -746,12 +746,12 @@ trait BackendForm
     {
         return [
             [
-                'id_option' => Variant::Primary()->value,
-                'name' => 'Żółty',
-            ],
-            [
                 'id_option' => Variant::Secondary()->value,
                 'name' => 'Czarny',
+            ],
+            [
+                'id_option' => Variant::Primary()->value,
+                'name' => 'Żółty',
             ],
         ];
     }
