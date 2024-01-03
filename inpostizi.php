@@ -604,8 +604,8 @@ class Inpostizi extends PaymentModule
      */
     private function createWidgetConfigurationForProduct($productId)
     {
-        $minWidth = $this->getWidgetWidth((int) \Configuration::get('INPOST_PAY_min_width_cart'));
-        $maxWidth = $this->getWidgetWidth((int) \Configuration::get('INPOST_PAY_max_width_cart'));
+        $minWidth = $this->getWidgetWidth((int) \Configuration::get('INPOST_PAY_min_width_details'));
+        $maxWidth = $this->getWidgetWidth((int) \Configuration::get('INPOST_PAY_max_width_details'));
 
         return (new WidgetConfiguration(BindingPlace::ProductCard(), false))
             ->setProductId((string) $productId)
