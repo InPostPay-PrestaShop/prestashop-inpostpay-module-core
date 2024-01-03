@@ -97,7 +97,20 @@ class MerchantController
     public function deleteBinding(): JsonResponse
     {
         $basketId = \izi\BasketIdentification::get();
-        $response = $this->application->getController()->basketBindingDelete();
+
+        [$response, $statusCode] = $this->application->getController()->basketBindingDelete();
+
+        if (
+            204 !== $statusCode &&
+            (!isset($response['error_code']) || !in_array($response['error_code'], ['BASKET_NOT_FOUND', 'BASKET_NOT_BOUND', 'BASKET_EXPIRED']))
+        ) {
+            $response = isset($response['error_code']) ? $response : [
+                'message' => 'Could not remove basket binding.',
+            ];
+
+            return new JsonResponse($response, $statusCode);
+        }
+
         CartSession::dropCartConfirmation($basketId);
         \izi\BasketIdentification::drop();
 

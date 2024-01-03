@@ -115,7 +115,7 @@ class Remote extends Connection
     {
         $query = $ordered ? '?if_basket_realized=1' : '';
 
-        return $this->request("v1/izi/basket/{$basketId}/binding{$query}", 'DELETE');
+        return $this->request("v1/izi/basket/{$basketId}/binding{$query}", 'DELETE', true);
     }
 
     public function browserBindingDelete($browserId)
