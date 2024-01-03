@@ -1,0 +1,42 @@
+<?php
+
+declare(strict_types=1);
+
+namespace izi\prestashop\Command;
+
+use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler;
+
+/**
+ * @see UpdateOrderTrackingNumbersHandler
+ */
+final class UpdateOrderTrackingNumbersCommand
+{
+    /**
+     * @var string
+     */
+    private $orderId;
+
+    /**
+     * @var \DateTimeImmutable
+     */
+    private $eventTime;
+
+    /**
+     * @param string $orderId
+     */
+    public function __construct(string $orderId, \DateTimeImmutable $eventTime)
+    {
+        $this->orderId = $orderId;
+        $this->eventTime = $eventTime;
+    }
+
+    public function getOrderId(): string
+    {
+        return $this->orderId;
+    }
+
+    public function getEventTime(): \DateTimeImmutable
+    {
+        return $this->eventTime;
+    }
+}

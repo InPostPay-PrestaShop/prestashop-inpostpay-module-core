@@ -4,10 +4,6 @@
     style="{foreach $styles as $name => $value}{$name|escape:'html'}:{$value|escape:'html'};{/foreach}"
   {/if}
 >
-  <inpost-izi-button
-    {foreach $attributes as $name => $value}
-      {$name|escape:'html'}="{$value|escape:'html'}"
-    {/foreach}
-  ></inpost-izi-button>
+  {$widget|cleanHtml nofilter}
   <div class="clearfix"></div>
 </div>

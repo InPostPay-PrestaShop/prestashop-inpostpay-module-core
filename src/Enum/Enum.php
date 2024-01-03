@@ -46,7 +46,7 @@ abstract class Enum implements \JsonSerializable
         $cases = self::casesByName();
 
         if (!isset($cases[$name])) {
-            throw new \BadMethodCallException(sprintf('Case "%s" does not exist in "%s".', $name, static::class));
+            throw new \DomainException(sprintf('Case "%s" does not exist in "%s".', $name, static::class));
         }
 
         return $cases[$name];
@@ -71,7 +71,7 @@ abstract class Enum implements \JsonSerializable
             case 'value':
                 return $this->_value;
             default:
-                trigger_error(sprintf('Undefined property: %s::$%s', static::class, $property));
+                trigger_error(sprintf('Undefined property: %s::$%s', static::class, $property), E_USER_WARNING);
 
                 return null;
         }

@@ -1,15 +1,16 @@
 <?php
 
+use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Installer\Database\Version_1_4_0;
 use izi\prestashop\Installer\DatabaseInstaller;
-use izi\prestashop\Widget\Variant;
+use izi\prestashop\View\Widget\Variant;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
 /**
- * @param \inpostizi $module
+ * @param \InPostIzi $module
  *
  * @return bool
  */
@@ -17,7 +18,7 @@ function upgrade_module_1_4_0(\Module $module)
 {
     $db = \Db::getInstance();
     $migration = new Version_1_4_0($db);
-    $dbInstaller = new DatabaseInstaller([$migration]);
+    $dbInstaller = new DatabaseInstaller(new Configuration(), [$migration]);
 
     $db->delete('configuration', 'name LIKE "INPOST_PAY_status_translation_%"');
     $db->execute(sprintf('

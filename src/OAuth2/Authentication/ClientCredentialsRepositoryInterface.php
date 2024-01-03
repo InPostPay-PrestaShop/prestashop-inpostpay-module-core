@@ -1,0 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+namespace izi\prestashop\OAuth2\Authentication;
+
+interface ClientCredentialsRepositoryInterface
+{
+    public function getClientCredentials(): ?ClientCredentialsInterface;
+}

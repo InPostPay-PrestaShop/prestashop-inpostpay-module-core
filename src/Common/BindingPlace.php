@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\Common;
 
 use izi\prestashop\Enum\StringEnum;

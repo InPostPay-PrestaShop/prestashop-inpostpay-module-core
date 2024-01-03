@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace izi\prestashop\BasketApp;
+
+use izi\prestashop\BasketApp\Basket\BasketsApiClientInterface;
+use izi\prestashop\BasketApp\Browser\BrowserApiClientInterface;
+use izi\prestashop\BasketApp\Order\OrdersApiClientInterface;
+use izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface;
+
+interface BasketAppClientInterface extends BasketsApiClientInterface, BrowserApiClientInterface, OrdersApiClientInterface, SigningKeysApiClientInterface
+{
+    public const DATETIME_FORMAT = 'Y-m-d\TH:i:s.v\Z'; // format character "p" is not available before PHP 8.0
+    public const DATETIME_ZONE = 'UTC';
+}

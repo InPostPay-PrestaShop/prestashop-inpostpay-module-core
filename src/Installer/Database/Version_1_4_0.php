@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\Installer\Database;
 
 final class Version_1_4_0 extends AbstractMigration
@@ -71,7 +73,7 @@ final class Version_1_4_0 extends AbstractMigration
     private function cleanupSessionsTable(): bool
     {
         return $this->deleteUnassociatedSessions()
-            && $this->updateNonexistentOrderIds()
+            && $this->updateNonExistentOrderIds()
             && $this->deleteDuplicatedCartAssociations()
             && $this->deleteDuplicatedIdentifiers();
     }
@@ -87,7 +89,7 @@ final class Version_1_4_0 extends AbstractMigration
         ');
     }
 
-    private function updateNonexistentOrderIds(): bool
+    private function updateNonExistentOrderIds(): bool
     {
         return $this->db->execute('
             UPDATE `' . _DB_PREFIX_ . self::SESSIONS_TABLE . '` bs

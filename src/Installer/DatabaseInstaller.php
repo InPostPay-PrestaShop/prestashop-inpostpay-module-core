@@ -1,26 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\Installer;
 
+use izi\prestashop\Configuration\Adapter\Configuration;
+use izi\prestashop\Configuration\ShopAwareConfigurationInterface;
 use izi\prestashop\Installer\Database\Version_1_4_0;
 
 final class DatabaseInstaller
 {
     private const SCHEMA_VERSION_CONFIG_KEY = 'INPOST_PAY_DB_SCHEMA_VERSION';
 
+    /**
+     * @var ShopAwareConfigurationInterface
+     */
+    private $configuration;
+
+    /**
+     * @var iterable<DatabaseMigrationInterface>
+     */
     private $migrations;
 
     /**
      * @param iterable<DatabaseMigrationInterface>|null $migrations
      */
-    public function __construct(iterable $migrations = null)
+    public function __construct(ShopAwareConfigurationInterface $configuration = null, iterable $migrations = null)
     {
+        $this->configuration = $configuration ?? new Configuration();
         $this->migrations = $migrations ?? $this->getDefaultMigrations();
     }
 
     public function install(\Module $module): bool
     {
-        $currentVersion = \Configuration::getGlobalValue(self::SCHEMA_VERSION_CONFIG_KEY) ?: '0';
+        $currentVersion = $this->configuration->getGlobal(self::SCHEMA_VERSION_CONFIG_KEY) ?: '0';
 
         foreach ($this->getSortedMigrations() as $migration) {
             if (\Tools::version_compare($currentVersion, $version = $migration->getVersion(), '>=')) {
@@ -72,7 +85,7 @@ final class DatabaseInstaller
 
     private function updateSchemaVersion(?string $version): void
     {
-        \Configuration::updateGlobalValue(self::SCHEMA_VERSION_CONFIG_KEY, $version);
+        $this->configuration->setGlobal(self::SCHEMA_VERSION_CONFIG_KEY, $version);
     }
 
     /**

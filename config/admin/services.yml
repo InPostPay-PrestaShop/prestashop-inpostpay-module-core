@@ -1,0 +1,23 @@
+imports:
+  - { resource: ../services/common.yml }
+
+parameters:
+  inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
+
+services:
+  _defaults:
+    public: false
+    autowire: true
+
+  izi\prestashop\Hook\Admin\DisplayAdminOrderSide:
+    class: izi\prestashop\Hook\Admin\DisplayAdminOrderSide
+
+  izi\prestashop\CommandBus:
+    class: izi\prestashop\CommandBus
+    tags: [ container.service_subscriber ]
+
+  izi\prestashop\Hook\HookExecutor:
+    class: izi\prestashop\Hook\HookExecutor
+    tags: [ container.service_subscriber ]
+    arguments:
+      $widget: '@inpost.izi.module'

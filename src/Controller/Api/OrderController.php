@@ -1,22 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\Controller\Api;
 
 use izi\prestashop\CartSession;
+use izi\prestashop\Common\Order\MerchantOrderStatusData;
+use izi\prestashop\MerchantApi\Command\UpdateOrderCommand;
+use izi\prestashop\MerchantApi\Exception\MalformedRequestException;
+use izi\prestashop\MerchantApi\Model\Order\Request\OrderEvent;
 use izi\prestashop\PrestashopOrder;
-use izi\prestashop\rest\Exception\OrderNotFoundException;
+use izi\prestashop\MerchantApi\Exception\OrderNotFoundException;
 use izi\prestashop\rest\order\Create;
-use izi\prestashop\traits\OrderStatusDescriberTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class OrderController extends ApiController
+class OrderController extends AbstractApiController
 {
-    use OrderStatusDescriberTrait;
-
     public function create(Request $request): JsonResponse
     {
-        $data = $this->decodeRequest($request);
+        $data = $this->_decodeRequest($request);
 
         $handler = new Create();
         $orderId = $handler->handleRequest($data);
@@ -27,9 +30,9 @@ class OrderController extends ApiController
         return new JsonResponse($response, 201);
     }
 
-    public function get(int $orderId): JsonResponse
+    public function get(string $orderId): JsonResponse
     {
-        $order = $this->getOrderById($orderId);
+        $order = $this->getOrderById((int) $orderId);
 
         $basketId = CartSession::getBasketIdByCartId($order->id_cart);
         $response = PrestashopOrder::getOrder($order, $basketId);
@@ -37,22 +40,15 @@ class OrderController extends ApiController
         return new JsonResponse($response);
     }
 
-    public function update(int $orderId, Request $request): JsonResponse
+    public function update(string $orderId, Request $request): JsonResponse
     {
-        $order = $this->getOrderById($orderId);
+        $event = $this->decodeRequest($request, OrderEvent::class);
+        $command = new UpdateOrderCommand($orderId, $event);
 
-        if ('inpostizi' !== $order->module) {
-            return new JsonResponse([
-                'order_status' => 'ORDER_COMPLETED',
-            ]);
-        }
+        /** @var MerchantOrderStatusData $orderStatus */
+        $orderStatus = $this->bus->handle($command);
 
-        $data = $this->decodeRequest($request);
-        $this->updateOrderStatus($order, $data);
-
-        return new JsonResponse([
-            'order_merchant_status_description' => $this->getStatusDescription($order),
-        ]);
+        return new JsonResponse($orderStatus);
     }
 
     private function getOrderById(int $orderId): \Order
@@ -66,19 +62,14 @@ class OrderController extends ApiController
         return $order;
     }
 
-    private function updateOrderStatus(\Order $order, $data): void
+    private function _decodeRequest(Request $request)
     {
-        if ('AUTHORIZED' !== $data->event_data->payment_status) {
-            return;
+        $data = json_decode($request->getContent(), false);
+
+        if (JSON_ERROR_NONE !== json_last_error()) {
+            throw MalformedRequestException::create();
         }
 
-        $statusId = (int) \Configuration::get('INPOST_PAY_authorized_payment', null, null, $order->id_shop);
-        if (0 >= $statusId || $statusId === (int) $order->current_state) {
-            return;
-        }
-
-        $order->setCurrentState($statusId);
-
-        \izi\prestashop\Logger::log(sprintf('Updated order #%d status to #%d.', $order->id, $statusId));
+        return $data;
     }
 }

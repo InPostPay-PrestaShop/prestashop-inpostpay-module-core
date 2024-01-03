@@ -1,93 +1,69 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\Controller\Api;
 
-use izi\item\Basket;
-use izi\item\BasketNotice;
+use izi\prestashop\BasketApp\BasketAppClientInterface;
 use izi\prestashop\CartSession;
-use izi\prestashop\Handler\Factory\BasketEventHandlerFactory;
-use izi\prestashop\PrestashopBasket;
-use izi\prestashop\rest\Exception\BasketNotFoundException;
-use izi\prestashop\traits\CartContextSetterTrait;
+use izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand;
+use izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand;
+use izi\prestashop\MerchantApi\Command\GetBasketCommand;
+use izi\prestashop\MerchantApi\Command\UpdateBasketCommand;
+use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
+use izi\prestashop\MerchantApi\Model\Basket\Request\BindingConfirmation;
+use izi\prestashop\MerchantApi\Model\Basket\Response\Basket;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-class BasketController extends ApiController
+final class BasketController extends AbstractApiController
 {
-    use CartContextSetterTrait;
-
-    public function __construct(\Context $context = null)
-    {
-        $this->context = $context ?? \Context::getContext();
-    }
-
     public function get(string $basketId): JsonResponse
     {
-        $basket = $this->getBasketById($basketId);
-        CartSession::setBasketCacheById($basketId, json_encode($basket));
+        /** @var Basket $basket */
+        $basket = $this->bus->handle(new GetBasketCommand($basketId));
 
-        return new JsonResponse($basket);
+        return $this->basketResponse($basket, $basketId);
     }
 
     public function confirm(string $basketId, Request $request): JsonResponse
     {
-        $basket = $this->getBasketById($basketId);
+        $confirmation = $this->decodeRequest($request, BindingConfirmation::class);
+        $command = new ConfirmBasketBindingCommand($basketId, $confirmation);
 
-        $data = $request->getContent();
-        CartSession::setConfirmationToCart($basketId, $data);
+        /** @var Basket $basket */
+        $basket = $this->bus->handle($command);
 
-        return new JsonResponse($basket);
+        return $this->basketResponse($basket, $basketId);
     }
 
     public function update(string $basketId, Request $request): JsonResponse
     {
-        $cart = $this->getCartByBasketId($basketId);
+        $event = $this->decodeRequest($request, BasketEvent::class);
+        $command = new UpdateBasketCommand($basketId, $event);
 
-        $event = $this->decodeRequest($request);
+        /** @var Basket $basket */
+        $basket = $this->bus->handle($command);
 
-        $handler = BasketEventHandlerFactory::create($this->context, $event);
-        $notice = $handler->handle($cart, $event);
-
-        if (null === $notice || BasketNotice::TYPE_ERROR !== $notice->getType()) {
-            \CartRule::autoRemoveFromCart($this->context);
-            \CartRule::autoAddToCart($this->context);
-        }
-
-        $basket = PrestashopBasket::createForCart($cart, $basketId);
-        if (null !== $notice) {
-            $basket->setNotice($notice);
-        }
-
-        CartSession::setBasketCacheById($basketId, json_encode($basket));
-        CartSession::setBasketCouponsById($basketId, 1);
-
-        return new JsonResponse($basket);
+        return $this->basketResponse($basket, $basketId);
     }
 
     public function deleteBinding(string $basketId): JsonResponse
     {
-        CartSession::deleteByBasketId($basketId);
+        $this->bus->handle(new DeleteBasketBindingCommand($basketId));
 
         return new JsonResponse();
     }
 
-    private function getBasketById(string $basketId): Basket
+    private function basketResponse(Basket $basket, string $basketId): JsonResponse
     {
-        $cart = $this->getCartByBasketId($basketId);
+        $data = $this->serializer->serialize($basket, 'json', [
+            'datetime_format' => BasketAppClientInterface::DATETIME_FORMAT,
+            'datetime_timezone' => BasketAppClientInterface::DATETIME_ZONE,
+        ]);
 
-        return PrestashopBasket::createForCart($cart, $basketId);
-    }
+        CartSession::setBasketCacheById($basketId, $data); // TODO remove when not needed
 
-    private function getCartByBasketId(string $basketId): \Cart
-    {
-        $cartId = CartSession::getCartIdByBasketId($basketId);
-
-        if (!$cartId || !\Validate::isLoadedObject($cart = new \Cart($cartId))) {
-            throw BasketNotFoundException::create();
-        }
-
-        $this->setUpContext($cart);
-
-        return $cart;
+        return new JsonResponse($data);
     }
 }

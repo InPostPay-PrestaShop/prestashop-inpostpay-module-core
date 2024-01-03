@@ -4,21 +4,31 @@ namespace izi\prestashop\rest\order;
 
 use izi\item\order\InvoiceDetails;
 use izi\prestashop\CartSession;
-use izi\prestashop\rest\Exception\BasketNotFoundException;
-use izi\prestashop\rest\Exception\CannotCreateOrderException;
-use izi\prestashop\rest\Exception\InternalServerErrorException;
+use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
+use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
+use izi\prestashop\MerchantApi\Exception\InternalServerErrorException;
 use izi\prestashop\traits\CarrierFinderTrait;
-use izi\prestashop\traits\CartContextSetterTrait;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
 
 class Create
 {
     use CarrierFinderTrait;
-    use CartContextSetterTrait;
 
     private const TRANSLATION_SOURCE = 'create';
 
+    /**
+     * @var \Context
+     */
+    private $context;
+
+    /**
+     * @var Hashing
+     */
     private $crypto;
+
+    /**
+     * @var \InPostIzi
+     */
     private $module;
 
     public function __construct(\Context $context = null, Hashing $crypto = null, \PaymentModule $module = null)
@@ -382,7 +392,9 @@ class Create
             $model->phone = $delivery->phone_number->phone;
             $model->save();
         } catch (\Exception $e) {
-            \izi\prestashop\Logger::log($e->getMessage() . ' at ' . $e->getFile() . ':' . $e->getLine());
+            $this->module->getLogger()->error('Could not save shipment data: {error}', [
+                'error' => $e,
+            ]);
         }
     }
 
@@ -455,5 +467,23 @@ class Create
         }
 
         return \Tools::getContextLocale($this->context)->formatPrice($price, 'PLN');
+    }
+
+    private function setUpContext(\Cart $cart): void
+    {
+        if ($currencyId = \Currency::getIdByIsoCode('PLN')) {
+            $cart->id_currency = $currencyId;
+        }
+
+        $this->context->cart = $cart;
+        $this->context->shop = new \Shop($cart->id_shop);
+        $this->context->customer = new \Customer($cart->id_customer);
+        $this->context->cart->setTaxCalculationMethod();
+        $this->context->currency = \Currency::getCurrencyInstance($cart->id_currency);
+        $this->context->language = new \Language($cart->id_lang);
+
+        $this->context->getTranslator()->setLocale($this->context->language->locale);
+
+        \Shop::setContext(\Shop::CONTEXT_SHOP, $cart->id_shop);
     }
 }

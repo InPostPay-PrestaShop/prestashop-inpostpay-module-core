@@ -1,6 +1,5 @@
 vendor/
 node_modules
 inpostizi.zip
-src/*.log
 config_*.xml
 *.js.map

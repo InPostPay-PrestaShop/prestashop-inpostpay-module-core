@@ -21,7 +21,6 @@ build-zip:
 	rm -rf /tmp/inpostizi/package.*
 	rm -rf /tmp/inpostizi/.docker-compose-ci.yml
 	rm -rf /tmp/inpostizi/.gitlab-ci.yml
-	rm -rf /tmp/inpostizi/**/*.log
 	mv -v /tmp/inpostizi $(PWD)/inpostizi
 	zip -r inpostizi.zip inpostizi
 	rm -rf $(PWD)/inpostizi

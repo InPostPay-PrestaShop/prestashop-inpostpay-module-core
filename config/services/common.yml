@@ -1,0 +1,403 @@
+parameters:
+  inpost.izi.logger_config:
+    type: rotating_file
+    path: '%inpost.izi.logs_dir%/izi.log'
+    max_files: 14
+    bubble: false
+    channels: [ general, basket_app, merchant_api ]
+    process_psr_3_messages:
+      remove_used_context_fields: true
+    include_stacktraces: true
+
+services:
+  _defaults:
+    public: false
+
+  inpost.izi.module:
+    class: InPostIzi
+    factory: [ \Module, getInstanceByName ]
+    arguments:
+      - inpostizi
+
+  inpost.izi.db:
+    class: Db
+    factory: [ \Db, getInstance ]
+
+  inpost.izi.context:
+    class: Context
+    factory: [ \Context, getContext ]
+
+  inpost.izi.clock:
+    class: Psr\Clock\ClockInterface
+    factory: [ \izi\prestashop\Clock\SystemClock, fromSystemTimezone ]
+
+  inpost.izi.serializer:
+    class: Symfony\Component\Serializer\SerializerInterface
+    factory: [ \izi\prestashop\Serializer\SerializerFactory, create ]
+
+  izi\prestashop\CommandBusInterface:
+    alias: izi\prestashop\CommandBus
+    public: true
+
+  izi\prestashop\Hook\HookExecutorInterface:
+    alias: izi\prestashop\Hook\HookExecutor
+    public: true
+
+  inpost.izi.psr17_factory:
+    class: Nyholm\Psr7\Factory\Psr17Factory
+
+  izi\prestashop\Http\Client\Factory\GuzzleClientFactory:
+    class: izi\prestashop\Http\Client\Factory\GuzzleClientFactory
+
+  inpost.izi.http_client.basket_app:
+    class: Psr\Http\Client\ClientInterface
+    factory: [ '@izi\prestashop\Http\Client\Factory\GuzzleClientFactory', create ]
+
+  inpost.izi.http_client.basket_app.authorizing:
+    class: izi\prestashop\Http\Client\AuthorizingClient
+    decorates: inpost.izi.http_client.basket_app
+    arguments:
+      - '@inpost.izi.http_client.basket_app.authorizing.inner'
+      - '@inpost.izi.oauth2.auth_provider'
+
+  inpost.izi.http_client.basket_app.logging:
+    class: izi\prestashop\Http\Client\LoggingClient
+    decorates: inpost.izi.http_client.basket_app
+    arguments:
+      - '@inpost.izi.http_client.basket_app.logging.inner'
+      - '@inpost.izi.basket_app_logger'
+
+  izi\prestashop\BasketApp\BasketAppClientInterface:
+    alias: izi\prestashop\BasketApp\BasketAppClient
+    public: true
+
+  izi\prestashop\BasketApp\BasketAppClient:
+    class: izi\prestashop\BasketApp\BasketAppClient
+    arguments:
+      - '@inpost.izi.http_client.basket_app'
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.serializer'
+      - '@=service("inpost.izi.environment").getBasketAppApiUri()'
+
+  izi\prestashop\Configuration\Adapter\Configuration:
+    class: izi\prestashop\Configuration\Adapter\Configuration
+    arguments:
+      - '@inpost.izi.db'
+
+  izi\prestashop\Configuration\ApiConfiguration:
+    class: izi\prestashop\Configuration\ApiConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+
+  izi\prestashop\Configuration\OrdersConfiguration:
+    class: izi\prestashop\Configuration\OrdersConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  izi\prestashop\Configuration\WidgetConfiguration:
+    class: izi\prestashop\Configuration\WidgetConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+
+  inpost.izi.environment:
+    class: izi\prestashop\Environment\EnvironmentInterface
+    factory: [ '@izi\prestashop\Configuration\ApiConfiguration', getEnvironment ]
+
+  izi\prestashop\Environment\AuthServerUriCollection:
+    class: izi\prestashop\Environment\AuthServerUriCollection
+    arguments:
+      - '@inpost.izi.environment'
+
+  inpost.izi.oauth2.auth_provider:
+    class: izi\prestashop\OAuth2\LazyAuthorizationProvider
+    arguments:
+      - '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
+      - '@izi\prestashop\Environment\AuthServerUriCollection'
+      - '@izi\prestashop\Configuration\ApiConfiguration'
+      - '@izi\prestashop\Configuration\ApiConfiguration'
+
+  izi\prestashop\BasketApp\AuthorizationProviderFactory:
+    class: izi\prestashop\BasketApp\AuthorizationProviderFactory
+    arguments:
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.psr17_factory'
+      - '@izi\prestashop\Http\Client\Factory\GuzzleClientFactory'
+
+  izi\prestashop\Log\MonologLoggerFactory:
+    class: izi\prestashop\Log\MonologLoggerFactory
+    arguments:
+      -
+        - '@izi\prestashop\Log\Handler\RotatingFileHandlerFactory'
+
+  izi\prestashop\Log\Handler\RotatingFileHandlerFactory:
+    class: izi\prestashop\Log\Handler\RotatingFileHandlerFactory
+    arguments:
+      - '%kernel.environment%'
+
+  inpost.izi.basket_app_logger:
+    class: Psr\Log\LoggerInterface
+    factory: [ '@izi\prestashop\Log\MonologLoggerFactory', create ]
+    arguments:
+      - basket_app
+      - '%inpost.izi.logger_config%'
+
+  inpost.izi.merchant_api_logger:
+    class: Psr\Log\LoggerInterface
+    public: true #todo
+    factory: [ '@izi\prestashop\Log\MonologLoggerFactory', create ]
+    arguments:
+      - merchant_api
+      - '%inpost.izi.logger_config%'
+
+  inpost.izi.general_logger:
+    class: Psr\Log\LoggerInterface
+    public: true
+    factory: [ '@izi\prestashop\Log\MonologLoggerFactory', create ]
+    arguments:
+      - general
+      - '%inpost.izi.logger_config%'
+
+  izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface: '@izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler'
+  izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler:
+    class: izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\Builder\Order\OrderEventBuilderFactory'
+      - '@izi\prestashop\BasketApp\BasketAppClientInterface'
+      - !tagged inpost.izi.tracking_number_provider
+
+  izi\prestashop\Handler\GetClientDetailsHandlerInterface: '@izi\prestashop\Handler\GetClientDetailsHandler'
+  izi\prestashop\Handler\GetClientDetailsHandler:
+    class: izi\prestashop\Handler\GetClientDetailsHandler
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\BasketApp\BasketAppClientInterface'
+
+  izi\prestashop\Handler\UpdateBasketHandlerInterface: '@izi\prestashop\Handler\UpdateBasketHandler'
+  izi\prestashop\Handler\UpdateBasketHandler:
+    class: izi\prestashop\Handler\UpdateBasketHandler
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
+      - '@izi\prestashop\BasketApp\BasketAppClientInterface'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider:
+    class: izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider
+    tags: [ inpost.izi.tracking_number_provider ]
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\Builder\Order\OrderEventBuilderFactory:
+    class: izi\prestashop\Builder\Order\OrderEventBuilderFactory
+    arguments:
+      - '@inpost.izi.object_model.order_repository'
+      - '@izi\prestashop\Builder\Order\OrderStatusDescriptionProvider'
+      - '@inpost.izi.clock'
+
+  izi\prestashop\Builder\Order\OrderStatusDescriptionProvider:
+    class: izi\prestashop\Builder\Order\OrderStatusDescriptionProvider
+    arguments:
+      - '@inpost.izi.object_model.order_state_repository'
+      - '@izi\prestashop\Configuration\OrdersConfiguration'
+
+  izi\prestashop\ObjectModel\Connection:
+    class: izi\prestashop\ObjectModel\Connection
+    public: true
+    arguments:
+      - '@inpost.izi.db'
+
+  izi\prestashop\ObjectModel\Hydrator:
+    class: izi\prestashop\ObjectModel\Hydrator
+
+  izi\prestashop\ObjectModel\ObjectManagerInterface:
+    alias: izi\prestashop\ObjectModel\ObjectManager
+    public: true
+
+  izi\prestashop\ObjectModel\ObjectManager:
+    class: izi\prestashop\ObjectModel\ObjectManager
+    arguments:
+      - '@izi\prestashop\ObjectModel\Connection'
+      - '@izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactory'
+      - '@izi\prestashop\ObjectModel\Hydrator'
+
+  inpost.izi.repository_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      -
+        Cart: '@inpost.izi.object_model.cart_repository'
+        Currency: '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
+        Order: '@inpost.izi.object_model.order_repository'
+        OrderState: '@inpost.izi.object_model.order_state_repository'
+        InPostShipmentModel: '@izi\prestashop\ObjectModel\Repository\ShipmentRepository'
+
+  izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactory:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactory
+    arguments:
+      - '@inpost.izi.repository_locator'
+
+  izi\prestashop\ObjectModel\Repository\CurrencyRepository:
+    class: izi\prestashop\ObjectModel\Repository\CurrencyRepository
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\ObjectModel\Repository\ShipmentRepository:
+    class: izi\prestashop\ObjectModel\Repository\ShipmentRepository
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  inpost.izi.object_model.order_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    arguments:
+      - Order
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  inpost.izi.object_model.order_state_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    arguments:
+      - OrderState
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  inpost.izi.object_model.cart_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    arguments:
+      - Cart
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\Repository\BasketSessionRepository:
+    class: izi\prestashop\Repository\BasketSessionRepository
+    arguments:
+      - '@inpost.izi.serializer'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\Hook\Common\ActionCartDeleteBefore:
+    class: izi\prestashop\Hook\Common\ActionCartDeleteBefore
+    arguments:
+      - '@izi\prestashop\CommandBusInterface'
+
+  izi\prestashop\Hook\Common\ActionCartSave:
+    class: izi\prestashop\Hook\Common\ActionCartSave
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  # for whatever reason Sf 3.4 might try and fail to autowire this service in the admin container
+  izi\prestashop\Hook\Front\ActionCartControllerAjaxUpdateResponse:
+    class: izi\prestashop\Hook\Front\ActionCartControllerAjaxUpdateResponse
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionShipmentAddAfter:
+    class: izi\prestashop\Hook\Common\ActionShipmentAddAfter
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionShipmentUpdateBefore:
+    class: izi\prestashop\Hook\Common\ActionShipmentUpdateBefore
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionShipmentUpdateAfter:
+    class: izi\prestashop\Hook\Common\ActionShipmentUpdateAfter
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionValidateOrder:
+    class: izi\prestashop\Hook\Common\ActionValidateOrder
+    arguments:
+      - '@inpost.izi.module'
+      - '@izi\prestashop\CommandBusInterface'
+
+  izi\prestashop\EventListener\ShipmentListener:
+    class: izi\prestashop\EventListener\ShipmentListener
+    arguments:
+      - '@izi\prestashop\Configuration\ApiConfiguration'
+      - '@izi\prestashop\ObjectModel\Repository\ShipmentRepository'
+      - '@izi\prestashop\CommandBusInterface'
+
+  izi\prestashop\Payment\PaymentCurrencyChecker:
+    class: izi\prestashop\Payment\PaymentCurrencyChecker
+
+  izi\prestashop\EventListener\CartListener:
+    class: izi\prestashop\EventListener\CartListener
+    arguments:
+      - '@izi\prestashop\Configuration\ApiConfiguration'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\CommandBusInterface'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\View\Templating\RendererInterface: '@izi\prestashop\View\Templating\SmartyRenderer'
+  izi\prestashop\View\Templating\SmartyRenderer:
+    class: izi\prestashop\View\Templating\SmartyRenderer
+    arguments:
+      - '@=service("inpost.izi.context").smarty'
+
+  izi\prestashop\ContextManager:
+    class: izi\prestashop\ContextManager
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\Hook\WidgetConfigurationResolver:
+    class: izi\prestashop\Hook\WidgetConfigurationResolver
+    public: true
+    arguments:
+      - '@izi\prestashop\Configuration\ApiConfiguration'
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Payment\PaymentCurrencyChecker'
+      - '@izi\prestashop\CommandBusInterface'
+
+  izi\prestashop\Hook\WidgetRenderer:
+    class: izi\prestashop\Hook\WidgetRenderer
+    public: true
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Builder\Basket\BasketBuilderFactory:
+    class: izi\prestashop\Builder\Basket\BasketBuilderFactory
+    arguments:
+      - '@inpost.izi.clock'
+      - '@izi\prestashop\ContextManager'
+
+  izi\prestashop\Cache\ConfigurationCache:
+    class: izi\prestashop\Cache\ConfigurationCache
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+      - '@inpost.izi.clock'
+
+  izi\prestashop\Event\EventDispatcherInterface:
+    alias: izi\prestashop\Event\Adapter\EventDispatcher
+    public: true
+
+  izi\prestashop\Event\Adapter\EventDispatcher:
+    class: izi\prestashop\Event\Adapter\EventDispatcher
+    arguments:
+      - '@inpost.izi.event_dispatcher'
+
+  inpost.izi.event_dispatcher:
+    class: Symfony\Component\EventDispatcher\EventDispatcherInterface
+    factory: [ '@izi\prestashop\Event\EventDispatcherFactory', create ]
+
+  inpost.izi.event_subscriber_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - izi\prestashop\EventListener\ShipmentListener: '@izi\prestashop\EventListener\ShipmentListener'
+        izi\prestashop\EventListener\CartListener: '@izi\prestashop\EventListener\CartListener'
+
+  izi\prestashop\Event\EventDispatcherFactory:
+    class: izi\prestashop\Event\EventDispatcherFactory
+    arguments:
+      - '@inpost.izi.event_subscriber_locator'

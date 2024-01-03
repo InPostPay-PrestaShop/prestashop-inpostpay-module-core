@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\Installer\Database;
 
 use izi\prestashop\Installer\DatabaseMigrationInterface;
@@ -57,13 +59,14 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
         );
     }
 
-    public function changeColumn(string $table, string $column, string $definition): bool
+    public function changeColumn(string $table, string $column, string $definition, string $newName = null): bool
     {
         $column = pSQL($column);
+        $newName = null !== $newName ? pSQL($newName) : $column;
 
         return $this->db->execute('
             ALTER TABLE `' . _DB_PREFIX_ . pSQL($table) . '`
-            CHANGE `' . $column . '` `' . $column . '` ' . pSQL($definition)
+            CHANGE `' . $column . '` `' . $newName . '` ' . pSQL($definition)
         );
     }
 

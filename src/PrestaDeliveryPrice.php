@@ -37,7 +37,6 @@ class PrestaDeliveryPrice
                     $gross = $net = 0.0;
                 }
             } catch (\Exception $e) {
-                Logger::log("EXCEPTION IN DELIVERY PRICE {$e->getMessage()}");
                 continue;
             }
 
@@ -64,9 +63,6 @@ class PrestaDeliveryPrice
         $pwwPriceAvailable = $this->optionAvailability('pww', $deliveryType);
         $codPrice = (float) \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_cod');
         $codPriceAvailable = $this->optionAvailability('cod', $deliveryType);
-
-        Logger::log("CENA PWW {$pwwPrice}, DOSTEPNOPSC PWW {$pwwPriceAvailable}");
-        Logger::log("CENA COD {$codPrice}, DOSTEPNOPSC COD {$codPriceAvailable}");
 
         if ($pwwPrice && $pwwPriceAvailable) {
             $option = new \izi\item\DeliveryOption();

@@ -1,11 +1,20 @@
 <?php
 
+use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\Controller\Api\BasketController;
 use izi\prestashop\Controller\Api\OrderController;
-use izi\prestashop\Controller\MerchantController;
-use izi\prestashop\rest\Exception\ApiException;
-use izi\prestashop\rest\Exception\InternalServerErrorException;
-use izi\prestashop\rest\SignatureVerification;
+use izi\prestashop\Controller\WidgetController;
+use izi\prestashop\Http\Exception\HttpExceptionInterface;
+use izi\prestashop\Http\Exception\ServerException;
+use izi\prestashop\MerchantApi\Exception\ApiException;
+use izi\prestashop\MerchantApi\Exception\BadGatewayException;
+use izi\prestashop\MerchantApi\Exception\InternalServerErrorException;
+use izi\prestashop\MerchantApi\Exception\ServiceUnavailableException;
+use izi\prestashop\MerchantApi\Firewall\MerchantApiAuthenticator;
+use izi\prestashop\OAuth2\Exception\OAuth2ExceptionInterface;
+use Psr\Http\Client\NetworkExceptionInterface;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,26 +24,26 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
     private const MERCHANT_ROUTES = [
         [
             'path' => '/inpost/v1/izi/merchant/basket/get/link',
-            'controller' => [MerchantController::class, 'getLink'],
+            'controller' => [WidgetController::class, 'getDeepLink'],
         ],
         [
             'path' => '/inpost/v1/izi/merchant/basket/confirmation',
-            'controller' => [MerchantController::class, 'checkBindingConfirmation'],
+            'controller' => [WidgetController::class, 'getIsBound'],
         ],
         [
             'path' => '/inpost/v1/izi/merchant/basket/delete/binding',
             'methods' => ['DELETE'],
-            'controller' => [MerchantController::class, 'deleteBinding'],
+            'controller' => [WidgetController::class, 'deleteBinding'],
         ],
         [
             'path' => '/inpost/v1/izi/merchant/order/confirmation/get',
-            'controller' => [MerchantController::class, 'checkOrderConfirmation'],
+            'controller' => [WidgetController::class, 'getOrderComplete'],
         ],
         [
             'path' => '/inpost/v1/izi/merchant/basket/post/binding/{prefix}/{number}',
             'prefix' => '/inpost/v1/izi/merchant/basket/post/binding',
             'regex' => '#^/inpost/v1/izi/merchant/basket/post/binding(?:/(?<prefix>.+?)(?:/(?<number>.+?))?)?$#',
-            'controller' => [MerchantController::class, 'bindCart'],
+            'controller' => [WidgetController::class, 'getPayData'],
         ],
     ];
 
@@ -88,11 +97,16 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         ],
     ];
 
+    /**
+     * @var \InPostIzi
+     */
+    public $module;
+
     protected $content_only = true;
 
     public function postProcess()
     {
-        $request = Request::createFromGlobals();
+        $request = $this->module->getCurrentRequest();
 
         $response = $this->handle($request);
         $response->send();
@@ -100,24 +114,31 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         exit;
     }
 
+    // TODO use own Sf Kernel?
     private function handle(Request $request): Response
     {
         $path = $this->getPath($request);
 
         try {
-            if (0 === strpos($path, '/inpost/v1/izi/merchant/')) {
-                return $this->handleCustomerRequest($request, $path);
+            if (0 !== strpos($path, '/inpost/v1/izi/merchant/')) {
+                return $this->handleApiRequest($request, $path);
             }
 
-            return $this->handleApiRequest($request, $path);
+            $response = $this->handleCustomerRequest($request, $path);
+            $response->prepare($request);
+
+            $this->context->cookie->write();
+
+            return $response;
         } catch (\Throwable $throwable) {
+            http_response_code(500);
             $this->logError($throwable);
 
             throw $throwable;
         }
     }
 
-    private function handleCustomerRequest(Request $request, $path): Response
+    private function handleCustomerRequest(Request $request, string $path): Response
     {
         [$controller, $params] = $this->resolveController($request, $path, self::MERCHANT_ROUTES);
 
@@ -130,10 +151,19 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
     {
         $method = $request->getMethod();
 
-        \izi\prestashop\Logger::response($request->getContent(), sprintf('Request: [%s %s]     URI: %s', $method, $path, $request->server->get('REQUEST_URI', $path)));
+        /** @var LoggerInterface $logger */
+        $logger = $this->module->get('inpost.izi.merchant_api_logger');
+        $logger->info('Request "{method} {path}"', [
+            'method' => $method,
+            'path' => $path,
+        ]);
+
+        if ($body = $request->getContent()) {
+            $logger->debug('Request body: "{body}"', ['body' => $body]);
+        }
 
         try {
-            (new SignatureVerification())->check($request);
+            $this->module->get(MerchantApiAuthenticator::class)->authenticate($request);
             [$controller, $params] = $this->resolveController($request, $path, self::API_ROUTES);
 
             /** @var JsonResponse $response */
@@ -144,25 +174,66 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             $response = $this->handleApiError($throwable);
         }
 
-        \izi\prestashop\Logger::response($response->getContent(), sprintf('Response: [%s %s]', $method, $path));
+        $logger->info('Response "{method} {path}": {status_code}', [
+            'method' => $method,
+            'path' => $path,
+            'status_code' => $response->getStatusCode(),
+        ]);
+
+        if (!$response->isSuccessful()) {
+            $logger->error('Response body: "{body}"', ['body' => $response->getContent()]);
+        } elseif ($body = $response->getContent()) {
+            $logger->debug('Response body: "{body}"', ['body' => $body]);
+        }
 
         return $response->setEncodingOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JsonResponse::DEFAULT_ENCODING_OPTIONS);
     }
 
     private function handleApiError(\Throwable $throwable): Response
     {
-        if (!$throwable instanceof ApiException) {
-            $throwable = InternalServerErrorException::create($throwable);
-        }
+        $exception = $this->convertApiError($throwable);
 
-        if ($throwable instanceof InternalServerErrorException && $previous = $throwable->getPrevious()) {
+        if ($exception instanceof InternalServerErrorException && $previous = $exception->getPrevious()) {
             $this->logError($previous);
         }
 
         return new JsonResponse([
-            'error_code' => $throwable->getErrorCode(),
-            'error_message' => $throwable->getMessage(),
-        ], $throwable->getStatusCode());
+            'error_code' => $exception->getErrorCode(),
+            'error_message' => $exception->getMessage(),
+        ], $exception->getStatusCode());
+    }
+
+    private function convertApiError(\Throwable $throwable): ApiException
+    {
+        if ($throwable instanceof ApiException) {
+            return $throwable;
+        }
+
+        if ($throwable instanceof NetworkExceptionInterface) {
+            $message = $throwable instanceof OAuth2ExceptionInterface
+                ? 'Could not connect to the authorization server'
+                : 'Could not connect to the basket app API';
+
+            return BadGatewayException::create($throwable, $message);
+        }
+
+        if ($throwable instanceof OAuth2ExceptionInterface) {
+            return BadGatewayException::create($throwable, 'Could not obtain access token');
+        }
+
+        if ($throwable instanceof BasketAppException) {
+            return BadGatewayException::create($throwable, sprintf('Basket app API error: "%s"', $throwable->getError()->getCode()));
+        }
+
+        if ($throwable instanceof ServerException && 503 === $throwable->getCode()) {
+            return ServiceUnavailableException::create($throwable, 'Basket app API is unavailable');
+        }
+
+        if ($throwable instanceof HttpExceptionInterface) {
+            return BadGatewayException::create($throwable, sprintf('Unexpected basket app API response status code: %d', $throwable->getCode()));
+        }
+
+        return InternalServerErrorException::create($throwable);
     }
 
     private function getPath(Request $request): string
@@ -182,7 +253,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 
     private function logError(\Throwable $throwable): void
     {
-        \izi\prestashop\Logger::log($throwable->getMessage() . ' at ' . $throwable->getFile() . ':' . $throwable->getLine());
+        $this->module->getLogger()->error('Error processing request: {error}', ['error' => $throwable]);
     }
 
     private function resolveController(Request $request, string $path, array $routes): array
@@ -215,9 +286,18 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
     private function callController(array $controller, Request $request, array $pathParams): Response
     {
         $arguments = $this->resolveControllerArguments($controller, $request, $pathParams);
-        $controller = [new $controller[0](), $controller[1]];
+        $controller = [$this->createController($controller[0]), $controller[1]];
 
         return $controller(...$arguments);
+    }
+
+    private function createController(string $className)
+    {
+        try {
+            return $this->module->get($className);
+        } catch (ServiceNotFoundException $e) {
+            return new $className();
+        }
     }
 
     private function resolveControllerArguments(array $controller, Request $request, array $pathParams): array

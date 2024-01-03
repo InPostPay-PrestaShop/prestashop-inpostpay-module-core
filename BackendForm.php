@@ -1,8 +1,8 @@
 <?php
 
-use izi\prestashop\Widget\Alignment;
-use izi\prestashop\Widget\FrameStyle;
-use izi\prestashop\Widget\Variant;
+use izi\prestashop\View\Widget\Alignment;
+use izi\prestashop\View\Widget\FrameStyle;
+use izi\prestashop\View\Widget\Variant;
 
 /**
  * @mixin \Module
@@ -114,10 +114,11 @@ trait BackendForm
             $fields[] = [
                 'type' => 'text',
                 'label' => $status['name'],
-                'name' => sprintf('INPOST_PAY_OS_DESCRIPTION_%d', $status['id_order_state']),
+                'name' => sprintf('os_description_%d', $status['id_order_state']),
                 'lang' => true,
                 'hint' => $this->l('If left empty the order state name will be presented.', 'backendform'),
                 'col' => 4,
+                'id_order_state' => $status['id_order_state'],
             ];
         }
 
@@ -526,15 +527,19 @@ trait BackendForm
         $output = '';
         if (Tools::isSubmit('submit' . $this->name)) {
             $languageIds = \Language::getLanguages(false, false, true);
+            $descriptionMaps = [];
             foreach ($this->formFields() as $field) {
-                if (!empty($field['lang'])) {
-                    $configValue = [];
+                if (isset($field['id_order_state'])) {
+                    $osId = (int) $field['id_order_state'];
                     foreach ($languageIds as $languageId) {
-                        $configValue[$languageId] = trim(\Tools::getValue(sprintf('%s_%d', $field['name'], $languageId))) ?: null;
+                        $descriptionMaps[$languageId][$osId] = trim(\Tools::getValue(sprintf('%s_%d', $field['name'], $languageId))) ?: null;
                     }
-                } else {
-                    $configValue = Tools::getValue($field['name']);
+
+                    continue;
                 }
+
+                $configValue = Tools::getValue($field['name']);
+
                 if ($field['name'] === 'INPOST_PAY_client_secret' && $configValue === '*****') {
                     continue;
                 }
@@ -548,6 +553,12 @@ trait BackendForm
                     Configuration::updateValue($field['name'], $configValue);
                 }
             }
+
+            \Configuration::updateValue('INPOST_PAY_OS_DESCRIPTION_MAP', array_map(static function (array $map) {
+                return json_encode(array_filter($map));
+            }, $descriptionMaps));
+
+            (new \izi\prestashop\Configuration\Adapter\Configuration())->removeMatching('INPOST_PAY_CACHE_*');
 
             $output = $this->displayConfirmation($this->l('Settings updated', 'backendform'));
         }
@@ -580,12 +591,21 @@ trait BackendForm
         $helper->languages = $this->context->controller->getLanguages();
         $helper->default_form_language = $this->context->language->id;
 
+        foreach ($helper->languages as $language) {
+            $value = \Configuration::get('INPOST_PAY_OS_DESCRIPTION_MAP', $language['id_lang']);
+            if (!$value) {
+                $osDescriptions[$language['id_lang']] = [];
+            } else {
+                $osDescriptions[$language['id_lang']] = json_decode($value, true) ?? [];
+            }
+        }
+
         foreach ($this->formFields() as $field) {
-            if (!empty($field['lang'])) {
+            if (isset($field['id_order_state'])) {
                 foreach ($helper->languages as $language) {
                     $helper->tpl_vars['fields_value'][$field['name']][$language['id_lang']] = \Tools::getValue(
                         sprintf('%s_%d', $field['name'], $language['id_lang']),
-                        \Configuration::get($field['name'], $language['id_lang'])
+                        $osDescriptions[$language['id_lang']][$field['id_order_state']] ?? null
                     );
                 }
             } elseif ($field['name'] === 'INPOST_PAY_client_secret') {

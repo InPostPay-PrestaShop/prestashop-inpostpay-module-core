@@ -6,6 +6,7 @@ use izi\interfaces\ICartSession;
 use izi\interfaces\LoggerInterface;
 use izi\interfaces\TokenCacheInterface;
 use izi\item\Basket;
+use izi\prestashop\View\Widget\Variant;
 
 abstract class InPostIzi
 {
@@ -249,6 +250,9 @@ abstract class InPostIzi
         return self::$clientSecret;
     }
 
+    /**
+     * @deprecated use {@see \InPostIzi::renderWidget} instead
+     */
     public static function render(
         $productId = null,
         $name = '',
@@ -264,43 +268,21 @@ abstract class InPostIzi
         $float = 'left',
         $bindingPlace = 'BASKET_POPUP'
     ) {
-        $basketId = $addBasketId ? 'basket-id="' . \izi\BasketIdentification::get() . '"' : '';
-        $id = BasketIdentification::get();
-        $html = '';
-        $variationHtml = '';
+        @trigger_error(sprintf('"%s::%s()" is deprecated, use "InPostIzi::renderWidget()" instead.', __CLASS__, __METHOD__), E_USER_DEPRECATED);
 
-        if ($variationId) {
-            $variationHtml = 'variationId="' . $variationId . '"';
-        }
+        /** @var \InPostIzi|false $module */
+        $module = \Module::getInstanceByName('inpostizi');
 
-        $data = self::getCartSessionClass()::getCartOrderRedirectUrl($id);
-        if ($data != null) {
-            BasketIdentification::drop();
-            $id = BasketIdentification::get();
-        }
-
-        $cartConfirmation = self::getCartSessionClass()::getCartConfirmation($id);
-        if (!$cartConfirmation) {
-            $maskedPhoneNumber = '';
-        }
-
-        $count = "count=\"{$count}\"";
-
-        $dark = $dark ? ' dark_mode="true" ' : '';
-        $yellow = $yellow ? ' variant="primary" ' : ' variant="secondary" ';
-        $cart = $cart ? ' basket="true" ' : '';
-
-        $float = 'class="float-' . $float . '"';
-
-        $bindingPlace = " binding_place=\"{$bindingPlace}\" ";
-
-        if ($productId) {
-            $html = '<inpost-izi-button ' . $bindingPlace . $float . $cart . $dark . $yellow . $count . $inpost_basket_id . ' ' . $variationHtml . ' name="' . $name . '" masked_phone_number="' . $maskedPhoneNumber . '" data-product-id="' . $productId . '" language="pl" ' . $basketId . '></inpost-izi-button>';
-        } else {
-            $html = '<inpost-izi-button ' . $bindingPlace . $float . $cart . $dark . $yellow . $count . $inpost_basket_id . ' ' . $variationHtml . ' name="' . $name . '" masked_phone_number="' . $maskedPhoneNumber . '" language="pl" ' . $basketId . '></inpost-izi-button>';
-        }
-
-        //        $html = "<!-- mfunc mysecurestring --><!--esi \n {$html} \n --><!-- /mfunc mysecurestring -->";
+        $html = false !== $module && $module->active
+            ? $module->renderWidget(null, [
+                'binding_place' => $bindingPlace,
+                'basket' => $cart,
+                'variant' => $yellow ? Variant::Primary() : Variant::Secondary(),
+                'dark_mode' => $dark,
+                'alignment' => $float,
+                'product_id' => $productId,
+            ])
+            : '';
 
         if ($echo) {
             echo $html;

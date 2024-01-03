@@ -5,7 +5,7 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * @param \inpostizi $module
+ * @param \InPostIzi $module
  *
  * @return bool
  */

@@ -1,0 +1,127 @@
+<?php
+
+declare(strict_types=1);
+
+namespace izi\prestashop\ObjectModel;
+
+use izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactoryInterface;
+use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
+
+final class ObjectManager implements ObjectManagerInterface
+{
+    /**
+     * @var ObjectRepositoryFactoryInterface
+     */
+    private $repositoryFactory;
+
+    /**
+     * @var Connection
+     */
+    private $connection;
+
+    /**
+     * @var HydratorInterface
+     */
+    private $hydrator;
+
+    private $metadata = [];
+
+    public function __construct(Connection $connection, ObjectRepositoryFactoryInterface $repositoryFactory, HydratorInterface $hydrator)
+    {
+        $this->repositoryFactory = $repositoryFactory;
+        $this->connection = $connection;
+        $this->hydrator = $hydrator;
+    }
+
+    public function getConnection(): Connection
+    {
+        return $this->connection;
+    }
+
+    public function getHydrator(): HydratorInterface
+    {
+        return $this->hydrator;
+    }
+
+    public function save(\ObjectModel $model): void
+    {
+        $id = (int) $model->id;
+
+        $result = $model->validateFields()
+            && $model->validateFieldsLang()
+            && $this->connection->save($model);
+
+        if (false === $result) {
+            $message = 0 >= $id
+                ? sprintf('Failed to create a new %s.', get_class($model))
+                : sprintf('Failed to update %s ID %d.', get_class($model), $id);
+
+            throw new \RuntimeException($message);
+        }
+    }
+
+    /**
+     * @template T of \ObjectModel
+     *
+     * @param class-string<T> $class
+     *
+     * @return T|null
+     */
+    public function find(string $class, int $id, int $languageId = null): ?\ObjectModel
+    {
+        if (0 >= $id) {
+            return null;
+        }
+
+        $args = \Product::class === $class
+            ? [$id, false, $languageId]
+            : [$id, $languageId];
+
+        $model = new $class(...$args);
+
+        return $id === (int) $model->id ? $model : null;
+    }
+
+    public function refresh(\ObjectModel $model): void
+    {
+        $class = get_class($model);
+        $metadata = $this->getMetadata($class);
+
+        $data = $this
+            ->getRepository($class)
+            ->createQueryBuilder('a')
+            ->where(sprintf('a.%s = %d', $metadata['primary'], (int) $model->id))
+            ->build()
+            ->getArrayResult();
+
+        $this->hydrator->hydrate($data, $class, $model);
+    }
+
+    /**
+     * @template T of \ObjectModel
+     *
+     * @param class-string<T> $class
+     */
+    public function getMetadata(string $class): array
+    {
+        if (isset($this->metadata[$class])) {
+            return $this->metadata[$class];
+        }
+
+        if (!is_subclass_of($class, \ObjectModel::class)) {
+            throw new \DomainException(sprintf('%s is not a %s.', $class, \ObjectModel::class));
+        }
+
+        return $this->metadata[$class] = $class::getDefinition($class);
+    }
+
+    public function getRepository(string $class): ObjectRepositoryInterface
+    {
+        return $this->repositoryFactory->getRepository($this, $class);
+    }
+
+    public function createQueryBuilder(string $class): QueryBuilder
+    {
+        return new QueryBuilder($this, $class);
+    }
+}
