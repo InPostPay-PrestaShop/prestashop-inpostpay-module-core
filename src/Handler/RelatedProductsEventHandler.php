@@ -3,6 +3,7 @@
 namespace izi\prestashop\Handler;
 
 use izi\item\BasketNotice;
+use izi\prestashop\Logger;
 
 final class RelatedProductsEventHandler implements BasketEventHandlerInterface
 {
@@ -91,18 +92,26 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
             ], 'Shop.Notifications.Error');
         }
 
-        $result = $cart->updateQty(
-            $quantity,
-            $productId,
-            $combinationId,
-            0,
-            'up',
-            0,
-            $this->context->shop
-        );
+        try {
+            $result = $cart->updateQty(
+                $quantity,
+                $productId,
+                $combinationId,
+                0,
+                'up',
+                0,
+                $this->context->shop
+            );
+        } catch (\Exception $e) {
+            Logger::log(sprintf('Related product addition error: "%s" at %s:%d', $e->getMessage(), $e->getFile(), $e->getLine()));
+
+            $result = false;
+        }
 
         if (false === $result) {
-            throw new \RuntimeException(sprintf('Could not add product [%d-%d] to cart #%d.', $productId, $combinationId, $cart->id));
+            isset($e) || Logger::log(sprintf('Could not add product [%d-%d] to cart #%d.', $productId, $combinationId, $cart->id));
+
+            return $this->module->l('Could not add the product to your cart.', self::TRANSLATION_SOURCE);
         }
 
         return null;

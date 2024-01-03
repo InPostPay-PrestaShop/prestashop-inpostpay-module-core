@@ -3,6 +3,7 @@
 namespace izi\prestashop\Handler;
 
 use izi\item\BasketNotice;
+use izi\prestashop\Logger;
 
 final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
 {
@@ -47,9 +48,7 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
         }
 
         if (0 >= $quantity) {
-            $this->deleteProduct($cart, $productId, $combinationId, $customizationId);
-
-            return null;
+            return $this->deleteProduct($cart, $productId, $combinationId, $customizationId);
         }
 
         if (0 === $deltaQuantity = $quantity - $currentQuantity) {
@@ -60,19 +59,27 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
             return $error;
         }
 
-        $result = $cart->updateQty(
-            abs($deltaQuantity),
-            $productId,
-            $combinationId,
-            $customizationId,
-            $deltaQuantity > 0 ? 'up' : 'down',
-            0,
-            $this->context->shop,
-            false
-        );
+        try {
+            $result = $cart->updateQty(
+                abs($deltaQuantity),
+                $productId,
+                $combinationId,
+                $customizationId,
+                $deltaQuantity > 0 ? 'up' : 'down',
+                0,
+                $this->context->shop,
+                false
+            );
+        } catch (\Exception $e) {
+            Logger::log(sprintf('Quantity update error: "%s" at %s:%d', $e->getMessage(), $e->getFile(), $e->getLine()));
+
+            $result = false;
+        }
 
         if (false === $result) {
-            throw new \RuntimeException(sprintf('Could not update product [%d-%d-%d] quantity in cart #%d.', $productId, $combinationId, $customizationId, $cart->id));
+            isset($e) || Logger::log(sprintf('Could not update product [%d-%d-%d] quantity in cart #%d.', $productId, $combinationId, $customizationId, $cart->id));
+
+            return $this->module->l('Could not update product quantity.', self::TRANSLATION_SOURCE);
         }
 
         return null;
@@ -93,13 +100,23 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
         return 0;
     }
 
-    private function deleteProduct(\Cart $cart, int $productId, int $combinationId, int $customizationId): void
+    private function deleteProduct(\Cart $cart, int $productId, int $combinationId, int $customizationId): ?string
     {
-        if ($cart->deleteProduct($productId, $combinationId, $customizationId)) {
-            return;
+        try {
+            $result = $cart->deleteProduct($productId, $combinationId, $customizationId);
+        } catch (\Exception $e) {
+            Logger::log(sprintf('Cart product deletion error: "%s" at %s:%d', $e->getMessage(), $e->getFile(), $e->getLine()));
+
+            $result = false;
         }
 
-        throw new \RuntimeException(sprintf('Could not delete product [%d-%d-%d] from cart #%d.', $productId, $combinationId, $customizationId, $cart->id));
+        if (false === $result) {
+            isset($e) || Logger::log(sprintf('Could not delete product [%d-%d-%d] from cart #%d.', $productId, $combinationId, $customizationId, $cart->id));
+
+            return $this->module->l('Could delete the product from your cart.', self::TRANSLATION_SOURCE);
+        }
+
+        return null;
     }
 
     private function checkQuantity(\Cart $cart, int $productId, int $combinationId, int $customizationId, int $quantity): ?string

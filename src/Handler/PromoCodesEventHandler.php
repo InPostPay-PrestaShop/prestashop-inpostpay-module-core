@@ -3,6 +3,7 @@
 namespace izi\prestashop\Handler;
 
 use izi\item\BasketNotice;
+use izi\prestashop\Logger;
 
 final class PromoCodesEventHandler implements BasketEventHandlerInterface
 {
@@ -82,7 +83,9 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
         }
 
         if (!$cart->addCartRule($cartRule->id)) {
-            throw new \RuntimeException(sprintf('Could not add promo code "%s" to cart #%d.', $code, $cart->id));
+            Logger::log(sprintf('Could not add promo code "%s" to cart #%d.', $code, $cart->id));
+
+            return $this->module->l('Could not add the voucher to your cart.', self::TRANSLATION_SOURCE);
         }
 
         \izi\prestashop\Logger::log(sprintf('Applied promo code "%s" to cart #%d.', $code, $cart->id));
