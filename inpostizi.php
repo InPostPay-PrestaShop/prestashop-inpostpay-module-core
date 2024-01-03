@@ -389,6 +389,12 @@ class Inpostizi extends PaymentModule
             return '';
         }
 
+        $count = $this->getCartProductsCount();
+
+        if (!$isBasketLinked && 0 >= $count && $config->isBasket()) {
+            return '';
+        }
+
         $maskedPhoneNumber = $isBasketLinked && isset($binding->client_details->masked_phone_number) ? $binding->client_details->masked_phone_number : null;
         $name = $isBasketLinked && isset($binding->client_details->name) ? $binding->client_details->name : null;
 //        $inpost_basket_id = $isBasketLinked && isset($binding->inpost_basket_id) ? $binding->inpost_basket_id : '';
@@ -407,7 +413,7 @@ class Inpostizi extends PaymentModule
         $config
             ->setName($name)
             ->setMaskedPhoneNumber($maskedPhoneNumber)
-            ->setCount($this->getCartProductsCount());
+            ->setCount($count);
 
         $this->smarty->assign([
             'styles' => $styles,
