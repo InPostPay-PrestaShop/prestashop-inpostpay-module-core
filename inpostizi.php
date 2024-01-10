@@ -1,5 +1,6 @@
 <?php
 
+use izi\prestashop\DependencyInjection\ContainerFactory;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
 use izi\prestashop\Hook\WidgetConfigurationResolver;
@@ -8,6 +9,7 @@ use izi\prestashop\Installer\DatabaseInstaller;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -22,6 +24,11 @@ require_once __DIR__ . '/BackendForm.php';
 class InPostIzi extends PaymentModule implements WidgetInterface
 {
     use BackendForm;
+
+    /**
+     * @var ContainerInterface|null
+     */
+    private $_container;
 
     public function __construct()
     {
@@ -147,6 +154,10 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             // TODO build own Sf 2.8 DI container
         }
 
+        if (\Tools::version_compare(_PS_VERSION_, '1.7.6')) {
+            return $this->_getContainer()->get($serviceName);
+        }
+
         try {
             $service = parent::get($serviceName);
         } catch (ServiceNotFoundException $exception) {
@@ -240,5 +251,32 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         }
 
         return $request;
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    private function _getContainer()
+    {
+        if (isset($this->_container)) {
+            return $this->_container;
+        }
+
+        return $this->_container = $this->createContainer();
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    private function createContainer()
+    {
+        $type = $this->context->controller instanceof AdminControllerCore ? 'admin' : 'front';
+
+        $cacheDir = sprintf('%s/inpost/', rtrim(_PS_CACHE_DIR_, '/'));
+        $className = sprintf('InPost\\Izi\\%sContainer_%s', ucfirst($type), str_replace('.', '_', $this->version));
+
+        return (new ContainerFactory($cacheDir))->create($className, [
+            sprintf('%s/config/%s/services.yml', rtrim($this->getLocalPath(), '/'), $type),
+        ]);
     }
 }
