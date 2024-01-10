@@ -47,6 +47,8 @@ class Inpostizi extends PaymentModule
         parent::__construct();
 
         $this->displayName = $this->l('InPost Pay');
+
+        $this->registerHook('displayExpressCheckout');
     }
 
     /**
@@ -194,12 +196,24 @@ class Inpostizi extends PaymentModule
         return $this->renderInPostPayWidget($config);
     }
 
-    public function hookDisplayShoppingCart()
-    {
-        return $this->hookDisplayShoppingCartFooter();
-    }
+//    public function hookDisplayShoppingCart()
+//    {
+//        return $this->hookDisplayShoppingCartFooter();
+//    }
 
-    public function hookDisplayShoppingCartFooter()
+//    public function hookDisplayShoppingCartFooter()
+//    {
+//        if (!\Configuration::get('INPOST_PAY_show_button_cart')) {
+//            return '';
+//        }
+//
+//        $config = $this->createWidgetConfigurationForCart();
+//        $styles = iterator_to_array($this->getCartWidgetStyles());
+//
+//        return $this->renderInPostPayWidget($config, $styles);
+//    }
+
+    public function hookDisplayExpressCheckout()
     {
         if (!\Configuration::get('INPOST_PAY_show_button_cart')) {
             return '';
@@ -265,6 +279,21 @@ class Inpostizi extends PaymentModule
                 'server' => 'remote',
             ]
         );
+
+        \Media::addJsDef([
+            'inpostizi_backend_ajax_url' => $this->context->link->getModuleLink($this->name, 'backend'),
+            'inpostizi_cart_ajax_url' => $this->context->link->getModuleLink($this->name, 'cart'),
+        ]);
+
+        if ($this->context->controller instanceof \ProductControllerCore) {
+            $productObject = $this->context->controller->getProduct();
+
+            if (\Validate::isLoadedObject($productObject)) {
+                \Media::addJsDef([
+                    'inpostizi_product_page_id_product' => $productObject->id,
+                ]);
+            }
+        }
     }
 
     /**
@@ -368,13 +397,13 @@ class Inpostizi extends PaymentModule
 
     private function renderInPostPayWidget(WidgetConfiguration $config, array $styles = [])
     {
-        static $alreadyShown;
-
-        if ($alreadyShown) {
-            return '';
-        }
-
-        $alreadyShown = true;
+//        static $alreadyShown;
+//
+//        if ($alreadyShown) {
+//            return '';
+//        }
+//
+//        $alreadyShown = true;
 
         if (!$this->shouldRenderWidget()) {
             return '';

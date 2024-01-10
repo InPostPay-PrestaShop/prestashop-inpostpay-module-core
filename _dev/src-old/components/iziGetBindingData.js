@@ -11,6 +11,7 @@ async function iziGetBindingData(id, prefix, phoneNumber, bindingPlace) {
       await iziAddToCart(id);
     }
   }
+
   const params = {
     prefix: prefix || "",
     number: phoneNumber || "",
