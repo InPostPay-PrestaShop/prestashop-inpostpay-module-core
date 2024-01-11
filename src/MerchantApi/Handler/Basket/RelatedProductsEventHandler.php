@@ -51,6 +51,11 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
         $this->logger = $logger;
     }
 
+    public static function getHandledEventType(): string
+    {
+        return EventType::RelatedProducts()->value;
+    }
+
     public function handle(BasketInterface $basket, BasketEvent $event): ?Notice
     {
         if (EventType::RelatedProducts() !== $type = $event->getType()) {

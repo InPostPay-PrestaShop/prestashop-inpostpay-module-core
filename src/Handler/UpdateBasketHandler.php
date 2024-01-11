@@ -43,6 +43,11 @@ final class UpdateBasketHandler implements UpdateBasketHandlerInterface
         $this->logger = $logger;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return UpdateBasketCommand::class;
+    }
+
     public function __invoke(UpdateBasketCommand $command)
     {
         $session = $this->sessionRepository->findByEntityId($cartId = $command->getBasketId());

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\DependencyInjection;
 
+use izi\prestashop\DependencyInjection\Dumper\PhpDumper;
 use izi\prestashop\Hook\Adapter\HookDispatcher;
 use izi\prestashop\Hook\HookDispatcherInterface;
 use Symfony\Component\Config\ConfigCache;
@@ -12,9 +13,8 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\Config\Resource\FileResource;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
+use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
@@ -39,7 +39,7 @@ final class ContainerFactory
      * @param class-string<T> $className
      * @param string[] $resources
      *
-     * @return T
+     * @return T|ContainerBuilder
      */
     public function create(string $className, array $resources): ContainerInterface
     {
@@ -87,6 +87,7 @@ final class ContainerFactory
             new YamlFileLoader($container, $fileLocator),
             new XmlFileLoader($container, $fileLocator),
             new PhpFileLoader($container, $fileLocator),
+            new ClosureLoader($container),
         ]));
 
         foreach ($resources as $resource) {
@@ -94,7 +95,6 @@ final class ContainerFactory
         }
 
         $this->hookDispatcher->dispatch('actionInPostIziBuildContainer', [
-            'builder' => $container,
             'loader' => $loader,
         ]);
 
@@ -110,6 +110,7 @@ final class ContainerFactory
             $dumper->dump([
                 'namespace' => $namespace,
                 'class' => $className,
+                'debug' => false,
             ]),
             $container->getResources()
         );

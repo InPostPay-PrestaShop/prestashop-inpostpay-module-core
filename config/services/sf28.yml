@@ -1,0 +1,52 @@
+# PS < 1.7.4 configuration
+imports:
+  - { resource: common.yml }
+  - { resource: common_front.yml }
+
+parameters:
+  inpost.izi.logs_dir: '%kernel.root_dir%/logs/inpost'
+
+services:
+  inpost.izi.event_dispatcher:
+    class: Symfony\Component\EventDispatcher\ContainerAwareEventDispatcher
+    public: false
+    arguments:
+      - '@service_container'
+
+  izi\prestashop\CommandBus:
+    class: izi\prestashop\CommandBus
+    arguments:
+      - '@inpost.izi.command_handler_locator'
+
+  inpost.izi.command_handler_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: inpost.izi.command_handler, index_by: command_class, default_index_method: getHandledCommandClass }
+
+  izi\prestashop\Hook\HookExecutor:
+    class: izi\prestashop\Hook\HookExecutor
+    arguments:
+      - '@inpost.izi.hook_locator'
+      - '@inpost.izi.module'
+
+  inpost.izi.hook_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: inpost.izi.hook, index_by: hook_name, default_index_method: getHookName }
+
+  inpost.izi.repository_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: inpost.izi.model_repository, index_by: model_class }
+
+  inpost.izi.basket_event_handler_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: inpost.izi.basket_event_handler, index_by: event_type, default_index_method: getHandledEventType }
+
+  izi\prestashop\Hook\Admin\DisplayAdminOrderSide:
+    class: izi\prestashop\Hook\Admin\DisplayAdminOrderSide

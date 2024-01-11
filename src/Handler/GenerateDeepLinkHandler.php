@@ -38,6 +38,11 @@ final class GenerateDeepLinkHandler implements GenerateDeepLinkHandlerInterface
         $this->client = $client;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return GenerateDeepLinkCommand::class;
+    }
+
     public function __invoke(GenerateDeepLinkCommand $command): DeepLink
     {
         if (null === $basketId = $this->getInPostBasketId($command)) {

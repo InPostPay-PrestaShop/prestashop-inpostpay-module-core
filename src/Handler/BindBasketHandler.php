@@ -41,6 +41,11 @@ final class BindBasketHandler implements BindBasketHandlerInterface
         $this->builderFactory = $builderFactory;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return BindBasketCommand::class;
+    }
+
     public function __invoke(BindBasketCommand $command): BasketBindingResult
     {
         $session = $this->findOrCreateSession($command->getBasket());

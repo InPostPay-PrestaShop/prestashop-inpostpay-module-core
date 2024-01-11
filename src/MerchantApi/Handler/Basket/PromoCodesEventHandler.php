@@ -51,6 +51,11 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
         $this->logger = $logger;
     }
 
+    public static function getHandledEventType(): string
+    {
+        return EventType::PromoCodes()->value;
+    }
+
     public function handle(BasketInterface $basket, BasketEvent $event): ?Notice
     {
         if (EventType::PromoCodes() !== $type = $event->getType()) {

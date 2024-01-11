@@ -28,6 +28,11 @@ final class GetBasketHandler implements GetBasketHandlerInterface
         $this->builderFactory = $builderFactory;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return GetBasketCommand::class;
+    }
+
     public function __invoke(GetBasketCommand $command): Basket
     {
         if (null === $session = $this->repository->findByBasketId($command->getBasketId())) {

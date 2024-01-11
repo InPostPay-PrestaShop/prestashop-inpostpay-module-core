@@ -45,6 +45,11 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
         $this->logger = $logger;
     }
 
+    public static function getHandledEventType(): string
+    {
+        return EventType::ProductsQuantity()->value;
+    }
+
     public function handle(BasketInterface $basket, BasketEvent $event): ?Notice
     {
         if (EventType::ProductsQuantity() !== $type = $event->getType()) {

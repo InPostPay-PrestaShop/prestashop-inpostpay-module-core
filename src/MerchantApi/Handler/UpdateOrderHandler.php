@@ -47,6 +47,11 @@ final class UpdateOrderHandler implements UpdateOrderHandlerInterface
         $this->logger = $logger;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return UpdateOrderCommand::class;
+    }
+
     public function __invoke(UpdateOrderCommand $command): MerchantOrderStatusData
     {
         $order = $this->repository->find((int) $command->getOrderId());

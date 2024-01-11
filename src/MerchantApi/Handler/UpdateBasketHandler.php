@@ -36,6 +36,11 @@ final class UpdateBasketHandler implements UpdateBasketHandlerInterface
         $this->builderFactory = $builderFactory;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return UpdateBasketCommand::class;
+    }
+
     public function __invoke(UpdateBasketCommand $command): Basket
     {
         if (null === $session = $this->repository->findByBasketId($command->getBasketId())) {

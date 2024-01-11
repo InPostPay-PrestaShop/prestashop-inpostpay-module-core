@@ -19,6 +19,11 @@ final class DeleteBasketBindingHandler implements DeleteBasketBindingHandlerInte
         $this->repository = $repository;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return DeleteBasketBindingCommand::class;
+    }
+
     public function __invoke(DeleteBasketBindingCommand $command)
     {
         if (null === $session = $this->repository->findByBasketId($command->getBasketId())) {

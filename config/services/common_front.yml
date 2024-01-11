@@ -1,0 +1,279 @@
+# common configuration for FO/BO
+services:
+  izi\prestashop\View\Asset\FrontAssetManager:
+    class: izi\prestashop\View\Asset\FrontAssetManager
+    public: false
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Hook\Front\ActionFrontControllerSetMedia:
+    class: izi\prestashop\Hook\Front\ActionFrontControllerSetMedia
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@inpost.izi.environment'
+      - '@izi\prestashop\View\Asset\FrontAssetManager'
+
+  izi\prestashop\Hook\Front\ActionGetPaymentOptions:
+    class: izi\prestashop\Hook\Front\ActionGetPaymentOptions
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@inpost.izi.module'
+      - '@izi\prestashop\Payment\PaymentCurrencyChecker'
+      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayOrderConfirmation:
+    class: izi\prestashop\Hook\Front\DisplayOrderConfirmation
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Hook\Front\DisplayPaymentReturn:
+    class: izi\prestashop\Hook\Front\DisplayPaymentReturn
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@inpost.izi.module'
+
+  izi\prestashop\Hook\Front\DisplayProductActions:
+    class: izi\prestashop\Hook\Front\DisplayProductActions
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayProductAdditionalInfo:
+    class: izi\prestashop\Hook\Front\DisplayProductAdditionalInfo
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+      - { name: inpost.izi.hook, hook_name: displayProductButtons }
+    arguments:
+      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayProductFooter:
+    class: izi\prestashop\Hook\Front\DisplayProductFooter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayShoppingCart:
+    class: izi\prestashop\Hook\Front\DisplayShoppingCart
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayShoppingCartFooter:
+    class: izi\prestashop\Hook\Front\DisplayShoppingCartFooter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Controller\WidgetController:
+    class: izi\prestashop\Controller\WidgetController
+    public: true
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@inpost.izi.clock'
+      - '@inpost.izi.serializer'
+      - '@izi\prestashop\CommandBus'
+
+  izi\prestashop\Controller\Api\BasketController:
+    class: izi\prestashop\Controller\Api\BasketController
+    public: true
+    arguments:
+      - '@inpost.izi.serializer'
+      - '@izi\prestashop\CommandBus'
+
+  izi\prestashop\Controller\Api\OrderController:
+    class: izi\prestashop\Controller\Api\OrderController
+    public: true
+    arguments:
+      - '@inpost.izi.serializer'
+      - '@izi\prestashop\CommandBus'
+
+  izi\prestashop\Handler\BindBasketHandlerInterface: '@izi\prestashop\Handler\BindBasketHandler'
+  izi\prestashop\Handler\BindBasketHandler:
+    class: izi\prestashop\Handler\BindBasketHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\BasketApp\BasketAppClient'
+      - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
+
+  izi\prestashop\Handler\GenerateDeepLinkHandlerInterface: '@izi\prestashop\Handler\GenerateDeepLinkHandler'
+  izi\prestashop\Handler\GenerateDeepLinkHandler:
+    class: izi\prestashop\Handler\GenerateDeepLinkHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@inpost.izi.environment'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\BasketApp\BasketAppClient'
+
+  izi\prestashop\Handler\UnbindBasketHandlerInterface: '@izi\prestashop\Handler\UnbindBasketHandler'
+  izi\prestashop\Handler\UnbindBasketHandler:
+    class: izi\prestashop\Handler\UnbindBasketHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\BasketApp\BasketAppClient'
+
+  izi\prestashop\Handler\GetBindingConfirmationHandlerInterface: '@izi\prestashop\Handler\GetBindingConfirmationHandler'
+  izi\prestashop\Handler\GetBindingConfirmationHandler:
+    class: izi\prestashop\Handler\GetBindingConfirmationHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+
+  izi\prestashop\Handler\GetOrderEventsHandlerInterface: '@izi\prestashop\Handler\GetOrderEventsHandler'
+  izi\prestashop\Handler\GetOrderEventsHandler:
+    class: izi\prestashop\Handler\GetOrderEventsHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManager'
+
+  izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface: '@izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandler'
+  izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandler:
+    class: izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
+
+  izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface: '@izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandler'
+  izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandler:
+    class: izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+
+  izi\prestashop\MerchantApi\Handler\GetBasketHandlerInterface: '@izi\prestashop\MerchantApi\Handler\GetBasketHandler'
+  izi\prestashop\MerchantApi\Handler\GetBasketHandler:
+    class: izi\prestashop\MerchantApi\Handler\GetBasketHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
+
+  izi\prestashop\MerchantApi\Handler\UpdateBasketHandlerInterface: '@izi\prestashop\MerchantApi\Handler\UpdateBasketHandler'
+  izi\prestashop\MerchantApi\Handler\UpdateBasketHandler:
+    class: izi\prestashop\MerchantApi\Handler\UpdateBasketHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler'
+      - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
+
+  izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface: '@izi\prestashop\MerchantApi\Handler\UpdateOrderHandler'
+  izi\prestashop\MerchantApi\Handler\UpdateOrderHandler:
+    class: izi\prestashop\MerchantApi\Handler\UpdateOrderHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@inpost.izi.object_model.order_repository'
+      - '@izi\prestashop\Configuration\OrdersConfiguration'
+      - '@izi\prestashop\Builder\Order\OrderStatusDescriptionProvider'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler:
+    class: izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler
+    public: false
+    arguments:
+      - '@inpost.izi.basket_event_handler_locator'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ContextManager'
+
+  izi\prestashop\MerchantApi\Handler\Basket\ProductsQuantityEventHandler:
+    class: izi\prestashop\MerchantApi\Handler\Basket\ProductsQuantityEventHandler
+    public: false
+    tags:
+      - { name: inpost.izi.basket_event_handler }
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManager'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\Handler\Basket\PromoCodesEventHandler:
+    class: izi\prestashop\MerchantApi\Handler\Basket\PromoCodesEventHandler
+    public: false
+    tags:
+      - { name: inpost.izi.basket_event_handler }
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManager'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\Handler\Basket\RelatedProductsEventHandler:
+    class: izi\prestashop\MerchantApi\Handler\Basket\RelatedProductsEventHandler
+    public: false
+    tags:
+      - { name: inpost.izi.basket_event_handler }
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManager'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\Firewall\MerchantApiAuthenticator:
+    class: izi\prestashop\MerchantApi\Firewall\MerchantApiAuthenticator
+    public: true
+    arguments:
+      - '@izi\prestashop\MerchantApi\Firewall\SigningKeysService'
+      - '@inpost.izi.clock'
+
+  izi\prestashop\MerchantApi\Firewall\SigningKeysService:
+    class: izi\prestashop\MerchantApi\Firewall\SigningKeysService
+    public: false
+    arguments:
+      - '@izi\prestashop\BasketApp\BasketAppClient'
+      - '@izi\prestashop\Cache\ConfigurationCache'

@@ -29,6 +29,11 @@ final class ConfirmBasketBindingHandler implements ConfirmBasketBindingHandlerIn
         $this->builderFactory = $builderFactory;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return ConfirmBasketBindingCommand::class;
+    }
+
     public function __invoke(ConfirmBasketBindingCommand $command): Basket
     {
         if (null === $session = $this->repository->findByBasketId($command->getBasketId())) {

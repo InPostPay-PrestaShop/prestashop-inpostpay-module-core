@@ -1,0 +1,33 @@
+# PS >= 1.7.4 common FO/BO configuration
+imports:
+  - { resource: common.yml }
+
+services:
+  _defaults:
+    public: false
+
+  inpost.izi.repository_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - Cart: '@inpost.izi.object_model.cart_repository'
+        Currency: '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
+        Order: '@inpost.izi.object_model.order_repository'
+        OrderState: '@inpost.izi.object_model.order_state_repository'
+        InPostShipmentModel: '@izi\prestashop\ObjectModel\Repository\ShipmentRepository'
+
+  inpost.izi.event_dispatcher:
+    class: Symfony\Component\EventDispatcher\EventDispatcherInterface
+    factory: [ '@izi\prestashop\Event\EventDispatcherFactory', create ]
+
+  inpost.izi.event_subscriber_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - izi\prestashop\EventListener\ShipmentListener: '@izi\prestashop\EventListener\ShipmentListener'
+        izi\prestashop\EventListener\CartListener: '@izi\prestashop\EventListener\CartListener'
+
+  izi\prestashop\Event\EventDispatcherFactory:
+    class: izi\prestashop\Event\EventDispatcherFactory
+    arguments:
+      - '@inpost.izi.event_subscriber_locator'

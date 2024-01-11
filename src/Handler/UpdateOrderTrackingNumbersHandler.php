@@ -43,6 +43,11 @@ final class UpdateOrderTrackingNumbersHandler implements UpdateOrderTrackingNumb
         $this->trackingNumberProviders = $trackingNumberProviders;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return UpdateOrderTrackingNumbersCommand::class;
+    }
+
     public function __invoke(UpdateOrderTrackingNumbersCommand $command)
     {
         if (null === $this->sessionRepository->findByOrderId($orderId = $command->getOrderId())) {

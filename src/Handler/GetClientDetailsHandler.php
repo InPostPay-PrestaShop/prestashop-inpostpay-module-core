@@ -36,6 +36,11 @@ final class GetClientDetailsHandler implements GetClientDetailsHandlerInterface
         $this->client = $client;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return GetClientDetailsCommand::class;
+    }
+
     public function __invoke(GetClientDetailsCommand $command): ?ClientDetails
     {
         if (null === $session = $this->repository->findByEntityId($command->getBasketId())) {

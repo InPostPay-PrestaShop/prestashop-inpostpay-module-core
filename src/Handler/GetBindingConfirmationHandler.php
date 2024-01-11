@@ -23,6 +23,11 @@ final class GetBindingConfirmationHandler implements GetBindingConfirmationHandl
         $this->repository = $repository;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return GetBindingConfirmationCommand::class;
+    }
+
     public function __invoke(GetBindingConfirmationCommand $command): BindingConfirmationStream
     {
         $session = null === ($basketId = $command->getBasketId())

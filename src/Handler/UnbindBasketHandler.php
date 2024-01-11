@@ -29,6 +29,11 @@ final class UnbindBasketHandler implements UnbindBasketHandlerInterface
         $this->client = $client;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return UnbindBasketCommand::class;
+    }
+
     public function __invoke(UnbindBasketCommand $command)
     {
         if (null === $session = $this->repository->findByEntityId($command->getBasketId())) {

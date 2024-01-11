@@ -36,6 +36,11 @@ final class GetOrderEventsHandler implements GetOrderEventsHandlerInterface
         $this->manager = $manager;
     }
 
+    public static function getHandledCommandClass(): string
+    {
+        return GetOrderEventsCommand::class;
+    }
+
     public function __invoke(GetOrderEventsCommand $command): OrderEventStream
     {
         if (null === $session = $this->repository->findByBasketId($command->getBasketId())) {
