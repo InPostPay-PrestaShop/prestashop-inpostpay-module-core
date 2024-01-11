@@ -1,12 +1,12 @@
 import mainController from './controller/mainController.js';
-import iziAddToCart from "./controller/components/actions/iziAddToCart";
-import iziBindingDelete from "./controller/components/actions/iziBindingDelete";
-import iziCanBeBound from "./controller/components/actions/iziCanBeBound";
-import iziGetBindingData from "./controller/components/actions/iziGetBindingData";
-import iziGetIsBound from "./controller/components/actions/iziGetIsBound";
-import iziGetOrderComplete from "./controller/components/actions/iziGetOrderComplete";
-import iziGetPayData from "./controller/components/actions/iziGetPayData";
-import iziMobileLink from "./controller/components/actions/iziMobileLink";
+import iziAddToCart from "./components/actions/iziAddToCart";
+import iziBindingDelete from "./components/actions/iziBindingDelete";
+import iziCanBeBound from "./components/actions/iziCanBeBound";
+import iziGetBindingData from "./components/actions/iziGetBindingData";
+import iziGetIsBound from "./components/actions/iziGetIsBound";
+import iziGetOrderComplete from "./components/actions/iziGetOrderComplete";
+import iziGetPayData from "./components/actions/iziGetPayData";
+import iziMobileLink from "./components/actions/iziMobileLink";
 
 window.iziAddToCart = iziAddToCart;
 window.iziBindingDelete = iziBindingDelete;

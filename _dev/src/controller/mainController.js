@@ -1,7 +1,7 @@
-import updateButtonCount from "./components/widget/updateButtonCount";
-import updatedCartHandler from "./components/handler/updatedCartHandler";
-import updateCartHandler from "./components/handler/updateCartHandler";
-import updatedProductHandler from "./components/handler/updatedProductHandler";
+import updateButtonCount from "../components/widget/updateButtonCount";
+import updatedCartHandler from "../components/handler/updatedCartHandler";
+import updateCartHandler from "../components/handler/updateCartHandler";
+import updatedProductHandler from "../components/handler/updatedProductHandler";
 
 const mainController = () => {
 
