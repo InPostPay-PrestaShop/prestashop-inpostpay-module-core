@@ -127,21 +127,21 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getProductBasePrice(array $product): Price
     {
         $gross = $product['price_without_reduction'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             true,
             false,
-            $product['cart_quantity'],
-            $product['id_customization']
+            (int) $product['cart_quantity'],
+            (int) $product['id_customization']
         );
 
         $net = $product['price_without_reduction_without_tax'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             false,
             false,
-            $product['cart_quantity'],
-            $product['id_customization']
+            (int) $product['cart_quantity'],
+            (int) $product['id_customization']
         );
 
         return PriceFactory::create((float) $net, (float) $gross);
@@ -150,21 +150,21 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getCartProductPromoPrice(array $product): Price
     {
         $gross = $product['price_with_reduction'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             true,
             true,
-            $product['cart_quantity'],
-            $product['id_customization']
+            (int) $product['cart_quantity'],
+            (int) $product['id_customization']
         );
 
         $net = $product['price_with_reduction_without_tax'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             false,
             true,
-            $product['cart_quantity'],
-            $product['id_customization']
+            (int) $product['cart_quantity'],
+            (int) $product['id_customization']
         );
 
         return PriceFactory::create((float) $net, (float) $gross);
@@ -621,7 +621,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         foreach ($cartProductsById as $productId => $cartProduct) {
             $product = new \Product($productId, false, $this->cart->id_lang);
 
-            foreach ($product->getAccessories($this->cart->id_lang) as $accessory) {
+            if (false === $accessories = $product->getAccessories($this->cart->id_lang)) {
+                continue;
+            }
+
+            foreach ($accessories as $accessory) {
                 $accessoryId = $accessory['id_product'];
                 if (isset($relatedProductsById[$accessoryId]) || isset($cartProductsById[$accessoryId])) {
                     continue;
