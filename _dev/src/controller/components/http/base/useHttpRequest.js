@@ -57,6 +57,11 @@ const useHttpRequest = (url, method, body = null, headers = {}) => {
       if (!response.ok) {
         reject(new Error('Error while fetching response'));
       } else {
+        if (response.status === 204) {
+          resolve();
+          return;
+        }
+
         let json = await response.json();
 
         if (!isObject(json)) {
