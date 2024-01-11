@@ -11,6 +11,6 @@ use izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface;
 
 interface BasketAppClientInterface extends BasketsApiClientInterface, BrowserApiClientInterface, OrdersApiClientInterface, SigningKeysApiClientInterface
 {
-    public const DATETIME_FORMAT = 'Y-m-d\TH:i:s.v\Z'; // format character "p" is not available before PHP 8.0
+    public const DATETIME_FORMAT = 'Y-m-d\TH:i:s.u\Z'; // format character "p" is not available before PHP 8.0
     public const DATETIME_ZONE = 'UTC';
 }

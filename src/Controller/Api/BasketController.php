@@ -64,6 +64,6 @@ final class BasketController extends AbstractApiController
 
         CartSession::setBasketCacheById($basketId, $data); // TODO remove when not needed
 
-        return new JsonResponse($data);
+        return JsonResponse::create()->setContent($data);
     }
 }

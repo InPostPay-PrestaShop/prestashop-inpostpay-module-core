@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Model\Basket\Request;
 
-use izi\prestashop\Common\Basket\Quantity;
-
 final class QuantityData implements \JsonSerializable
 {
     /**

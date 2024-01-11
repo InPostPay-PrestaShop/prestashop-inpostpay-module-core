@@ -186,7 +186,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             $logger->debug('Response body: "{body}"', ['body' => $body]);
         }
 
-        return $response->setEncodingOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JsonResponse::DEFAULT_ENCODING_OPTIONS);
+        return $response;
     }
 
     private function handleApiError(\Throwable $throwable): Response

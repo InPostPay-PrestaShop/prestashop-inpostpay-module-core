@@ -44,6 +44,7 @@ abstract class AbstractApiController
         try {
             return $this->serializer->deserialize($request->getContent(), $class, 'json', [
                 'datetime_format' => BasketAppClientInterface::DATETIME_FORMAT,
+                'datetime_timezone' => BasketAppClientInterface::DATETIME_ZONE,
             ]);
         } catch (UnexpectedValueException $e) {
             throw new MalformedRequestException('Could not decode request.', 0, $e);
