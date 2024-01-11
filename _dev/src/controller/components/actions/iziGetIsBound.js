@@ -11,23 +11,29 @@ function iziGetIsBound() {
       const { data = null } = event;
 
       if (data) {
-        let binding;
+        let parsedData;
 
         try {
-          binding = parseToJson(data);
+          parsedData = parseToJson(data);
         } catch (e) {
           return;
         }
 
-        if (binding?.phone_number) {
+        if (parsedData?.phone_number) {
+          resolve(parsedData);
           close();
-          resolve(binding);
         }
       }
     }
 
     const onError = (event) => {
+      // We don't want to reject promise if connection is in progress
+      if (event.target.readyState === EventSource.CONNECTING) {
+        return;
+      }
+
       reject(new Error('An error occurred while attempting to connect.'));
+      close();
     }
 
     const {

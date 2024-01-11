@@ -184,17 +184,17 @@ class Inpostizi extends PaymentModule
         return $this->renderInPostPayWidget($config);
     }
 
-    public function hookDisplayFooterProduct(array $params)
-    {
-        if (!\Configuration::get('INPOST_PAY_show_button_details')) {
-            return '';
-        }
-
-        $productId = is_array($params['product']) ? $params['product']['id'] : $params['product']->id;
-        $config = $this->createWidgetConfigurationForProduct($productId);
-
-        return $this->renderInPostPayWidget($config);
-    }
+//    public function hookDisplayFooterProduct(array $params)
+//    {
+//        if (!\Configuration::get('INPOST_PAY_show_button_details')) {
+//            return '';
+//        }
+//
+//        $productId = is_array($params['product']) ? $params['product']['id'] : $params['product']->id;
+//        $config = $this->createWidgetConfigurationForProduct($productId);
+//
+//        return $this->renderInPostPayWidget($config);
+//    }
 
 //    public function hookDisplayShoppingCart()
 //    {

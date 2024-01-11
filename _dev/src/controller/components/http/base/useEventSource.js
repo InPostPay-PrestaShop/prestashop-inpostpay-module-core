@@ -1,7 +1,12 @@
 import { getBackendUrl } from "../confg/confg";
 import useUrlBuilder from "../../utils/urlBuilder";
+import useEventSourceStore from "../store/EventSourceStore";
 
-const eventSourceMap = new Map();
+const {
+  getEvent,
+  setEvent,
+  removeEvent,
+} = useEventSourceStore();
 
 /**
  * @param endpoint {string}
@@ -23,29 +28,15 @@ const useEventSource = (endpoint, onMessage, onError = () => {}) => {
   }
 
   /**
-   * @return {EventSource|null}
-   */
-  const getEventSource = () => {
-    return eventSourceMap.get(endpoint);
-  }
-
-  /**
-   * @param {EventSource} eventSource
-   * @return {void}
-   */
-  const setEventSource = (eventSource) => {
-    eventSourceMap.set(endpoint, eventSource);
-  }
-
-  /**
    * Close Event source
    * @return {void}
    */
   const close = () => {
-    const eventSource = getEventSource();
+    const eventSource = getEvent(endpoint);
 
     if (eventSource) {
       eventSource.close();
+      removeEvent(endpoint);
     }
   }
 
@@ -60,7 +51,7 @@ const useEventSource = (endpoint, onMessage, onError = () => {}) => {
     eventSource.addEventListener('message', onMessage);
     eventSource.addEventListener('error', onError);
 
-    setEventSource(eventSource);
+    setEvent(endpoint, eventSource);
   }
 
   return {

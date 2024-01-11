@@ -23,14 +23,18 @@ function iziGetOrderComplete() {
           actionData = { action: "redirect", redirect: parsedData.redirect };
         } else if (parsedData?.action === "delete" || parsedData?.action === "refresh") {
           // Disabled for now we don't have to refresh page on cart changes
-          // actionData = { action: "refresh" };
+          actionData = { action: "refresh" };
 
-          prestashop.emit('updateCart', {
-            reason: {
-              linkAction: 'refresh'
-            },
-            resp: {}
-          })
+          if (parsedData?.action === 'refresh') {
+            prestashop.emit('updateCart', {
+              reason: {
+                linkAction: 'refresh'
+              },
+              resp: {}
+            });
+
+            return;
+          }
         }
 
         if (actionData) {
