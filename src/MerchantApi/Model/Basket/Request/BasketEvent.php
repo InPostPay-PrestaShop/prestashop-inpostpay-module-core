@@ -108,21 +108,4 @@ final class BasketEvent implements \JsonSerializable
     {
         return get_object_vars($this);
     }
-
-    /**
-     * @return PromoCode[]|QuantityData[]|RelatedProductData[]
-     */
-    public function getData(): array
-    {
-        switch ($this->event_type) {
-            case EventType::ProductsQuantity():
-                return $this->quantity_event_data;
-            case EventType::PromoCodes():
-                return $this->promo_codes_event_data;
-            case EventType::RelatedProducts():
-                return $this->related_products_event_data;
-            default:
-                throw new \LogicException('Unreachable statement.');
-        }
-    }
 }
