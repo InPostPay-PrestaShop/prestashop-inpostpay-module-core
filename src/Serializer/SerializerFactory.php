@@ -4,10 +4,17 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Serializer;
 
-use izi\prestashop\Serializer\DateTimeNormalizer as DateTimeNormalizerPolyfill;
+use izi\prestashop\Serializer\Normalizer\CustomDenormalizer;
+use izi\prestashop\Serializer\Normalizer\DateTimeNormalizer as DateTimeNormalizerPolyfill;
+use izi\prestashop\Serializer\Normalizer\EnumDenormalizer;
+use izi\prestashop\Serializer\Normalizer\JsonSerializableNormalizer as JsonSerializableNormalizerPolyfill;
+use izi\prestashop\Serializer\Normalizer\ObjectNormalizer as CustomObjectNormalizer;
+use izi\prestashop\Serializer\Normalizer\PriceNormalizer;
+use phpDocumentor\Reflection\ClassReflector;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
+use Symfony\Component\PropertyInfo\PropertyTypeExtractorInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ArrayDenormalizer;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
@@ -33,7 +40,7 @@ final class SerializerFactory
             new EnumDenormalizer(),
             new CustomDenormalizer(),
             class_exists(DateTimeNormalizer::class) ? new DateTimeNormalizer() : new DateTimeNormalizerPolyfill(),
-            new JsonSerializableNormalizer(), // TODO Sf 2.8?
+            class_exists(JsonSerializableNormalizer::class) ? new JsonSerializableNormalizer() : new JsonSerializableNormalizerPolyfill(),
             new ArrayDenormalizer(),
             self::createObjectNormalizer(),
         ];
@@ -41,8 +48,25 @@ final class SerializerFactory
 
     private static function createObjectNormalizer(): ObjectNormalizer
     {
-        $extractor = new PropertyInfoExtractor([], [new ReflectionExtractor(), new PhpDocExtractor()]);
+        $typeExtractor = self::createTypeExtractor();
 
-        return new ObjectNormalizer(null, null, null, $extractor); // TODO Sf 2.8
+        $class = new \ReflectionClass(ObjectNormalizer::class);
+        $params = $class->getConstructor()->getParameters();
+
+        return 4 < count($params)
+            ? new ObjectNormalizer(null, null, null, $typeExtractor)
+            : new CustomObjectNormalizer(null, null, null, $typeExtractor);
+    }
+
+    private static function createTypeExtractor(): PropertyTypeExtractorInterface
+    {
+        $typeExtractors = [new ReflectionExtractor()];
+        if (class_exists(ClassReflector::class)) {
+            $typeExtractors[] = new PhpDocExtractor();
+        } else {
+            $typeExtractors[] = new PropertyDocBlockTypeExtractor();
+        }
+
+        return new PropertyInfoExtractor([], $typeExtractors);
     }
 }

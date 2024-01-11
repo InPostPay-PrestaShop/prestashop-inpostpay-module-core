@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\BasketApp\Signature\Response;
 
-use izi\prestashop\Serializer\DenormalizableInterface;
+use izi\prestashop\Serializer\Normalizer\DenormalizableInterface;
 
 final class PublicKey implements \JsonSerializable, DenormalizableInterface
 {

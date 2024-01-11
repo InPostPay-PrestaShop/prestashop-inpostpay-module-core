@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace izi\prestashop\Serializer;
+namespace izi\prestashop\Serializer\Normalizer;
 
 interface DenormalizableInterface
 {

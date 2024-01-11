@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace izi\prestashop\Serializer;
+namespace izi\prestashop\Serializer\Normalizer;
 
 use izi\prestashop\Common\Price;
 use Symfony\Component\Serializer\Exception\InvalidArgumentException;
