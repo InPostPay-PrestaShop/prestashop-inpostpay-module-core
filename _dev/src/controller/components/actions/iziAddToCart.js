@@ -57,6 +57,7 @@ async function iziAddToCart(productId) {
   const formData = {
     add: 1,
     action: 'update',
+    ajax: 1,
     ...restFormData,
   };
 
