@@ -22,6 +22,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer as BaseNormalizer;
  * @internal
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
+ *
  * @see \Symfony\Component\Serializer\Normalizer\AbstractNormalizer
  * @see \Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer
  * @see \Symfony\Component\Serializer\Normalizer\ObjectNormalizer
@@ -41,7 +42,7 @@ final class ObjectNormalizer extends BaseNormalizer
         $this->propertyTypeExtractor = $propertyTypeExtractor;
     }
 
-    public function denormalize($data, $class, $format = null, array $context = array())
+    public function denormalize($data, $class, $format = null, array $context = [])
     {
         if (!isset($context['cache_key'])) {
             $context['cache_key'] = $this->getCacheKey($format, $context);
@@ -72,7 +73,7 @@ final class ObjectNormalizer extends BaseNormalizer
         return $object;
     }
 
-    protected function instantiateObject(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, $format = null)
+    protected function instantiateObject(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, string $format = null)
     {
         if (!$constructor = $reflectionClass->getConstructor()) {
             return new $class();
@@ -116,7 +117,7 @@ final class ObjectNormalizer extends BaseNormalizer
                 // Don't run set for a parameter passed to the constructor
                 $params[] = $this->denormalizeParameter($reflectionClass, $constructorParameter, $paramName, $parameterData, $context, $format);
                 unset($data[$key]);
-            }  elseif ($constructorParameter->isDefaultValueAvailable()) {
+            } elseif ($constructorParameter->isDefaultValueAvailable()) {
                 $params[] = $constructorParameter->getDefaultValue();
             } elseif ($constructorParameter->hasType() && $constructorParameter->getType()->allowsNull()) {
                 $params[] = null;
@@ -160,7 +161,7 @@ final class ObjectNormalizer extends BaseNormalizer
         return $parameterData;
     }
 
-    protected function createChildContext(array $parentContext, ?string $format): array
+    protected function createChildContext(array $parentContext, $attribute, string $format = null): array
     {
         $context = $parentContext;
         $context['cache_key'] = $this->getCacheKey($format, $context);
@@ -208,7 +209,7 @@ final class ObjectNormalizer extends BaseNormalizer
 
             if (null !== $collectionValueType && Type::BUILTIN_TYPE_OBJECT === $collectionValueType->getBuiltinType()) {
                 $builtinType = Type::BUILTIN_TYPE_OBJECT;
-                $class = $collectionValueType->getClassName().'[]';
+                $class = $collectionValueType->getClassName() . '[]';
 
                 if (null !== $collectionKeyType = $type->getCollectionKeyType()) {
                     $context['key_type'] = $collectionKeyType;
@@ -227,7 +228,7 @@ final class ObjectNormalizer extends BaseNormalizer
                 if (null !== $innerType->getClassName()) {
                     // the builtinType is the inner one and the class is the class followed by []...[]
                     $builtinType = $innerType->getBuiltinType();
-                    $class = $innerType->getClassName().$dimensions;
+                    $class = $innerType->getClassName() . $dimensions;
                 } else {
                     // default fallback (keep it as array)
                     $builtinType = $type->getBuiltinType();
@@ -271,7 +272,7 @@ final class ObjectNormalizer extends BaseNormalizer
                     return false;
                 }
 
-                if (('is_'.$builtinType)($data)) {
+                if (('is_' . $builtinType)($data)) {
                     return $data;
                 }
             } catch (MissingConstructorArgumentsException $e) {
@@ -298,7 +299,7 @@ final class ObjectNormalizer extends BaseNormalizer
             return null;
         }
 
-        $key = $currentClass.'::'.$attribute;
+        $key = $currentClass . '::' . $attribute;
         if (isset($this->typesCache[$key])) {
             return false === $this->typesCache[$key] ? null : $this->typesCache[$key];
         }

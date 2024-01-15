@@ -2,9 +2,6 @@
 imports:
   - { resource: ../services/sf34.yml }
 
-parameters:
-  inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
-
 services:
   _defaults:
     public: false

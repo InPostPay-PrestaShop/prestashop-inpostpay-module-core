@@ -1,5 +1,6 @@
 <?php
 
+use izi\prestashop\Common\Currency;
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
 use izi\prestashop\DependencyInjection\ContainerFactory;
@@ -33,7 +34,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     /**
      * @var ContainerInterface|null
      */
-    private $_container;
+    private $legacyContainer;
 
     public function __construct()
     {
@@ -98,7 +99,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $data = [];
 
         foreach ($shops as $shopId) {
-            foreach (\izi\prestashop\Common\Currency::cases() as $currency) {
+            foreach (Currency::cases() as $currency) {
                 if (0 >= $currencyId = (int) \Currency::getIdByIsoCode($currency->value, $shopId)) {
                     continue;
                 }
@@ -156,7 +157,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function get($serviceName)
     {
         if (\Tools::version_compare(_PS_VERSION_, '1.7.6')) {
-            return $this->_getContainer()->get($serviceName);
+            return $this->getLegacyContainer()->get($serviceName);
         }
 
         try {
@@ -218,6 +219,8 @@ class InPostIzi extends PaymentModule implements WidgetInterface
 
     /**
      * @return Request
+     *
+     * @interal
      */
     public function getCurrentRequest()
     {
@@ -234,6 +237,8 @@ class InPostIzi extends PaymentModule implements WidgetInterface
 
     /**
      * @return LoggerInterface
+     *
+     * @interal
      */
     public function getLogger()
     {
@@ -257,13 +262,13 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     /**
      * @return ContainerInterface
      */
-    private function _getContainer()
+    private function getLegacyContainer()
     {
-        if (isset($this->_container)) {
-            return $this->_container;
+        if (isset($this->legacyContainer)) {
+            return $this->legacyContainer;
         }
 
-        return $this->_container = $this->createContainer();
+        return $this->legacyContainer = $this->createContainer();
     }
 
     /**
@@ -271,7 +276,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     private function createContainer()
     {
-        $cacheDir = sprintf('%s/inpost/', rtrim(_PS_CACHE_DIR_, '/'));
+        $cacheDir = sprintf('%s/inpost/izi/', rtrim(_PS_CACHE_DIR_, '/'));
 
         if (\Tools::version_compare(_PS_VERSION_, '1.7.4')) {
             $className = sprintf('InPost\\Izi\\Container_%s', str_replace('.', '_', $this->version));

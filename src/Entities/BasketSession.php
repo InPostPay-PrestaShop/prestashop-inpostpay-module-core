@@ -83,8 +83,9 @@ final class BasketSession implements SwitchableBasketSessionInterface
 
     public function isBasketBound(): bool
     {
-        return null !== $this->confirmation
-            && BindingStatus::Success() === $this->confirmation->getStatus();
+        $confirmation = $this->getBindingConfirmation();
+
+        return null !== $confirmation && BindingStatus::Success() === $confirmation->getStatus();
     }
 
     public function getBindingConfirmation(): ?BindingConfirmation

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Builder\Basket;
 
-use izi\item\BasketNotice;
+use izi\prestashop\Common\Basket\Notice;
 
 /**
  * @template T of object
@@ -24,7 +24,7 @@ interface BasketBuilderInterface
     /**
      * @return static
      */
-    public function setNotice(?BasketNotice $notice): self;
+    public function setNotice(?Notice $notice): self;
 
     /**
      * @return static

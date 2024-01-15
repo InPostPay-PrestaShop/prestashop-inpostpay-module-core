@@ -122,7 +122,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
             }
 
             foreach ($node->uses as $use) {
-                $useStatements[$use->alias] = (string) $use->name;
+                $useStatements[$use->alias ?? $use->name->getLast()] = (string) $use->name;
             }
         }
 

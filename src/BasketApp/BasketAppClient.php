@@ -133,7 +133,8 @@ final class BasketAppClient implements BasketAppClientInterface
     public function updateOrder(string $orderId, OrderEvent $event): void
     {
         $request = $this->createRequest('POST', sprintf('/v1/izi/order/%s/event', $orderId), $event);
-        $this->sendRequest($request);
+        // currently the API returns 201 on success instead of 200 given in the documentation
+        $this->sendRequest($request, 200, 201);
     }
 
     public function getSigningKey(string $version): SigningKey
@@ -176,7 +177,7 @@ final class BasketAppClient implements BasketAppClientInterface
             ->withHeader('Content-Type', 'application/json');
     }
 
-    private function sendRequest(RequestInterface $request, int $expectedStatusCode = 200): ResponseInterface
+    private function sendRequest(RequestInterface $request, int $expectedStatusCode = 200, int ...$allowedStatusCodes): ResponseInterface
     {
         $response = $this->client->sendRequest($request);
         $statusCode = $response->getStatusCode();
@@ -185,7 +186,7 @@ final class BasketAppClient implements BasketAppClientInterface
             $this->handleUnsuccessfulResponse($request, $response);
         }
 
-        if ($expectedStatusCode === $statusCode) {
+        if ($expectedStatusCode === $statusCode || in_array($statusCode, $allowedStatusCodes, true)) {
             return $response;
         }
 

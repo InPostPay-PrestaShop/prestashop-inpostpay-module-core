@@ -34,7 +34,7 @@ class OrderController extends AbstractApiController
     {
         $order = $this->getOrderById((int) $orderId);
 
-        $basketId = CartSession::getBasketIdByCartId($order->id_cart);
+        $basketId = CartSession::getBasketIdByCartId((int) $order->id_cart);
         $response = PrestashopOrder::getOrder($order, $basketId);
 
         return new JsonResponse($response);

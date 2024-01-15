@@ -6,7 +6,7 @@ namespace izi\prestashop\Controller\Api;
 
 use izi\prestashop\BasketApp\BasketAppClientInterface;
 use izi\prestashop\CommandBusInterface;
-use izi\prestashop\MerchantApi\Exception\BadRequestException;
+use izi\prestashop\MerchantApi\Exception\InternalServerErrorException;
 use izi\prestashop\MerchantApi\Exception\MalformedRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
@@ -49,7 +49,7 @@ abstract class AbstractApiController
         } catch (UnexpectedValueException $e) {
             throw new MalformedRequestException('Could not decode request.', 0, $e);
         } catch (ExceptionInterface $e) {
-            throw new BadRequestException('Could not decode request.', 0, $e);
+            throw new InternalServerErrorException('Could not decode request.', 0, $e);
         }
     }
 }

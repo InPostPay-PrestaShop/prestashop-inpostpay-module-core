@@ -53,7 +53,7 @@ final class SerializerFactory
         $class = new \ReflectionClass(ObjectNormalizer::class);
         $params = $class->getConstructor()->getParameters();
 
-        return 4 < count($params)
+        return 3 < count($params)
             ? new ObjectNormalizer(null, null, null, $typeExtractor)
             : new CustomObjectNormalizer(null, null, null, $typeExtractor);
     }

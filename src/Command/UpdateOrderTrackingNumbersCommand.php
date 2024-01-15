@@ -21,9 +21,6 @@ final class UpdateOrderTrackingNumbersCommand
      */
     private $eventTime;
 
-    /**
-     * @param string $orderId
-     */
     public function __construct(string $orderId, \DateTimeImmutable $eventTime)
     {
         $this->orderId = $orderId;

@@ -104,7 +104,7 @@ final class MerchantApiAuthenticator
 
     private function checkTimestamp(string $signatureTimestamp): void
     {
-        if (false === $signatureTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.vP', $signatureTimestamp)) {
+        if (false === $signatureTime = \DateTimeImmutable::createFromFormat('Y-m-d\TH:i:s.uP', $signatureTimestamp)) {
             throw new InvalidSignatureException('Malformed timestamp.');
         }
 

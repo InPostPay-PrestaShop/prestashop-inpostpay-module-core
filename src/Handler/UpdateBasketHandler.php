@@ -52,7 +52,7 @@ final class UpdateBasketHandler implements UpdateBasketHandlerInterface
     {
         $session = $this->sessionRepository->findByEntityId($cartId = $command->getBasketId());
 
-        if (null === $session || !$session->isBasketBound()) {
+        if (null === $session || !$session->isBasketBound() || null !== $session->getOrderId()) {
             return;
         }
 

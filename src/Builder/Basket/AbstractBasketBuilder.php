@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Builder\Basket;
 
-use izi\item\BasketNotice;
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\Consent;
 use izi\prestashop\Common\Basket\ConsentType;
+use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Common\Basket\Product;
 use izi\prestashop\Common\Basket\Quantity;
 use izi\prestashop\Common\Basket\Summary;
@@ -42,7 +42,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $expirationDate;
 
     /**
-     * @var BasketNotice|null
+     * @var Notice|null
      */
     private $notice;
 
@@ -71,7 +71,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     /**
      * @return static
      */
-    public function setNotice(?BasketNotice $notice): BasketBuilderInterface
+    public function setNotice(?Notice $notice): BasketBuilderInterface
     {
         $this->notice = $notice;
 
@@ -181,7 +181,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
         return new Product(
             sprintf('%d.%d.%d', $model->id, $combinationId, $customizationId),
-            isset($product['attributes']) ? sprintf('%s %s', $product['name'], $product['attributes']) : $product['name'],
+            $product['name'],
             $basePrice,
             $quantity,
             is_array($category) ? (string) current($category) : (string) $category,
@@ -224,21 +224,40 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getProductAttributes(array $product): array
     {
-        return array_map([$this, 'createProductAttribute'], $this->getFeatures($product));
+        return array_map([$this, 'createProductAttribute'], $this->getAttributes($product));
     }
 
-    private function createProductAttribute(array $feature): ProductAttribute
+    private function createProductAttribute(array $attribute): ProductAttribute
     {
-        return new ProductAttribute($feature['name'], $feature['value']);
+        return new ProductAttribute($attribute['group'], $attribute['name']);
     }
 
-    private function getFeatures(array $product): array
+    private function getAttributes(array $product): array
     {
-        if (isset($product['features']) && array_key_exists('name', reset($product['features']))) {
-            return $product['features'];
+        if (!isset($product['id_product_attribute']) || 0 >= (int) $product['id_product_attribute']) {
+            return [];
         }
 
-        return \Product::getFrontFeaturesStatic($this->cart->id_lang, $product['id_product']);
+        $attributes = $product['attributes'] ?? null;
+
+        if (is_array($product['attributes'])) {
+            return array_values($product['attributes']);
+        }
+
+        if (!is_string($attributes)) {
+            return [];
+        }
+
+        $separator = \Context::getContext()->getTranslator()->trans(': ', [], 'Shop.Pdf');
+
+        return array_map(static function (string $attribute) use ($separator): array {
+            [$group, $name] = explode($separator, $attribute, 2);
+
+            return [
+                'group' => trim($group),
+                'name' => trim($name),
+            ];
+        }, explode($this->getConfiguration('PS_ATTRIBUTE_ANCHOR_SEPARATOR'), $attributes));
     }
 
     private function createQuantity(array $product, int $quantity): Quantity
