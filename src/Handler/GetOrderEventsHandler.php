@@ -75,9 +75,9 @@ final class GetOrderEventsHandler implements GetOrderEventsHandlerInterface
         }
 
         if (null === $session->getBindingConfirmation()) {
-            // binding was deleted
             yield ServerSentEvent::builder()
-                ->setData(OrderEvent::refresh())
+//                ->setEventName('binding_deleted')
+                ->setData(json_encode(['action' => 'delete'])) // TODO? adjust front-end?
                 ->build();
 
             return;
