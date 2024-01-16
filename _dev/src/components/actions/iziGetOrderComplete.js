@@ -1,7 +1,6 @@
 import useEventSource from "../http/base/useEventSource";
 import endpoints from "../map/endpoints";
 import parseToJson from "../utils/parseToJson";
-import isObject from "../utils/isObject";
 
 function iziGetOrderComplete() {
   return new Promise((resolve, reject) => {
