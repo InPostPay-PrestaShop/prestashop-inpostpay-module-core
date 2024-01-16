@@ -95,6 +95,16 @@ services:
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
+  izi\prestashop\Hook\Front\DisplayExpressCheckout:
+    class: izi\prestashop\Hook\Front\DisplayExpressCheckout
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
   izi\prestashop\Controller\WidgetController:
     class: izi\prestashop\Controller\WidgetController
     public: true

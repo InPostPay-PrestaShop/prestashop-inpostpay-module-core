@@ -43,7 +43,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Front\DisplayPaymentReturn::HOOK_NAME => '?' . Front\DisplayPaymentReturn::class,
             Front\DisplayProductAdditionalInfo::HOOK_NAME => '?' . Front\DisplayProductAdditionalInfo::class,
             Front\DisplayProductActions::HOOK_NAME => '?' . Front\DisplayProductActions::class,
-            Front\DisplayShoppingCartFooter::HOOK_NAME => '?' . Front\DisplayShoppingCartFooter::class,
+            Front\DisplayExpressCheckout::HOOK_NAME => '?' . Front\DisplayExpressCheckout::class,
         ];
     }
 

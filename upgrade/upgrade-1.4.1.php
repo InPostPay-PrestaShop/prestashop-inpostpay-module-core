@@ -1,5 +1,8 @@
 <?php
 
+use izi\prestashop\Hook\Front\DisplayProductFooter;
+use izi\prestashop\Hook\Front\DisplayShoppingCart;
+use izi\prestashop\Hook\Front\DisplayShoppingCartFooter;
 use izi\prestashop\Hook\HookExecutor;
 
 if (!defined('_PS_VERSION_')) {
@@ -47,6 +50,8 @@ function upgrade_module_1_4_1(\Module $module)
         $db->delete('configuration_lang', 'id_configuration IN (' . implode(',', $configIds) . ')');
     }
 
-    return $module->unregisterHook('displayFooterProduct')
+    return $module->unregisterHook(DisplayProductFooter::HOOK_NAME)
+        && $module->unregisterHook(DisplayShoppingCart::HOOK_NAME)
+        && $module->unregisterHook(DisplayShoppingCartFooter::HOOK_NAME)
         && $module->registerHook(HookExecutor::getHooksToInstall(_PS_VERSION_));
 }
