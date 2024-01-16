@@ -39,10 +39,23 @@ const getProductFormData = (form) => {
 }
 
 /**
+ * @return {boolean}
+ */
+const checkIsCartEmpty = () => {
+  const products = window?.prestashop?.cart?.products;
+
+  return !(!products || products.length === 0);
+};
+
+/**
  * @param productId
  * @return {Promise<void>}
  */
 async function iziAddToCart(productId) {
+  if (checkIsCartEmpty()) {
+    return;
+  }
+
   const { productPageForm } = selectorsMap();
 
   const formElement = document.querySelector(productPageForm);

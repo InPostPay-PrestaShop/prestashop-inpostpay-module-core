@@ -1,22 +1,6 @@
 import iziAddToCart from "./iziAddToCart";
 import bindBasketRequest from "../http/bindBasketRequest";
 
-/**
- * @param productId {number}
- * @return {boolean}
- */
-const checkIfProductIsInCart = (productId) => {
-  const products = window?.prestashop?.cart?.products;
-
-  if (!products || products.length === 0) {
-    return false;
-  }
-
-  const productInCart = products.find((product) => product.id_product === productId);
-
-  return !!productInCart;
-};
-
 
 /**
  * @param id {number|string}
@@ -31,14 +15,6 @@ async function iziGetBindingData(
   phoneNumber = '',
   bindingPlace = 'PRODUCT_CARD'
 ) {
-  if (id) {
-    const productIsInCart = checkIfProductIsInCart(id);
-
-    if (!productIsInCart) {
-      await iziAddToCart(id);
-    }
-  }
-
   return await bindBasketRequest(prefix, phoneNumber, bindingPlace);
 }
 
