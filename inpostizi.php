@@ -3,7 +3,9 @@
 use izi\prestashop\Common\Currency;
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
+use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
 use izi\prestashop\DependencyInjection\ContainerFactory;
+use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
 use izi\prestashop\Hook\WidgetConfigurationResolver;
@@ -12,6 +14,7 @@ use izi\prestashop\Installer\DatabaseInstaller;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -30,6 +33,11 @@ require_once __DIR__ . '/BackendForm.php';
 class InPostIzi extends PaymentModule implements WidgetInterface
 {
     use BackendForm;
+
+    /**
+     * @var bool use bootstrap styles on the module configuration page
+     */
+    public $bootstrap;
 
     /**
      * @var ContainerInterface|null
@@ -290,11 +298,16 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         return (new ContainerFactory($cacheDir))->create($className, $resources);
     }
 
-    private function getSf28ConfigResources(): array
+    /**
+     * @return array
+     */
+    private function getSf28ConfigResources()
     {
         $configurator = static function (ContainerBuilder $container) {
+            $container->addResource(new FileResource(__FILE__));
             $container->addCompilerPass(new RegisterListenersPass('inpost.izi.event_dispatcher'), PassConfig::TYPE_BEFORE_REMOVING);
             $container->addCompilerPass(new ProvideServiceLocatorFactoriesPass('inpost.izi.service_locator'));
+            $container->addCompilerPass(new TaggedIteratorsCollectorPass(UpdateOrderTrackingNumbersHandler::class));
             AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
         };
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\DependencyInjection\Compiler;
 
 use izi\prestashop\DependencyInjection\Argument\ServiceClosureArgument;

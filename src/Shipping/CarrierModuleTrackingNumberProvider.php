@@ -25,9 +25,7 @@ final class CarrierModuleTrackingNumberProvider implements TrackingNumberProvide
             return [];
         }
 
-        /**
-         * @var ShipmentRepository $repository
-         */
+        /** @var ShipmentRepository $repository */
         $repository = $this->manager->getRepository(\InPostShipmentModel::class);
         $shipments = $repository->findWithTrackingNumbersByOrderId($orderId);
 

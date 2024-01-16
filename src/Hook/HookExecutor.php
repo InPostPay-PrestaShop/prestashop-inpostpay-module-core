@@ -60,6 +60,9 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
         throw new \DomainException(sprintf('Hook "%s" is either not implemented or not available in the current context.', $hookName));
     }
 
+    /**
+     * @return string[]
+     */
     public static function getHooksToInstall(string $psVersion): array
     {
         $hookNames = [];
@@ -89,6 +92,8 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
 
     /**
      * @param class-string<AliasedHookInterface> $class
+     *
+     * @return string[]
      */
     private static function getAliases(string $class, string $psVersion): array
     {
