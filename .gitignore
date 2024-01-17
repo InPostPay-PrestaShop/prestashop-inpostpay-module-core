@@ -3,3 +3,5 @@ node_modules
 inpostizi.zip
 config_*.xml
 *.js.map
+.idea
+.DS_Store
