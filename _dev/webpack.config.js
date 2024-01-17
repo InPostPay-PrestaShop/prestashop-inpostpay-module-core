@@ -1,7 +1,7 @@
 const path = require('path');
 const { EsbuildPlugin } = require('esbuild-loader');
 
-module.exports = {
+module.exports = (env, options) => ({
   entry: {
     prestashopizi: [
       './src/index.js',
@@ -28,13 +28,13 @@ module.exports = {
   stats: {
     colors: true,
   },
-  devtool: 'hidden-source-map',
+  devtool: options.mode !== 'production' ? 'eval-source-map' : 'hidden-source-map',
   plugins: [
     new EsbuildPlugin({
       target: 'es2015',
       format: 'iife',
-      minify: true,
-      sourcemap: true,
+      minify: options.mode === 'production',
+      sourcemap: options.mode !== 'production',
     }),
   ],
-};
+});
