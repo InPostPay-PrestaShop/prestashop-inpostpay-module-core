@@ -73,7 +73,7 @@ final class ActionFrontControllerSetMedia implements HookInterface
                 'priority' => 101,
             ]);
 
-        \Media::addJsDef([
+        $this->assetManager->registerJavaScriptVariables([
             'inpostizi_backend_ajax_url' => $this->context->link->getModuleLink($this->module->name, 'backend'),
             'inpostizi_cart_ajax_url' => $this->context->link->getModuleLink($this->module->name, 'cart'),
         ]);
@@ -82,7 +82,7 @@ final class ActionFrontControllerSetMedia implements HookInterface
             $productObject = $this->context->controller->getProduct();
 
             if (\Validate::isLoadedObject($productObject)) {
-                \Media::addJsDef([
+                $this->assetManager->registerJavaScriptVariables([
                     'inpostizi_product_page_id_product' => $productObject->id,
                 ]);
             }
