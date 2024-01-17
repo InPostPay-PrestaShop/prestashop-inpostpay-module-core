@@ -1,6 +1,7 @@
 import isObject from '../../utils/isObject';
 import parseToJson from "../../utils/parseToJson";
 import useUrlBuilder from "../../utils/urlBuilder";
+import getHttpGenericError from "../getHttpGenericError";
 
 /**
  * @param url {string}
@@ -12,7 +13,6 @@ import useUrlBuilder from "../../utils/urlBuilder";
 const useHttpRequest = (url, method, body = null, headers = {}) => {
   let params = {};
   const { addParam, addParams, getURL } = useUrlBuilder(url);
-  const genericErrorMessage = window?.inpostizi_generic_http_error || 'Something went wrong. Please try again later.';
 
   const options = {
     method,
@@ -61,7 +61,7 @@ const useHttpRequest = (url, method, body = null, headers = {}) => {
 
       let json = await response.json();
 
-      if (!isObject(json)) {
+      if (!isObject(json) && typeof json === 'string') {
         json = parseToJson(json);
       }
 
@@ -69,7 +69,7 @@ const useHttpRequest = (url, method, body = null, headers = {}) => {
         if (json?.message) {
           reject(new Error(json.message));
         } else {
-          reject(new Error(genericErrorMessage));
+          reject(getHttpGenericError());
         }
       } else {
         resolve(json);
@@ -80,7 +80,7 @@ const useHttpRequest = (url, method, body = null, headers = {}) => {
         return;
       }
 
-      reject(new Error(genericErrorMessage));
+      reject(getHttpGenericError());
     }
   });
 

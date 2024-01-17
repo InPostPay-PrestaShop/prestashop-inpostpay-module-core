@@ -1,6 +1,7 @@
 import useEventSource from "../http/base/useEventSource";
 import endpoints from "../map/endpoints";
 import parseToJson from "../utils/parseToJson";
+import getHttpGenericError from "../http/getHttpGenericError";
 
 function iziGetOrderComplete() {
   return new Promise((resolve, reject) => {
@@ -42,7 +43,15 @@ function iziGetOrderComplete() {
       }
     }
 
-    const onError = () => {}
+    const onError = () => {
+      // We don't want to reject promise if connection is in progress
+      if (event.target.readyState === EventSource.CONNECTING) {
+        return;
+      }
+
+      reject(getHttpGenericError());
+      close();
+    }
 
     const {
       open,

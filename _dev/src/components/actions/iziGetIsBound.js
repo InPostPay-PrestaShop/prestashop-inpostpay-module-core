@@ -1,6 +1,7 @@
 import useEventSource from "../http/base/useEventSource";
 import endpoints from "../map/endpoints";
 import parseToJson from "../utils/parseToJson";
+import getHttpGenericError from "../http/getHttpGenericError";
 
 /**
  * @return {Promise<any>}
@@ -32,7 +33,7 @@ function iziGetIsBound() {
         return;
       }
 
-      reject(new Error('An error occurred while attempting to connect.'));
+      reject(getHttpGenericError());
       close();
     }
 
