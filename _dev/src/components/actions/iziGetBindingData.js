@@ -15,7 +15,11 @@ async function iziGetBindingData(
   phoneNumber = '',
   bindingPlace = 'PRODUCT_CARD'
 ) {
-  return await bindBasketRequest(prefix, phoneNumber, bindingPlace);
+  try {
+    return await bindBasketRequest(prefix, phoneNumber, bindingPlace);
+  } catch (error) {
+    throw error;
+  }
 }
 
 export default iziGetBindingData;

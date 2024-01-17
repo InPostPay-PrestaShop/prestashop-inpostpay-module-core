@@ -12,6 +12,7 @@ import useUrlBuilder from "../../utils/urlBuilder";
 const useHttpRequest = (url, method, body = null, headers = {}) => {
   let params = {};
   const { addParam, addParams, getURL } = useUrlBuilder(url);
+  const genericErrorMessage = window?.inpostizi_generic_http_error || 'Something went wrong. Please try again later.';
 
   const options = {
     method,
@@ -53,21 +54,24 @@ const useHttpRequest = (url, method, body = null, headers = {}) => {
   const getResponse = async () => new Promise(async (resolve, reject) => {
     try {
       const response = await fetch(getURL(), getOptions());
+      if (response.status === 204) {
+        resolve();
+        return;
+      }
+
+      let json = await response.json();
+
+      if (!isObject(json)) {
+        json = parseToJson(json);
+      }
 
       if (!response.ok) {
-        reject(new Error('Error while fetching response'));
+        if (json?.message) {
+          reject(new Error(json.message));
+        } else {
+          reject(new Error(genericErrorMessage));
+        }
       } else {
-        if (response.status === 204) {
-          resolve();
-          return;
-        }
-
-        let json = await response.json();
-
-        if (!isObject(json)) {
-          json = parseToJson(json);
-        }
-
         resolve(json);
       }
     } catch (e) {
@@ -76,7 +80,7 @@ const useHttpRequest = (url, method, body = null, headers = {}) => {
         return;
       }
 
-      reject(new Error('Error while fetching response'));
+      reject(new Error(genericErrorMessage));
     }
   });
 

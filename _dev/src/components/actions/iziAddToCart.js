@@ -78,7 +78,11 @@ async function iziAddToCart(productId) {
     formData[item.name] = item.value;
   });
 
-  await addToCartHandler(formData);
+  try {
+    await addToCartHandler(formData);
+  } catch (error) {
+    throw error;
+  }
 }
 
 export default iziAddToCart;

@@ -76,6 +76,7 @@ final class ActionFrontControllerSetMedia implements HookInterface
         $this->assetManager->registerJavaScriptVariables([
             'inpostizi_backend_ajax_url' => $this->context->link->getModuleLink($this->module->name, 'backend'),
             'inpostizi_cart_ajax_url' => $this->context->link->getModuleLink($this->module->name, 'cart'),
+            'inpostizi_generic_http_error' => $this->module->l('Something went wrong. Please try again later.', self::HOOK_NAME),
         ]);
 
         if ($this->context->controller instanceof \ProductControllerCore) {

@@ -10,7 +10,7 @@ async function iziMobileLink() {
   try {
     return await getResponse();
   } catch (error) {
-    return error
+    throw error;
   }
 }
 

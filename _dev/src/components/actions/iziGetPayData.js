@@ -13,9 +13,8 @@ async function iziGetPayData(
 ) {
   try {
     return await bindBasketRequest(prefix, phoneNumber, bindingPlace);
-  } catch (e) {
-    // Based on the documentation, this method should return an empty object if the request fails.
-    return {};
+  } catch (error) {
+    throw error;
   }
 }
 
