@@ -13,6 +13,8 @@ services:
     tags:
       - { name: inpost.izi.hook }
     arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
       - '@inpost.izi.environment'
       - '@izi\prestashop\View\Asset\FrontAssetManager'
 

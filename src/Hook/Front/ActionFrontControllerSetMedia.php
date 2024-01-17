@@ -14,6 +14,16 @@ final class ActionFrontControllerSetMedia implements HookInterface
     public const HOOK_NAME = 'actionFrontControllerSetMedia';
 
     /**
+     * @var \Module
+     */
+    private $module;
+
+    /**
+     * @var \Context
+     */
+    private $context;
+
+    /**
      * @var EnvironmentInterface
      */
     private $environment;
@@ -23,8 +33,15 @@ final class ActionFrontControllerSetMedia implements HookInterface
      */
     private $assetManager;
 
-    public function __construct(EnvironmentInterface $environment, AssetManagerInterface $assetManager)
+    public function __construct(
+        \Module $module,
+        \Context $context,
+        EnvironmentInterface $environment,
+        AssetManagerInterface $assetManager
+    )
     {
+        $this->module = $module;
+        $this->context = $context;
         $this->environment = $environment;
         $this->assetManager = $assetManager;
     }
@@ -55,5 +72,20 @@ final class ActionFrontControllerSetMedia implements HookInterface
                 'position' => 'bottom',
                 'priority' => 101,
             ]);
+
+        \Media::addJsDef([
+            'inpostizi_backend_ajax_url' => $this->context->link->getModuleLink($this->module->name, 'backend'),
+            'inpostizi_cart_ajax_url' => $this->context->link->getModuleLink($this->module->name, 'cart'),
+        ]);
+
+        if ($this->context->controller instanceof \ProductControllerCore) {
+            $productObject = $this->context->controller->getProduct();
+
+            if (\Validate::isLoadedObject($productObject)) {
+                \Media::addJsDef([
+                    'inpostizi_product_page_id_product' => $productObject->id,
+                ]);
+            }
+        }
     }
 }
