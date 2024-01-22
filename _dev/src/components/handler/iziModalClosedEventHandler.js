@@ -25,7 +25,7 @@ const iziModalClosedEventHandler = (event) => {
     if (!getCartBound()) {
       evenSourceCleanupHandler();
     }
-  }, 1)
+  }, 50);
 }
 
 export default iziModalClosedEventHandler
