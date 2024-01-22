@@ -21,6 +21,7 @@ services:
         actionFrontControllerSetMedia: '@izi\prestashop\Hook\Front\ActionFrontControllerSetMedia'
         paymentOptions: '@izi\prestashop\Hook\Front\ActionGetPaymentOptions'
         displayOrderConfirmation: '@izi\prestashop\Hook\Front\DisplayOrderConfirmation'
+        displayIziThankYou: '@izi\prestashop\Hook\Front\DisplayIziThankYou'
         displayPaymentReturn: '@izi\prestashop\Hook\Front\DisplayPaymentReturn'
         displayProductActions: '@izi\prestashop\Hook\Front\DisplayProductActions'
         displayProductAdditionalInfo: '@izi\prestashop\Hook\Front\DisplayProductAdditionalInfo'

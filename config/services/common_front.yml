@@ -29,6 +29,15 @@ services:
       - '@izi\prestashop\Configuration\WidgetConfiguration'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
+  izi\prestashop\Hook\Front\DisplayIziThankYou:
+    class: izi\prestashop\Hook\Front\DisplayIziThankYou
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+        - '@inpost.izi.module'
+        - '@izi\prestashop\Configuration\ThankYouWidgetConfiguration'
+
   izi\prestashop\Hook\Front\DisplayOrderConfirmation:
     class: izi\prestashop\Hook\Front\DisplayOrderConfirmation
     public: false
@@ -37,6 +46,8 @@ services:
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@inpost.izi.context'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\Configuration\ThankYouWidgetConfiguration'
 
   izi\prestashop\Hook\Front\DisplayPaymentReturn:
     class: izi\prestashop\Hook\Front\DisplayPaymentReturn
@@ -45,6 +56,7 @@ services:
       - { name: inpost.izi.hook }
     arguments:
       - '@inpost.izi.module'
+      - '@izi\prestashop\Configuration\ThankYouWidgetConfiguration'
 
   izi\prestashop\Hook\Front\DisplayProductActions:
     class: izi\prestashop\Hook\Front\DisplayProductActions

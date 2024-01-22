@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Configuration\ThankYouWidgetConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 
 final class DisplayOrderConfirmation implements HookInterface
 {
+    use ThankYouWidgetRendererTrait;
+
     public const HOOK_NAME = 'displayOrderConfirmation';
 
     /**
@@ -21,15 +24,37 @@ final class DisplayOrderConfirmation implements HookInterface
      */
     private $context;
 
-    public function __construct(BasketSessionRepositoryInterface $repository, \Context $context)
+    public function __construct(
+        BasketSessionRepositoryInterface $repository,
+        \Context $context,
+        \PaymentModule $paymentModule,
+        ThankYouWidgetConfigurationInterface $configuration
+    )
     {
         $this->repository = $repository;
         $this->context = $context;
+        $this->paymentModule = $paymentModule;
+        $this->configuration = $configuration;
     }
 
     public static function getHookName(): string
     {
         return self::HOOK_NAME;
+    }
+
+    /**
+     * @param \Order $order
+     * @return void
+     */
+    private function removeSavedBasketId(\Order $order): void
+    {
+        if (null === $session = $this->repository->findByEntityId((int) $order->id_cart)) {
+            return;
+        }
+
+        if ($session->getBasketId() === $this->context->cookie->inpostizi_basket_id) {
+            unset($this->context->cookie->inpostizi_basket_id);
+        }
     }
 
     /**
@@ -43,12 +68,10 @@ final class DisplayOrderConfirmation implements HookInterface
             throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', \Order::class, is_object($order) ? get_class($order) : gettype($order)));
         }
 
-        if (null === $session = $this->repository->findByEntityId((int) $order->id_cart)) {
-            return '';
-        }
+        $this->removeSavedBasketId($order);
 
-        if ($session->getBasketId() === $this->context->cookie->inpostizi_basket_id) {
-            unset($this->context->cookie->inpostizi_basket_id);
+        if ($this->shouldBeRendered(self::HOOK_NAME, $order)) {
+            return $this->renderWidgetBlock();
         }
 
         return '';

@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Hook\HookInterface;
+use izi\prestashop\Configuration\ThankYouWidgetConfigurationInterface;
 
 final class DisplayPaymentReturn implements HookInterface
 {
+    use ThankYouWidgetRendererTrait;
+
     public const HOOK_NAME = 'displayPaymentReturn';
 
     /**
@@ -15,9 +18,18 @@ final class DisplayPaymentReturn implements HookInterface
      */
     private $paymentModule;
 
-    public function __construct(\PaymentModule $paymentModule)
+    /**
+     * @var ThankYouWidgetConfigurationInterface
+     */
+    private $configuration;
+
+    public function __construct(
+        \PaymentModule $paymentModule,
+        ThankYouWidgetConfigurationInterface $configuration
+    )
     {
         $this->paymentModule = $paymentModule;
+        $this->configuration = $configuration;
     }
 
     public static function getHookName(): string
@@ -36,10 +48,10 @@ final class DisplayPaymentReturn implements HookInterface
             throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Order::class, is_object($order) ? get_class($order) : gettype($order)));
         }
 
-        if ($this->paymentModule->name !== $order->module) {
-            return '';
+        if ($this->shouldBeRendered(self::HOOK_NAME, $order)) {
+            return $this->renderWidgetBlock();
         }
 
-        return '<inpost-thank-you/>';
+        return '';
     }
 }

@@ -19,8 +19,8 @@ function iziGetOrderComplete() {
           return;
         }
 
-        if (parsedData?.redirect) {
-          actionData = { action: "redirect", redirect: parsedData.redirect };
+        if (parsedData?.action === "redirect" && parsedData?.url) {
+          actionData = { action: "redirect", redirect: parsedData.url };
         } else if (parsedData?.action === "delete" || parsedData?.action === "refresh") {
           // Disabled for now we don't have to refresh page on cart changes
           actionData = { action: "refresh" };
