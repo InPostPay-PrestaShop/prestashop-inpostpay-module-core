@@ -3,6 +3,9 @@
 use izi\prestashop\View\Widget\Alignment;
 use izi\prestashop\View\Widget\FrameStyle;
 use izi\prestashop\View\Widget\Variant;
+use izi\prestashop\Hook\Front\DisplayPaymentReturn;
+use izi\prestashop\Hook\Front\DisplayOrderConfirmation;
+use izi\prestashop\Hook\Front\DisplayIziThankYou;
 
 /**
  * @mixin \Module
@@ -85,6 +88,18 @@ trait BackendForm
                         'label' => $this->l('Nie'),
                     ],
                 ],
+            ],
+            [
+                'type' => 'select',
+                'class' => 'fixed-width-xxl',
+                'label' => $this->l('Hook do wyświetlania widgetu na stronie potwierdzenia zamówienia'),
+                'name' => 'INPOST_PAY_THANK_YOU_DISPLAY',
+                'options' => [
+                    'query' => $this->getThankYouDisplayOptions(),
+                    'id' => 'id_option',
+                    'name' => 'name',
+                ],
+                'desc' => sprintf($this->l('Jeśli wybierzesz hook `%s` musisz go ręcznie zaimplementować w pliku templates/checkout/order-confirmation.tpl `{hook h="%s" order=$order}`.', 'backendform'), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
             ],
             [
                 'type' => 'select',
@@ -687,6 +702,24 @@ trait BackendForm
         }
 
         return $options;
+    }
+
+    protected function getThankYouDisplayOptions()
+    {
+        return [
+            [
+                'id_option' => DisplayPaymentReturn::getHookName(),
+                'name' => DisplayPaymentReturn::getHookName(),
+            ],
+            [
+                'id_option' => DisplayOrderConfirmation::getHookName(),
+                'name' => DisplayOrderConfirmation::getHookName(),
+            ],
+            [
+                'id_option' => DisplayIziThankYou::getHookName(),
+                'name' => DisplayIziThankYou::getHookName(),
+            ],
+        ];
     }
 
     protected function DeliveryOptions()
