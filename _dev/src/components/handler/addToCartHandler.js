@@ -13,19 +13,19 @@ const addToCartHandler = async (formData) => {
 
   setParams(formData);
 
-  try {
-    const resp = await getResponse();
+  const resp = await getResponse();
 
-    prestashop.emit("updateCart", {
-      reason: {
-        idProduct: resp.id_product,
-        idProductAttribute: resp.id_product_attribute,
-      },
-      resp,
-    });
-  } catch (error) {
-    prestashop.emit("handleError", { eventType: "addProductToCart", resp: error });
+  if (resp?.hasError && resp?.errors && Array.isArray(resp.errors)) {
+    throw new Error(resp.errors.join("\n"));
   }
+
+  prestashop.emit("updateCart", {
+    reason: {
+      idProduct: resp.id_product,
+      idProductAttribute: resp.id_product_attribute,
+    },
+    resp,
+  });
 }
 
 export default addToCartHandler;
