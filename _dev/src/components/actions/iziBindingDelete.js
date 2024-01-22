@@ -8,11 +8,7 @@ import addToCartHandler from "../handler/addToCartHandler";
 async function iziBindingDelete() {
   const { getResponse } = useEndpointRequest(endpoints.basketDeleteBinding, 'DELETE');
 
-  try {
-    return await getResponse();
-  } catch (error) {
-    throw error;
-  }
+  return await getResponse();
 }
 
 export default iziBindingDelete;

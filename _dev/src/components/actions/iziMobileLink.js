@@ -7,11 +7,7 @@ import useEndpointRequest from "../http/base/useEndpointRequest";
 async function iziMobileLink() {
   const { getResponse } = useEndpointRequest(endpoints.basketGetLink, 'GET');
 
-  try {
-    return await getResponse();
-  } catch (error) {
-    throw error;
-  }
+  return await getResponse();
 }
 
 export default iziMobileLink;

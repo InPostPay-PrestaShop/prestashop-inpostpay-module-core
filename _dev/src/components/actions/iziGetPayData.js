@@ -11,11 +11,7 @@ async function iziGetPayData(
   phoneNumber = '',
   bindingPlace = 'PRODUCT_CARD'
 ) {
-  try {
-    return await bindBasketRequest(prefix, phoneNumber, bindingPlace);
-  } catch (error) {
-    throw error;
-  }
+  return await bindBasketRequest(prefix, phoneNumber, bindingPlace);
 }
 
 export default iziGetPayData;
