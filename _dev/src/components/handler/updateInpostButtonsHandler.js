@@ -8,7 +8,7 @@ const updateInpostButtonsHandler = () => {
     }
 
     bindIziButtonEvents();
-  }, 1);
+  }, 10);
 }
 
 export default updateInpostButtonsHandler;
