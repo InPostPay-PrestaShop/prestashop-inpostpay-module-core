@@ -650,8 +650,16 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
                     continue;
                 }
 
+                if (!$accessory['available_for_order']) {
+                    continue;
+                }
+
                 if ($accessory['customizable'] > 1) {
                     continue; // product requires customization
+                }
+
+                if (!$accessory['allow_oosp'] && $accessory['quantity'] < $accessory['minimal_quantity']) {
+                    continue;
                 }
 
                 $relatedProductsById[$accessoryId] = $accessory;
