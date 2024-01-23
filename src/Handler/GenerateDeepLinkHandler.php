@@ -81,7 +81,7 @@ final class GenerateDeepLinkHandler implements GenerateDeepLinkHandlerInterface
     {
         $query = http_build_query(['basket_id' => $inPostBasketId], '', '&', PHP_QUERY_RFC3986);
 
-        return http_build_url($this->environment->getDeepLinkUri(), $query, HTTP_URL_JOIN_QUERY);
+        return http_build_url($this->environment->getDeepLinkUri(), ['query' => $query], HTTP_URL_JOIN_QUERY);
     }
 
     private function saveConfirmation(BasketSessionInterface $session, BasketBindingResponse $binding): void
