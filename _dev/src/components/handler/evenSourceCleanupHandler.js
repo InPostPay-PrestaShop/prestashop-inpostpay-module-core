@@ -2,7 +2,6 @@ import endpoints from "../map/endpoints";
 import useEventSourceStore from "../http/store/EventSourceStore";
 
 const evenSourceCleanupHandler = () => {
-
   const { orderComplete, basketConfirmation } = endpoints;
 
   const {

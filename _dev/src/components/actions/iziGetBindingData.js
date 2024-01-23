@@ -1,6 +1,4 @@
-import iziAddToCart from "./iziAddToCart";
 import bindBasketRequest from "../http/bindBasketRequest";
-
 
 /**
  * @param id {number|string}

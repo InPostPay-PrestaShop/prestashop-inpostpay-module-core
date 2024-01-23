@@ -4,9 +4,9 @@ import updateCartHandler from "../components/handler/updateCartHandler";
 import updatedProductHandler from "../components/handler/updatedProductHandler";
 import iziModalClosedEventHandler from "../components/handler/iziModalClosedEventHandler";
 import bindIziButtonEvents from "../components/events/bindIziButtonEvents";
+import initGetOrderCompleteIfCartBound from "../components/handler/initGetOrderCompleteIfCartBound";
 
 const mainController = () => {
-
   const attachEvents = () => {
     prestashop.on('updateCart', updateCartHandler);
     prestashop.on('updatedCart', updatedCartHandler);
@@ -20,6 +20,7 @@ const mainController = () => {
       updateButtonCount(prestashop.cart.products_count);
     }
 
+    initGetOrderCompleteIfCartBound();
     attachEvents();
   }
 
