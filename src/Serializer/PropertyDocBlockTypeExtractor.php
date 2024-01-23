@@ -32,7 +32,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
      *
      * @return Type[]|null
      */
-    public function getTypes($class, $property, array $context = array()): ?array
+    public function getTypes($class, $property, array $context = []): ?array
     {
         $key = sprintf('%s::%s', $class, $property);
 

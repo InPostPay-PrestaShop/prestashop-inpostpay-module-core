@@ -43,7 +43,7 @@ final class Notice implements \JsonSerializable
         return $this->description;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return get_object_vars($this);
     }

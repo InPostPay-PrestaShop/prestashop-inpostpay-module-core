@@ -10,8 +10,6 @@ use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class RelatedProductsEventHandler implements BasketEventHandlerInterface
 {
@@ -28,11 +26,6 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
     private $context;
 
     /**
-     * @var LegacyTranslatorInterface|TranslatorInterface
-     */
-    private $translator;
-
-    /**
      * @var ObjectManagerInterface
      */
     private $manager;
@@ -46,7 +39,6 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
     {
         $this->module = $module;
         $this->context = $context;
-        $this->translator = $context->getTranslator();
         $this->manager = $manager;
         $this->logger = $logger;
     }
@@ -87,17 +79,17 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
         }
 
         if (0 >= $quantity) {
-            return $this->translator->trans('Null quantity.', [], 'Shop.Notifications.Error');
+            return $this->context->getTranslator()->trans('Null quantity.', [], 'Shop.Notifications.Error');
         }
 
         $product = $this->manager->getRepository(\Product::class)->find($productId, (int) $cart->id_lang);
 
         if (null === $product) {
-            return $this->translator->trans('Product not found', [], 'Shop.Notifications.Error');
+            return $this->context->getTranslator()->trans('Product not found', [], 'Shop.Notifications.Error');
         }
 
         if (!$product->active || !$product->available_for_order || !$product->checkAccess((int) $cart->id_customer)) {
-            return $this->translator->trans('This product (%product%) is no longer available.', [
+            return $this->context->getTranslator()->trans('This product (%product%) is no longer available.', [
                 '%product%' => $product->name,
             ], 'Shop.Notifications.Error');
         }
@@ -117,14 +109,14 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
             $combination = $this->manager->getRepository(\Combination::class)->find($combinationId);
 
             if (null === $combination) {
-                return $this->translator->trans('Product not found', [], 'Shop.Notifications.Error');
+                return $this->context->getTranslator()->trans('Product not found', [], 'Shop.Notifications.Error');
             }
 
             $minimalQuantity = $combination->minimal_quantity;
         }
 
         if ($quantity < $minimalQuantity) {
-            return $this->translator->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
+            return $this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
                 '%product%' => $product->name,
                 '%quantity%' => $minimalQuantity,
             ], 'Shop.Notifications.Error');
@@ -132,7 +124,7 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
 
         $availableQuantity = $this->getAvailableQuantity($productId, $combinationId);
         if (null !== $availableQuantity && $quantity > $availableQuantity) {
-            return $this->translator->trans('The available purchase order quantity for this product is %quantity%.', [
+            return $this->context->getTranslator()->trans('The available purchase order quantity for this product is %quantity%.', [
                 '%quantity%' => $availableQuantity,
             ], 'Shop.Notifications.Error');
         }

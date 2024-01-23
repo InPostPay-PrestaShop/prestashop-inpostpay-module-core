@@ -1,4 +1,4 @@
-# common configuration for FO/BO
+# common FO configuration
 services:
   izi\prestashop\View\Asset\FrontAssetManager:
     class: izi\prestashop\View\Asset\FrontAssetManager
