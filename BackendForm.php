@@ -537,7 +537,7 @@ trait BackendForm
         );
     }
 
-    public function getContent()
+    private function doGetContent()
     {
         $output = '';
         if (Tools::isSubmit('submit' . $this->name)) {

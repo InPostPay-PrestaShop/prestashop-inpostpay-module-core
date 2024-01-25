@@ -99,6 +99,7 @@ services:
     arguments:
       - '@inpost.izi.db'
 
+  izi\prestashop\Configuration\ApiConfigurationInterface: '@izi\prestashop\Configuration\ApiConfiguration'
   izi\prestashop\Configuration\ApiConfiguration:
     class: izi\prestashop\Configuration\ApiConfiguration
     public: false
@@ -106,6 +107,7 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
 
+  izi\prestashop\Configuration\OrdersConfigurationInterface: '@izi\prestashop\Configuration\OrdersConfiguration'
   izi\prestashop\Configuration\OrdersConfiguration:
     class: izi\prestashop\Configuration\OrdersConfiguration
     public: false

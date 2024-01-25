@@ -1,0 +1,4 @@
+inpost_izi_admin:
+  resource: ../src/Controller/Admin
+  type: annotation
+  prefix: /inpost/izi

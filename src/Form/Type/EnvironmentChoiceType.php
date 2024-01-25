@@ -1,0 +1,51 @@
+<?php
+
+declare(strict_types=1);
+
+namespace izi\prestashop\Form\Type;
+
+use izi\prestashop\Environment\EnvironmentType;
+use izi\prestashop\Environment\UatEnvironment;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+final class EnvironmentChoiceType extends AbstractType
+{
+    private const TRANSLATION_SOURCE = 'environmentchoicetype';
+
+    private $module;
+
+    public function __construct(\Module $module)
+    {
+        $this->module = $module;
+    }
+
+    public function getParent(): string
+    {
+        return ChoiceType::class;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'choices' => $this->getChoices(),
+        ]);
+    }
+
+    private function getChoices(): array
+    {
+        $choices = [
+            $this->module->l('Sandbox', self::TRANSLATION_SOURCE) => EnvironmentType::Sandbox(),
+            $this->module->l('Production', self::TRANSLATION_SOURCE) => EnvironmentType::Production(),
+        ];
+
+        if (!class_exists(UatEnvironment::class)) {
+            return $choices;
+        }
+
+        return array_merge([
+            $this->module->l('UAT', self::TRANSLATION_SOURCE) => EnvironmentType::Uat(),
+        ], $choices);
+    }
+}

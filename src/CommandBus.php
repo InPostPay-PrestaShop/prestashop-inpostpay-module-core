@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop;
 
 use izi\prestashop\Command\BindBasketCommand;
+use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
 use izi\prestashop\Command\GenerateDeepLinkCommand;
 use izi\prestashop\Command\GetBindingConfirmationCommand;
 use izi\prestashop\Command\GetClientDetailsCommand;
@@ -13,6 +14,7 @@ use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\Command\UpdateBasketCommand;
 use izi\prestashop\Command\UpdateOrderTrackingNumbersCommand;
 use izi\prestashop\Handler\BindBasketHandlerInterface;
+use izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface;
 use izi\prestashop\Handler\GenerateDeepLinkHandlerInterface;
 use izi\prestashop\Handler\GetBindingConfirmationHandlerInterface;
 use izi\prestashop\Handler\GetClientDetailsHandlerInterface;
@@ -60,6 +62,8 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             GetBasketCommand::class => '?' . GetBasketHandlerInterface::class,
             MerchantApi\Command\UpdateBasketCommand::class => '?' . MerchantApi\Handler\UpdateBasketHandlerInterface::class,
             UpdateOrderCommand::class => '?' . UpdateOrderHandlerInterface::class,
+            /* configuration */
+            UpdateGeneralConfigurationCommand::class => '?' . UpdateGeneralConfigurationHandlerInterface::class,
         ];
     }
 

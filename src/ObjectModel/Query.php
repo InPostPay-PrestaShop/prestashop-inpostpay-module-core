@@ -37,11 +37,11 @@ class Query
     /**
      * @return T[]
      */
-    public function getResult(): array
+    public function getResult(int $languageId = null): array
     {
         $data = $this->getArrayResult();
 
-        return $this->manager->getHydrator()->hydrateCollection($data, $this->class);
+        return $this->manager->getHydrator()->hydrateCollection($data, $this->class, $languageId);
     }
 
     public function getArrayResult(): array
@@ -52,10 +52,10 @@ class Query
     /**
      * @return T|null
      */
-    public function getOneOrNullResult(): ?\ObjectModel
+    public function getOneOrNullResult(int $languageId = null): ?\ObjectModel
     {
         $data = $this->getArrayResult();
 
-        return $this->manager->getHydrator()->hydrate($data, $this->class);
+        return $this->manager->getHydrator()->hydrate($data, $this->class, null, $languageId);
     }
 }

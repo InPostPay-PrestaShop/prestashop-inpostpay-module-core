@@ -13,7 +13,7 @@ interface HydratorInterface
      *
      * @return T
      */
-    public function hydrate(array $data, string $class, \ObjectModel $model = null): \ObjectModel;
+    public function hydrate(array $data, string $class, \ObjectModel $model = null, int $languageId = null): \ObjectModel;
 
     /**
      * @template T of \ObjectModel
@@ -22,5 +22,5 @@ interface HydratorInterface
      *
      * @return T[]
      */
-    public function hydrateCollection(array $data, string $class): array;
+    public function hydrateCollection(array $data, string $class, int $languageId = null): array;
 }

@@ -11,7 +11,7 @@ final class Hydrator implements HydratorInterface
      *
      * @throws \PrestaShopException
      */
-    public function hydrate(array $data, string $class, \ObjectModel $model = null): \ObjectModel
+    public function hydrate(array $data, string $class, \ObjectModel $model = null, int $languageId = null): \ObjectModel
     {
         if ([] === $data) {
             throw new \DomainException('Provided data is empty.');
@@ -22,10 +22,10 @@ final class Hydrator implements HydratorInterface
         }
 
         if (null !== $model) {
-            return $this->hydrateObject($model, $data);
+            return $this->hydrateObject($model, $data, $languageId);
         }
 
-        $collection = $this->hydrateCollection($data, $class);
+        $collection = $this->hydrateCollection($data, $class, $languageId);
         if (1 !== $count = count($collection)) {
             throw new \DomainException(sprintf('Unexpected collection count. Expected: 1, got: %d.', $count));
         }
@@ -42,12 +42,12 @@ final class Hydrator implements HydratorInterface
      *
      * @throws \PrestaShopException
      */
-    public function hydrateCollection(array $data, string $class): array
+    public function hydrateCollection(array $data, string $class, int $languageId = null): array
     {
-        return $class::hydrateCollection($class, $data);
+        return $class::hydrateCollection($class, $data, $languageId);
     }
 
-    private function hydrateObject(\ObjectModel $model, array $data): \ObjectModel
+    private function hydrateObject(\ObjectModel $model, array $data, int $languageId = null): \ObjectModel
     {
         $metadata = $model::getDefinition(get_class($model));
         $data = $this->normalizeData($data, $metadata);
@@ -59,7 +59,7 @@ final class Hydrator implements HydratorInterface
             throw new \DomainException('Identifier mismatch.');
         }
 
-        $model->hydrate($data);
+        $model->hydrate($data, $languageId);
 
         return $model;
     }

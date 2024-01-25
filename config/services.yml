@@ -1,0 +1,67 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $module: '@inpost.izi.module'
+      $context: '@inpost.izi.context'
+
+  izi\prestashop\Controller\Admin\ConfigurationController:
+    class: izi\prestashop\Controller\Admin\ConfigurationController
+    tags:
+      - { name: controller.service_arguments }
+
+  izi\prestashop\Form\Type\GeneralConfigurationType:
+    class: izi\prestashop\Form\Type\GeneralConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\ApiConfigurationType:
+    class: izi\prestashop\Form\Type\ApiConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\EnvironmentChoiceType:
+    class: izi\prestashop\Form\Type\EnvironmentChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\ClientCredentialsType:
+    class: izi\prestashop\Form\Type\ClientCredentialsType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\MaskedPasswordType:
+    class: izi\prestashop\Form\Type\MaskedPasswordType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\OrdersConfigurationType:
+    class: izi\prestashop\Form\Type\OrdersConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\OrderStateChoiceType:
+    class: izi\prestashop\Form\Type\OrderStateChoiceType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
+
+  izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader
+    bind:
+      $repository: '@inpost.izi.object_model.order_state_repository'
+
+  izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler
+    bind:
+      $cache: '@izi\prestashop\Cache\ConfigurationCache'
+
+  izi\prestashop\Validator\InPostApiCredentialsValidator:
+    class: izi\prestashop\Validator\InPostApiCredentialsValidator
+    tags:
+      - { name: validator.constraint_validator }
+    bind:
+      $authProviderFactory: '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
