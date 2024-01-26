@@ -5,6 +5,7 @@ services:
     bind:
       $module: '@inpost.izi.module'
       $context: '@inpost.izi.context'
+      $clock: '@inpost.izi.clock'
 
   izi\prestashop\Controller\Admin\ConfigurationController:
     class: izi\prestashop\Controller\Admin\ConfigurationController
@@ -75,3 +76,24 @@ services:
 
   izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory:
     class: izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory
+
+  izi\prestashop\Form\Type\ConsentsConfigurationType:
+    class: izi\prestashop\Form\Type\ConsentsConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Consent\ConsentType:
+    class: izi\prestashop\Form\Type\Consent\ConsentType
+    tags:
+      - { name: form.type }
+    bind:
+      $cmsPageRepository: '@izi\prestashop\ObjectModel\Repository\CmsPageRepository'
+
+  izi\prestashop\Form\Type\Consent\ConsentRequirementChoiceType:
+    class: izi\prestashop\Form\Type\Consent\ConsentRequirementChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler

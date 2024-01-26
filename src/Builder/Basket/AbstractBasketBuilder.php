@@ -6,7 +6,6 @@ namespace izi\prestashop\Builder\Basket;
 
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\Consent;
-use izi\prestashop\Common\Basket\ConsentType;
 use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Common\Basket\Product;
 use izi\prestashop\Common\Basket\Quantity;
@@ -17,6 +16,7 @@ use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductVariant;
 use izi\prestashop\Common\PromoCode;
+use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\ContextManager;
 
 abstract class AbstractBasketBuilder implements BasketBuilderInterface
@@ -30,6 +30,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      * @var ContextManager
      */
     private $contextManager;
+
+    /**
+     * @var ConsentsConfigurationInterface
+     */
+    private $consentsConfiguration;
 
     /**
      * @var DeliveryFactory
@@ -51,10 +56,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private $additionalInformation;
 
-    public function __construct(\Cart $cart, ContextManager $contextManager)
+    public function __construct(\Cart $cart, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration)
     {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
+        $this->consentsConfiguration = $consentsConfiguration;
         $this->deliveryFactory = new DeliveryFactory();
     }
 
@@ -449,51 +455,41 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getConsents(): array
     {
-        $consents = [];
+        $configConsents = $this->consentsConfiguration->getConsents((int) $this->cart->id_shop);
+
+        if ([] === $configConsents) {
+            return [];
+        }
+
         $context = \Context::getContext();
+        $languageId = (int) $this->cart->id_lang;
 
-        $selectedRequired = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required'));
-        $requiredText = $this->getConfiguration('INPOST_PAY_terms_options_required_text');
+        $cmsPages = \CMS::getCMSPages($languageId, null, true, $this->cart->id_shop);
 
-        $selectedRequiredOnce = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required_once'));
-        $requiredOnceText = $this->getConfiguration('INPOST_PAY_terms_options_required_once_text');
-
-        $selectedAdditional = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_additional'));
-        $requiredAdditionalText = $this->getConfiguration('INPOST_PAY_terms_options_additional_text');
-
-        $cmsPages = \CMS::getCMSPages($this->cart->id_lang, null, true, $this->cart->id_shop);
-
-        $consentId = 1;
-
+        $cmsPagesById = [];
         foreach ($cmsPages as $page) {
-            $cmsId = $page['id_cms'];
-            $link = $context->link->getCMSLink($cmsId, $page['link_rewrite'], null, $this->cart->id_lang, $this->cart->id_shop);
+            $cmsPagesById[$page['id_cms']] = $page;
+        }
 
-            if (in_array($cmsId, $selectedRequired, false)) {
-                $consents[] = new Consent(
-                    (string) $consentId++,
-                    $link,
-                    $requiredText,
-                    '1',
-                    ConsentType::RequiredAlways()
-                );
-            } elseif (in_array($cmsId, $selectedRequiredOnce, false)) {
-                $consents[] = new Consent(
-                    (string) $consentId++,
-                    $link,
-                    $requiredOnceText,
-                    '1',
-                    ConsentType::RequiredOnce()
-                );
-            } elseif (in_array($cmsId, $selectedAdditional, false)) {
-                $consents[] = new Consent(
-                    (string) $consentId++,
-                    $link,
-                    $requiredAdditionalText,
-                    '1',
-                    ConsentType::Optional()
-                );
+        $consents = [];
+
+        foreach ($configConsents as $consent) {
+            if (!isset($cmsPagesById[$cmsId = $consent->getCmsPageId()])) {
+                continue;
             }
+
+            $page = &$cmsPagesById[$cmsId];
+            if (!isset($page['url'])) {
+                $page['url'] = $context->link->getCMSLink($cmsId, $page['link_rewrite'], null, $languageId, $this->cart->id_shop);
+            }
+
+            $consents[] = new Consent(
+                $consent->getId(),
+                $page['url'],
+                $consent->getDescription($languageId),
+                $consent->getVersion(),
+                $consent->getRequirementType()
+            );
         }
 
         return $consents;

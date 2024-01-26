@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Form\Type\Widget;
 
+use izi\prestashop\Form\DataTransformer\EnumDataTransformer;
 use izi\prestashop\View\Widget\Variant;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class WidgetVariantChoiceType extends AbstractType
@@ -25,13 +27,17 @@ final class WidgetVariantChoiceType extends AbstractType
         return ChoiceType::class;
     }
 
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder->addModelTransformer(new EnumDataTransformer(Variant::class));
+    }
+
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Variant::class,
             'choices' => [
-                $this->module->l('Yellow', self::TRANSLATION_SOURCE) => Variant::Primary(),
-                $this->module->l('Black', self::TRANSLATION_SOURCE) => Variant::Secondary(),
+                $this->module->l('Yellow', self::TRANSLATION_SOURCE) => Variant::Primary()->value,
+                $this->module->l('Black', self::TRANSLATION_SOURCE) => Variant::Secondary()->value,
             ],
         ]);
     }

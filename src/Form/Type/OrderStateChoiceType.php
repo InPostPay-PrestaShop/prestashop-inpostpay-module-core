@@ -40,9 +40,7 @@ final class OrderStateChoiceType extends AbstractType
     {
         $resolver->setDefaults([
             'choice_loader' => $this->choiceLoader,
-            'choice_value' => static function ($orderState): int {
-                return (int) $orderState->id;
-            },
+            'choice_value' => 'id',
             'choice_label' => function (\OrderState $orderState): string {
                 return $orderState->name[$this->context->language->id] ?? '';
             },

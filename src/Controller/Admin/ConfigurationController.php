@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Controller\Admin;
 
-use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
+use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory;
 use izi\prestashop\CommandBusInterface;
-use izi\prestashop\Configuration\ApiConfiguration;
-use izi\prestashop\Configuration\ApiConfigurationInterface;
-use izi\prestashop\Configuration\OrdersConfiguration;
-use izi\prestashop\Configuration\OrdersConfigurationInterface;
+use izi\prestashop\Configuration\ConsentsConfigurationInterface;
+use izi\prestashop\Configuration\DTO\Consent;
+use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
 use PrestaShopBundle\Security\Voter\PageVoter;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,9 +42,6 @@ final class ConfigurationController extends AbstractController
 
     /**
      * @Route(path="/general", name="general", methods={"GET", "POST"})
-     *
-     * @param ApiConfiguration $apiConfiguration,
-     * @param OrdersConfiguration $ordersConfiguration
      */
     public function generalConfig(Request $request, UpdateGeneralConfigurationCommandFactory $commandFactory, CommandBusInterface $bus): Response
     {
@@ -58,35 +54,95 @@ final class ConfigurationController extends AbstractController
         ]);
 
         if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
-            $bus->handle($command);
-            $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
+            try {
+                $bus->handle($command);
+                $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
-            return $this->redirectToRoute('admin_inpost_izi_config_general');
+                return $this->redirectToRoute('admin_inpost_izi_config_general');
+            } catch (\Exception $e) {
+                $this->handleException($e);
+            }
         }
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/general.html.twig', [
             'form' => $form->createView(),
             'can_update' => $canUpdate,
             'layoutTitle' => $this->module->l('API configuration', self::TRANSLATION_SOURCE),
-            'headerTabContent' => $this->renderNav('general'),
+            'headerTabContent' => $this->renderNav($request),
         ]);
     }
 
-    private function renderNav(string $activeTab): string
+    /**
+     * @Route(path="/consents", name="consents", methods={"GET", "POST"})
+     */
+    public function consentConfig(Request $request, ConsentsConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
-        return $this->renderView('@Modules/inpostizi/views/templates/admin/config/nav.html.twig', [
-            'nav_items' => [
-                'general' => [
-                    'url' => $this->generateUrl('admin_inpost_izi_config_general'),
-                    'label' => $this->module->l('API configuration', self::TRANSLATION_SOURCE),
-                    'active' => 'general' === $activeTab,
-                ],
+//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+
+        $consents = $configuration->getConsents() ?: [new Consent()];
+        $command = new UpdateConsentsConfigurationCommand(...$consents);
+
+        $form = $this->createForm(ConsentsConfigurationType::class, $command, [
+            'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
+        ]);
+
+        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+            try {
+                $bus->handle($command);
+                $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
+
+                return $this->redirectToRoute('admin_inpost_izi_config_consents');
+            } catch (\Exception $e) {
+                $this->handleException($e);
+            }
+        }
+
+        return $this->render('@Modules/inpostizi/views/templates/admin/config/consents.html.twig', [
+            'form' => $form->createView(),
+            'can_update' => $canUpdate,
+            'layoutTitle' => $this->module->l('Consents', self::TRANSLATION_SOURCE),
+            'headerTabContent' => $this->renderNav($request),
+        ]);
+    }
+
+    private function renderNav(Request $request): string
+    {
+        $pages = [
+            'general' => [
+                'route' => 'admin_inpost_izi_config_general',
+                'title' => $this->module->l('API configuration', self::TRANSLATION_SOURCE),
             ],
+            'consents' => [
+                'route' => 'admin_inpost_izi_config_consents',
+                'title' => $this->module->l('Consents', self::TRANSLATION_SOURCE),
+            ],
+        ];
+
+        return $this->renderView('@Modules/inpostizi/views/templates/admin/config/nav.html.twig', [
+            'nav_items' => array_map(function (array $page) use ($request): array {
+                return [
+                    'url' => $this->generateUrl($page['route']),
+                    'label' => $page['title'],
+                    'active' => $page['route'] === $request->attributes->get('_route'),
+                ];
+            }, $pages),
         ]);
     }
 
     private function trans(string $id, array $parameters = [], string $domain = null, string $locale = null): string
     {
         return $this->context->getTranslator()->trans($id, $parameters, $domain, $locale);
+    }
+
+    private function handleException(\Exception $e): void
+    {
+        if ($this->getParameter('kernel.debug')) {
+            throw $e;
+        }
+
+        $this->addFlash('error', $this->trans('An unexpected error occurred. [%type% code %code%]', [
+            '%type%' => get_class($e),
+            '%code%' => $e->getCode(),
+        ], 'Admin.Notifications.Error'));
     }
 }

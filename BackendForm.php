@@ -1,5 +1,7 @@
 <?php
 
+use izi\prestashop\Common\Basket\ConsentRequirementType;
+use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\View\Widget\Alignment;
 use izi\prestashop\View\Widget\FrameStyle;
 use izi\prestashop\View\Widget\Variant;
@@ -162,11 +164,14 @@ trait BackendForm
                     'id' => 'id_option',
                     'name' => 'name',
                 ],
+                'consent_cms_ids' => ConsentRequirementType::RequiredAlways(),
             ],
             [
                 'type' => 'text',
+                'lang' => true,
                 'label' => $this->l('Zgody Wymagane Tekst'),
                 'name' => 'INPOST_PAY_terms_options_required_text',
+                'consent_descriptions' => ConsentRequirementType::RequiredAlways(),
             ],
             [
                 'type' => 'select',
@@ -179,11 +184,14 @@ trait BackendForm
                     'id' => 'id_option',
                     'name' => 'name',
                 ],
+                'consent_cms_ids' => ConsentRequirementType::RequiredOnce(),
             ],
             [
                 'type' => 'text',
                 'label' => $this->l('Zgody Wymagane Raz Tekst'),
+                'lang' => true,
                 'name' => 'INPOST_PAY_terms_options_required_once_text',
+                'consent_cms_ids' => ConsentRequirementType::RequiredOnce(),
             ],
             [
                 'type' => 'select',
@@ -196,11 +204,14 @@ trait BackendForm
                     'id' => 'id_option',
                     'name' => 'name',
                 ],
+                'consent_cms_ids' => ConsentRequirementType::Optional(),
             ],
             [
                 'type' => 'text',
+                'lang' => true,
                 'label' => $this->l('Zgody Dodatkowe Tekst'),
                 'name' => 'INPOST_PAY_terms_options_additional_text',
+                'consent_descriptions' => ConsentRequirementType::Optional(),
             ],
         ];
     }
@@ -543,21 +554,44 @@ trait BackendForm
         if (Tools::isSubmit('submit' . $this->name)) {
             $languageIds = \Language::getLanguages(false, false, true);
             $descriptionMaps = [];
+            $consentData = [];
+
             foreach ($this->formFields() as $field) {
+                if (!empty($field['lang'])) {
+                    $configValue = [];
+
+                    foreach ($languageIds as $languageId) {
+                        $configValue[$languageId] = trim(\Tools::getValue(sprintf('%s_%d', $field['name'], $languageId)));
+                    }
+                } else {
+                    $configValue = Tools::getValue($field['name']);
+                }
+
                 if (isset($field['id_order_state'])) {
                     $osId = (int) $field['id_order_state'];
-                    foreach ($languageIds as $languageId) {
-                        $descriptionMaps[$languageId][$osId] = trim(\Tools::getValue(sprintf('%s_%d', $field['name'], $languageId))) ?: null;
+                    foreach ($configValue as $languageId => $value) {
+                        $descriptionMaps[$languageId][$osId] = $value ?: null;
                     }
 
                     continue;
                 }
 
-                $configValue = Tools::getValue($field['name']);
-
                 if ($field['name'] === 'INPOST_PAY_client_secret' && $configValue === '*****') {
                     continue;
                 }
+
+                if (isset($field['consent_descriptions'])) {
+                    $consentData[$field['consent_descriptions']->value]['descriptions'] = $configValue;
+
+                    continue;
+                }
+
+                if (isset($field['consent_cms_ids'])) {
+                    $consentData[$field['consent_cms_ids']->value]['cms_ids'] = is_array($configValue) ? $configValue : [];
+
+                    continue;
+                }
+
                 if (isset($field['multiple']) && $field['multiple']) {
                     if (is_array($configValue)) {
                         Configuration::updateValue($field['name'], implode(',', $configValue));
@@ -572,6 +606,7 @@ trait BackendForm
             \Configuration::updateValue('INPOST_PAY_OS_DESCRIPTION_MAP', array_map(static function (array $map) {
                 return json_encode(array_filter($map));
             }, $descriptionMaps));
+            $this->updateConsents($consentData);
 
             (new \izi\prestashop\Configuration\Adapter\Configuration())->removeMatching('INPOST_PAY_CACHE_*');
 
@@ -615,6 +650,13 @@ trait BackendForm
             }
         }
 
+        $consents = json_decode(\Configuration::get('INPOST_PAY_CONSENTS'), true) ?? [];
+        $consentsByType = [];
+        foreach ($consents as $consent) {
+            $consentsByType[$consent['requirementType']]['descriptions'] = $consent['descriptions'];
+            $consentsByType[$consent['requirementType']]['cms_ids'][] = $consent['cmsPageId'];
+        }
+
         foreach ($this->formFields() as $field) {
             if (isset($field['id_order_state'])) {
                 foreach ($helper->languages as $language) {
@@ -623,6 +665,12 @@ trait BackendForm
                         $osDescriptions[$language['id_lang']][$field['id_order_state']] ?? null
                     );
                 }
+            } elseif (isset($field['consent_cms_ids'])) {
+                $cmsIds = $consentsByType[$field['consent_cms_ids']->value]['cms_ids'] ?? [];
+                $helper->tpl_vars['fields_value'][$field['name'] . '[]'] = $cmsIds;
+            } elseif (isset($field['consent_descriptions'])) {
+                $descriptions = $consentsByType[$field['consent_descriptions']->value]['descriptions'] ?? [];
+                $helper->tpl_vars['fields_value'][$field['name']] = $descriptions;
             } elseif ($field['name'] === 'INPOST_PAY_client_secret') {
                 $helper->tpl_vars['fields_value'][$field['name']] = \Configuration::get($field['name']) ? '*****' : '';
             } elseif (isset($field['multiple']) && $field['multiple']) {
@@ -825,5 +873,27 @@ trait BackendForm
                 'name' => 'Duże zaokrąglenie',
             ],
         ];
+    }
+
+    private function updateConsents(array $consentData)
+    {
+        $consents = [];
+        $now = new \DateTimeImmutable();
+
+        foreach ($consentData as $requirementType => $data) {
+            $requirementType = ConsentRequirementType::from($requirementType);
+
+            foreach ($data['cms_ids'] as $cmsPageId) {
+                $consents = new Consent(
+                    null,
+                    (int) $cmsPageId,
+                    $data['descriptions'],
+                    $requirementType,
+                    $now
+                );
+            }
+        }
+
+        \Configuration::updateValue('INPOST_PAY_CONSENTS', json_encode($consents));
     }
 }

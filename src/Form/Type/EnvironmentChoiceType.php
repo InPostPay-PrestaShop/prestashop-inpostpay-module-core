@@ -6,8 +6,10 @@ namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Environment\EnvironmentType;
 use izi\prestashop\Environment\UatEnvironment;
+use izi\prestashop\Form\DataTransformer\EnumDataTransformer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class EnvironmentChoiceType extends AbstractType
@@ -26,6 +28,11 @@ final class EnvironmentChoiceType extends AbstractType
         return ChoiceType::class;
     }
 
+    public function buildForm(FormBuilderInterface $builder, array $options): void
+    {
+        $builder->addModelTransformer(new EnumDataTransformer(EnvironmentType::class));
+    }
+
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
@@ -36,8 +43,8 @@ final class EnvironmentChoiceType extends AbstractType
     private function getChoices(): array
     {
         $choices = [
-            $this->module->l('Sandbox', self::TRANSLATION_SOURCE) => EnvironmentType::Sandbox(),
-            $this->module->l('Production', self::TRANSLATION_SOURCE) => EnvironmentType::Production(),
+            $this->module->l('Sandbox', self::TRANSLATION_SOURCE) => EnvironmentType::Sandbox()->value,
+            $this->module->l('Production', self::TRANSLATION_SOURCE) => EnvironmentType::Production()->value,
         ];
 
         if (!class_exists(UatEnvironment::class)) {
@@ -45,7 +52,7 @@ final class EnvironmentChoiceType extends AbstractType
         }
 
         return array_merge([
-            $this->module->l('UAT', self::TRANSLATION_SOURCE) => EnvironmentType::Uat(),
+            $this->module->l('UAT', self::TRANSLATION_SOURCE) => EnvironmentType::Uat()->value,
         ], $choices);
     }
 }

@@ -47,12 +47,12 @@ final class OrderStateChoiceLoader implements ChoiceLoaderInterface
      */
     public function loadValuesForChoices(array $choices, $value = null): array
     {
-        $choices = array_map(function ($choice): \OrderState {
+        $choices = array_map(function ($choice): ?\OrderState {
             if ($choice instanceof \OrderState) {
                 return $choice;
             }
 
-            return $this->getChoices()[$choice];
+            return $this->getChoices()[$choice] ?? null;
         }, $choices);
 
         return $this->loadChoiceList($value)->getValuesForChoices($choices);

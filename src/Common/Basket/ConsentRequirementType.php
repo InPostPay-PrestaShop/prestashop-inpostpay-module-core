@@ -11,7 +11,7 @@ use izi\prestashop\Enum\StringEnum;
  * @method static self RequiredOnce()
  * @method static self RequiredAlways()
  */
-final class ConsentType extends StringEnum
+final class ConsentRequirementType extends StringEnum
 {
     private const OPTIONAL = 'OPTIONAL';
     private const REQUIRED_ONCE = 'REQUIRED_ONCE';

@@ -121,6 +121,14 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
 
+  izi\prestashop\Configuration\ConsentsConfigurationInterface: '@izi\prestashop\Configuration\ConsentsConfiguration'
+  izi\prestashop\Configuration\ConsentsConfiguration:
+    class: izi\prestashop\Configuration\ConsentsConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+
   izi\prestashop\Configuration\WidgetConfiguration:
     class: izi\prestashop\Configuration\WidgetConfiguration
     public: false
@@ -285,6 +293,12 @@ services:
     arguments:
       - '@inpost.izi.repository_locator'
 
+  izi\prestashop\ObjectModel\Repository\CmsPageRepository:
+    class: izi\prestashop\ObjectModel\Repository\CmsPageRepository
+    public: false
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   izi\prestashop\ObjectModel\Repository\CurrencyRepository:
     class: izi\prestashop\ObjectModel\Repository\CurrencyRepository
     public: false
@@ -447,7 +461,7 @@ services:
     public: true
     arguments:
       - '@inpost.izi.context'
-      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
   izi\prestashop\Builder\Basket\BasketBuilderFactory:
@@ -456,6 +470,7 @@ services:
     arguments:
       - '@inpost.izi.clock'
       - '@izi\prestashop\ContextManager'
+      - '@izi\prestashop\Configuration\ConsentsConfiguration'
 
   izi\prestashop\Cache\ConfigurationCache:
     class: izi\prestashop\Cache\ConfigurationCache

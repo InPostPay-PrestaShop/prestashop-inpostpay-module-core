@@ -1,0 +1,54 @@
+{% use '@PrestaShop/Admin/TwigTemplateForm/bootstrap_4_layout.html.twig' %}
+
+{% block _consents_configuration_consents_widget %}
+  {% with {'child': prototype} %}
+    <div {{ block('widget_container_attributes') }} data-prototype="{{ block('consent_collection_item_widget')|e('html_attr') }}">
+      <div class="js-consent-collection-item-container">
+        {% for child in form %}
+          <div class="js-consent-collection-item">
+            {{ block('consent_collection_item_widget') }}
+          </div>
+        {% endfor %}
+      </div>
+
+      <button type="button" class="js-add-consent-collection-item btn btn-outline-primary">
+        <i class="material-icons">add_circle</i>
+        {{ add_consent_label }}
+      </button>
+    </div>
+  {% endwith %}
+{% endblock %}
+
+{% block consent_collection_item_widget %}
+  <div class="input-group row">
+    <div class="col-3">
+      {{ form_label(child.cmsPageId) }}
+      <div class="form-group">
+        {{ form_widget(child.cmsPageId) }}
+        {{ form_errors(child.cmsPageId) }}
+      </div>
+    </div>
+
+    <div class="col-5">
+      {{ form_label(child.descriptions) }}
+      <div class="form-group">
+        {{ form_widget(child.descriptions) }}
+        {{ form_errors(child.descriptions) }}
+      </div>
+    </div>
+
+    <div class="col-3">
+      {{ form_label(child.requirementType) }}
+      <div class="form-group">
+        {{ form_widget(child.requirementType) }}
+        {{ form_errors(child.requirementType) }}
+      </div>
+    </div>
+
+    <div class="input-group-btn col-1 m-auto">
+      <button type="button" class="js-remove-consent-collection-item btn btn-outline-secondary float-right btn-sm" title="{{ 'Remove'|trans({}, 'Admin.Actions') }}">
+        <i class="material-icons icon-delete">clear</i>
+      </button>
+    </div>
+  </div>
+{% endblock %}

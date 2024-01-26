@@ -27,11 +27,11 @@ final class Consent implements \JsonSerializable
     private $consent_version;
 
     /**
-     * @var ConsentType
+     * @var ConsentRequirementType
      */
     private $requirement_type;
 
-    public function __construct(string $consent_id, string $consent_link, string $consent_description, string $consent_version, ConsentType $requirement_type)
+    public function __construct(string $consent_id, string $consent_link, string $consent_description, string $consent_version, ConsentRequirementType $requirement_type)
     {
         $this->consent_id = $consent_id;
         $this->consent_link = $consent_link;
@@ -60,7 +60,7 @@ final class Consent implements \JsonSerializable
         return $this->consent_version;
     }
 
-    public function getRequirementType(): ConsentType
+    public function getRequirementType(): ConsentRequirementType
     {
         return $this->requirement_type;
     }
