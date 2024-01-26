@@ -6,11 +6,15 @@ namespace izi\prestashop\Controller\Admin;
 
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory;
+use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO\Consent;
+use izi\prestashop\Configuration\GuiConfiguration;
+use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
+use izi\prestashop\Form\Type\GuiConfigurationType;
 use PrestaShopBundle\Security\Voter\PageVoter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -105,6 +109,40 @@ final class ConfigurationController extends AbstractController
         ]);
     }
 
+    /**
+     * @param GuiConfiguration $configuration
+     *
+     * @Route(path="/gui", name="gui", methods={"GET", "POST"})
+     */
+    public function guiConfig(Request $request, GuiConfigurationInterface $configuration, CommandBusInterface $bus): Response
+    {
+//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+
+        $form = $this->createForm(GuiConfigurationType::class, $configuration->copy(), [
+            'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
+        ]);
+
+        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+            $command = new UpdateGuiConfigurationCommand($form->getData());
+
+            try {
+                $bus->handle($command);
+                $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
+
+                return $this->redirectToRoute('admin_inpost_izi_config_gui');
+            } catch (\Exception $e) {
+                $this->handleException($e);
+            }
+        }
+
+        return $this->render('@Modules/inpostizi/views/templates/admin/config/gui.html.twig', [
+            'form' => $form->createView(),
+            'can_update' => $canUpdate,
+            'layoutTitle' => $this->module->l('GUI configuration', self::TRANSLATION_SOURCE),
+            'headerTabContent' => $this->renderNav($request),
+        ]);
+    }
+
     private function renderNav(Request $request): string
     {
         $pages = [
@@ -115,6 +153,10 @@ final class ConfigurationController extends AbstractController
             'consents' => [
                 'route' => 'admin_inpost_izi_config_consents',
                 'title' => $this->module->l('Consents', self::TRANSLATION_SOURCE),
+            ],
+            'gui' => [
+                'route' => 'admin_inpost_izi_config_gui',
+                'title' => $this->module->l('GUI configuration', self::TRANSLATION_SOURCE),
             ],
         ];
 

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\WidgetConfigurationInterface;
+use izi\prestashop\Configuration\GuiConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 trait ProductWidgetRendererTrait
 {
     /**
-     * @var WidgetConfigurationInterface
+     * @var GuiConfigurationInterface
      */
     private $configuration;
 
@@ -25,12 +25,12 @@ trait ProductWidgetRendererTrait
             return '';
         }
 
-        if (!$this->configuration->isDisplayedOnProductCard()) {
+        if (!$this->configuration->isWidgetDisplayedOnProductCard()) {
             return '';
         }
 
         $configuration = $this->configuration
-            ->getProductCardConfiguration()
+            ->getProductCardWidgetConfiguration()
             ->setProductId((string) $productId);
 
         return $this->module->renderWidget($hookName, [

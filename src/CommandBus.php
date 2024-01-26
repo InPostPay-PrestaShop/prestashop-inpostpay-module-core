@@ -7,6 +7,7 @@ namespace izi\prestashop;
 use izi\prestashop\Command\BindBasketCommand;
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
+use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
 use izi\prestashop\Command\GenerateDeepLinkCommand;
 use izi\prestashop\Command\GetBindingConfirmationCommand;
 use izi\prestashop\Command\GetClientDetailsCommand;
@@ -17,6 +18,7 @@ use izi\prestashop\Command\UpdateOrderTrackingNumbersCommand;
 use izi\prestashop\Handler\BindBasketHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface;
+use izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface;
 use izi\prestashop\Handler\GenerateDeepLinkHandlerInterface;
 use izi\prestashop\Handler\GetBindingConfirmationHandlerInterface;
 use izi\prestashop\Handler\GetClientDetailsHandlerInterface;
@@ -50,23 +52,28 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
     public static function getSubscribedServices(): array
     {
         return [
+            UpdateOrderTrackingNumbersCommand::class => UpdateOrderTrackingNumbersHandlerInterface::class,
+            UpdateBasketCommand::class => UpdateBasketHandlerInterface::class,
+
+            /* widget */
+            GetClientDetailsCommand::class => GetClientDetailsHandlerInterface::class,
             BindBasketCommand::class => '?' . BindBasketHandlerInterface::class,
             GenerateDeepLinkCommand::class => '?' . GenerateDeepLinkHandlerInterface::class,
             UnbindBasketCommand::class => '?' . UnbindBasketHandlerInterface::class,
-            UpdateOrderTrackingNumbersCommand::class => UpdateOrderTrackingNumbersHandlerInterface::class,
-            GetClientDetailsCommand::class => GetClientDetailsHandlerInterface::class,
-            UpdateBasketCommand::class => UpdateBasketHandlerInterface::class,
             GetBindingConfirmationCommand::class => '?' . GetBindingConfirmationHandlerInterface::class,
             GetOrderEventsCommand::class => '?' . GetOrderEventsHandlerInterface::class,
+
             /* merchant API */
             ConfirmBasketBindingCommand::class => '?' . ConfirmBasketBindingHandlerInterface::class,
             DeleteBasketBindingCommand::class => '?' . DeleteBasketBindingHandlerInterface::class,
             GetBasketCommand::class => '?' . GetBasketHandlerInterface::class,
             MerchantApi\Command\UpdateBasketCommand::class => '?' . MerchantApi\Handler\UpdateBasketHandlerInterface::class,
             UpdateOrderCommand::class => '?' . UpdateOrderHandlerInterface::class,
+
             /* configuration */
             UpdateGeneralConfigurationCommand::class => '?' . UpdateGeneralConfigurationHandlerInterface::class,
             UpdateConsentsConfigurationCommand::class => '?' . UpdateConsentsConfigurationHandlerInterface::class,
+            UpdateGuiConfigurationCommand::class => '?' . UpdateGuiConfigurationHandlerInterface::class,
         ];
     }
 

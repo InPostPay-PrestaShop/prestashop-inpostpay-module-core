@@ -1,4 +1,4 @@
-{% use '@PrestaShop/Admin/TwigTemplateForm/bootstrap_4_layout.html.twig' %}
+{% use 'bootstrap_4_layout.html.twig' %}
 
 {% block _consents_configuration_consents_widget %}
   {% with {'child': prototype} %}
@@ -52,3 +52,16 @@
     </div>
   </div>
 {% endblock %}
+
+{%- block integer_widget -%}
+  {%- set type = type|default('number') -%}
+  <div class="input-group">
+    {{- block('form_widget_simple') -}}
+
+    {% if form.vars.unit is defined %}
+      <div class="input-group-append">
+        <span class="input-group-text">{{ form.vars.unit }}</span>
+      </div>
+    {% endif %}
+  </div>
+{%- endblock integer_widget -%}

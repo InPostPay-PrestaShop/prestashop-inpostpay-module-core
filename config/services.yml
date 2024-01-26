@@ -12,6 +12,10 @@ services:
     tags:
       - { name: controller.service_arguments }
 
+  izi\prestashop\View\Asset\AssetManagerInterface: '@izi\prestashop\View\Asset\AdminAssetManager'
+  izi\prestashop\View\Asset\AdminAssetManager:
+    class: izi\prestashop\View\Asset\AdminAssetManager
+
   izi\prestashop\Form\Type\GeneralConfigurationType:
     class: izi\prestashop\Form\Type\GeneralConfigurationType
     tags:
@@ -97,3 +101,42 @@ services:
   izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler
+
+  izi\prestashop\Form\Type\GuiConfigurationType:
+    class: izi\prestashop\Form\Type\GuiConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\HtmlStylesType:
+    class: izi\prestashop\Form\Type\HtmlStylesType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Widget\WidgetConfigurationType:
+    class: izi\prestashop\Form\Type\Widget\WidgetConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Widget\WidgetAlignmentChoiceType:
+    class: izi\prestashop\Form\Type\Widget\WidgetAlignmentChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Widget\WidgetVariantChoiceType:
+    class: izi\prestashop\Form\Type\Widget\WidgetVariantChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Widget\WidgetFrameStyleChoiceType:
+    class: izi\prestashop\Form\Type\Widget\WidgetFrameStyleChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\TypeExtension\UnitTypeExtension:
+    class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
+    tags:
+      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\NumberType }
+
+  izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler

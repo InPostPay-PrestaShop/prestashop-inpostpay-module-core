@@ -129,8 +129,9 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
 
-  izi\prestashop\Configuration\WidgetConfiguration:
-    class: izi\prestashop\Configuration\WidgetConfiguration
+  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfiguration:
+    class: izi\prestashop\Configuration\GuiConfiguration
     public: false
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'

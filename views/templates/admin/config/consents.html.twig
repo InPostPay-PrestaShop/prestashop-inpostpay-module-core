@@ -14,14 +14,8 @@
 
         <div class="card-body card-block">
           <div class="form-wrapper card-text">
-            {% block form_fields %}
-              {% if form.vars.compound is same as(true) %}
-                {{ form_errors(form) }}
-                {{ form_rest(form) }}
-              {% else %}
-                {{ form_row(form) }}
-              {% endif %}
-            {% endblock %}
+            {{ form_errors(form) }}
+            {{ form_rest(form) }}
           </div>
         </div>
 
