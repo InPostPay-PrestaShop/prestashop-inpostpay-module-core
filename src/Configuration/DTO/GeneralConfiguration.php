@@ -4,54 +4,49 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration\DTO;
 
-use izi\prestashop\Configuration\ApiConfigurationInterface;
-use izi\prestashop\Configuration\OrdersConfigurationInterface;
-use izi\prestashop\Validator\InPostApiCredentials;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class GeneralConfiguration
+final class GeneralConfiguration implements GeneralConfigurationInterface
 {
     /**
-     * @var ApiConfigurationInterface
-     *
-     * @Assert\Valid()
-     * @InPostApiCredentials(groups={"API"})
+     * @var bool
      */
-    private $apiConfiguration;
+    private $enabledForEveryone;
 
     /**
-     * @var OrdersConfigurationInterface
+     * @var int|null
      *
-     * @Assert\Valid()
+     * @Assert\GreaterThanOrEqual(0)
      */
-    private $ordersConfiguration;
+    private $maxSuggestedProducts;
 
-    public function __construct(ApiConfigurationInterface $apiConfiguration, OrdersConfigurationInterface $ordersConfiguration)
+    public function __construct(bool $enabledForEveryone = false, int $maxSuggestedProducts = null)
     {
-        $this->apiConfiguration = $apiConfiguration;
-        $this->ordersConfiguration = $ordersConfiguration;
+        $this->enabledForEveryone = $enabledForEveryone;
+        $this->maxSuggestedProducts = $maxSuggestedProducts;
     }
 
-    public function getApiConfiguration(): ApiConfigurationInterface
+    public function isEnabledForEveryone(): bool
     {
-        return $this->apiConfiguration;
+        return $this->enabledForEveryone;
     }
 
-    public function setApiConfiguration(ApiConfigurationInterface $apiConfiguration): self
+    public function setEnabledForEveryone(bool $enabledForEveryone): GeneralConfiguration
     {
-        $this->apiConfiguration = $apiConfiguration;
+        $this->enabledForEveryone = $enabledForEveryone;
 
         return $this;
     }
 
-    public function getOrdersConfiguration(): OrdersConfigurationInterface
+    public function getMaxSuggestedProducts(int $shopId = null): ?int
     {
-        return $this->ordersConfiguration;
+        return $this->maxSuggestedProducts;
     }
 
-    public function setOrdersConfiguration(OrdersConfigurationInterface $ordersConfiguration): self
+    public function setMaxSuggestedProducts(?int $maxSuggestedProducts): GeneralConfiguration
     {
-        $this->ordersConfiguration = $ordersConfiguration;
+        $this->maxSuggestedProducts = $maxSuggestedProducts;
 
         return $this;
     }

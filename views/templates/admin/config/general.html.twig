@@ -12,7 +12,7 @@
           <i class="material-icons">settings</i> {{ layoutTitle }}
         </h3>
 
-        <div class="card-body card-block row">
+        <div class="card-body card-block">
           <div class="form-wrapper card-text">
             {% block form_fields %}
               {% if form.vars.compound is same as(true) %}
@@ -35,4 +35,17 @@
 
     </div>
   </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+
+  <script type="text/javascript">
+    /* TODO: webpack */
+    $(document).ready(() => {
+      window.prestashop.component.initComponents([
+        'TranslatableInput',
+      ])
+    });
+  </script>
 {% endblock %}

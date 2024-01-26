@@ -13,6 +13,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 final class OrderStateChoiceType extends AbstractType
 {
     /**
+     * @var \Context
+     */
+    private $context;
+
+    /**
      * @var ChoiceLoaderInterface
      */
     private $choiceLoader;
@@ -20,8 +25,9 @@ final class OrderStateChoiceType extends AbstractType
     /**
      * @param OrderStateChoiceLoader $choiceLoader
      */
-    public function __construct(ChoiceLoaderInterface $choiceLoader)
+    public function __construct(\Context $context, ChoiceLoaderInterface $choiceLoader)
     {
+        $this->context = $context;
         $this->choiceLoader = $choiceLoader;
     }
 
@@ -34,6 +40,12 @@ final class OrderStateChoiceType extends AbstractType
     {
         $resolver->setDefaults([
             'choice_loader' => $this->choiceLoader,
+            'choice_value' => static function ($orderState): int {
+                return (int) $orderState->id;
+            },
+            'choice_label' => function (\OrderState $orderState): string {
+                return $orderState->name[$this->context->language->id] ?? '';
+            },
         ]);
     }
 }

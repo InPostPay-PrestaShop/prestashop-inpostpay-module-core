@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
-final class OrdersConfiguration implements OrdersConfigurationInterface
+final class OrdersConfiguration implements OrdersConfigurationInterface, PersistentConfigurationInterface
 {
     private const INITIAL_OS_ID = 'INPOST_PAY_INITIAL_OS_ID';
     private const PAID_OS_ID = 'INPOST_PAY_authorized_payment';
@@ -35,13 +35,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return (int) $this->configuration->get(self::PAID_OS_ID, $shopId);
     }
 
-    public function getStatusDescriptionMapping(int $languageId, int $shopId = null): array
+    public function getStatusDescriptionMap(): array
     {
-        if (!isset($this->descriptionMappings[$languageId][(int) $shopId])) {
-            $this->descriptionMappings[$languageId][(int) $shopId] = $this->loadOrderStatusDescriptionMap($languageId, $shopId);
-        }
-
-        return $this->descriptionMappings[$languageId][(int) $shopId];
+        return array_map([$this, 'decodeStatusDescriptionMap'], $this->configuration->getLocalized(self::STATUS_DESCRIPTION_MAP));
     }
 
     public function getStatusDescription(int $statusId, int $languageId, int $shopId): ?string
@@ -71,29 +67,48 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return new DTO\OrdersConfiguration(
             $this->getInitialStatusId(),
             $this->getPaidStatusId(),
-            [],
             $this->isBankPaymentEnabled(),
             $this->isCarrierPaymentEnabled(),
-            $this->getPointOfSaleId()
+            $this->getPointOfSaleId(),
+            $this->getStatusDescriptionMap()
         );
     }
 
     public function persist(OrdersConfigurationInterface $configuration): void
     {
-
+        $this->configuration->set(self::INITIAL_OS_ID, $configuration->getInitialStatusId());
+        $this->configuration->set(self::PAID_OS_ID, $configuration->getPaidStatusId());
+        $this->configuration->set(self::ENABLE_BANK_PAYMENT, $configuration->isBankPaymentEnabled());
+        $this->configuration->set(self::ENABLE_CARRIER_PAYMENT, $configuration->isCarrierPaymentEnabled());
+        $this->configuration->set(self::POS_ID, $configuration->getPointOfSaleId());
+        $this->setOrderStatusDescriptionMapping($configuration->getStatusDescriptionMap());
     }
 
-    private function loadOrderStatusDescriptionMap(int $languageId, ?int $shopId): array
+    private function loadStatusDescriptionMap(int $languageId, ?int $shopId): array
     {
         $config = $this->configuration->get(self::STATUS_DESCRIPTION_MAP, $shopId, $languageId);
 
-        if (null === $config) {
+        return $this->decodeStatusDescriptionMap($config);
+    }
+
+    private function decodeStatusDescriptionMap($value): array
+    {
+        if (null === $value) {
             return [];
         }
 
-        $map = json_decode($config, true);
+        $map = json_decode($value, true);
 
         return is_array($map) ? $map : [];
+    }
+
+    private function getStatusDescriptionMapping(int $languageId, int $shopId = null): array
+    {
+        if (!isset($this->descriptionMappings[$languageId][(int) $shopId])) {
+            $this->descriptionMappings[$languageId][(int) $shopId] = $this->loadStatusDescriptionMap($languageId, $shopId);
+        }
+
+        return $this->descriptionMappings[$languageId][(int) $shopId];
     }
 
     private function setOrderStatusDescriptionMapping(array $data): void

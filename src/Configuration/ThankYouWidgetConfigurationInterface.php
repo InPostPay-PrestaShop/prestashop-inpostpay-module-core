@@ -6,5 +6,5 @@ namespace izi\prestashop\Configuration;
 
 interface ThankYouWidgetConfigurationInterface
 {
-    public function shouldDisplayHook($hookName): bool;
+    public function shouldDisplayHook(string $hookName): bool;
 }

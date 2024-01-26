@@ -29,8 +29,7 @@ final class DisplayOrderConfirmation implements HookInterface
         \Context $context,
         \PaymentModule $paymentModule,
         ThankYouWidgetConfigurationInterface $configuration
-    )
-    {
+    ) {
         $this->repository = $repository;
         $this->context = $context;
         $this->paymentModule = $paymentModule;

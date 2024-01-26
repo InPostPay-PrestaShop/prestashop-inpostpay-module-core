@@ -25,13 +25,8 @@ trait ThankYouWidgetRendererTrait
      */
     private function shouldBeRendered(string $hookName, \Order $order): bool
     {
-        if ($this->paymentModule->name !== $order->module ||
-            !$this->configuration->shouldDisplayHook($hookName)
-        ) {
-            return false;
-        }
-
-        return true;
+        return !$this->paymentModule->name !== $order->module
+            || !$this->configuration->shouldDisplayHook($hookName);
     }
 
     /**

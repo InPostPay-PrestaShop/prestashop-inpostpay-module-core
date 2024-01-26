@@ -18,7 +18,7 @@ final class ThankYouWidgetConfiguration implements ThankYouWidgetConfigurationIn
         $this->configuration = $configuration;
     }
 
-    public function shouldDisplayHook($hookName): bool
+    public function shouldDisplayHook(string $hookName): bool
     {
         return $this->configuration->get(self::INPOST_PAY_THANK_YOU_DISPLAY) === $hookName;
     }

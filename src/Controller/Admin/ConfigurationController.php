@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace izi\prestashop\Controller\Admin;
 
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
+use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Configuration\ApiConfiguration;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
-use izi\prestashop\Configuration\DTO\GeneralConfiguration;
 use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
@@ -47,18 +47,18 @@ final class ConfigurationController extends AbstractController
      * @param ApiConfiguration $apiConfiguration,
      * @param OrdersConfiguration $ordersConfiguration
      */
-    public function generalConfig(Request $request, ApiConfigurationInterface $apiConfiguration, OrdersConfigurationInterface $ordersConfiguration, CommandBusInterface $bus): Response
+    public function generalConfig(Request $request, UpdateGeneralConfigurationCommandFactory $commandFactory, CommandBusInterface $bus): Response
     {
 //        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
 
-        $data = new GeneralConfiguration($apiConfiguration->copy(), $ordersConfiguration->copy());
+        $command = $commandFactory->create();
 
-        $form = $this->createForm(GeneralConfigurationType::class, $data, [
+        $form = $this->createForm(GeneralConfigurationType::class, $command, [
             'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
         ]);
 
         if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
-            $bus->handle(new UpdateGeneralConfigurationCommand($form->getData()));
+            $bus->handle($command);
             $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
             return $this->redirectToRoute('admin_inpost_izi_config_general');

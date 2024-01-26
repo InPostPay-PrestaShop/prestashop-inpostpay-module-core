@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook;
 
-use izi\prestashop\Configuration\WidgetConfigurationInterface;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\View\Templating\RendererInterface;
 use izi\prestashop\View\Widget\Configuration;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +17,7 @@ final class WidgetRenderer
     private $context;
 
     /**
-     * @var WidgetConfigurationInterface
+     * @var GeneralConfigurationInterface
      */
     private $configuration;
 
@@ -26,7 +26,7 @@ final class WidgetRenderer
      */
     private $renderer;
 
-    public function __construct(\Context $context, WidgetConfigurationInterface $configuration, RendererInterface $renderer)
+    public function __construct(\Context $context, GeneralConfigurationInterface $configuration, RendererInterface $renderer)
     {
         $this->context = $context;
         $this->configuration = $configuration;
@@ -46,7 +46,7 @@ final class WidgetRenderer
 
     private function shouldWidgetBeHiddenForUser(Request $request): bool
     {
-        if ($this->configuration->isVisibleToEveryone()) {
+        if ($this->configuration->isEnabledForEveryone()) {
             return false;
         }
 

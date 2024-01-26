@@ -11,9 +11,9 @@ interface OrdersConfigurationInterface
     public function getPaidStatusId(int $shopId = null): ?int;
 
     /**
-     * @return array<int, string> description by status ID
+     * @return array<int, array<int, string>> descriptions by language and status ID
      */
-    public function getStatusDescriptionMapping(int $languageId, int $shopId = null): array;
+    public function getStatusDescriptionMap(): array;
 
     public function getStatusDescription(int $statusId, int $languageId, int $shopId): ?string;
 

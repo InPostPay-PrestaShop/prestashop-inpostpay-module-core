@@ -47,14 +47,14 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      */
     private $posId;
 
-    public function __construct(int $initialStatusId = null, int $paidStatusId = null, array $statusDescriptionMap = [], bool $bankPaymentEnabled = null, bool $carrierPaymentEnabled = null, string $posId = null)
+    public function __construct(int $initialStatusId = null, int $paidStatusId = null, bool $bankPaymentEnabled = null, bool $carrierPaymentEnabled = null, string $posId = null, array $statusDescriptionMap = [])
     {
         $this->initialStatusId = $initialStatusId;
         $this->paidStatusId = $paidStatusId;
-        $this->statusDescriptionMap = $statusDescriptionMap;
         $this->bankPaymentEnabled = $bankPaymentEnabled;
         $this->carrierPaymentEnabled = $carrierPaymentEnabled;
         $this->posId = $posId;
+        $this->statusDescriptionMap = $statusDescriptionMap;
     }
 
     public function getInitialStatusId(int $shopId = null): ?int
@@ -62,9 +62,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->initialStatusId;
     }
 
-    public function setInitialStatusId(?int $initialStatusId): OrdersConfiguration
+    public function setInitialStatusId(?\OrderState $initialStatus): OrdersConfiguration
     {
-        $this->initialStatusId = $initialStatusId;
+        $this->initialStatusId = null === $initialStatus ? null : (int) $initialStatus->id;
 
         return $this;
     }
@@ -74,23 +74,21 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->paidStatusId;
     }
 
-    public function setPaidStatusId(?int $paidStatusId): OrdersConfiguration
+    public function setPaidStatusId(?\OrderState $paidStatus): OrdersConfiguration
     {
-        $this->paidStatusId = $paidStatusId;
+        $this->paidStatusId = null === $paidStatus ? null : (int) $paidStatus->id;
 
         return $this;
     }
 
     public function getStatusDescription(int $statusId, int $languageId, int $shopId = null): ?string
     {
-        $map = $this->getStatusDescriptionMapping($languageId);
-
-        return $map[$statusId] ?? null;
+        return $this->statusDescriptionMap[$languageId][$statusId] ?? null;
     }
 
-    public function getStatusDescriptionMapping(int $languageId, int $shopId = null): array
+    public function getStatusDescriptionMap(): array
     {
-        return $this->statusDescriptionMap[$languageId] ?? [];
+        return $this->statusDescriptionMap;
     }
 
     public function setStatusDescriptionMap(array $statusDescriptionMap): OrdersConfiguration

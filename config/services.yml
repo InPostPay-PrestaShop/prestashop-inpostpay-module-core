@@ -45,8 +45,15 @@ services:
     class: izi\prestashop\Form\Type\OrderStateChoiceType
     tags:
       - { name: form.type }
-    arguments:
-      - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
+    bind:
+      $choiceLoader: '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
+
+  izi\prestashop\Form\Type\OrderStatusDescriptionMapType:
+    class: izi\prestashop\Form\Type\OrderStatusDescriptionMapType
+    tags:
+      - { name: form.type }
+    bind:
+      $choiceLoader: '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
 
   izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader
@@ -65,3 +72,6 @@ services:
       - { name: validator.constraint_validator }
     bind:
       $authProviderFactory: '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
+
+  izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory:
+    class: izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory

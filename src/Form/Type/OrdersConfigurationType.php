@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\OrdersConfiguration;
+use PrestaShopBundle\Form\Admin\Type\TranslatableType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -30,6 +31,11 @@ final class OrdersConfigurationType extends AbstractType
             ])
             ->add('paidStatusId', OrderStateChoiceType::class, [
                 'label' => $this->module->l('Paid order status', self::TRANSLATION_SOURCE),
+            ])
+            // TODO: polyfill type for PS < 1.7.6
+            ->add('statusDescriptionMap', TranslatableType::class, [
+                'label' => $this->module->l('Order statuses', self::TRANSLATION_SOURCE),
+                'type' => OrderStatusDescriptionMapType::class,
             ])
             ->add('bankPaymentEnabled', CheckboxType::class, [
                 'required' => false,

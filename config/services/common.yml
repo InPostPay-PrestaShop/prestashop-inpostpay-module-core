@@ -114,6 +114,13 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
 
+  izi\prestashop\Configuration\GeneralConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
+  izi\prestashop\Configuration\GeneralConfiguration:
+    class: izi\prestashop\Configuration\GeneralConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
   izi\prestashop\Configuration\WidgetConfiguration:
     class: izi\prestashop\Configuration\WidgetConfiguration
     public: false

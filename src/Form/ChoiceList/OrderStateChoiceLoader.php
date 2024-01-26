@@ -11,8 +11,6 @@ use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 
 final class OrderStateChoiceLoader implements ChoiceLoaderInterface
 {
-    private $context;
-
     /**
      * @var ObjectRepositoryInterface
      */
@@ -23,24 +21,40 @@ final class OrderStateChoiceLoader implements ChoiceLoaderInterface
     /**
      * @param ObjectRepositoryInterface<\OrderState> $repository
      */
-    public function __construct(\Context $context, ObjectRepositoryInterface $repository)
+    public function __construct(ObjectRepositoryInterface $repository)
     {
-        $this->context = $context;
         $this->repository = $repository;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function loadChoiceList($value = null): ChoiceListInterface
     {
         return new ArrayChoiceList($this->getChoices(), $value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function loadChoicesForValues(array $values, $value = null): array
     {
         return $this->loadChoiceList($value)->getChoicesForValues($values);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function loadValuesForChoices(array $choices, $value = null): array
     {
+        $choices = array_map(function ($choice): \OrderState {
+            if ($choice instanceof \OrderState) {
+                return $choice;
+            }
+
+            return $this->getChoices()[$choice];
+        }, $choices);
+
         return $this->loadChoiceList($value)->getValuesForChoices($choices);
     }
 
@@ -52,8 +66,8 @@ final class OrderStateChoiceLoader implements ChoiceLoaderInterface
 
         $this->choices = [];
 
-        foreach ($this->repository->findAll((int) $this->context->language->id) as $orderState) {
-            $this->choices[$orderState->name] = (int) $orderState->id;
+        foreach ($this->repository->findAll() as $orderState) {
+            $this->choices[$orderState->id] = $orderState;
         }
 
         return $this->choices;
