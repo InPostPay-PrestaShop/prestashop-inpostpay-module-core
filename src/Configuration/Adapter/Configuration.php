@@ -33,7 +33,7 @@ final class Configuration implements LanguageAwareConfigurationInterface
         $configuration = [];
 
         foreach (\Language::getIDs(false) as $languageId) {
-            $configuration[$languageId] = $this->doGet($key, $languageId);
+            $configuration[$languageId] = $this->doGet($key, (int) $languageId);
         }
 
         return $configuration;
