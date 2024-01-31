@@ -39,6 +39,6 @@ trait ThankYouWidgetRendererTrait
      */
     private function renderWidgetBlock(): string
     {
-        return '<inpost-thank-you/>';
+        return '<inpost-thank-you></inpost-thank-you>';
     }
 }
