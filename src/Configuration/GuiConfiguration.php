@@ -17,6 +17,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
     private const CART_PAGE_HTML_STYLES = 'INPOST_PAY_CART_HTML_STYLES';
     private const ENABLE_PRODUCT_CARD_WIDGET_DISPLAY = 'INPOST_PAY_show_button_details';
     private const PRODUCT_CARD_WIDGET_CONFIG = 'INPOST_PAY_PRODUCT_CARD_WIDGET_CONFIG';
+    private const PRODUCT_CARD_HTML_STYLES = 'INPOST_PAY_PRODUCT_HTML_STYLES';
 
     /**
      * @var ConfigurationInterface
@@ -31,6 +32,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
     private $cartWidgetConfig;
     private $cartHtmlStyles;
     private $productWidgetConfig;
+    private $productHtmlStyles;
 
     public function __construct(ConfigurationInterface $configuration, SerializerInterface $serializer)
     {
@@ -96,6 +98,15 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
 //        }
     }
 
+    public function getProductCardHtmlStyles(): HtmlStyles
+    {
+        if (!isset($this->productHtmlStyles)) {
+            $this->productHtmlStyles = $this->loadProductCardHtmlStyles();
+        }
+
+        return clone $this->productHtmlStyles;
+    }
+
     public function isWidgetDisplayedOnProductCard(): bool
     {
         return (bool) $this->configuration->get(self::ENABLE_PRODUCT_CARD_WIDGET_DISPLAY);
@@ -128,7 +139,8 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             $this->getCartPageWidgetConfiguration(),
             $this->getCartPageHtmlStyles(),
             $this->isWidgetDisplayedOnProductCard(),
-            $this->getProductCardWidgetConfiguration()
+            $this->getProductCardWidgetConfiguration(),
+            $this->getProductCardHtmlStyles()
         );
     }
 
@@ -139,6 +151,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         $this->setCartPageWidgetConfig($configuration->getCartPageWidgetConfiguration());
         $this->setCartPageHtmlStyles($configuration->getCartPageHtmlStyles());
         $this->setProductPageWidgetConfig($configuration->getProductCardWidgetConfiguration());
+        $this->setProductCardHtmlStyles($configuration->getProductCardHtmlStyles());
     }
 
     private function loadCartPageWidgetConfig(): Configuration
@@ -174,6 +187,17 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         return new Configuration(BindingPlace::ProductCard());
     }
 
+    private function loadProductCardHtmlStyles(): HtmlStyles
+    {
+        $value = $this->configuration->get(self::PRODUCT_CARD_HTML_STYLES);
+
+        if (null !== $value && $styles = $this->deserialize($value, HtmlStyles::class)) {
+            return $styles;
+        }
+
+        return new HtmlStyles();
+    }
+
     private function setCartPageWidgetConfig(Configuration $config): void
     {
         $value = $this->serializer->serialize($config, 'json');
@@ -193,6 +217,13 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         $value = $this->serializer->serialize($config, 'json');
         $this->configuration->set(self::PRODUCT_CARD_WIDGET_CONFIG, $value);
         $this->productWidgetConfig = $config;
+    }
+
+    private function setProductCardHtmlStyles(HtmlStyles $styles): void
+    {
+        $value = $this->serializer->serialize($styles, 'json');
+        $this->configuration->set(self::PRODUCT_CARD_HTML_STYLES, $value);
+        $this->productHtmlStyles = $styles;
     }
 
     /**

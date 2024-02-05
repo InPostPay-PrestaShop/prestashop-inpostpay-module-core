@@ -41,6 +41,9 @@ final class GuiConfigurationType extends AbstractType
             ])
             ->add('productCardWidgetConfiguration', WidgetConfigurationType::class, [
                 'label' => $this->module->l('Product card', self::TRANSLATION_SOURCE),
+            ])
+            ->add('productCardHtmlStyles', HtmlStylesType::class, [
+                'label' => false,
             ]);
     }
 

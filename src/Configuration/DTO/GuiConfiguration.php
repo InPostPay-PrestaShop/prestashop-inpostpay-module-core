@@ -45,13 +45,28 @@ final class GuiConfiguration implements GuiConfigurationInterface
      */
     private $productCardWidgetConfiguration;
 
-    public function __construct(bool $widgetDisplayedOnCartPage = false, Configuration $cartPageWidgetConfiguration = null, HtmlStyles $cartPageHtmlStyles = null, bool $widgetDisplayedOnProductCard = false, Configuration $productCardWidgetConfiguration = null)
-    {
+    /**
+     * @var HtmlStyles|null
+     *
+     * @Assert\NotNull()
+     * @Assert\Valid()
+     */
+    private $productCardHtmlStyles;
+
+    public function __construct(
+        bool $widgetDisplayedOnCartPage = false,
+        Configuration $cartPageWidgetConfiguration = null,
+        HtmlStyles $cartPageHtmlStyles = null,
+        bool $widgetDisplayedOnProductCard = false,
+        Configuration $productCardWidgetConfiguration = null,
+        HtmlStyles $productCardHtmlStyles = null
+    ) {
         $this->widgetDisplayedOnCartPage = $widgetDisplayedOnCartPage;
         $this->cartPageWidgetConfiguration = $cartPageWidgetConfiguration;
         $this->cartPageHtmlStyles = $cartPageHtmlStyles;
         $this->widgetDisplayedOnProductCard = $widgetDisplayedOnProductCard;
         $this->productCardWidgetConfiguration = $productCardWidgetConfiguration;
+        $this->productCardHtmlStyles = $productCardHtmlStyles;
     }
 
     public function getCheckoutWidgetConfiguration(): Configuration
@@ -118,4 +133,18 @@ final class GuiConfiguration implements GuiConfigurationInterface
 
         return $this;
     }
+
+
+    public function getProductCardHtmlStyles(): HtmlStyles
+    {
+        return $this->productCardHtmlStyles ?? new HtmlStyles();
+    }
+
+    public function setProductCardHtmlStyles(?HtmlStyles $productCardHtmlStyles): self
+    {
+        $this->productCardHtmlStyles = $productCardHtmlStyles;
+
+        return $this;
+    }
+
 }
