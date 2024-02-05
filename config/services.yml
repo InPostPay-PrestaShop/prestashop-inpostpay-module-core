@@ -135,7 +135,7 @@ services:
   izi\prestashop\Form\TypeExtension\UnitTypeExtension:
     class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
     tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\NumberType }
+      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }
 
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
