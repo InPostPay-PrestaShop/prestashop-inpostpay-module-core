@@ -14,11 +14,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 final class HourChoiceType extends AbstractType
 {
     /**
-     * @var \Context
-     */
-    private $context;
-
-    /**
      * @var ChoiceLoaderInterface
      */
     private $choiceLoader;
@@ -26,9 +21,8 @@ final class HourChoiceType extends AbstractType
     /**
      * @param HourChoiceLoader $choiceLoader
      */
-    public function __construct(\Context $context, ChoiceLoaderInterface $choiceLoader)
+    public function __construct(ChoiceLoaderInterface $choiceLoader)
     {
-        $this->context = $context;
         $this->choiceLoader = $choiceLoader;
     }
 

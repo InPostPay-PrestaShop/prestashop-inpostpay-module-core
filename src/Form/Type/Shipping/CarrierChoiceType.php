@@ -13,11 +13,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 final class CarrierChoiceType extends AbstractType
 {
     /**
-     * @var \Context
-     */
-    private $context;
-
-    /**
      * @var ChoiceLoaderInterface
      */
     private $choiceLoader;
@@ -25,9 +20,8 @@ final class CarrierChoiceType extends AbstractType
     /**
      * @param CarrierChoiceLoader $choiceLoader
      */
-    public function __construct(\Context $context, ChoiceLoaderInterface $choiceLoader)
+    public function __construct(ChoiceLoaderInterface $choiceLoader)
     {
-        $this->context = $context;
         $this->choiceLoader = $choiceLoader;
     }
 

@@ -9,7 +9,6 @@ use izi\prestashop\Form\Type\Shipping\CarrierChoiceType;
 use izi\prestashop\Form\Type\Shipping\DayChoiceType;
 use izi\prestashop\Form\Type\Shipping\HourChoiceType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -23,7 +22,7 @@ final class ShippingType extends AbstractType
                 'label' => $options['shippingIdLabel'],
                 'empty_data' => null,
             ])
-            ->add('shippingPrice', NumberType::class, [
+            ->add('shippingPrice', MoneyCurrencyType::class, [
                 'required' => false,
                 'label' => $options['shippingPriceLabel'],
             ])
@@ -43,7 +42,7 @@ final class ShippingType extends AbstractType
                 'required' => false,
                 'label' => $options['shippingAvailableToHourLabel'],
             ])
-            ->add('shippingCodPrice', NumberType::class, [
+            ->add('shippingCodPrice', MoneyCurrencyType::class, [
                 'required' => false,
                 'label' => $options['shippingCodPriceLabel'],
             ])
