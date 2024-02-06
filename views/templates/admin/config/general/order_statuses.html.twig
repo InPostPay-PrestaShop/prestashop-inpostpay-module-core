@@ -1,7 +1,11 @@
 {% set ordersConfigurationForm = form.ordersConfiguration.statusDescriptionMap %}
 
 <p class="h3 mb-3">
-  Statusy zamówień
+  {{ form_label(ordersConfigurationForm, null, {
+      'label_attr': {
+        'class': 'p-0'
+      }
+  }) }}
 </p>
 
 {% if not ordersConfigurationForm.vars.hide_locales %}
