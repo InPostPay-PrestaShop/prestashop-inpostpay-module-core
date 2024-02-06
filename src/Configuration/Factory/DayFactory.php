@@ -30,19 +30,19 @@ final class DayFactory implements DayFactoryInterface
     {
         switch ($id) {
             case Day::MONDAY:
-                return $this->module->l('Poniedziałek', self::TRANSLATION_SOURCE);
+                return $this->module->l('Monday', self::TRANSLATION_SOURCE);
             case Day::TUESDAY:
-                return $this->module->l('Wtorek', self::TRANSLATION_SOURCE);
+                return $this->module->l('Tuesday', self::TRANSLATION_SOURCE);
             case Day::WEDNESDAY:
-                return $this->module->l('Środa', self::TRANSLATION_SOURCE);
+                return $this->module->l('Wednesday', self::TRANSLATION_SOURCE);
             case Day::THURSDAY:
-                return $this->module->l('Czwartek', self::TRANSLATION_SOURCE);
+                return $this->module->l('Thursday', self::TRANSLATION_SOURCE);
             case Day::FRIDAY:
-                return $this->module->l('Piątek', self::TRANSLATION_SOURCE);
+                return $this->module->l('Friday', self::TRANSLATION_SOURCE);
             case Day::SATURDAY:
-                return $this->module->l('Sobota', self::TRANSLATION_SOURCE);
+                return $this->module->l('Saturday', self::TRANSLATION_SOURCE);
             case Day::SUNDAY:
-                return $this->module->l('Niedziela', self::TRANSLATION_SOURCE);
+                return $this->module->l('Sunday', self::TRANSLATION_SOURCE);
             default:
                 return '';
         }
