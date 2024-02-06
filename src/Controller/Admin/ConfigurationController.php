@@ -167,10 +167,7 @@ final class ConfigurationController extends AbstractController
 
                 return $this->redirectToRoute('admin_inpost_izi_config_shipping');
             } catch (\Exception $e) {
-                echo '<pre>';
-                var_dump($e->getMessage());
-                die();
-//                $this->handleException($e);
+                $this->handleException($e);
             }
         }
 
