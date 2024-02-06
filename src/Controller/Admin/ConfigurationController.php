@@ -74,7 +74,7 @@ final class ConfigurationController extends AbstractController
         return $this->render('@Modules/inpostizi/views/templates/admin/config/general.html.twig', [
             'form' => $form->createView(),
             'can_update' => $canUpdate,
-            'layoutTitle' => $this->module->l('API configuration', self::TRANSLATION_SOURCE),
+            'layoutTitle' => $this->module->l('Configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
         ]);
     }
@@ -184,7 +184,7 @@ final class ConfigurationController extends AbstractController
         $pages = [
             'general' => [
                 'route' => 'admin_inpost_izi_config_general',
-                'title' => $this->module->l('API configuration', self::TRANSLATION_SOURCE),
+                'title' => $this->module->l('Configuration', self::TRANSLATION_SOURCE),
             ],
             'consents' => [
                 'route' => 'admin_inpost_izi_config_consents',
