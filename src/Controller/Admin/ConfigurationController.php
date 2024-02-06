@@ -179,6 +179,19 @@ final class ConfigurationController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route(path="/support", name="support", methods={"GET", "POST"})
+     */
+    public function support(Request $request): Response
+    {
+//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+
+        return $this->render('@Modules/inpostizi/views/templates/admin/config/support.html.twig', [
+            'layoutTitle' => $this->module->l('Support', self::TRANSLATION_SOURCE),
+            'headerTabContent' => $this->renderNav($request),
+        ]);
+    }
+
     private function renderNav(Request $request): string
     {
         $pages = [
@@ -197,6 +210,10 @@ final class ConfigurationController extends AbstractController
             'gui' => [
                 'route' => 'admin_inpost_izi_config_gui',
                 'title' => $this->module->l('GUI configuration', self::TRANSLATION_SOURCE),
+            ],
+            'support' => [
+                'route' => 'admin_inpost_izi_config_support',
+                'title' => $this->module->l('Support', self::TRANSLATION_SOURCE),
             ],
         ];
 
