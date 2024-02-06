@@ -147,7 +147,7 @@ final class ConfigurationController extends AbstractController
     }
 
     /**
-     * @param ShippingAmpConfiguration $configuration
+     * @param UpdateShippingConfigurationCommandFactory $commandFactory
      *
      * @Route(path="/shipping", name="shipping", methods={"GET", "POST"})
      */
