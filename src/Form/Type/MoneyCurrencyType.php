@@ -36,6 +36,7 @@ final class MoneyCurrencyType extends AbstractType
 
         $resolver->setDefaults([
             'currency' => $currency->iso_code ?? 'PLN',
+            'scale' => (int) $currency->precision ?? 2,
         ]);
     }
 }
