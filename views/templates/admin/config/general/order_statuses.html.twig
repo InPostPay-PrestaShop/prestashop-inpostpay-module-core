@@ -1,0 +1,52 @@
+{% set ordersConfigurationForm = form.ordersConfiguration.statusDescriptionMap %}
+
+<p class="h3 mb-3">
+  Statusy zamówień
+</p>
+
+{% if not ordersConfigurationForm.vars.hide_locales %}
+  <div class="row mt-n1 align-items-center mb-1 mx-n1">
+    <div class="col-auto mt-1 px-1">
+      <p class="mb-0 font-weight-bold">
+        Wybierz tłumaczenie dla języka:
+      </p>
+    </div>
+    <div class="col-auto mt-1 px-1">
+      <div class="dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle js-locale-btn"
+                type="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                id="{{ ordersConfigurationForm.vars.id }}"
+        >
+          {{ ordersConfigurationForm.vars.default_locale.iso_code }}
+        </button>
+
+        <div class="dropdown-menu locale-dropdown-menu" aria-labelledby="{{ ordersConfigurationForm.vars.id }}">
+          {% for locale in ordersConfigurationForm.vars.locales %}
+            <span class="dropdown-item js-locale-item cursor-pointer" data-locale="{{ locale.iso_code }}">{{ locale.name }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% for formGroup in ordersConfigurationForm %}
+  {% set classes = 'js-locale-input js-locale-' ~ formGroup.vars.label %}
+
+  {% if ordersConfigurationForm.vars.default_locale.id_lang != formGroup.vars.name %}
+    {% set classes = classes ~ ' d-none' %}
+  {% endif %}
+
+  <div data-lang-id="{{ formGroup.vars.name }}" class="{{ classes }}" style="flex-grow: 1;">
+    <div class="row mt-n1">
+    {% for statusForm in formGroup %}
+      <div class="col-lg-3 col-md-4 mt-1">
+        {{ form_row(statusForm) }}
+      </div>
+    {% endfor %}
+    </div>
+  </div>
+{% endfor %}
