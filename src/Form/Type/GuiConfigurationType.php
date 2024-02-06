@@ -28,6 +28,7 @@ final class GuiConfigurationType extends AbstractType
             ->add('widgetDisplayedOnCartPage', SwitchType::class, [
                 'required' => false,
                 'label' => $this->module->l('Displayed', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', self::TRANSLATION_SOURCE),
             ])
             ->add('cartPageWidgetConfiguration', WidgetConfigurationType::class, [
                 'label' => $this->module->l('Cart page', self::TRANSLATION_SOURCE),
@@ -38,6 +39,7 @@ final class GuiConfigurationType extends AbstractType
             ->add('widgetDisplayedOnProductCard', SwitchType::class, [
                 'required' => false,
                 'label' => $this->module->l('Displayed', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', self::TRANSLATION_SOURCE),
             ])
             ->add('productCardWidgetConfiguration', WidgetConfigurationType::class, [
                 'label' => $this->module->l('Product card', self::TRANSLATION_SOURCE),

@@ -33,7 +33,7 @@ final class GeneralConfigurationType extends AbstractType
                 ],
                 'property_path' => 'generalConfiguration.enabledForEveryone',
                 'label' => $this->module->l('Display widget', self::TRANSLATION_SOURCE),
-                'help' => $this->module->l('In test mode add \'showIzi=true\' to query params to enable widget display.', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('If you select "to testers" the widget will be visible only to those who are supposed to see it. To display the widget in this mode in a web browser, type the address of your store with \'?showIzi=true\' Example: https://mojsklep.pl?showIzi=true', self::TRANSLATION_SOURCE),
             ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,
@@ -48,6 +48,7 @@ final class GeneralConfigurationType extends AbstractType
                 'property_path' => 'generalConfiguration.maxSuggestedProducts',
                 'required' => false,
                 'label' => $this->module->l('Maximum number of suggested products', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('To show suggested products, complete the Accessories Products section in the product configuration.', self::TRANSLATION_SOURCE),
                 'attr' => [
                     'placeholder' => $this->module->l('unlimited', self::TRANSLATION_SOURCE),
                     'min' => 0,

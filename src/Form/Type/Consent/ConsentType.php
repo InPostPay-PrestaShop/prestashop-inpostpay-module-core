@@ -56,13 +56,16 @@ final class ConsentType extends AbstractType implements ChoiceLoaderInterface
                 'choice_value' => 'id',
                 'choice_label' => 'meta_title',
                 'label' => $this->module->l('Details page', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('Specifies the page to which your customer will be redirected for a target who clicks on a given consent in the InPost mobile app.', self::TRANSLATION_SOURCE),
             ])
             ->add('descriptions', TranslatableType::class, [
                 'label' => $this->module->l('Consent text in the mobile app', self::TRANSLATION_SOURCE),
                 'type' => TextType::class,
+                'help' => $this->module->l('Add a description to be displayed with the consent in the InPost mobile app.', self::TRANSLATION_SOURCE),
             ])
             ->add('requirementType', ConsentRequirementChoiceType::class, [
                 'label' => $this->module->l('Requiredness', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('Specify whether consent is required or optional.', self::TRANSLATION_SOURCE),
             ]);
     }
 

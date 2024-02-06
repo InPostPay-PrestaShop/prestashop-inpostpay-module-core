@@ -78,3 +78,51 @@
     {% endif %}
   </div>
 {%- endblock integer_widget -%}
+
+{% block form_label -%}
+  {{- parent() -}}
+
+  {% if help is defined and help is not null %}
+    <span
+      class="help-box"
+      data-toggle="popover"
+      data-html="true"
+      data-trigger="hover"
+      data-placement="top"
+      data-content="{{ help }}"
+    >
+         </span>
+  {% endif %}
+{%- endblock form_label %}
+
+
+{% block checkbox_widget -%}
+  <div class="custom-control custom-checkbox">
+    <input
+      type="checkbox"
+      class="custom-control-input"
+      {{ block('widget_attributes') }}
+      {% if value is defined %} value="{{ value }}"{% endif %}
+      {% if checked %} checked="checked"{% endif %}
+    >
+    <label
+      class="custom-control-label"
+      for="{{ id }}"
+    >
+      {% if help is defined and help is not null %}
+        {{ label }}
+      {% endif %}
+      {% if help is defined and help is not null %}
+        <span
+          class="help-box"
+          data-toggle="popover"
+          data-html="true"
+          data-trigger="hover"
+          data-placement="top"
+          data-content="{{ help }}"
+        >
+        </span>
+      {% endif %}
+    </label>
+  </div>
+{%- endblock checkbox_widget %}

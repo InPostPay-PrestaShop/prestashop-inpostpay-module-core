@@ -28,9 +28,12 @@ final class ClientCredentialsType extends AbstractType
         $builder
             ->add('clientId', TextType::class, [
                 'label' => $this->module->l('Client ID', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('Please note that the client ID varies depending on the selected environment. To get a sandbox Client ID contact us through the contact form. To get a production Client ID log in to InPost and complete your store details.', self::TRANSLATION_SOURCE),
+
             ])
             ->add('clientSecret', MaskedPasswordType::class, [
                 'label' => $this->module->l('Client secret', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('Note that Client Secret varies depending on the environment you choose. To get sandboxed Client Secret contact us through the contact form. To get production Client Secret log in to InPost and complete your store details.', self::TRANSLATION_SOURCE),
                 'always_empty' => false,
             ])
             ->setDataMapper(new ClientCredentialsDataMapper());

@@ -40,13 +40,16 @@ final class OrdersConfigurationType extends AbstractType
             ->add('bankPaymentEnabled', CheckboxType::class, [
                 'required' => false,
                 'label' => $this->module->l('Enable payment options according to an agreement with Aion Bank', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('Payment methods are specified on the payment gateway contract', self::TRANSLATION_SOURCE),
             ])
             ->add('carrierPaymentEnabled', CheckboxType::class, [
                 'required' => false,
                 'label' => $this->module->l('Enable payment options according to an agreement with InPost', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('Payment on delivery will be available only if you have an agreement with InPost to provide this service in your store.', self::TRANSLATION_SOURCE),
             ])
             ->add('pointOfSaleId', TextType::class, [
                 'label' => $this->module->l('POS ID', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('For sandbox environment - enter a random string of characters. In the case of a production environment - log into InPost and get the POS ID', self::TRANSLATION_SOURCE),
             ]);
     }
 

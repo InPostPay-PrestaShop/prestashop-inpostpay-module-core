@@ -25,6 +25,7 @@ final class ApiConfigurationType extends AbstractType
         $builder
             ->add('environmentType', EnvironmentChoiceType::class, [
                 'label' => $this->module->l('Environment', self::TRANSLATION_SOURCE),
+                'help' => $this->module->l('Select the environment on which you want to show the InPost Pay service. Remember to make sure that the service in your store is working properly before switching to the production environment', self::TRANSLATION_SOURCE),
             ])
             ->add('clientCredentials', ClientCredentialsType::class, [
                 'required' => false,
