@@ -6,8 +6,8 @@ namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\GuiConfiguration;
 use izi\prestashop\Form\Type\Widget\WidgetConfigurationType;
+use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -25,7 +25,7 @@ final class GuiConfigurationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('widgetDisplayedOnCartPage', CheckboxType::class, [
+            ->add('widgetDisplayedOnCartPage', SwitchType::class, [
                 'required' => false,
                 'label' => $this->module->l('Displayed', self::TRANSLATION_SOURCE),
             ])
@@ -35,7 +35,7 @@ final class GuiConfigurationType extends AbstractType
             ->add('cartPageHtmlStyles', HtmlStylesType::class, [
                 'label' => false,
             ])
-            ->add('widgetDisplayedOnProductCard', CheckboxType::class, [
+            ->add('widgetDisplayedOnProductCard', SwitchType::class, [
                 'required' => false,
                 'label' => $this->module->l('Displayed', self::TRANSLATION_SOURCE),
             ])
