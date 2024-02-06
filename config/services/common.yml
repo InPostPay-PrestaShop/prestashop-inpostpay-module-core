@@ -121,6 +121,26 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
 
+  izi\prestashop\Configuration\ShippingCourierConfigurationInterface: '@izi\prestashop\Configuration\ShippingCourierConfiguration'
+  izi\prestashop\Configuration\ShippingCourierConfiguration:
+    class: izi\prestashop\Configuration\ShippingCourierConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+      - '@izi\prestashop\Configuration\Factory\DayFactory'
+      - '@izi\prestashop\Configuration\Factory\HourFactory'
+
+  izi\prestashop\Configuration\ShippingAmpConfigurationInterface: '@izi\prestashop\Configuration\ShippingAmpConfiguration'
+  izi\prestashop\Configuration\ShippingAmpConfiguration:
+    class: izi\prestashop\Configuration\ShippingAmpConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+      - '@izi\prestashop\Configuration\Factory\DayFactory'
+      - '@izi\prestashop\Configuration\Factory\HourFactory'
+
   izi\prestashop\Configuration\ConsentsConfigurationInterface: '@izi\prestashop\Configuration\ConsentsConfiguration'
   izi\prestashop\Configuration\ConsentsConfiguration:
     class: izi\prestashop\Configuration\ConsentsConfiguration
@@ -302,6 +322,12 @@ services:
 
   izi\prestashop\ObjectModel\Repository\CurrencyRepository:
     class: izi\prestashop\ObjectModel\Repository\CurrencyRepository
+    public: false
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\ObjectModel\Repository\CarrierRepository:
+    class: izi\prestashop\ObjectModel\Repository\CarrierRepository
     public: false
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'

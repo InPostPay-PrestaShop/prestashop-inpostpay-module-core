@@ -53,6 +53,37 @@ services:
     bind:
       $choiceLoader: '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
 
+  izi\prestashop\Form\Type\ShippingConfigurationType:
+    class: izi\prestashop\Form\Type\ShippingConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\ShippingType:
+    class: izi\prestashop\Form\Type\ShippingType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Shipping\CarrierChoiceType:
+    class: izi\prestashop\Form\Type\Shipping\CarrierChoiceType
+    tags:
+      - { name: form.type }
+    bind:
+      $choiceLoader: '@izi\prestashop\Form\ChoiceList\CarrierChoiceLoader'
+
+  izi\prestashop\Form\Type\Shipping\HourChoiceType:
+    class: izi\prestashop\Form\Type\Shipping\HourChoiceType
+    tags:
+      - { name: form.type }
+    bind:
+      $choiceLoader: '@izi\prestashop\Form\ChoiceList\HourChoiceLoader'
+
+  izi\prestashop\Form\Type\Shipping\DayChoiceType:
+    class: izi\prestashop\Form\Type\Shipping\DayChoiceType
+    tags:
+      - { name: form.type }
+    bind:
+      $choiceLoader: '@izi\prestashop\Form\ChoiceList\DayChoiceLoader'
+
   izi\prestashop\Form\Type\OrderStatusDescriptionMapType:
     class: izi\prestashop\Form\Type\OrderStatusDescriptionMapType
     tags:
@@ -64,6 +95,21 @@ services:
     class: izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader
     bind:
       $repository: '@inpost.izi.object_model.order_state_repository'
+
+  izi\prestashop\Form\ChoiceList\CarrierChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\CarrierChoiceLoader
+    bind:
+      $repository: '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+
+  izi\prestashop\Form\ChoiceList\DayChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\DayChoiceLoader
+    bind:
+      $dayFactory: '@izi\prestashop\Configuration\Factory\DayFactory'
+
+  izi\prestashop\Form\ChoiceList\HourChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\HourChoiceLoader
+    bind:
+      $hourFactory: '@izi\prestashop\Configuration\Factory\HourFactory'
 
   izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler:
@@ -140,3 +186,18 @@ services:
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler
+
+  izi\prestashop\Command\Config\UpdateShippingConfigurationCommandFactory:
+    class: izi\prestashop\Command\Config\UpdateShippingConfigurationCommandFactory
+
+  izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler
+
+  izi\prestashop\Configuration\Factory\DayFactoryInterface: '@izi\prestashop\Configuration\Factory\DayFactory'
+  izi\prestashop\Configuration\Factory\DayFactory:
+    class: izi\prestashop\Configuration\Factory\DayFactory
+
+  izi\prestashop\Configuration\Factory\HourFactoryInterface: '@izi\prestashop\Configuration\Factory\HourFactory'
+  izi\prestashop\Configuration\Factory\HourFactory:
+    class: izi\prestashop\Configuration\Factory\HourFactory

@@ -7,14 +7,17 @@ namespace izi\prestashop\Controller\Admin;
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
+use izi\prestashop\Command\Config\UpdateShippingConfigurationCommandFactory;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Configuration\ShippingAmpConfiguration;
 use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
 use izi\prestashop\Form\Type\GuiConfigurationType;
+use izi\prestashop\Form\Type\ShippingConfigurationType;
 use PrestaShopBundle\Security\Voter\PageVoter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -143,6 +146,42 @@ final class ConfigurationController extends AbstractController
         ]);
     }
 
+    /**
+     * @param ShippingAmpConfiguration $configuration
+     *
+     * @Route(path="/shipping", name="shipping", methods={"GET", "POST"})
+     */
+    public function shippingConfig(Request $request, UpdateShippingConfigurationCommandFactory $commandFactory, CommandBusInterface $bus): Response
+    {
+//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+        $command = $commandFactory->create();
+
+        $form = $this->createForm(ShippingConfigurationType::class, $command, [
+            'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
+        ]);
+
+        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+            try {
+                $bus->handle($command);
+                $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
+
+                return $this->redirectToRoute('admin_inpost_izi_config_shipping');
+            } catch (\Exception $e) {
+                echo '<pre>';
+                var_dump($e->getMessage());
+                die();
+//                $this->handleException($e);
+            }
+        }
+
+        return $this->render('@Modules/inpostizi/views/templates/admin/config/shipping.html.twig', [
+            'form' => $form->createView(),
+            'can_update' => $canUpdate,
+            'layoutTitle' => $this->module->l('Shipping configuration', self::TRANSLATION_SOURCE),
+            'headerTabContent' => $this->renderNav($request),
+        ]);
+    }
+
     private function renderNav(Request $request): string
     {
         $pages = [
@@ -153,6 +192,10 @@ final class ConfigurationController extends AbstractController
             'consents' => [
                 'route' => 'admin_inpost_izi_config_consents',
                 'title' => $this->module->l('Consents', self::TRANSLATION_SOURCE),
+            ],
+            'shipping' => [
+                'route' => 'admin_inpost_izi_config_shipping',
+                'title' => $this->module->l('Shipping configuration', self::TRANSLATION_SOURCE),
             ],
             'gui' => [
                 'route' => 'admin_inpost_izi_config_gui',

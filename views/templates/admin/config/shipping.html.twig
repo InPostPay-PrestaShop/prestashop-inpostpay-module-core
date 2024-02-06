@@ -1,0 +1,40 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% form_theme form '@Modules/inpostizi/views/templates/admin/config/form_theme.html.twig' %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col">
+
+      <div class="card">
+        {{ form_start(form) }}
+        <h3 class="card-header">
+          <i class="material-icons">settings</i> {{ layoutTitle }}
+        </h3>
+
+        <div class="card-body card-block">
+          <div class="form-wrapper card-text">
+            {{ form_errors(form) }}
+            {{ form_rest(form) }}
+          </div>
+        </div>
+
+        <div class="card-footer clearfix">
+          <a href="{{ path('admin_module_manage') }}" class="btn btn-outline-secondary">{{ 'Back'|trans({}, 'Admin.Global') }}</a>
+
+          <button class="btn btn-primary float-right"{% if not can_update %} disabled{% endif %}>{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
+        </div>
+        {{ form_end(form) }}
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+
+  <script type="text/javascript">
+
+  </script>
+{% endblock %}
