@@ -24,6 +24,7 @@ final class ShippingConfigurationType extends AbstractType
     {
         $builder
             ->add('shippingCourier', ShippingType::class, [
+                'label' => $this->module->l('Courier', self::TRANSLATION_SOURCE),
                 'required' => false,
                 'shippingIdLabel' => $this->module->l('Courier', self::TRANSLATION_SOURCE),
                 'shippingPriceLabel' => $this->module->l('Courier package weekend net price', self::TRANSLATION_SOURCE),
@@ -38,6 +39,7 @@ final class ShippingConfigurationType extends AbstractType
                 'shippingCodAvailableToHourLabel' => $this->module->l('Courier COD available to day', self::TRANSLATION_SOURCE),
             ])
             ->add('shippingAmp', ShippingType::class, [
+                'label' => $this->module->l('Paczkomat', self::TRANSLATION_SOURCE),
                 'required' => false,
                 'shippingIdLabel' => $this->module->l('Paczkomat', self::TRANSLATION_SOURCE),
                 'shippingPriceLabel' => $this->module->l('Paczkomat package weekend net price', self::TRANSLATION_SOURCE),

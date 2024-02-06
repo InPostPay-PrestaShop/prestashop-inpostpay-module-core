@@ -12,11 +12,20 @@
           <i class="material-icons">local_shipping</i> {{ layoutTitle }}
         </h3>
 
-        <div class="card-body card-block">
-          <div class="form-wrapper card-text">
-            {{ form_errors(form) }}
-            {{ form_rest(form) }}
-          </div>
+        <div class="card-body form-wrapper px-3 pt-4 pb-3">
+          {{ form_errors(form) }}
+
+          {% include '@Modules/inpostizi/views/templates/admin/config/shipping/form.html.twig' with {
+            form: form.shippingCourier,
+          } %}
+        </div>
+
+        <div class="card-body form-wrapper px-3 pt-4 pb-3 border-top">
+          {% include '@Modules/inpostizi/views/templates/admin/config/shipping/form.html.twig' with {
+            form: form.shippingAmp,
+          } %}
+
+          {{ form_rest(form) }}
         </div>
 
         <div class="card-footer clearfix">

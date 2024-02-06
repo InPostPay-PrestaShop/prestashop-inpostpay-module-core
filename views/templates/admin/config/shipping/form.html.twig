@@ -1,0 +1,20 @@
+{% include '@Modules/inpostizi/views/templates/admin/config/shipping/shipping.html.twig' with {
+  carrierForm: form.carrierId,
+  priceForm: form.shippingPrice,
+  fromDayForm: form.shippingAvailableFromDay,
+  fromHourForm: form.shippingAvailableFromHour,
+  toDayForm: form.shippingAvailableToDay,
+  toHourForm: form.shippingAvailableToHour,
+  title: form.vars.label
+} %}
+
+<div class="mt-3">
+  {% include '@Modules/inpostizi/views/templates/admin/config/shipping/shipping.html.twig' with {
+    priceForm: form.shippingCodPrice,
+    fromDayForm: form.shippingCodAvailableFromDay,
+    fromHourForm: form.shippingCodAvailableFromHour,
+    toDayForm: form.shippingCodAvailableToDay,
+    toHourForm: form.shippingCodAvailableToHour,
+    title: form.vars.label ~ ' - COD'
+  } %}
+</div>

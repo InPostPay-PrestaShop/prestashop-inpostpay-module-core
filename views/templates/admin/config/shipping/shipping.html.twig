@@ -1,0 +1,35 @@
+
+{% if title is defined  %}
+  <p class="h3 mb-3">
+    {{ title }}
+  </p>
+{% endif %}
+
+<div class="row mt-n2">
+  {% if carrierForm is defined %}
+    <div class="col-xl-3 col-sm-6 col-12 mt-2">
+      {{ form_row(carrierForm) }}
+    </div>
+  {% endif %}
+
+  <div class="col-xl-3 col-sm-6 col-12 mt-2">
+    {{ form_row(priceForm) }}
+  </div>
+</div>
+
+<div class="row mt-n2">
+  <div class="col-xl-4 col-sm-6 col-12 mt-2">
+    {% include '@Modules/inpostizi/views/templates/admin/config/shipping/shipping_time_date.html.twig' with {
+      dayForm: fromDayForm,
+      hourForm: fromHourForm,
+      label: 'Dostępne od',
+    } %}
+  </div>
+  <div class="col-xl-4 col-sm-6 col-12 mt-2">
+    {% include '@Modules/inpostizi/views/templates/admin/config/shipping/shipping_time_date.html.twig' with {
+      dayForm: toDayForm,
+      hourForm: toHourForm,
+      label: 'Dostępne do',
+    } %}
+  </div>
+</div>
