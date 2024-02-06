@@ -22,7 +22,12 @@
 {% block consent_collection_item_widget %}
   <div class="input-group row">
     <div class="col-3">
-      {{ form_label(child.cmsPageId) }}
+      {{ form_label(child.cmsPageId, null, {
+        'label_attr': {
+          'class': 'p-0 mb-2'
+        }
+      }) }}
+
       <div class="form-group">
         {{ form_widget(child.cmsPageId) }}
         {{ form_errors(child.cmsPageId) }}
@@ -30,7 +35,11 @@
     </div>
 
     <div class="col-5">
-      {{ form_label(child.descriptions) }}
+      {{ form_label(child.descriptions, null, {
+        'label_attr': {
+          'class': 'p-0 mb-2'
+        }
+      }) }}
       <div class="form-group">
         {{ form_widget(child.descriptions) }}
         {{ form_errors(child.descriptions) }}
@@ -38,7 +47,11 @@
     </div>
 
     <div class="col-3">
-      {{ form_label(child.requirementType) }}
+      {{ form_label(child.requirementType, null, {
+        'label_attr': {
+          'class': 'p-0 mb-2'
+        }
+      }) }}
       <div class="form-group">
         {{ form_widget(child.requirementType) }}
         {{ form_errors(child.requirementType) }}

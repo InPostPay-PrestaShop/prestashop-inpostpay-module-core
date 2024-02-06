@@ -12,17 +12,17 @@
           <i class="material-icons">settings</i> {{ layoutTitle }}
         </h3>
 
-        <div class="card-body form-wrapper px-3 pt-4 pb-3">
+        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
           {{ form_errors(form) }}
 
           {% include '@Modules/inpostizi/views/templates/admin/config/general/main.html.twig' with form %}
         </div>
 
-        <div class="card-body form-wrapper px-3 pt-4 pb-3 border-top">
+        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3 border-top">
           {% include '@Modules/inpostizi/views/templates/admin/config/general/order_statuses.html.twig' with form %}
         </div>
 
-        <div class="card-body form-wrapper px-3 pt-4 pb-3 border-top">
+        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3 border-top">
           {% include '@Modules/inpostizi/views/templates/admin/config/general/products.html.twig' with form %}
 
           {{ form_rest(form) }}
