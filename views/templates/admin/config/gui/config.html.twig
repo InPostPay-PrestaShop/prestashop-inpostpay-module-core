@@ -1,0 +1,23 @@
+
+<div class="row mt-n2">
+  <div class="col-xl-auto col-12">
+    {{ form_row(formDisplay) }}
+  </div>
+
+  {% for formElement in form %}
+    {% if formElement.vars.name not in ['minWidthPx', 'maxWidthPx'] %}
+      <div class="col-xl col-sm-6 col-12 mt-2">
+        {{ form_row(formElement) }}
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<div class="row">
+  <div class="col-xl-3 col-sm-6 col-12 mt-2">
+    {{ form_row(form.minWidthPx) }}
+  </div>
+  <div class="col-xl-3 col-sm-6 col-12 mt-2">
+    {{ form_row(form.maxWidthPx) }}
+  </div>
+</div>
