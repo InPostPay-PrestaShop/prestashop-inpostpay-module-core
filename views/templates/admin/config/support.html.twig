@@ -1,15 +1,19 @@
 {% extends '@PrestaShop/Admin/layout.html.twig' %}
 
 {% block content %}
-    <div class="card">
-      <h3 class="card-header">
-        <i class="material-icons">settings</i> {{ layoutTitle }}
-      </h3>
+  {% include '@Modules/inpostizi/views/templates/admin/support/description.html.twig' %}
 
-      <div class="card-body card-block">
-        Card conentet
-      </div>
-
+  <div class="row mx-n2">
+    <div class="col-lg-4 col-sm-6 col-12 mt-3 px-2">
+      {% include '@Modules/inpostizi/views/templates/admin/support/module_status.html.twig' %}
+      {% include '@Modules/inpostizi/views/templates/admin/support/updates.html.twig' %}
     </div>
+    <div class="col-lg-4 col-sm-6 col-12 mt-3 px-2">
+      {% include '@Modules/inpostizi/views/templates/admin/support/how_to.html.twig' %}
+    </div>
+    <div class="col-lg-4 col-sm-6 col-12 mt-3 px-2">
+      {% include '@Modules/inpostizi/views/templates/admin/support/troubleshooting.html.twig' %}
+    </div>
+  </div>
 {% endblock %}
 

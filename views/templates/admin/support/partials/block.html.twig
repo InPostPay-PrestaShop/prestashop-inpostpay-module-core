@@ -1,0 +1,16 @@
+{% block support_block %}
+  <div class="card {% block support_block_extra_classes %}{% endblock %}">
+    {% block support_block_header %}
+      <div class="card-header p-3 h3 d-flex align-items-center font-weight-bold">
+        {% block support_block_header_content %}
+        {% endblock %}
+      </div>
+    {% endblock %}
+    {% block support_block_body %}
+      <div class="card-body {% block support_block_body_extra_classes %}{% endblock %}">
+        {% block support_block_body_content %}
+        {% endblock %}
+      </div>
+    {% endblock %}
+  </div>
+{% endblock %}

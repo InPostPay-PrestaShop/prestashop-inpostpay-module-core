@@ -1,0 +1,32 @@
+{% extends "@Modules/inpostizi/views/templates/admin/support/partials/block.html.twig" %}
+
+{% block support_block_extra_classes %}mb-0 h-100{% endblock %}
+
+{% block support_block_header_content %}
+  <i class="material-icons mr-2">error</i>
+  <span>
+    Kontakt i wsparcie
+  </span>
+{% endblock %}
+
+{% block support_block_body_extra_classes %}p-3{% endblock %}
+
+{% block support_block_body_content %}
+  <ul class="mb-0 pl-3">
+    <li class="mb-1">
+      <a href="https://inpostpay.pl/kontakt">
+        Pomoc techniczna - skorzystaj z formularza kontaktowego
+      </a>
+    </li>
+    <li class="mb-1">
+      <a href="https://inpostpay.pl/kontakt">
+        Skontaktuj się z przedstawicielem handlowym
+      </a>
+    </li>
+    <li>
+      <a href="https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/163905538/FAQ+InPost+Pay">
+        FAQ
+      </a>
+    </li>
+  </ul>
+{% endblock %}

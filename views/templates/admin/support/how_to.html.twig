@@ -1,0 +1,39 @@
+{% extends "@Modules/inpostizi/views/templates/admin/support/partials/block.html.twig" %}
+
+{% block support_block_extra_classes %}h-100 mb-0{% endblock %}
+
+{% block support_block_header_content %}
+  <i class="material-icons mr-2">info</i>
+  <span>
+    Jak zacząć?
+  </span>
+{% endblock %}
+
+{% block support_block_body_extra_classes %}p-3{% endblock %}
+
+{% block support_block_body_content %}
+  <ul class="mb-0 pl-3">
+    <li class="mb-1">
+      <a href="https://inpost.pl/inpostpay">
+        Przewodnik Merchanta - jak poprawnie wyświetlić InPost Pay w Twoim sklepie internetowym
+      </a>
+    </li>
+    <li class="mb-1">
+      {#TODO: CHANGE LINK#}
+      <a href="#dokumentacja_konfiguracji">
+        Instrukcja konfiguracji wtyczki InPost Pay
+      </a>
+    </li>
+    <li class="mb-1">
+      <a href="https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/154271751/Zwroty+i+transakcje#Panel-Merchanta">
+        Instrukcja obsługi zwrotów
+      </a>
+    </li>
+    <li>
+      {#TODO: CHANGE LINK#}
+      <a href="https://malaysia.prod.0000wpo12a.vodeno.online/centaur-web/">
+        Panel merchanta - podgląd transakcji i obsługa zwrotów
+      </a>
+    </li>
+  </ul>
+{% endblock %}

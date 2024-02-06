@@ -1,0 +1,40 @@
+{% extends "@Modules/inpostizi/views/templates/admin/support/partials/block.html.twig" %}
+
+{% block support_block_extra_classes %}mb-3{% endblock %}
+
+{% block support_block_header_content %}
+  <i class="material-icons mr-2">check_circle</i>
+  <span>
+    Status wtyczki:
+    {#TODO: pass status somehow?#}
+    <span class="text-success text-uppercase">OK</span>
+  </span>
+{% endblock %}
+
+{% block support_block_body_extra_classes %}p-0{% endblock %}
+
+{% block support_block_body_content %}
+  <div class="row no-gutters">
+    <div class="col-6 border-right">
+      <div class="p-3">
+        {#TODO: BTN PLACEHOLDER RENDER FORM#}
+        <a href="#" class="btn btn-sm btn-block px-0 d-flex justify-content-center align-items-center btn-link">
+          <span class="material-icons btn-icon">content_copy</span>
+          Kopiuj dane wtyczki i log
+        </a>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="p-3 d-flex align-items-center justify-content-center h-100">
+        {#TODO: SWITCH PLACEHOLDER RENDER FORM#}
+        <span class="ps-switch">
+            <input id="debug_enabled_0" class="ps-switch" name="debug_enabled" value="0" type="radio" aria-label="Nie">
+            <label for="debug_enabled_0" class="small mb-0">Wyłącz debugowanie</label>
+            <input id="debug_enabled_1" class="ps-switch" name="debug_enabled" value="1" checked="" type="radio" aria-label="Tak">
+            <label for="debug_enabled_1" class="small mb-0">Włącz debugowanie</label>
+            <span class="slide-button"></span>
+          </span>
+      </div>
+    </div>
+  </div>
+{% endblock %}
