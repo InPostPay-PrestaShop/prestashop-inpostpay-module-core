@@ -5,7 +5,7 @@
 {% block support_block_header_content %}
   <i class="material-icons mr-2">info</i>
   <span>
-    Przydatne linki
+    {{ 'Useful links'|legacy_trans }}
   </span>
 {% endblock %}
 
@@ -15,24 +15,24 @@
   <ul class="mb-0 pl-3">
     <li class="mb-1">
       <a href="https://inpost.pl/inpostpay">
-        Przewodnik Merchanta - jak poprawnie wyświetlić InPost Pay w Twoim sklepie internetowym
+        {{ 'Merchant\'s guide - how to correctly display InPost Pay in your online store'|legacy_trans }}
       </a>
     </li>
     <li class="mb-1">
       {#TODO: CHANGE LINK#}
       <a href="#dokumentacja_konfiguracji">
-        Instrukcja konfiguracji wtyczki InPost Pay
+        {{ 'InPost Pay plugin configuration instructions'|legacy_trans }}
       </a>
     </li>
     <li class="mb-1">
       <a href="https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/154271751/Zwroty+i+transakcje#Panel-Merchanta">
-        Instrukcja obsługi zwrotów
+        {{ 'Returns manual'|legacy_trans }}
       </a>
     </li>
     <li>
       {#TODO: CHANGE LINK#}
       <a href="https://malaysia.prod.0000wpo12a.vodeno.online/centaur-web/">
-        Panel merchanta - podgląd transakcji i obsługa zwrotów
+        {{ 'Merchant panel - previewing transactions and handling returns'|legacy_trans }}
       </a>
     </li>
   </ul>

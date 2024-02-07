@@ -17,19 +17,21 @@
   </div>
 </div>
 
+
+
 <div class="row mt-n2">
   <div class="col-xl-4 col-md-6 col-12 mt-2">
     {% include '@Modules/inpostizi/views/templates/admin/config/shipping/shipping_time_date.html.twig' with {
       dayForm: fromDayForm,
       hourForm: fromHourForm,
-      label: 'Dostępne od',
+      label: 'Available from'|legacy_trans,
     } %}
   </div>
   <div class="col-xl-4 col-md-6 col-12 mt-2">
     {% include '@Modules/inpostizi/views/templates/admin/config/shipping/shipping_time_date.html.twig' with {
       dayForm: toDayForm,
       hourForm: toHourForm,
-      label: 'Dostępne do',
+      label: 'Available to'|legacy_trans,
     } %}
   </div>
 </div>

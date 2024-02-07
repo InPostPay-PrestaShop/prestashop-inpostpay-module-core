@@ -214,4 +214,7 @@ services:
     class: izi\prestashop\Form\Provider\DefaultCurrencyProvider
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
-
+      -
+  izi\prestashop\Twig\Extension\LegacyTranslation:
+    tags:
+      - { name: 'twig.extension' }
