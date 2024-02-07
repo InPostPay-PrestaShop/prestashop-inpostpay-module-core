@@ -1,0 +1,19 @@
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block content_header %}
+  {{ parent() }}
+
+  {% include '@Modules/inpostizi/views/templates/admin/banner.html.twig'%}
+{% endblock %}
+
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/admin.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script type="text/javascript" src="{{ asset('../modules/inpostizi/views/js/admin/admin.js') }}">
+  </script>
+{% endblock %}
