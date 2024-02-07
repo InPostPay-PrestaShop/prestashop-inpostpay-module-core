@@ -18,7 +18,10 @@
     } %}
   </div>
   <div class="col-lg-4 col-md-6 col-12 mt-3">
-    {% include '@Modules/inpostizi/views/templates/admin/config/gui/preview.html.twig' %}
+    {% include '@Modules/inpostizi/views/templates/admin/config/gui/preview.html.twig' with {
+      previewTitle: 'Podgląd przycisku',
+      form: widgetConfig,
+    } %}
   </div>
 </div>
 

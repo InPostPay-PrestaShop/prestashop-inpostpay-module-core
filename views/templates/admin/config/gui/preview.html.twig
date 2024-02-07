@@ -1,1 +1,15 @@
-PREVIEW
+{# TODO: REFACTO, DID IT ONLY FOR PREVIEW FOR CLIENT #}
+
+<div class="inpostizi-btn-preview">
+  {% if previewTitle is defined %}
+    <p class="inpostizi-btn-preview__title text-center mb-3">
+      {{ previewTitle }}
+    </p>
+  {% endif %}
+
+  {% set btnConfig = form.vars.data %}
+
+  <div class="inpostizi-btn-preview__content clearfix">
+    {% include '@Modules/inpostizi/views/templates/admin/config/gui/preview_btn.html.twig' with btnConfig %}
+  </div>
+</div>

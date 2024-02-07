@@ -5,6 +5,7 @@ const { EsbuildPlugin } = require('esbuild-loader');
 const entries = [
   'admin',
   'consents',
+  'gui',
 ];
 
 const getEntries = () => {

@@ -22,7 +22,7 @@
           } %}
         </div>
 
-        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3 border-top">
+        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
           {% include '@Modules/inpostizi/views/templates/admin/config/gui/form.html.twig' with {
             widgetDisplay: form.widgetDisplayedOnProductCard,
             widgetConfig: form.productCardWidgetConfiguration,
@@ -44,3 +44,17 @@
   </div>
 {% endblock %}
 
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/gui.css') }}" />
+{% endblock %}
+
+
+
+{% block javascripts %}
+  {{ parent() }}
+  <script type="text/javascript" src="https://izi-sandbox.inpost.pl/inpostizi.js">
+  </script>
+  <script type="text/javascript" src="{{ asset('../modules/inpostizi/views/js/admin/gui.js') }}">
+  </script>
+{% endblock %}
