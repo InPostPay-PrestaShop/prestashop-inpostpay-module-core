@@ -2,13 +2,26 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 const { EsbuildPlugin } = require('esbuild-loader');
 
+const entries = [
+  'admin',
+  'consents',
+];
+
+const getEntries = () => {
+  const entry = {};
+
+  entries.forEach((name) => {
+    entry[name] = [
+      `./src/js/${name}.js`,
+      `./src/css/${name}.scss`,
+    ];
+  });
+
+  return entry;
+}
+
 module.exports = {
-  entry: {
-    admin: [
-      './src/js/admin.js',
-      './src/css/admin.scss',
-    ],
-  },
+  entry: getEntries(),
   output: {
     filename: 'js/admin/[name].js',
     path: path.resolve(__dirname, '../views/'),

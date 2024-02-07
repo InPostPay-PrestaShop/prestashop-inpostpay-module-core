@@ -1,1 +1,3 @@
-(()=>{(()=>{var _={};(()=>{"use strict"})()})();})();
+(()=>{(()=>{var n={400:()=>{$(document).ready(()=>{window.prestashop.component.initComponents(["TranslatableInput"])})}},a={};function r(_){var e=a[_];if(e!==void 0)return e.exports;var t=a[_]={exports:{}};return n[_](t,t.exports,r),t.exports}r.n=_=>{var e=_&&_.__esModule?()=>_.default:()=>_;return r.d(e,{a:e}),e},r.d=(_,e)=>{for(var t in e)r.o(e,t)&&!r.o(_,t)&&Object.defineProperty(_,t,{enumerable:!0,get:e[t]})},r.o=(_,e)=>Object.prototype.hasOwnProperty.call(_,e);var o={};(()=>{"use strict";var _=r(400),e=r.n(_)})(),(()=>{"use strict"})()})();})();
+
+//# sourceMappingURL=admin.js.map

@@ -39,16 +39,3 @@
     </div>
   </div>
 {% endblock %}
-
-{% block javascripts %}
-  {{ parent() }}
-
-  <script type="text/javascript">
-    /* TODO: webpack */
-    $(document).ready(() => {
-      window.prestashop.component.initComponents([
-        'TranslatableInput',
-      ]);
-    });
-  </script>
-{% endblock %}
