@@ -66,29 +66,29 @@ final class ShippingAmpConfiguration implements ShippingAmpConfigurationInterfac
         $this->configuration->set(self::AMP_COD_AVAILABLE_TO_HOUR, $configuration->getShippingCodAvailableToHour());
     }
 
-    private function loadShipping(): Shipping
+    private function loadShipping(?int $idShop): Shipping
     {
         $shipping = new Shipping();
 
-        $shipping->setCarrierId($this->loadCarrier((int) $this->configuration->get(self::AMP_ID)));
-        $shipping->setShippingPrice((float) $this->configuration->get(self::AMP_PRICE));
-        $shipping->setShippingAvailableFromDay($this->loadDay((int) $this->configuration->get(self::AMP_AVAILABLE_FROM_DAY)));
-        $shipping->setShippingAvailableToDay($this->loadDay((int) $this->configuration->get(self::AMP_AVAILABLE_TO_DAY)));
-        $shipping->setShippingAvailableFromHour($this->loadHour((int) $this->configuration->get(self::AMP_AVAILABLE_FROM_HOUR)));
-        $shipping->setShippingAvailableToHour($this->loadHour((int) $this->configuration->get(self::AMP_AVAILABLE_TO_HOUR)));
-        $shipping->setShippingCodPrice((float) $this->configuration->get(self::AMP_COD_PRICE));
-        $shipping->setShippingCodAvailableFromDay($this->loadDay((int) $this->configuration->get(self::AMP_COD_AVAILABLE_FROM_DAY)));
-        $shipping->setShippingCodAvailableToDay($this->loadDay((int) $this->configuration->get(self::AMP_COD_AVAILABLE_TO_DAY)));
-        $shipping->setShippingCodAvailableFromHour($this->loadHour((int) $this->configuration->get(self::AMP_COD_AVAILABLE_FROM_HOUR)));
-        $shipping->setShippingCodAvailableToHour($this->loadHour((int) $this->configuration->get(self::AMP_COD_AVAILABLE_TO_HOUR)));
+        $shipping->setCarrierId($this->loadCarrier((int) $this->configuration->get(self::AMP_ID, $idShop)));
+        $shipping->setShippingPrice((float) $this->configuration->get(self::AMP_PRICE, $idShop));
+        $shipping->setShippingAvailableFromDay($this->loadDay((int) $this->configuration->get(self::AMP_AVAILABLE_FROM_DAY, $idShop)));
+        $shipping->setShippingAvailableToDay($this->loadDay((int) $this->configuration->get(self::AMP_AVAILABLE_TO_DAY, $idShop)));
+        $shipping->setShippingAvailableFromHour($this->loadHour((int) $this->configuration->get(self::AMP_AVAILABLE_FROM_HOUR, $idShop)));
+        $shipping->setShippingAvailableToHour($this->loadHour((int) $this->configuration->get(self::AMP_AVAILABLE_TO_HOUR, $idShop)));
+        $shipping->setShippingCodPrice((float) $this->configuration->get(self::AMP_COD_PRICE, $idShop));
+        $shipping->setShippingCodAvailableFromDay($this->loadDay((int) $this->configuration->get(self::AMP_COD_AVAILABLE_FROM_DAY, $idShop)));
+        $shipping->setShippingCodAvailableToDay($this->loadDay((int) $this->configuration->get(self::AMP_COD_AVAILABLE_TO_DAY, $idShop)));
+        $shipping->setShippingCodAvailableFromHour($this->loadHour((int) $this->configuration->get(self::AMP_COD_AVAILABLE_FROM_HOUR, $idShop)));
+        $shipping->setShippingCodAvailableToHour($this->loadHour((int) $this->configuration->get(self::AMP_COD_AVAILABLE_TO_HOUR, $idShop)));
 
         return $shipping;
     }
 
-    public function getAmpShipping(): Shipping
+    public function getAmpShipping(?int $idShop = null): Shipping
     {
         if (!isset($this->shippingAmp)) {
-            $this->shippingAmp = $this->loadShipping();
+            $this->shippingAmp = $this->loadShipping($idShop);
         }
 
         return clone $this->shippingAmp;

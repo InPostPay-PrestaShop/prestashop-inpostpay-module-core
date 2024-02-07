@@ -24,7 +24,7 @@ final class ShippingCourierConfiguration implements ShippingCourierConfiguration
         $this->shipping = $shipping;
     }
 
-    public function getCourierShipping(): Shipping
+    public function getCourierShipping(?int $idShop = null): Shipping
     {
         return $this->shipping;
     }

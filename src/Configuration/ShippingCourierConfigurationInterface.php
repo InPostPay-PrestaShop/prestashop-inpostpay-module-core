@@ -8,7 +8,7 @@ use izi\prestashop\Configuration\DTO\Shipping;
 
 interface ShippingCourierConfigurationInterface
 {
-    public function getCourierShipping(): Shipping;
+    public function getCourierShipping(?int $idShop): Shipping;
 
     public function setCourierShipping(Shipping $shipping): self;
 }

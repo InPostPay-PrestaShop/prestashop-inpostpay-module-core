@@ -8,7 +8,7 @@ use izi\prestashop\Configuration\DTO\Shipping;
 
 interface ShippingAmpConfigurationInterface
 {
-    public function getAmpShipping(): Shipping;
+    public function getAmpShipping(?int $idShop): Shipping;
 
     public function setAmpShipping(Shipping $shipping): self;
 }

@@ -23,7 +23,7 @@ final class ShippingAmpConfiguration implements ShippingAmpConfigurationInterfac
         $this->shipping = $shipping;
     }
 
-    public function getAmpShipping(): Shipping
+    public function getAmpShipping(?int $idShop = null): Shipping
     {
         return $this->shipping;
     }

@@ -87,10 +87,10 @@ final class ShippingCourierConfiguration implements ShippingCourierConfiguration
         $this->configuration->set(self::COURIER_COD_AVAILABLE_TO_HOUR, $configuration->getShippingCodAvailableToHour());
     }
 
-    public function getCourierShipping(): Shipping
+    public function getCourierShipping(?int $idShop = null): Shipping
     {
         if (!isset($this->shippingCourier)) {
-            $this->shippingCourier = $this->loadShipping();
+            $this->shippingCourier = $this->loadShipping($idShop);
         }
 
         return clone $this->shippingCourier;
@@ -103,21 +103,21 @@ final class ShippingCourierConfiguration implements ShippingCourierConfiguration
         return $this;
     }
 
-    private function loadShipping(): Shipping
+    private function loadShipping(?int $idShop): Shipping
     {
         $shipping = new Shipping();
 
-        $shipping->setCarrierId($this->loadCarrier((int) $this->configuration->get(self::COURIER_ID)));
-        $shipping->setShippingPrice((float) $this->configuration->get(self::COURIER_PRICE));
-        $shipping->setShippingAvailableFromDay($this->loadDay((int) $this->configuration->get(self::COURIER_AVAILABLE_FROM_DAY)));
-        $shipping->setShippingAvailableToDay($this->loadDay((int) $this->configuration->get(self::COURIER_AVAILABLE_TO_DAY)));
-        $shipping->setShippingAvailableFromHour($this->loadHour((int) $this->configuration->get(self::COURIER_AVAILABLE_FROM_HOUR)));
-        $shipping->setShippingAvailableToHour($this->loadHour((int) $this->configuration->get(self::COURIER_AVAILABLE_TO_HOUR)));
-        $shipping->setShippingCodPrice((float) $this->configuration->get(self::COURIER_COD_PRICE));
-        $shipping->setShippingCodAvailableFromDay($this->loadDay((int) $this->configuration->get(self::COURIER_COD_AVAILABLE_FROM_DAY)));
-        $shipping->setShippingCodAvailableToDay($this->loadDay((int) $this->configuration->get(self::COURIER_COD_AVAILABLE_TO_DAY)));
-        $shipping->setShippingCodAvailableFromHour($this->loadHour((int) $this->configuration->get(self::COURIER_COD_AVAILABLE_FROM_HOUR)));
-        $shipping->setShippingCodAvailableToHour($this->loadHour((int) $this->configuration->get(self::COURIER_COD_AVAILABLE_TO_HOUR)));
+        $shipping->setCarrierId($this->loadCarrier((int) $this->configuration->get(self::COURIER_ID, $idShop)));
+        $shipping->setShippingPrice((float) $this->configuration->get(self::COURIER_PRICE, $idShop));
+        $shipping->setShippingAvailableFromDay($this->loadDay((int) $this->configuration->get(self::COURIER_AVAILABLE_FROM_DAY, $idShop)));
+        $shipping->setShippingAvailableToDay($this->loadDay((int) $this->configuration->get(self::COURIER_AVAILABLE_TO_DAY, $idShop)));
+        $shipping->setShippingAvailableFromHour($this->loadHour((int) $this->configuration->get(self::COURIER_AVAILABLE_FROM_HOUR, $idShop)));
+        $shipping->setShippingAvailableToHour($this->loadHour((int) $this->configuration->get(self::COURIER_AVAILABLE_TO_HOUR, $idShop)));
+        $shipping->setShippingCodPrice((float) $this->configuration->get(self::COURIER_COD_PRICE, $idShop));
+        $shipping->setShippingCodAvailableFromDay($this->loadDay((int) $this->configuration->get(self::COURIER_COD_AVAILABLE_FROM_DAY, $idShop)));
+        $shipping->setShippingCodAvailableToDay($this->loadDay((int) $this->configuration->get(self::COURIER_COD_AVAILABLE_TO_DAY, $idShop)));
+        $shipping->setShippingCodAvailableFromHour($this->loadHour((int) $this->configuration->get(self::COURIER_COD_AVAILABLE_FROM_HOUR, $idShop)));
+        $shipping->setShippingCodAvailableToHour($this->loadHour((int) $this->configuration->get(self::COURIER_COD_AVAILABLE_TO_HOUR, $idShop)));
 
         return $shipping;
     }

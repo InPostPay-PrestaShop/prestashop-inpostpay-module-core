@@ -108,7 +108,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingPrice(int $shopId = null): ?float
+    public function getShippingPrice(): ?float
     {
         return $this->shippingPrice;
     }
@@ -120,7 +120,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingAvailableFromDay(int $shopId = null): ?int
+    public function getShippingAvailableFromDay(): ?int
     {
         return $this->shippingAvailableFromDay;
     }
@@ -132,7 +132,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingAvailableToDay(int $shopId = null): ?int
+    public function getShippingAvailableToDay(): ?int
     {
         return $this->shippingAvailableToDay;
     }
@@ -144,7 +144,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingAvailableFromHour(int $shopId = null): ?int
+    public function getShippingAvailableFromHour(): ?int
     {
         return $this->shippingAvailableFromHour;
     }
@@ -156,7 +156,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingAvailableToHour(int $shopId = null): ?int
+    public function getShippingAvailableToHour(): ?int
     {
         return $this->shippingAvailableToHour;
     }
@@ -168,7 +168,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingCodPrice(int $shopId = null): ?float
+    public function getShippingCodPrice(): ?float
     {
         return $this->shippingCodPrice;
     }
@@ -180,7 +180,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingCodAvailableFromDay(int $shopId = null): ?int
+    public function getShippingCodAvailableFromDay(): ?int
     {
         return $this->shippingCodAvailableFromDay;
     }
@@ -192,7 +192,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingCodAvailableToDay(int $shopId = null): ?int
+    public function getShippingCodAvailableToDay(): ?int
     {
         return $this->shippingCodAvailableToDay;
     }
@@ -204,7 +204,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingCodAvailableFromHour(int $shopId = null): ?int
+    public function getShippingCodAvailableFromHour(): ?int
     {
         return $this->shippingCodAvailableFromHour;
     }
@@ -216,7 +216,7 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingCodAvailableToHour(int $shopId = null): ?int
+    public function getShippingCodAvailableToHour(): ?int
     {
         return $this->shippingCodAvailableToHour;
     }
