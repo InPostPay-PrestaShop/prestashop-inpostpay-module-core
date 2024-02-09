@@ -39,17 +39,15 @@ const handleStylesChanges = () => {
 
   const handleSelectChange = () => {
     const formData = new FormData(form);
-    const data = {};
 
-    formData.forEach((value, key) => {
-      data[key] = value;
-    });
-
-    $.ajax({
-      data,
-      method: 'POST',
-      success: handeAjaxRequest,
-    })
+    fetch("", {
+      "headers": {
+        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+        "x-requested-with": "XMLHttpRequest"
+      },
+      "body": new URLSearchParams(formData).toString(),
+      "method": "POST",
+    }).then(response => response.text()).then(handeAjaxRequest);
   };
 
   selects.forEach((select) => {
