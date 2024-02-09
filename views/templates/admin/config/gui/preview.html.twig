@@ -1,15 +1,19 @@
-{# TODO: REFACTO, DID IT ONLY FOR PREVIEW FOR CLIENT #}
-
 <div class="inpostizi-btn-preview">
-  {% if previewTitle is defined %}
-    <p class="inpostizi-btn-preview__title text-center mb-3">
-      {{ previewTitle }}
-    </p>
-  {% endif %}
+  <p class="inpostizi-btn-preview__title text-center mb-0">
+    {{ 'Button preview'|legacy_trans }}
+  </p>
 
-  {% set btnConfig = form.vars.data %}
+  <p class="small inpostizi-btn-preview__title-subtitle text-center mb-3">
+    {{ 'Remember to click the \'Save\' button after you finish configuring the button styles'|legacy_trans }}
+  </p>
 
-  <div class="inpostizi-btn-preview__content clearfix">
+  {% set btnConfig = form.vars.value %}
+  {% set type = form.vars.name %}
+
+  <div
+    class="js-inpostizi-btn-preview-content inpostizi-btn-preview__content clearfix"
+    data-type="{{ type }}"
+  >
     {% include '@Modules/inpostizi/views/templates/admin/config/gui/preview_btn.html.twig' with btnConfig %}
   </div>
 </div>

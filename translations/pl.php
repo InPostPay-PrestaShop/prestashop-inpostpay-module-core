@@ -23,6 +23,8 @@ $_MODULE['<{inpostizi}prestashop>admin_template_translations_87f4ea988928e7dd998
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_541127e34a74cf1eb876350223c574a7'] = 'Instrukcja konfiguracji wtyczki InPost Pay';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_3747ade9aba396fea40b3f9e0bdc6989'] = 'Instrukcja obsługi zwrotów';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_b886efdff22fe2cb1c6bd9af9e3757aa'] = 'Panel merchanta - podgląd transakcji i obsługa zwrotów';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_9c15669ba55d94ca08b6c4cfaab10a13'] = 'Podgląd przycisku';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_df4069cdb9787753503ca5dae66919c0'] = 'Pamiętaj by kliknąć przycisk \'Zapisz\' gdy już skonfigurujesz wygląd przycisku';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_0b1d93d523e523fdcf4d395a2a5645d6'] = 'Konfiguracja wtyczki InPost Pay';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_65d508ca1dd3c13922c433eb6e26fd2f'] = 'Zadbaj o poprawną ekspozycję usługi InPost Pay, dzięki czemu:';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_4cdb65c6277c5987c5a8b440224865ef'] = 'Kupujący szybko rozpoznają, że dokonując zakupu w Twoim sklepie mogą skorzystać z usługi szybkiego i bezpiecznego zakupu oraz dostawy przez firmę, której usługi znają i do której mają zaufanie, co bezpośrednio przyczynia się do decyzji zakupowych Klientów.';

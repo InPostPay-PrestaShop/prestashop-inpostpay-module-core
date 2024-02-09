@@ -18,6 +18,9 @@
 
 {l s='Merchant panel - previewing transactions and handling returns' mod='inpostizi'}
 
+{l s='Button preview' mod='inpostizi'}
+{l s='Remember to click the \'Save\' button after you finish configuring the button styles' mod='inpostizi'}
+
 {l s='InPost Pay plugin configuration' mod='inpostizi'}
 {l s='Take care of the correct exposure of the InPost Pay service, so that:' mod='inpostizi'}
 {l s='Buyers quickly recognize that when they make a purchase from your store, they can benefit from a fast and secure purchase and delivery service by a company whose services they know and trust, which directly contributes to customers\' purchasing decisions.' mod='inpostizi'}
