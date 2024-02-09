@@ -10,8 +10,9 @@
   {% set btnConfig = form.vars.value %}
   {% set type = form.vars.name %}
 
+  {% set styleType = btnConfig.darkMode ? 'dark' : 'light' %}
   <div
-    class="js-inpostizi-btn-preview-content inpostizi-btn-preview__content clearfix"
+    class="js-inpostizi-btn-preview-content inpostizi-btn-preview__content inpostizi-btn-preview__content--{{ styleType  }} clearfix"
     data-type="{{ type }}"
   >
     {% include '@Modules/inpostizi/views/templates/admin/config/gui/preview_btn.html.twig' with btnConfig %}
