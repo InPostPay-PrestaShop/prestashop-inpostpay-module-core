@@ -28,30 +28,14 @@ final class ShippingConfigurationType extends AbstractType
                 'required' => false,
                 'shippingIdLabel' => $this->module->l('Courier', self::TRANSLATION_SOURCE),
                 'shippingPriceLabel' => $this->module->l('Courier package weekend net price', self::TRANSLATION_SOURCE),
-                'shippingAvailableFromDayLabel' => $this->module->l('Weekend package courier available from day', self::TRANSLATION_SOURCE),
-                'shippingAvailableToDayLabel' => $this->module->l('Weekend package courier available to day', self::TRANSLATION_SOURCE),
-                'shippingAvailableFromHourLabel' => $this->module->l('Weekend package courier available from hour', self::TRANSLATION_SOURCE),
-                'shippingAvailableToHourLabel' => $this->module->l('Weekend package courier available to hour', self::TRANSLATION_SOURCE),
                 'shippingCodPriceLabel' => $this->module->l('Courier COD net price', self::TRANSLATION_SOURCE),
-                'shippingCodAvailableFromDayLabel' => $this->module->l('Courier COD available from day', self::TRANSLATION_SOURCE),
-                'shippingCodAvailableToDayLabel' => $this->module->l('Courier COD available to day', self::TRANSLATION_SOURCE),
-                'shippingCodAvailableFromHourLabel' => $this->module->l('Courier COD available from hour', self::TRANSLATION_SOURCE),
-                'shippingCodAvailableToHourLabel' => $this->module->l('Courier COD available to day', self::TRANSLATION_SOURCE),
             ])
             ->add('shippingAmp', ShippingType::class, [
                 'label' => $this->module->l('Paczkomat', self::TRANSLATION_SOURCE),
                 'required' => false,
                 'shippingIdLabel' => $this->module->l('Paczkomat', self::TRANSLATION_SOURCE),
                 'shippingPriceLabel' => $this->module->l('Paczkomat package weekend net price', self::TRANSLATION_SOURCE),
-                'shippingAvailableFromDayLabel' => $this->module->l('Paczkomat package weekend available from day', self::TRANSLATION_SOURCE),
-                'shippingAvailableToDayLabel' => $this->module->l('Paczkomat package weekend available to day', self::TRANSLATION_SOURCE),
-                'shippingAvailableFromHourLabel' => $this->module->l('Paczkomat package weekend available from hour', self::TRANSLATION_SOURCE),
-                'shippingAvailableToHourLabel' => $this->module->l('Paczkomat package weekend available to hour', self::TRANSLATION_SOURCE),
                 'shippingCodPriceLabel' => $this->module->l('Paczkomat package COD net price', self::TRANSLATION_SOURCE),
-                'shippingCodAvailableFromDayLabel' => $this->module->l('Paczkomat package COD available from day', self::TRANSLATION_SOURCE),
-                'shippingCodAvailableToDayLabel' => $this->module->l('Paczkomat package COD available to day', self::TRANSLATION_SOURCE),
-                'shippingCodAvailableFromHourLabel' => $this->module->l('Paczkomat package COD available from hour', self::TRANSLATION_SOURCE),
-                'shippingCodAvailableToHourLabel' => $this->module->l('Paczkomat package COD available to day', self::TRANSLATION_SOURCE),
             ]);
     }
 

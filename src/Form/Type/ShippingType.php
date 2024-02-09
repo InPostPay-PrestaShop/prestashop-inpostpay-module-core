@@ -28,19 +28,15 @@ final class ShippingType extends AbstractType
             ])
             ->add('shippingAvailableFromDay', DayChoiceType::class, [
                 'required' => false,
-                'label' => $options['shippingAvailableFromDayLabel'],
             ])
             ->add('shippingAvailableToDay', DayChoiceType::class, [
                 'required' => false,
-                'label' => $options['shippingAvailableToDayLabel'],
             ])
             ->add('shippingAvailableFromHour', HourChoiceType::class, [
                 'required' => false,
-                'label' => $options['shippingAvailableFromHourLabel'],
             ])
             ->add('shippingAvailableToHour', HourChoiceType::class, [
                 'required' => false,
-                'label' => $options['shippingAvailableToHourLabel'],
             ])
             ->add('shippingCodPrice', MoneyCurrencyType::class, [
                 'required' => false,
@@ -48,19 +44,15 @@ final class ShippingType extends AbstractType
             ])
             ->add('shippingCodAvailableFromDay', DayChoiceType::class, [
                 'required' => false,
-                'label' => $options['shippingCodAvailableFromDayLabel'],
             ])
             ->add('shippingCodAvailableToDay', DayChoiceType::class, [
                 'required' => false,
-                'label' => $options['shippingCodAvailableToDayLabel'],
             ])
             ->add('shippingCodAvailableFromHour', HourChoiceType::class, [
                 'required' => false,
-                'label' => $options['shippingCodAvailableFromHourLabel'],
             ])
             ->add('shippingCodAvailableToHour', HourChoiceType::class, [
                 'required' => false,
-                'label' => $options['shippingCodAvailableToHourLabel'],
             ]);
 
     }
@@ -70,15 +62,7 @@ final class ShippingType extends AbstractType
         $resolver->setRequired([
             'shippingIdLabel',
             'shippingPriceLabel',
-            'shippingAvailableFromDayLabel',
-            'shippingAvailableToDayLabel',
-            'shippingAvailableFromHourLabel',
-            'shippingAvailableToHourLabel',
             'shippingCodPriceLabel',
-            'shippingCodAvailableFromDayLabel',
-            'shippingCodAvailableToDayLabel',
-            'shippingCodAvailableFromHourLabel',
-            'shippingCodAvailableToHourLabel',
         ]);
 
         $resolver->setDefaults([
@@ -87,14 +71,6 @@ final class ShippingType extends AbstractType
 
         $resolver->setAllowedTypes('shippingIdLabel', 'string');
         $resolver->setAllowedTypes('shippingPriceLabel', 'string');
-        $resolver->setAllowedTypes('shippingAvailableFromDayLabel', 'string');
-        $resolver->setAllowedTypes('shippingAvailableToDayLabel', 'string');
-        $resolver->setAllowedTypes('shippingAvailableFromHourLabel', 'string');
-        $resolver->setAllowedTypes('shippingAvailableToHourLabel', 'string');
         $resolver->setAllowedTypes('shippingCodPriceLabel', 'string');
-        $resolver->setAllowedTypes('shippingCodAvailableFromDayLabel', 'string');
-        $resolver->setAllowedTypes('shippingCodAvailableToDayLabel', 'string');
-        $resolver->setAllowedTypes('shippingCodAvailableFromHourLabel', 'string');
-        $resolver->setAllowedTypes('shippingCodAvailableToHourLabel', 'string');
     }
 }
