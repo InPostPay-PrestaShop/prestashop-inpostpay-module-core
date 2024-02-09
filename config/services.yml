@@ -201,14 +201,6 @@ services:
   izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler
 
-  izi\prestashop\Configuration\Factory\DayFactoryInterface: '@izi\prestashop\Configuration\Factory\DayFactory'
-  izi\prestashop\Configuration\Factory\DayFactory:
-    class: izi\prestashop\Configuration\Factory\DayFactory
-
-  izi\prestashop\Configuration\Factory\HourFactoryInterface: '@izi\prestashop\Configuration\Factory\HourFactory'
-  izi\prestashop\Configuration\Factory\HourFactory:
-    class: izi\prestashop\Configuration\Factory\HourFactory
-
   izi\prestashop\Form\Provider\DefaultCurrencyProviderInterface: '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
   izi\prestashop\Form\Provider\DefaultCurrencyProvider:
     class: izi\prestashop\Form\Provider\DefaultCurrencyProvider

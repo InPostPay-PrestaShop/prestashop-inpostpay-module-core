@@ -20,4 +20,6 @@ interface GuiConfigurationInterface
     public function isWidgetDisplayedOnProductCard(): bool;
 
     public function getProductCardWidgetConfiguration(): Configuration;
+
+    public function getProductCardHtmlStyles(): HtmlStyles;
 }

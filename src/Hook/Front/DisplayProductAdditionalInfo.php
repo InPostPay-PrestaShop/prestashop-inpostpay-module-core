@@ -61,7 +61,7 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
 
         return $this->renderer->render('module:inpostizi/views/templates/hook/mymodule.tpl', [
             'widget' => $widget,
-            'styles' => [],
+            'styles' => $this->getHtmlStyles(),
         ]);
     }
 }

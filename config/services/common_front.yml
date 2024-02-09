@@ -26,7 +26,7 @@ services:
     arguments:
       - '@inpost.izi.module'
       - '@izi\prestashop\Payment\PaymentCurrencyChecker'
-      - '@GuiConfiguration'
+      - '@izi\prestashop\Configuration\GuiConfiguration'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
   izi\prestashop\Hook\Front\DisplayIziThankYou:
@@ -64,7 +64,7 @@ services:
     tags:
       - { name: inpost.izi.hook }
     arguments:
-      - '@GuiConfiguration'
+      - '@izi\prestashop\Configuration\GuiConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
@@ -75,7 +75,7 @@ services:
       - { name: inpost.izi.hook }
       - { name: inpost.izi.hook, hook_name: displayProductButtons }
     arguments:
-      - '@GuiConfiguration'
+      - '@izi\prestashop\Configuration\GuiConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
@@ -85,7 +85,7 @@ services:
     tags:
       - { name: inpost.izi.hook }
     arguments:
-      - '@GuiConfiguration'
+      - '@izi\prestashop\Configuration\GuiConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
@@ -95,7 +95,7 @@ services:
     tags:
       - { name: inpost.izi.hook }
     arguments:
-      - '@GuiConfiguration'
+      - '@izi\prestashop\Configuration\GuiConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
@@ -105,7 +105,7 @@ services:
     tags:
       - { name: inpost.izi.hook }
     arguments:
-      - '@GuiConfiguration'
+      - '@izi\prestashop\Configuration\GuiConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
@@ -115,7 +115,7 @@ services:
     tags:
       - { name: inpost.izi.hook }
     arguments:
-      - '@GuiConfiguration'
+      - '@izi\prestashop\Configuration\GuiConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 

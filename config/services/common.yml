@@ -516,3 +516,11 @@ services:
     public: false
     arguments:
       - '@inpost.izi.event_dispatcher'
+
+  izi\prestashop\Configuration\Factory\DayFactoryInterface: '@izi\prestashop\Configuration\Factory\DayFactory'
+  izi\prestashop\Configuration\Factory\DayFactory:
+    class: izi\prestashop\Configuration\Factory\DayFactory
+
+  izi\prestashop\Configuration\Factory\HourFactoryInterface: '@izi\prestashop\Configuration\Factory\HourFactory'
+  izi\prestashop\Configuration\Factory\HourFactory:
+    class: izi\prestashop\Configuration\Factory\HourFactory

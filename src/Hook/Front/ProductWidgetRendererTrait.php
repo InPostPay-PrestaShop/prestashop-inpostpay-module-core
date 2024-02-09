@@ -38,4 +38,13 @@ trait ProductWidgetRendererTrait
             'request' => $parameters['request'] ?? null,
         ]);
     }
+
+    private function getHtmlStyles(): array
+    {
+        $styles = $this->configuration->getProductCardHtmlStyles();
+
+        return is_array($styles)
+            ? $styles
+            : iterator_to_array($styles);
+    }
 }
