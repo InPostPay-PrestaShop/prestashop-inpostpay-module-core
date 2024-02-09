@@ -157,6 +157,13 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
 
+  izi\prestashop\Configuration\AdvancedConfigurationInterface: '@izi\prestashop\Configuration\AdvancedConfiguration'
+  izi\prestashop\Configuration\AdvancedConfiguration:
+    class: izi\prestashop\Configuration\AdvancedConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
   izi\prestashop\Configuration\ThankYouWidgetConfiguration:
     class: izi\prestashop\Configuration\ThankYouWidgetConfiguration
     public: false

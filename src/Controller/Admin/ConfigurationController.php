@@ -4,21 +4,25 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Controller\Admin;
 
+use izi\prestashop\Command\Config\UpdateAdvancedConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateShippingConfigurationCommandFactory;
 use izi\prestashop\CommandBusInterface;
+use izi\prestashop\Configuration\AdvancedConfigurationInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Configuration\ShippingAmpConfiguration;
+use izi\prestashop\Form\Type\AdvancedConfigurationType;
 use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
 use izi\prestashop\Form\Type\GuiConfigurationType;
 use izi\prestashop\Form\Type\ShippingConfigurationType;
 use PrestaShopBundle\Security\Voter\PageVoter;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -120,7 +124,6 @@ final class ConfigurationController extends AbstractController
     public function guiConfig(Request $request, GuiConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
 //        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
-
         $form = $this->createForm(GuiConfigurationType::class, $configuration->copy(), [
             'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
         ]);
@@ -180,16 +183,55 @@ final class ConfigurationController extends AbstractController
     }
 
     /**
-     * @Route(path="/support", name="support", methods={"GET", "POST"})
+     * @Route(path="/support", name="support", methods={"GET"})
      */
-    public function support(Request $request): Response
+    public function support(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
 //        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+
+        $form = $this->createForm(AdvancedConfigurationType::class, $configuration->copy(), [
+            'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
+            'action' => $this->generateUrl('admin_inpost_izi_config_support_save'),
+        ]);
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/support.html.twig', [
             'layoutTitle' => $this->module->l('Support', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
+            'form' => $form->createView(),
         ]);
+    }
+
+    /**
+     * @Route(path="/support", name="support_save", methods={"POST"})
+     */
+    public function supportSave(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
+    {
+//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+
+        $form = $this->createForm(AdvancedConfigurationType::class, $configuration->copy());
+
+        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+            $command = new UpdateAdvancedConfigurationCommand($form->getData());
+
+            try {
+                $bus->handle($command);
+
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => $this->trans('Successful update.', [], 'Admin.Notifications.Success')
+                ]);
+            } catch (\Exception $e) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => $e->getMessage()
+                ], 400);
+            }
+        } else {
+            return new JsonResponse([
+                'success' => false,
+                'message' => $this->trans('Oops... looks like an unexpected error occurred', [], 'Admin.Notifications.Error')
+            ], 400);
+        }
     }
 
     private function renderNav(Request $request): string

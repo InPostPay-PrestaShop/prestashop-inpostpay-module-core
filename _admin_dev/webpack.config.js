@@ -6,6 +6,7 @@ const entries = [
   'admin',
   'consents',
   'gui',
+  'support',
 ];
 
 const getEntries = () => {

@@ -1,11 +1,13 @@
 {% extends '@Modules/inpostizi/views/templates/admin/layout/basic-layout.html.twig' %}
 
+{% form_theme form '@Modules/inpostizi/views/templates/admin/config/form_theme_support.html.twig' %}
+
 {% block content %}
   {% include '@Modules/inpostizi/views/templates/admin/config/support/description.html.twig' %}
 
   <div class="row mx-n2">
     <div class="col-lg-4 col-sm-6 col-12 mt-3 px-2">
-      {% include '@Modules/inpostizi/views/templates/admin/config/support/module_status.html.twig' %}
+      {% include '@Modules/inpostizi/views/templates/admin/config/support/module_status.html.twig' with form %}
       {% include '@Modules/inpostizi/views/templates/admin/config/support/updates.html.twig' %}
     </div>
     <div class="col-lg-4 col-sm-6 col-12 mt-3 px-2">
@@ -17,3 +19,13 @@
   </div>
 {% endblock %}
 
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/support.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script type="text/javascript" src="{{ asset('../modules/inpostizi/views/js/admin/support.js') }}">
+  </script>
+{% endblock %}

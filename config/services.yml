@@ -58,6 +58,11 @@ services:
     tags:
       - { name: form.type }
 
+  izi\prestashop\Form\Type\AdvancedConfigurationType:
+    class: izi\prestashop\Form\Type\AdvancedConfigurationType
+    tags:
+      - { name: form.type }
+
   izi\prestashop\Form\Type\ShippingType:
     class: izi\prestashop\Form\Type\ShippingType
     tags:
@@ -200,6 +205,10 @@ services:
   izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler
+
+  izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler
 
   izi\prestashop\Form\Provider\DefaultCurrencyProviderInterface: '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
   izi\prestashop\Form\Provider\DefaultCurrencyProvider:

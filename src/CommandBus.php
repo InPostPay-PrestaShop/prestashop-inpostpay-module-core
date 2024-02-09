@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop;
 
 use izi\prestashop\Command\BindBasketCommand;
+use izi\prestashop\Command\Config\UpdateAdvancedConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
@@ -17,6 +18,7 @@ use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\Command\UpdateBasketCommand;
 use izi\prestashop\Command\UpdateOrderTrackingNumbersCommand;
 use izi\prestashop\Handler\BindBasketHandlerInterface;
+use izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface;
@@ -77,6 +79,7 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             UpdateConsentsConfigurationCommand::class => '?' . UpdateConsentsConfigurationHandlerInterface::class,
             UpdateGuiConfigurationCommand::class => '?' . UpdateGuiConfigurationHandlerInterface::class,
             UpdateShippingConfigurationCommand::class => '?' . UpdateShippingConfigurationHandlerInterface::class,
+            UpdateAdvancedConfigurationCommand::class => '?' . UpdateAdvancedConfigurationHandlerInterface::class,
         ];
     }
 

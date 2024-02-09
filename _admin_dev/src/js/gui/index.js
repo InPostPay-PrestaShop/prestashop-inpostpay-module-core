@@ -1,3 +1,5 @@
+import { DOMReady } from '../helpers/DOM';
+
 const SELECTORS = {
   form: '[name="gui_configuration"]',
   selects: '.js-widget-attribute-provider',
@@ -56,6 +58,4 @@ const handleStylesChanges = () => {
 }
 
 
-$(() => {
-  handleStylesChanges();
-})
+DOMReady(handleStylesChanges);

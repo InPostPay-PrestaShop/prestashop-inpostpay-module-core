@@ -6,7 +6,7 @@
   <i class="material-icons mr-2">check_circle</i>
   <span>
     {{ 'Module status'|legacy_trans }}:
-    {#TODO: pass status somehow?#}
+    {# TODO: pass status https://waynet.slack.com/archives/C063QMYG8TY/p1707306380868329 #}
     <span class="text-success text-uppercase">OK</span>
   </span>
 {% endblock %}
@@ -25,16 +25,25 @@
       </div>
     </div>
     <div class="col-6">
-      <div class="p-3 d-flex align-items-center justify-content-center h-100">
-        {#TODO: SWITCH PLACEHOLDER RENDER FORM#}
-        <span class="ps-switch">
-            <input id="debug_enabled_0" class="ps-switch" name="debug_enabled" value="0" type="radio" aria-label="Nie">
-            <label for="debug_enabled_0" class="small mb-0">Wyłącz debugowanie</label>
-            <input id="debug_enabled_1" class="ps-switch" name="debug_enabled" value="1" checked="" type="radio" aria-label="Tak">
-            <label for="debug_enabled_1" class="small mb-0">Włącz debugowanie</label>
-            <span class="slide-button"></span>
-          </span>
-      </div>
+      {{ form_start(form) }}
+
+        {{ form_errors(form) }}
+        <div class="p-3 d-flex align-items-center justify-content-center h-100">
+          {{ form_widget(form.debugEnabled, {
+            'label': 'Debug mode',
+            'attr': {
+              'class': 'form-check-input',
+              'data-toggle': 'toggle',
+              'data-on': 'On',
+              'data-off': 'Off',
+              'data-onstyle': 'success',
+              'data-offstyle': 'danger',
+              'data-size': 'sm',
+            },
+          }) }}
+        </div>
+
+      {{ form_end(form) }}
     </div>
   </div>
 {% endblock %}
