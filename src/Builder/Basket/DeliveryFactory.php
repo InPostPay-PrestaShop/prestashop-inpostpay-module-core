@@ -118,6 +118,7 @@ class DeliveryFactory
         $deliveryType = strtolower($deliveryType->value);
         $option = strtolower($option->value);
 
+//      TODO: implement new config?
         $dayFrom = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_from_day');
         $dayTo = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_to_day');
         $hourFrom = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_from_time');
