@@ -28,8 +28,8 @@ final class AdvancedConfigurationType extends AbstractType
             ->add('debugEnabled', SwitchType::class, [
                 'required' => false,
                 'choices' => [
-                    $this->module->l('Włącz debugowanie', self::TRANSLATION_SOURCE) => false,
-                    $this->module->l('Wyłącz debugowanie', self::TRANSLATION_SOURCE) => true,
+                    $this->module->l('Enable debug mode', self::TRANSLATION_SOURCE) => false,
+                    $this->module->l('Disable debug mode', self::TRANSLATION_SOURCE) => true,
                 ],
             ]);
 

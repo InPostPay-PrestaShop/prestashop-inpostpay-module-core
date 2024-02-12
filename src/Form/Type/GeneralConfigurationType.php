@@ -46,7 +46,7 @@ final class GeneralConfigurationType extends AbstractType
                 ],
                 'property_path' => 'generalConfiguration.thankYouDisplayHook',
                 'label' => $this->module->l('Order confirmation page display hook', self::TRANSLATION_SOURCE),
-                'help' => sprintf($this->module->l('Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku templates/checkout/order-confirmation.tpl \'{hook h="%s" order=$order}\'.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
+                'help' => sprintf($this->module->l('If you choose the \'%s\' hook you have to manually implement it in the templates/checkout/order-confirmation.tpl file \'{hook h="%s" order=$order}\'.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
             ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,
