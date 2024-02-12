@@ -19,7 +19,9 @@ class LegacyTranslation extends AbstractExtension
     public function getFilters()
     {
         return [
-            new TwigFilter('legacy_trans', [$this, 'legacyTrans']),
+            new TwigFilter('legacy_trans', [$this, 'legacyTrans'], [
+                'is_safe' => ['html'],
+            ]),
         ];
     }
 
