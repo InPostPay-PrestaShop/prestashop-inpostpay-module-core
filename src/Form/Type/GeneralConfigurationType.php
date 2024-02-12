@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
+use izi\prestashop\Hook\Front\DisplayIziThankYou;
+use izi\prestashop\Hook\Front\DisplayOrderConfirmation;
+use izi\prestashop\Hook\Front\DisplayPaymentReturn;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -34,6 +37,16 @@ final class GeneralConfigurationType extends AbstractType
                 'property_path' => 'generalConfiguration.enabledForEveryone',
                 'label' => $this->module->l('Display widget', self::TRANSLATION_SOURCE),
                 'help' => $this->module->l('If you select "to testers" the widget will be visible only to those who are supposed to see it. To display the widget in this mode in a web browser, type the address of your store with \'?showIzi=true\' Example: https://mojsklep.pl?showIzi=true', self::TRANSLATION_SOURCE),
+            ])
+            ->add('thankYouDisplayHook', ChoiceType::class, [
+                'choices' => [
+                    DisplayPaymentReturn::getHookName() => DisplayPaymentReturn::getHookName(),
+                    DisplayOrderConfirmation::getHookName() => DisplayOrderConfirmation::getHookName(),
+                    DisplayIziThankYou::getHookName() => DisplayIziThankYou::getHookName(),
+                ],
+                'property_path' => 'generalConfiguration.thankYouDisplayHook',
+                'label' => $this->module->l('Order confirmation page display hook', self::TRANSLATION_SOURCE),
+                'help' => sprintf($this->module->l('Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku templates/checkout/order-confirmation.tpl \'{hook h="%s" order=$order}\'.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
             ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,

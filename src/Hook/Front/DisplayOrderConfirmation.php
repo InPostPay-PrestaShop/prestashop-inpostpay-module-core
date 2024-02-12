@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\ThankYouWidgetConfigurationInterface;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 
@@ -28,7 +28,7 @@ final class DisplayOrderConfirmation implements HookInterface
         BasketSessionRepositoryInterface $repository,
         \Context $context,
         \PaymentModule $paymentModule,
-        ThankYouWidgetConfigurationInterface $configuration
+        GeneralConfigurationInterface $configuration
     ) {
         $this->repository = $repository;
         $this->context = $context;

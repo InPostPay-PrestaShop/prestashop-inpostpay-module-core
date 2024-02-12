@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\ThankYouWidgetConfigurationInterface;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 
 final class DisplayPaymentReturn implements HookInterface
@@ -13,7 +13,7 @@ final class DisplayPaymentReturn implements HookInterface
 
     public const HOOK_NAME = 'displayPaymentReturn';
 
-    public function __construct(\PaymentModule $paymentModule, ThankYouWidgetConfigurationInterface $configuration)
+    public function __construct(\PaymentModule $paymentModule, GeneralConfigurationInterface $configuration)
     {
         $this->paymentModule = $paymentModule;
         $this->configuration = $configuration;

@@ -8,6 +8,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
 {
     private const ENABLE_FOR_EVERYONE = 'INPOST_PAY_show_izi';
     private const MAX_SUGGESTED_PRODUCTS = 'INPOST_PAY_related_count';
+    private const THANK_YOU_DISPLAY_HOOK = 'INPOST_PAY_THANK_YOU_DISPLAY';
 
     /**
      * @var ConfigurationInterface
@@ -31,11 +32,17 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
         return null === $value ? $value : (int) $value;
     }
 
+    public function getThankYouDisplayHook(int $shopId = null): ?string
+    {
+        return $this->configuration->get(self::THANK_YOU_DISPLAY_HOOK, $shopId);
+    }
+
     public function copy(): GeneralConfigurationInterface
     {
         return new DTO\GeneralConfiguration(
             $this->isEnabledForEveryone(),
-            $this->getMaxSuggestedProducts()
+            $this->getMaxSuggestedProducts(),
+            $this->getThankYouDisplayHook()
         );
     }
 
@@ -43,5 +50,6 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
     {
         $this->configuration->set(self::ENABLE_FOR_EVERYONE, $configuration->isEnabledForEveryone());
         $this->configuration->set(self::MAX_SUGGESTED_PRODUCTS, $configuration->getMaxSuggestedProducts());
+        $this->configuration->set(self::THANK_YOU_DISPLAY_HOOK, $configuration->getThankYouDisplayHook());
     }
 }

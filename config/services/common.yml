@@ -164,12 +164,6 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
 
-  izi\prestashop\Configuration\ThankYouWidgetConfiguration:
-    class: izi\prestashop\Configuration\ThankYouWidgetConfiguration
-    public: false
-    arguments:
-      - '@izi\prestashop\Configuration\Adapter\Configuration'
-
   inpost.izi.environment:
     class: izi\prestashop\Environment\EnvironmentInterface
     public: false

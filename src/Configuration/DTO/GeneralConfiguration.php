@@ -21,10 +21,22 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
      */
     private $maxSuggestedProducts;
 
-    public function __construct(bool $enabledForEveryone = false, int $maxSuggestedProducts = null)
+    /**
+     * @var string
+     *
+     * @Assert\NotBlank
+     */
+    private $thankYouDisplayHook;
+
+    public function __construct(
+        bool $enabledForEveryone = false,
+        int $maxSuggestedProducts = null,
+        string $thankYouDisplayHook = null
+    )
     {
         $this->enabledForEveryone = $enabledForEveryone;
         $this->maxSuggestedProducts = $maxSuggestedProducts;
+        $this->thankYouDisplayHook = $thankYouDisplayHook;
     }
 
     public function isEnabledForEveryone(): bool
@@ -47,6 +59,18 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
     public function setMaxSuggestedProducts(?int $maxSuggestedProducts): GeneralConfiguration
     {
         $this->maxSuggestedProducts = $maxSuggestedProducts;
+
+        return $this;
+    }
+
+    public function getThankYouDisplayHook(int $shopId = null): ?string
+    {
+        return $this->thankYouDisplayHook;
+    }
+
+    public function setThankYouDisplayHook(?string $thankYouDisplayHook): GeneralConfiguration
+    {
+        $this->thankYouDisplayHook = $thankYouDisplayHook;
 
         return $this;
     }
