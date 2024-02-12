@@ -40,7 +40,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
             return $this->types[$key];
         }
 
-        return $this->types[$key] = $this->getPropertyTypesFromDocBlock($class, $property);
+        return $this->types[$key] = $this->getPropertyTypesFromDocBlock($class, (string) $property);
     }
 
     private function getPropertyTypesFromDocBlock(string $class, string $property): ?array
