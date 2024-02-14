@@ -134,7 +134,6 @@ final class GuiConfiguration implements GuiConfigurationInterface
         return $this;
     }
 
-
     public function getProductCardHtmlStyles(): HtmlStyles
     {
         return $this->productCardHtmlStyles ?? new HtmlStyles();
@@ -146,5 +145,4 @@ final class GuiConfiguration implements GuiConfigurationInterface
 
         return $this;
     }
-
 }

@@ -28,11 +28,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
      */
     private $thankYouDisplayHook;
 
-    public function __construct(
-        bool $enabledForEveryone = false,
-        int $maxSuggestedProducts = null,
-        string $thankYouDisplayHook = null
-    )
+    public function __construct(bool $enabledForEveryone = false, int $maxSuggestedProducts = null, string $thankYouDisplayHook = null)
     {
         $this->enabledForEveryone = $enabledForEveryone;
         $this->maxSuggestedProducts = $maxSuggestedProducts;

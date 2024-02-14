@@ -4,35 +4,38 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Controller\Admin;
 
+use izi\prestashop\Command\Config\CheckStatusCommand;
+use izi\prestashop\Command\Config\DownloadModuleDataCommand;
 use izi\prestashop\Command\Config\UpdateAdvancedConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
-use izi\prestashop\Command\Config\UpdateShippingConfigurationCommandFactory;
+use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
-use izi\prestashop\Configuration\ShippingAmpConfiguration;
+use izi\prestashop\Configuration\ShippingConfiguration;
+use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Form\Type\AdvancedConfigurationType;
 use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
 use izi\prestashop\Form\Type\GuiConfigurationType;
 use izi\prestashop\Form\Type\ShippingConfigurationType;
-use PrestaShopBundle\Security\Voter\PageVoter;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route(path="config", name="admin_inpost_izi_config_", defaults={"_legacy_controller"=ConfigurationController::TAB_NAME, "_legacy_link"=ConfigurationController::TAB_NAME})
+ * @Route(path="config", name="admin_inpost_izi_config_")
  */
 final class ConfigurationController extends AbstractController
 {
-    public const TAB_NAME = 'AdminInPostIziConfiguration';
     private const TRANSLATION_SOURCE = 'configurationcontroller';
 
     /**
@@ -56,13 +59,11 @@ final class ConfigurationController extends AbstractController
      */
     public function generalConfig(Request $request, UpdateGeneralConfigurationCommandFactory $commandFactory, CommandBusInterface $bus): Response
     {
-//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+        $this->checkAccess();
 
         $command = $commandFactory->create();
 
-        $form = $this->createForm(GeneralConfigurationType::class, $command, [
-            'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
-        ]);
+        $form = $this->createForm(GeneralConfigurationType::class, $command);
 
         if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
             try {
@@ -77,7 +78,6 @@ final class ConfigurationController extends AbstractController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/general.html.twig', [
             'form' => $form->createView(),
-            'can_update' => $canUpdate,
             'layoutTitle' => $this->module->l('Configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
         ]);
@@ -88,14 +88,12 @@ final class ConfigurationController extends AbstractController
      */
     public function consentConfig(Request $request, ConsentsConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
-//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+        $this->checkAccess();
 
         $consents = $configuration->getConsents() ?: [new Consent()];
         $command = new UpdateConsentsConfigurationCommand(...$consents);
 
-        $form = $this->createForm(ConsentsConfigurationType::class, $command, [
-            'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
-        ]);
+        $form = $this->createForm(ConsentsConfigurationType::class, $command);
 
         if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
             try {
@@ -110,7 +108,6 @@ final class ConfigurationController extends AbstractController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/consents.html.twig', [
             'form' => $form->createView(),
-            'can_update' => $canUpdate,
             'layoutTitle' => $this->module->l('Consents', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
         ]);
@@ -123,10 +120,9 @@ final class ConfigurationController extends AbstractController
      */
     public function guiConfig(Request $request, GuiConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
-//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
-        $form = $this->createForm(GuiConfigurationType::class, $configuration->copy(), [
-            'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
-        ]);
+        $this->checkAccess();
+
+        $form = $this->createForm(GuiConfigurationType::class, $configuration->copy());
 
         if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
             $command = new UpdateGuiConfigurationCommand($form->getData());
@@ -143,27 +139,25 @@ final class ConfigurationController extends AbstractController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/gui.html.twig', [
             'form' => $form->createView(),
-            'can_update' => $canUpdate,
             'layoutTitle' => $this->module->l('GUI configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
         ]);
     }
 
     /**
-     * @param UpdateShippingConfigurationCommandFactory $commandFactory
+     * @param ShippingConfiguration $configuration
      *
      * @Route(path="/shipping", name="shipping", methods={"GET", "POST"})
      */
-    public function shippingConfig(Request $request, UpdateShippingConfigurationCommandFactory $commandFactory, CommandBusInterface $bus): Response
+    public function shippingConfig(Request $request, ShippingConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
-//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
-        $command = $commandFactory->create();
+        $this->checkAccess();
 
-        $form = $this->createForm(ShippingConfigurationType::class, $command, [
-            'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
-        ]);
+        $form = $this->createForm(ShippingConfigurationType::class, $configuration->copy());
 
         if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+            $command = new UpdateShippingConfigurationCommand($form->getData());
+
             try {
                 $bus->handle($command);
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
@@ -176,7 +170,6 @@ final class ConfigurationController extends AbstractController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/shipping.html.twig', [
             'form' => $form->createView(),
-            'can_update' => $canUpdate,
             'layoutTitle' => $this->module->l('Shipping configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
         ]);
@@ -187,10 +180,9 @@ final class ConfigurationController extends AbstractController
      */
     public function support(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
-//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+        $this->checkAccess();
 
         $form = $this->createForm(AdvancedConfigurationType::class, $configuration->copy(), [
-            'disabled' => !$canUpdate = true || $this->isGranted(PageVoter::UPDATE, self::TAB_NAME),
             'action' => $this->generateUrl('admin_inpost_izi_config_support_save'),
         ]);
 
@@ -198,6 +190,7 @@ final class ConfigurationController extends AbstractController
             'layoutTitle' => $this->module->l('Support', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
             'form' => $form->createView(),
+            'status' => $bus->handle(new CheckStatusCommand()),
         ]);
     }
 
@@ -206,7 +199,12 @@ final class ConfigurationController extends AbstractController
      */
     public function supportSave(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
-//        $this->denyAccessUnlessGranted(PageVoter::READ, self::TAB_NAME);
+        if (!$this->module->getPermission('configure')) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Access Denied.',
+            ], 403);
+        }
 
         $form = $this->createForm(AdvancedConfigurationType::class, $configuration->copy());
 
@@ -218,20 +216,40 @@ final class ConfigurationController extends AbstractController
 
                 return new JsonResponse([
                     'success' => true,
-                    'message' => $this->trans('Successful update.', [], 'Admin.Notifications.Success')
+                    'message' => $this->trans('Successful update.', [], 'Admin.Notifications.Success'),
                 ]);
             } catch (\Exception $e) {
                 return new JsonResponse([
                     'success' => false,
-                    'message' => $e->getMessage()
-                ], 400);
+                    'message' => $e->getMessage(),
+                ], 500);
             }
         } else {
             return new JsonResponse([
                 'success' => false,
-                'message' => $this->trans('Oops... looks like an unexpected error occurred', [], 'Admin.Notifications.Error')
+                'message' => $this->trans('Oops... looks like an unexpected error occurred', [], 'Admin.Notifications.Error'),
             ], 400);
         }
+    }
+
+    /**
+     * @Route(path="/download-data", name="download_data", methods={"GET"})
+     */
+    public function downloadData(CommandBusInterface $bus): Response
+    {
+        $this->checkAccess();
+
+        $callback = $bus->handle(new DownloadModuleDataCommand());
+        $response = new StreamedResponse($callback);
+
+        $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, 'module_data.zip');
+
+        $response->headers->add([
+            'Content-Type' => 'application/x-zip',
+            'Content-Disposition' => $disposition,
+        ]);
+
+        return $response;
     }
 
     private function renderNav(Request $request): string
@@ -285,5 +303,12 @@ final class ConfigurationController extends AbstractController
             '%type%' => get_class($e),
             '%code%' => $e->getCode(),
         ], 'Admin.Notifications.Error'));
+    }
+
+    private function checkAccess(): void
+    {
+        if (!$this->module->getPermission('configure')) {
+            throw $this->createAccessDeniedException();
+        }
     }
 }

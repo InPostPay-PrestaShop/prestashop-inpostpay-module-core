@@ -199,9 +199,6 @@ services:
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler
 
-  izi\prestashop\Command\Config\UpdateShippingConfigurationCommandFactory:
-    class: izi\prestashop\Command\Config\UpdateShippingConfigurationCommandFactory
-
   izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler
@@ -210,12 +207,36 @@ services:
   izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler
 
+  izi\prestashop\Handler\Config\CheckStatusHandlerInterface: '@izi\prestashop\Handler\Config\CheckStatusHandler'
+  izi\prestashop\Handler\Config\CheckStatusHandler:
+    class: izi\prestashop\Handler\Config\CheckStatusHandler
+    arguments:
+      - !tagged inpost.izi.status_checker
+
+  izi\prestashop\Handler\Config\DownloadModuleDataHandlerInterface: '@izi\prestashop\Handler\Config\DownloadModuleDataHandler'
+  izi\prestashop\Handler\Config\DownloadModuleDataHandler:
+    class: izi\prestashop\Handler\Config\DownloadModuleDataHandler
+    bind:
+      $logsDirectory: '%inpost.izi.logs_dir%'
+
   izi\prestashop\Form\Provider\DefaultCurrencyProviderInterface: '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
   izi\prestashop\Form\Provider\DefaultCurrencyProvider:
     class: izi\prestashop\Form\Provider\DefaultCurrencyProvider
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
-      -
+
   izi\prestashop\Twig\Extension\LegacyTranslation:
     tags:
       - { name: 'twig.extension' }
+
+  izi\prestashop\Handler\Config\Status\ConfigurationStatusChecker:
+    class: izi\prestashop\Handler\Config\Status\ConfigurationStatusChecker
+    tags:
+      - { name: inpost.izi.status_checker }
+
+  izi\prestashop\Handler\Config\Status\DeliveryOptionsStatusChecker:
+    class: izi\prestashop\Handler\Config\Status\DeliveryOptionsStatusChecker
+    tags:
+      - { name: inpost.izi.status_checker }
+    bind:
+      $carrierRepository: '@izi\prestashop\ObjectModel\Repository\CarrierRepository'

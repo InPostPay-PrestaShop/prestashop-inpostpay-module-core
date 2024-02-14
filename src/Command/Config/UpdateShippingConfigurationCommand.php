@@ -4,13 +4,8 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Command\Config;
 
-use izi\prestashop\Configuration\DTO\Shipping;
-use izi\prestashop\Configuration\ShippingAmpConfiguration;
-use izi\prestashop\Configuration\ShippingAmpConfigurationInterface;
-use izi\prestashop\Configuration\ShippingCourierConfiguration;
-use izi\prestashop\Configuration\ShippingCourierConfigurationInterface;
+use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @see UpdateShippingConfigurationHandler
@@ -18,50 +13,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class UpdateShippingConfigurationCommand
 {
     /**
-     * @var ShippingCourierConfigurationInterface
-     *
-     * @Assert\Valid()
+     * @var ShippingConfigurationInterface
      */
-    private $shippingCourierConfiguration;
+    private $configuration;
 
-    /**
-     * @var ShippingAmpConfigurationInterface
-     *
-     * @Assert\Valid()
-     */
-    private $shippingAmpConfiguration;
-
-    /**
-     * @param ShippingCourierConfiguration $shippingCourierConfiguration
-     * @param ShippingAmpConfiguration $shippingAmpConfiguration
-     */
-    public function __construct(ShippingCourierConfigurationInterface $shippingCourierConfiguration, ShippingAmpConfigurationInterface $shippingAmpConfiguration)
+    public function __construct(ShippingConfigurationInterface $configuration)
     {
-        $this->shippingCourierConfiguration = $shippingCourierConfiguration;
-        $this->shippingAmpConfiguration = $shippingAmpConfiguration;
+        $this->configuration = $configuration;
     }
 
-    public function getShippingCourier(): Shipping
+    public function getConfiguration(): ShippingConfigurationInterface
     {
-        return $this->shippingCourierConfiguration->getCourierShipping();
-    }
-
-    public function setShippingCourier(Shipping $shipping): self
-    {
-        $this->shippingCourierConfiguration->setCourierShipping($shipping);
-
-        return $this;
-    }
-
-    public function getShippingAmp(): Shipping
-    {
-        return $this->shippingAmpConfiguration->getAmpShipping();
-    }
-
-    public function setShippingAmp(Shipping $shipping): self
-    {
-        $this->shippingAmpConfiguration->setAmpShipping($shipping);
-
-        return $this;
+        return $this->configuration;
     }
 }

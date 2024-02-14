@@ -16,6 +16,8 @@ services:
       - Cart: '@inpost.izi.object_model.cart_repository'
         Currency: '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
         Carrier: '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+        Configuration: '@izi\prestashop\ObjectModel\Repository\ConfigurationRepository'
+        Hook: '@izi\prestashop\ObjectModel\Repository\HookRepository'
         Order: '@inpost.izi.object_model.order_repository'
         OrderState: '@inpost.izi.object_model.order_state_repository'
         InPostShipmentModel: '@izi\prestashop\ObjectModel\Repository\ShipmentRepository'

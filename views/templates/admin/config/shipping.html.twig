@@ -16,13 +16,13 @@
           {{ form_errors(form) }}
 
           {% include '@Modules/inpostizi/views/templates/admin/config/shipping/form.html.twig' with {
-            form: form.shippingCourier,
+            form: form.courierShippingOptions,
           } %}
         </div>
 
         <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
           {% include '@Modules/inpostizi/views/templates/admin/config/shipping/form.html.twig' with {
-            form: form.shippingAmp,
+            form: form.apmShippingOptions,
           } %}
 
           {{ form_rest(form) }}
@@ -31,7 +31,7 @@
         <div class="card-footer clearfix">
           <a href="{{ path('admin_module_manage') }}" class="btn btn-outline-secondary">{{ 'Back'|trans({}, 'Admin.Global') }}</a>
 
-          <button class="btn btn-primary float-right"{% if not can_update %} disabled{% endif %}>{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
+          <button class="btn btn-primary float-right">{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
         </div>
         {{ form_end(form) }}
       </div>

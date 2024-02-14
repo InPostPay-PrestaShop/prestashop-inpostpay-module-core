@@ -6,8 +6,12 @@
   <i class="material-icons mr-2">check_circle</i>
   <span>
     {{ 'Module status'|legacy_trans }}:
-    {# TODO: pass status https://waynet.slack.com/archives/C063QMYG8TY/p1707306380868329 #}
-    <span class="text-success text-uppercase">OK</span>
+
+    {% if status.OK %}
+      <span class="text-success text-uppercase">OK</span>
+    {% else %}
+      <span class="text-danger text-uppercase">{{ 'Error'|trans({}, 'validators') }}</span>
+    {% endif %}
   </span>
 {% endblock %}
 
@@ -15,12 +19,22 @@
 
 {% block support_block_body_content %}
   <div class="row no-gutters">
+    {% if not status.OK %}
+      <div class="col-12 border-bottom">
+        <div class="p-3">
+          <ul>
+            {% for error in status.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
     <div class="col-6 border-right">
       <div class="p-3">
-        {#TODO: BTN PLACEHOLDER RENDER FORM#}
-        <a href="#" class="btn btn-sm btn-block px-0 d-flex justify-content-center align-items-center btn-link">
+        <a href="{{ path('admin_inpost_izi_config_download_data') }}" class="btn btn-sm btn-block px-0 d-flex justify-content-center align-items-center btn-link">
           <span class="material-icons btn-icon">content_copy</span>
-          Kopiuj dane wtyczki i log
+          {{ 'Download logs and module data'|legacy_trans }}
         </a>
       </div>
     </div>

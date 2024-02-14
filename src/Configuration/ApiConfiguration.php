@@ -17,8 +17,8 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
 {
     private const ENVIRONMENT_TYPE = 'INPOST_PAY_environment';
     private const OAUTH2_CLIENT_ID = 'INPOST_PAY_client_id';
-    private const OAUTH2_CLIENT_SECRET = 'INPOST_PAY_client_secret';
-    private const ACCESS_TOKEN = 'INPOST_PAY_ACCESS_TOKEN';
+    public const OAUTH2_CLIENT_SECRET = 'INPOST_PAY_client_secret';
+    public const ACCESS_TOKEN = 'INPOST_PAY_ACCESS_TOKEN';
 
     /**
      * @var ConfigurationInterface

@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @see UpdateConsentsConfigurationHandler
@@ -17,6 +18,8 @@ final class UpdateConsentsConfigurationCommand implements ConsentsConfigurationI
 {
     /**
      * @var Collection<Consent>
+     *
+     * @Assert\Valid()
      */
     private $consents;
 

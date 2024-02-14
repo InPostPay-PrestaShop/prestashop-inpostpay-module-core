@@ -22,7 +22,7 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\GreaterThanOrEqual(0)
      */
-    private $shippingPrice;
+    private $weekendDeliveryPrice;
 
     /**
      * @var int|null
@@ -30,7 +30,7 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\Range(min=Day::MIN_DAY, max=Day::MAX_DAY)
      */
-    private $shippingAvailableFromDay;
+    private $weekendDeliveryAvailableFromDay;
 
     /**
      * @var int|null
@@ -38,7 +38,7 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\Range(min=Day::MIN_DAY, max=Day::MAX_DAY)
      */
-    private $shippingAvailableToDay;
+    private $weekendDeliveryAvailableToDay;
 
     /**
      * @var int|null
@@ -46,7 +46,7 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\Range(min=Hour::MIN_HOUR, max=Hour::MAX_HOUR)
      */
-    private $shippingAvailableFromHour;
+    private $weekendDeliveryAvailableFromHour;
 
     /**
      * @var int|null
@@ -54,7 +54,7 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\Range(min=Hour::MIN_HOUR, max=Hour::MAX_HOUR)
      */
-    private $shippingAvailableToHour;
+    private $weekendDeliveryAvailableToHour;
 
     /**
      * @var float|null
@@ -62,7 +62,7 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\GreaterThanOrEqual(0)
      */
-    private $shippingCodPrice;
+    private $codPrice;
 
     /**
      * @var int|null
@@ -70,7 +70,7 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\Range(min=Day::MIN_DAY, max=Day::MAX_DAY)
      */
-    private $shippingCodAvailableFromDay;
+    private $codAvailableFromDay;
 
     /**
      * @var int|null
@@ -78,7 +78,7 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\Range(min=Day::MIN_DAY, max=Day::MAX_DAY)
      */
-    private $shippingCodAvailableToDay;
+    private $codAvailableToDay;
 
     /**
      * @var int|null
@@ -86,7 +86,7 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\Range(min=Hour::MIN_HOUR, max=Hour::MAX_HOUR)
      */
-    private $shippingCodAvailableFromHour;
+    private $codAvailableFromHour;
 
     /**
      * @var int|null
@@ -94,9 +94,9 @@ final class Shipping
      * @Assert\NotNull()
      * @Assert\Range(min=Hour::MIN_HOUR, max=Hour::MAX_HOUR)
      */
-    private $shippingCodAvailableToHour;
+    private $codAvailableToHour;
 
-    public function getCarrierId(int $shopId = null): ?int
+    public function getCarrierId(): ?int
     {
         return $this->carrierId;
     }
@@ -108,122 +108,122 @@ final class Shipping
         return $this;
     }
 
-    public function getShippingPrice(): ?float
+    public function getWeekendDeliveryPrice(): ?float
     {
-        return $this->shippingPrice;
+        return $this->weekendDeliveryPrice;
     }
 
-    public function setShippingPrice(?float $shippingPrice): self
+    public function setWeekendDeliveryPrice(?float $weekendDeliveryPrice): self
     {
-        $this->shippingPrice = $shippingPrice;
+        $this->weekendDeliveryPrice = $weekendDeliveryPrice;
 
         return $this;
     }
 
-    public function getShippingAvailableFromDay(): ?int
+    public function getWeekendDeliveryAvailableFromDay(): ?int
     {
-        return $this->shippingAvailableFromDay;
+        return $this->weekendDeliveryAvailableFromDay;
     }
 
-    public function setShippingAvailableFromDay(?Day $shippingAvailableFromDay): self
+    public function setWeekendDeliveryAvailableFromDay(?Day $weekendDeliveryAvailableFromDay): self
     {
-        $this->shippingAvailableFromDay = $shippingAvailableFromDay instanceof Day ? $shippingAvailableFromDay->getId() : null;
+        $this->weekendDeliveryAvailableFromDay = $weekendDeliveryAvailableFromDay instanceof Day ? $weekendDeliveryAvailableFromDay->getId() : null;
 
         return $this;
     }
 
-    public function getShippingAvailableToDay(): ?int
+    public function getWeekendDeliveryAvailableToDay(): ?int
     {
-        return $this->shippingAvailableToDay;
+        return $this->weekendDeliveryAvailableToDay;
     }
 
-    public function setShippingAvailableToDay(?Day $shippingAvailableToDay): self
+    public function setWeekendDeliveryAvailableToDay(?Day $weekendDeliveryAvailableToDay): self
     {
-        $this->shippingAvailableToDay = $shippingAvailableToDay instanceof Day ? $shippingAvailableToDay->getId() : null;
+        $this->weekendDeliveryAvailableToDay = $weekendDeliveryAvailableToDay instanceof Day ? $weekendDeliveryAvailableToDay->getId() : null;
 
         return $this;
     }
 
-    public function getShippingAvailableFromHour(): ?int
+    public function getWeekendDeliveryAvailableFromHour(): ?int
     {
-        return $this->shippingAvailableFromHour;
+        return $this->weekendDeliveryAvailableFromHour;
     }
 
-    public function setShippingAvailableFromHour(?Hour $shippingAvailableFromHour): self
+    public function setWeekendDeliveryAvailableFromHour(?Hour $weekendDeliveryAvailableFromHour): self
     {
-        $this->shippingAvailableFromHour = $shippingAvailableFromHour instanceof Hour ? $shippingAvailableFromHour->getId() : null;
+        $this->weekendDeliveryAvailableFromHour = $weekendDeliveryAvailableFromHour instanceof Hour ? $weekendDeliveryAvailableFromHour->getId() : null;
 
         return $this;
     }
 
-    public function getShippingAvailableToHour(): ?int
+    public function getWeekendDeliveryAvailableToHour(): ?int
     {
-        return $this->shippingAvailableToHour;
+        return $this->weekendDeliveryAvailableToHour;
     }
 
-    public function setShippingAvailableToHour(?Hour $shippingAvailableToHour): self
+    public function setWeekendDeliveryAvailableToHour(?Hour $weekendDeliveryAvailableToHour): self
     {
-        $this->shippingAvailableToHour = $shippingAvailableToHour instanceof Hour ? $shippingAvailableToHour->getId() : null;
+        $this->weekendDeliveryAvailableToHour = $weekendDeliveryAvailableToHour instanceof Hour ? $weekendDeliveryAvailableToHour->getId() : null;
 
         return $this;
     }
 
-    public function getShippingCodPrice(): ?float
+    public function getCodPrice(): ?float
     {
-        return $this->shippingCodPrice;
+        return $this->codPrice;
     }
 
-    public function setShippingCodPrice(?float $shippingCodPrice): self
+    public function setCodPrice(?float $codPrice): self
     {
-        $this->shippingCodPrice = $shippingCodPrice;
+        $this->codPrice = $codPrice;
 
         return $this;
     }
 
-    public function getShippingCodAvailableFromDay(): ?int
+    public function getCodAvailableFromDay(): ?int
     {
-        return $this->shippingCodAvailableFromDay;
+        return $this->codAvailableFromDay;
     }
 
-    public function setShippingCodAvailableFromDay(?Day $shippingCodAvailableFromDay): self
+    public function setCodAvailableFromDay(?Day $codAvailableFromDay): self
     {
-        $this->shippingCodAvailableFromDay = $shippingCodAvailableFromDay instanceof Day ? $shippingCodAvailableFromDay->getId() : null;
+        $this->codAvailableFromDay = $codAvailableFromDay instanceof Day ? $codAvailableFromDay->getId() : null;
 
         return $this;
     }
 
-    public function getShippingCodAvailableToDay(): ?int
+    public function getCodAvailableToDay(): ?int
     {
-        return $this->shippingCodAvailableToDay;
+        return $this->codAvailableToDay;
     }
 
-    public function setShippingCodAvailableToDay(?Day $shippingCodAvailableToDay): self
+    public function setCodAvailableToDay(?Day $codAvailableToDay): self
     {
-        $this->shippingCodAvailableToDay = $shippingCodAvailableToDay instanceof Day ? $shippingCodAvailableToDay->getId() : null;
+        $this->codAvailableToDay = $codAvailableToDay instanceof Day ? $codAvailableToDay->getId() : null;
 
         return $this;
     }
 
-    public function getShippingCodAvailableFromHour(): ?int
+    public function getCodAvailableFromHour(): ?int
     {
-        return $this->shippingCodAvailableFromHour;
+        return $this->codAvailableFromHour;
     }
 
-    public function setShippingCodAvailableFromHour(?Hour $shippingCodAvailableFromHour): self
+    public function setCodAvailableFromHour(?Hour $codAvailableFromHour): self
     {
-        $this->shippingCodAvailableFromHour = $shippingCodAvailableFromHour instanceof Hour ? $shippingCodAvailableFromHour->getId() : null;
+        $this->codAvailableFromHour = $codAvailableFromHour instanceof Hour ? $codAvailableFromHour->getId() : null;
 
         return $this;
     }
 
-    public function getShippingCodAvailableToHour(): ?int
+    public function getCodAvailableToHour(): ?int
     {
-        return $this->shippingCodAvailableToHour;
+        return $this->codAvailableToHour;
     }
 
-    public function setShippingCodAvailableToHour(?Hour $shippingCodAvailableToHour): self
+    public function setCodAvailableToHour(?Hour $codAvailableToHour): self
     {
-        $this->shippingCodAvailableToHour = $shippingCodAvailableToHour instanceof Hour ? $shippingCodAvailableToHour->getId() : null;
+        $this->codAvailableToHour = $codAvailableToHour instanceof Hour ? $codAvailableToHour->getId() : null;
 
         return $this;
     }

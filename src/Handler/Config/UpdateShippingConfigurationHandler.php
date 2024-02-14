@@ -5,36 +5,26 @@ declare(strict_types=1);
 namespace izi\prestashop\Handler\Config;
 
 use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
-use izi\prestashop\Configuration\ShippingAmpConfiguration;
-use izi\prestashop\Configuration\ShippingAmpConfigurationInterface;
-use izi\prestashop\Configuration\ShippingCourierConfiguration;
-use izi\prestashop\Configuration\ShippingCourierConfigurationInterface;
+use izi\prestashop\Configuration\ShippingConfiguration;
+use izi\prestashop\Configuration\ShippingConfigurationInterface;
 
 final class UpdateShippingConfigurationHandler implements UpdateShippingConfigurationHandlerInterface
 {
     /**
-     * @var ShippingCourierConfigurationInterface
+     * @var ShippingConfigurationInterface
      */
-    private $shippingCourierConfiguration;
+    private $configuration;
 
     /**
-     * @var ShippingAmpConfigurationInterface
+     * @param ShippingConfiguration $configuration
      */
-    private $shippingAmpConfiguration;
-
-    /**
-     * @param ShippingCourierConfiguration $shippingCourierConfiguration
-     * @param ShippingAmpConfiguration $shippingAmpConfiguration
-     */
-    public function __construct(ShippingCourierConfiguration $shippingCourierConfiguration, ShippingAmpConfiguration $shippingAmpConfiguration)
+    public function __construct(ShippingConfigurationInterface $configuration)
     {
-        $this->shippingCourierConfiguration = $shippingCourierConfiguration;
-        $this->shippingAmpConfiguration = $shippingAmpConfiguration;
+        $this->configuration = $configuration;
     }
 
     public function __invoke(UpdateShippingConfigurationCommand $command)
     {
-        $this->shippingCourierConfiguration->persist($command->getShippingCourier());
-        $this->shippingAmpConfiguration->persist($command->getShippingAmp());
+        $this->configuration->persist($command->getConfiguration());
     }
 }

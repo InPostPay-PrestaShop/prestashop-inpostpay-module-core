@@ -15,4 +15,17 @@ class CarrierRepository extends ObjectRepository
     {
         parent::__construct(\Carrier::class, $manager);
     }
+
+    public function findOneByReferenceId(int $referenceId, int $languageId = null): ?\Carrier
+    {
+        if (0 >= $referenceId) {
+            return null;
+        }
+
+        if (false === $carrier = \Carrier::getCarrierByReference($referenceId, $languageId)) {
+            return null;
+        }
+
+        return $carrier;
+    }
 }

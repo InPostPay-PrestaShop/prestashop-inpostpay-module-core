@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Form\Type;
 
-use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
+use izi\prestashop\Configuration\DTO\ShippingConfiguration;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -23,14 +23,14 @@ final class ShippingConfigurationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('shippingCourier', ShippingType::class, [
+            ->add('courierShippingOptions', ShippingType::class, [
                 'label' => $this->module->l('Courier', self::TRANSLATION_SOURCE),
                 'required' => false,
                 'shippingIdLabel' => $this->module->l('Courier', self::TRANSLATION_SOURCE),
                 'shippingPriceLabel' => $this->module->l('Courier package weekend net price', self::TRANSLATION_SOURCE),
                 'shippingCodPriceLabel' => $this->module->l('Courier COD net price', self::TRANSLATION_SOURCE),
             ])
-            ->add('shippingAmp', ShippingType::class, [
+            ->add('apmShippingOptions', ShippingType::class, [
                 'label' => $this->module->l('Paczkomat', self::TRANSLATION_SOURCE),
                 'required' => false,
                 'shippingIdLabel' => $this->module->l('Paczkomat', self::TRANSLATION_SOURCE),
@@ -42,7 +42,7 @@ final class ShippingConfigurationType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => UpdateShippingConfigurationCommand::class,
+            'data_class' => ShippingConfiguration::class,
         ]);
     }
 }

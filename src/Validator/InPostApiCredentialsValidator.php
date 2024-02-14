@@ -8,6 +8,7 @@ use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Environment\AuthServerUriCollection;
 use izi\prestashop\OAuth2\AuthorizationProviderFactoryInterface;
 use izi\prestashop\OAuth2\Exception\AccessTokenRequestException;
+use izi\prestashop\OAuth2\Token\AccessTokenInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -16,6 +17,9 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 final class InPostApiCredentialsValidator extends ConstraintValidator
 {
     private const TRANSLATION_SOURCE = 'apiconfigurationvalidator';
+    private const REQUIRED_SCOPES = [
+        'izi:basket:write',
+    ];
 
     private $module;
     private $authProviderFactory;
@@ -40,14 +44,18 @@ final class InPostApiCredentialsValidator extends ConstraintValidator
             throw new UnexpectedTypeException($value, ApiConfigurationInterface::class);
         }
 
+        if (null === $credentials = $value->getClientCredentials()) {
+            return;
+        }
+
         $uriCollection = new AuthServerUriCollection($value->getEnvironment());
 
         try {
             $token = $this->authProviderFactory
-                ->create($uriCollection, $value->getClientCredentials())
+                ->create($uriCollection, $credentials)
                 ->getAccessToken();
 
-            $token->getScopes(); // TODO? check if all required scopes were granted?
+            $this->validateTokenScopes($token);
         } catch (AccessTokenRequestException $e) {
             $this->context
                 ->buildViolation($this->module->l('Invalid client credentials.', self::TRANSLATION_SOURCE))
@@ -59,6 +67,19 @@ final class InPostApiCredentialsValidator extends ConstraintValidator
         } catch (\Exception $e) {
             $this->context
                 ->buildViolation($this->module->l('Could not validate client credentials.', self::TRANSLATION_SOURCE))
+                ->addViolation();
+        }
+    }
+
+    private function validateTokenScopes(AccessTokenInterface $token): void
+    {
+        if (null === $scopes = $token->getScopes()) {
+            return;
+        }
+
+        if ([] !== array_diff(self::REQUIRED_SCOPES, $scopes)) {
+            $this->context
+                ->buildViolation($this->module->l('The granted access token does not have all of the required permissions. To resolve this issue, please contact support.', self::TRANSLATION_SOURCE))
                 ->addViolation();
         }
     }

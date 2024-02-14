@@ -22,36 +22,36 @@ final class ShippingType extends AbstractType
                 'label' => $options['shippingIdLabel'],
                 'empty_data' => null,
             ])
-            ->add('shippingPrice', MoneyCurrencyType::class, [
+            ->add('weekendDeliveryPrice', MoneyCurrencyType::class, [
                 'required' => false,
                 'label' => $options['shippingPriceLabel'],
             ])
-            ->add('shippingAvailableFromDay', DayChoiceType::class, [
+            ->add('weekendDeliveryAvailableFromDay', DayChoiceType::class, [
                 'required' => false,
             ])
-            ->add('shippingAvailableToDay', DayChoiceType::class, [
+            ->add('weekendDeliveryAvailableToDay', DayChoiceType::class, [
                 'required' => false,
             ])
-            ->add('shippingAvailableFromHour', HourChoiceType::class, [
+            ->add('weekendDeliveryAvailableFromHour', HourChoiceType::class, [
                 'required' => false,
             ])
-            ->add('shippingAvailableToHour', HourChoiceType::class, [
+            ->add('weekendDeliveryAvailableToHour', HourChoiceType::class, [
                 'required' => false,
             ])
-            ->add('shippingCodPrice', MoneyCurrencyType::class, [
+            ->add('codPrice', MoneyCurrencyType::class, [
                 'required' => false,
                 'label' => $options['shippingCodPriceLabel'],
             ])
-            ->add('shippingCodAvailableFromDay', DayChoiceType::class, [
+            ->add('codAvailableFromDay', DayChoiceType::class, [
                 'required' => false,
             ])
-            ->add('shippingCodAvailableToDay', DayChoiceType::class, [
+            ->add('codAvailableToDay', DayChoiceType::class, [
                 'required' => false,
             ])
-            ->add('shippingCodAvailableFromHour', HourChoiceType::class, [
+            ->add('codAvailableFromHour', HourChoiceType::class, [
                 'required' => false,
             ])
-            ->add('shippingCodAvailableToHour', HourChoiceType::class, [
+            ->add('codAvailableToHour', HourChoiceType::class, [
                 'required' => false,
             ]);
 

@@ -10,6 +10,7 @@
 {l s='Contact your sales representative' mod='inpostizi'}
 {l s='FAQ' mod='inpostizi'}
 {l s='Module status' mod='inpostizi'}
+{l s='Download logs and module data' mod='inpostizi'}
 
 {l s='Useful links' mod='inpostizi'}
 {l s='Merchant\'s guide - how to correctly display InPost Pay in your online store' mod='inpostizi'}
