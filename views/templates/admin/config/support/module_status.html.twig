@@ -24,7 +24,7 @@
         <div class="p-3">
           <ul>
             {% for error in status.errors %}
-              <li>{{ error }}</li>
+              <li>{{ error|raw }}</li>
             {% endfor %}
           </ul>
         </div>

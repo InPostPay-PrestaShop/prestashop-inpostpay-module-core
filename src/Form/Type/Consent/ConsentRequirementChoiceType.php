@@ -6,6 +6,7 @@ namespace izi\prestashop\Form\Type\Consent;
 
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Form\DataTransformer\EnumDataTransformer;
+use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -16,13 +17,13 @@ final class ConsentRequirementChoiceType extends AbstractType
     private const TRANSLATION_SOURCE = 'consentrequirementchoicetype';
 
     /**
-     * @var \Module
+     * @var LegacyTranslator
      */
-    private $module;
+    private $translator;
 
-    public function __construct(\Module $module)
+    public function __construct(LegacyTranslator $translator)
     {
-        $this->module = $module;
+        $this->translator = $translator;
     }
 
     public function getParent(): string
@@ -39,9 +40,9 @@ final class ConsentRequirementChoiceType extends AbstractType
     {
         $resolver->setDefaults([
             'choices' => [
-                $this->module->l('Optional', self::TRANSLATION_SOURCE) => ConsentRequirementType::Optional()->value,
-                $this->module->l('Always required', self::TRANSLATION_SOURCE) => ConsentRequirementType::RequiredAlways()->value,
-                $this->module->l('Required once', self::TRANSLATION_SOURCE) => ConsentRequirementType::RequiredOnce()->value,
+                $this->translator->l('Optional', self::TRANSLATION_SOURCE) => ConsentRequirementType::Optional()->value,
+                $this->translator->l('Always required', self::TRANSLATION_SOURCE) => ConsentRequirementType::RequiredAlways()->value,
+                $this->translator->l('Required once', self::TRANSLATION_SOURCE) => ConsentRequirementType::RequiredOnce()->value,
             ],
         ]);
     }

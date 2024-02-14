@@ -50,8 +50,9 @@ services:
     class: izi\prestashop\Form\Type\OrderStateChoiceType
     tags:
       - { name: form.type }
-    bind:
-      $choiceLoader: '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
 
   izi\prestashop\Form\Type\ShippingConfigurationType:
     class: izi\prestashop\Form\Type\ShippingConfigurationType
@@ -72,22 +73,22 @@ services:
     class: izi\prestashop\Form\Type\MoneyCurrencyType
     tags:
       - { name: form.type }
-    bind:
-      $currencyProvider: '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
+    arguments:
+      - '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
 
   izi\prestashop\Form\Type\Shipping\CarrierChoiceType:
     class: izi\prestashop\Form\Type\Shipping\CarrierChoiceType
     tags:
       - { name: form.type }
-    bind:
-      $choiceLoader: '@izi\prestashop\Form\ChoiceList\CarrierChoiceLoader'
+    arguments:
+      - '@izi\prestashop\Form\ChoiceList\CarrierChoiceLoader'
 
   izi\prestashop\Form\Type\Shipping\HourChoiceType:
     class: izi\prestashop\Form\Type\Shipping\HourChoiceType
     tags:
       - { name: form.type }
-    bind:
-      $choiceLoader: '@izi\prestashop\Form\ChoiceList\HourChoiceLoader'
+    arguments:
+      - '@izi\prestashop\Form\ChoiceList\HourChoiceLoader'
 
   izi\prestashop\Form\Type\Shipping\DayChoiceType:
     class: izi\prestashop\Form\Type\Shipping\DayChoiceType
@@ -100,13 +101,14 @@ services:
     class: izi\prestashop\Form\Type\OrderStatusDescriptionMapType
     tags:
       - { name: form.type }
-    bind:
-      $choiceLoader: '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
 
   izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader
-    bind:
-      $repository: '@inpost.izi.object_model.order_state_repository'
+    arguments:
+      - '@inpost.izi.object_model.order_state_repository'
 
   izi\prestashop\Form\ChoiceList\CarrierChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\CarrierChoiceLoader
@@ -115,8 +117,8 @@ services:
 
   izi\prestashop\Form\ChoiceList\DayChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\DayChoiceLoader
-    bind:
-      $dayFactory: '@izi\prestashop\Configuration\Factory\DayFactory'
+    arguments:
+      - '@izi\prestashop\Configuration\Factory\DayFactory'
 
   izi\prestashop\Form\ChoiceList\HourChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\HourChoiceLoader
@@ -133,8 +135,9 @@ services:
     class: izi\prestashop\Validator\InPostApiCredentialsValidator
     tags:
       - { name: validator.constraint_validator }
-    bind:
-      $authProviderFactory: '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
 
   izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory:
     class: izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory
@@ -148,8 +151,10 @@ services:
     class: izi\prestashop\Form\Type\Consent\ConsentType
     tags:
       - { name: form.type }
-    bind:
-      $cmsPageRepository: '@izi\prestashop\ObjectModel\Repository\CmsPageRepository'
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\Repository\CmsPageRepository'
 
   izi\prestashop\Form\Type\Consent\ConsentRequirementChoiceType:
     class: izi\prestashop\Form\Type\Consent\ConsentRequirementChoiceType
@@ -216,8 +221,11 @@ services:
   izi\prestashop\Handler\Config\DownloadModuleDataHandlerInterface: '@izi\prestashop\Handler\Config\DownloadModuleDataHandler'
   izi\prestashop\Handler\Config\DownloadModuleDataHandler:
     class: izi\prestashop\Handler\Config\DownloadModuleDataHandler
-    bind:
-      $logsDirectory: '%inpost.izi.logs_dir%'
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '%inpost.izi.logs_dir%'
 
   izi\prestashop\Form\Provider\DefaultCurrencyProviderInterface: '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
   izi\prestashop\Form\Provider\DefaultCurrencyProvider:
@@ -225,7 +233,8 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
 
-  izi\prestashop\Twig\Extension\LegacyTranslation:
+  izi\prestashop\Twig\Extension\LegacyTranslationExtension:
+    class: izi\prestashop\Twig\Extension\LegacyTranslationExtension
     tags:
       - { name: 'twig.extension' }
 
@@ -238,5 +247,11 @@ services:
     class: izi\prestashop\Handler\Config\Status\DeliveryOptionsStatusChecker
     tags:
       - { name: inpost.izi.status_checker }
-    bind:
-      $carrierRepository: '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+
+  izi\prestashop\Translation\LegacyTranslator:
+    class: izi\prestashop\Translation\LegacyTranslator
+    arguments:
+      - inpostizi

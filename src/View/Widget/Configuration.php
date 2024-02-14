@@ -7,9 +7,6 @@ namespace izi\prestashop\View\Widget;
 use izi\prestashop\Common\BindingPlace;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @implements \IteratorAggregate<string, string>
- */
 final class Configuration implements \IteratorAggregate, \JsonSerializable
 {
     public const WIDTH_MIN_PX = 220;

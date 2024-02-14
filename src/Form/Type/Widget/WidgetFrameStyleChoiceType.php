@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type\Widget;
 
 use izi\prestashop\Form\DataTransformer\EnumDataTransformer;
+use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\View\Widget\FrameStyle;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -15,11 +16,11 @@ final class WidgetFrameStyleChoiceType extends AbstractType
 {
     private const TRANSLATION_SOURCE = 'widgetframestylechoicetype';
 
-    private $module;
+    private $translator;
 
-    public function __construct(\Module $module)
+    public function __construct(LegacyTranslator $translator)
     {
-        $this->module = $module;
+        $this->translator = $translator;
     }
 
     public function getParent(): string
@@ -36,11 +37,11 @@ final class WidgetFrameStyleChoiceType extends AbstractType
     {
         $resolver->setDefaults([
             'choices' => [
-                $this->module->l('Rounded', self::TRANSLATION_SOURCE) => FrameStyle::Rounded()->value,
-                $this->module->l('Round', self::TRANSLATION_SOURCE) => FrameStyle::Round()->value,
+                $this->translator->l('Rounded', self::TRANSLATION_SOURCE) => FrameStyle::Rounded()->value,
+                $this->translator->l('Round', self::TRANSLATION_SOURCE) => FrameStyle::Round()->value,
             ],
             'required' => false,
-            'placeholder' => $this->module->l('Rectangular', self::TRANSLATION_SOURCE),
+            'placeholder' => $this->translator->l('Rectangular', self::TRANSLATION_SOURCE),
         ]);
     }
 }

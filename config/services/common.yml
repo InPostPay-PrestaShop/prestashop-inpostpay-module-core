@@ -531,8 +531,8 @@ services:
   izi\prestashop\Configuration\Factory\DayFactoryInterface: '@izi\prestashop\Configuration\Factory\DayFactory'
   izi\prestashop\Configuration\Factory\DayFactory:
     class: izi\prestashop\Configuration\Factory\DayFactory
-    bind:
-      $module: '@inpost.izi.module'
+    arguments:
+      - '@inpost.izi.module'
 
   izi\prestashop\Configuration\Factory\HourFactoryInterface: '@izi\prestashop\Configuration\Factory\HourFactory'
   izi\prestashop\Configuration\Factory\HourFactory:

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\AdvancedConfiguration;
+use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -14,11 +15,11 @@ final class AdvancedConfigurationType extends AbstractType
 {
     private const TRANSLATION_SOURCE = 'advancedconfigurationtype';
 
-    private $module;
+    private $translator;
 
-    public function __construct(\Module $module)
+    public function __construct(LegacyTranslator $translator)
     {
-        $this->module = $module;
+        $this->translator = $translator;
     }
 
 
@@ -28,8 +29,8 @@ final class AdvancedConfigurationType extends AbstractType
             ->add('debugEnabled', SwitchType::class, [
                 'required' => false,
                 'choices' => [
-                    $this->module->l('Enable debug mode', self::TRANSLATION_SOURCE) => false,
-                    $this->module->l('Disable debug mode', self::TRANSLATION_SOURCE) => true,
+                    $this->translator->l('Enable debug mode', self::TRANSLATION_SOURCE) => false,
+                    $this->translator->l('Disable debug mode', self::TRANSLATION_SOURCE) => true,
                 ],
             ]);
 

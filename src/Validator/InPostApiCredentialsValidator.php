@@ -9,6 +9,7 @@ use izi\prestashop\Environment\AuthServerUriCollection;
 use izi\prestashop\OAuth2\AuthorizationProviderFactoryInterface;
 use izi\prestashop\OAuth2\Exception\AccessTokenRequestException;
 use izi\prestashop\OAuth2\Token\AccessTokenInterface;
+use izi\prestashop\Translation\LegacyTranslator;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -21,12 +22,19 @@ final class InPostApiCredentialsValidator extends ConstraintValidator
         'izi:basket:write',
     ];
 
-    private $module;
+    /**
+     * @var LegacyTranslator
+     */
+    private $translator;
+
+    /**
+     * @var AuthorizationProviderFactoryInterface
+     */
     private $authProviderFactory;
 
-    public function __construct(\Module $module, AuthorizationProviderFactoryInterface $authProviderFactory)
+    public function __construct(LegacyTranslator $translator, AuthorizationProviderFactoryInterface $authProviderFactory)
     {
-        $this->module = $module;
+        $this->translator = $translator;
         $this->authProviderFactory = $authProviderFactory;
     }
 
@@ -58,15 +66,15 @@ final class InPostApiCredentialsValidator extends ConstraintValidator
             $this->validateTokenScopes($token);
         } catch (AccessTokenRequestException $e) {
             $this->context
-                ->buildViolation($this->module->l('Invalid client credentials.', self::TRANSLATION_SOURCE))
+                ->buildViolation($this->translator->l('Invalid client credentials.', self::TRANSLATION_SOURCE))
                 ->addViolation();
         } catch (NetworkExceptionInterface $e) {
             $this->context
-                ->buildViolation($this->module->l('Could not connect to the authorization server.', self::TRANSLATION_SOURCE))
+                ->buildViolation($this->translator->l('Could not connect to the authorization server.', self::TRANSLATION_SOURCE))
                 ->addViolation();
         } catch (\Exception $e) {
             $this->context
-                ->buildViolation($this->module->l('Could not validate client credentials.', self::TRANSLATION_SOURCE))
+                ->buildViolation($this->translator->l('Could not validate client credentials.', self::TRANSLATION_SOURCE))
                 ->addViolation();
         }
     }
@@ -79,7 +87,7 @@ final class InPostApiCredentialsValidator extends ConstraintValidator
 
         if ([] !== array_diff(self::REQUIRED_SCOPES, $scopes)) {
             $this->context
-                ->buildViolation($this->module->l('The granted access token does not have all of the required permissions. To resolve this issue, please contact support.', self::TRANSLATION_SOURCE))
+                ->buildViolation($this->translator->l('The granted access token does not have all of the required permissions. To resolve this issue, please contact support.', self::TRANSLATION_SOURCE))
                 ->addViolation();
         }
     }

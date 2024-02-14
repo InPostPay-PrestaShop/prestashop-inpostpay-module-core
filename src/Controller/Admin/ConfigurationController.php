@@ -24,6 +24,7 @@ use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
 use izi\prestashop\Form\Type\GuiConfigurationType;
 use izi\prestashop\Form\Type\ShippingConfigurationType;
+use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,18 +40,18 @@ final class ConfigurationController extends AbstractController
     private const TRANSLATION_SOURCE = 'configurationcontroller';
 
     /**
-     * @var \Module
+     * @var LegacyTranslator
      */
-    private $module;
+    private $translator;
 
     /**
      * @var \Context
      */
     private $context;
 
-    public function __construct(\Module $module, \Context $context)
+    public function __construct(LegacyTranslator $translator, \Context $context)
     {
-        $this->module = $module;
+        $this->translator = $translator;
         $this->context = $context;
     }
 
@@ -78,7 +79,7 @@ final class ConfigurationController extends AbstractController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/general.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => $this->module->l('Configuration', self::TRANSLATION_SOURCE),
+            'layoutTitle' => $this->translator->l('Configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
         ]);
     }
@@ -108,7 +109,7 @@ final class ConfigurationController extends AbstractController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/consents.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => $this->module->l('Consents', self::TRANSLATION_SOURCE),
+            'layoutTitle' => $this->translator->l('Consents', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
         ]);
     }
@@ -139,7 +140,7 @@ final class ConfigurationController extends AbstractController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/gui.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => $this->module->l('GUI configuration', self::TRANSLATION_SOURCE),
+            'layoutTitle' => $this->translator->l('GUI configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
         ]);
     }
@@ -170,7 +171,7 @@ final class ConfigurationController extends AbstractController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/shipping.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => $this->module->l('Shipping configuration', self::TRANSLATION_SOURCE),
+            'layoutTitle' => $this->translator->l('Shipping configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
         ]);
     }
@@ -187,7 +188,7 @@ final class ConfigurationController extends AbstractController
         ]);
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/support.html.twig', [
-            'layoutTitle' => $this->module->l('Support', self::TRANSLATION_SOURCE),
+            'layoutTitle' => $this->translator->l('Support', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
             'form' => $form->createView(),
             'status' => $bus->handle(new CheckStatusCommand()),
@@ -199,7 +200,7 @@ final class ConfigurationController extends AbstractController
      */
     public function supportSave(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
-        if (!$this->module->getPermission('configure')) {
+        if (!$this->checkAccess(false)) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Access Denied.',
@@ -257,23 +258,23 @@ final class ConfigurationController extends AbstractController
         $pages = [
             'general' => [
                 'route' => 'admin_inpost_izi_config_general',
-                'title' => $this->module->l('Configuration', self::TRANSLATION_SOURCE),
+                'title' => $this->translator->l('Configuration', self::TRANSLATION_SOURCE),
             ],
             'consents' => [
                 'route' => 'admin_inpost_izi_config_consents',
-                'title' => $this->module->l('Consents', self::TRANSLATION_SOURCE),
+                'title' => $this->translator->l('Consents', self::TRANSLATION_SOURCE),
             ],
             'shipping' => [
                 'route' => 'admin_inpost_izi_config_shipping',
-                'title' => $this->module->l('Shipping configuration', self::TRANSLATION_SOURCE),
+                'title' => $this->translator->l('Shipping configuration', self::TRANSLATION_SOURCE),
             ],
             'gui' => [
                 'route' => 'admin_inpost_izi_config_gui',
-                'title' => $this->module->l('GUI configuration', self::TRANSLATION_SOURCE),
+                'title' => $this->translator->l('GUI configuration', self::TRANSLATION_SOURCE),
             ],
             'support' => [
                 'route' => 'admin_inpost_izi_config_support',
-                'title' => $this->module->l('Support', self::TRANSLATION_SOURCE),
+                'title' => $this->translator->l('Support', self::TRANSLATION_SOURCE),
             ],
         ];
 
@@ -305,10 +306,15 @@ final class ConfigurationController extends AbstractController
         ], 'Admin.Notifications.Error'));
     }
 
-    private function checkAccess(): void
+    private function checkAccess(bool $throw = true): bool
     {
-        if (!$this->module->getPermission('configure')) {
+        $moduleId = \Module::getModuleIdByName('inpostizi');
+        $hasAccess = \Module::getPermissionStatic($moduleId, 'configure');
+
+        if ($throw && !$hasAccess) {
             throw $this->createAccessDeniedException();
         }
+
+        return $hasAccess;
     }
 }

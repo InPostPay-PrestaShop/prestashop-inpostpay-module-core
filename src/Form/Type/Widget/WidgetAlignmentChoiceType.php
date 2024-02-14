@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type\Widget;
 
 use izi\prestashop\Form\DataTransformer\EnumDataTransformer;
+use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\View\Widget\Alignment;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -15,11 +16,11 @@ final class WidgetAlignmentChoiceType extends AbstractType
 {
     private const TRANSLATION_SOURCE = 'widgetalignmentchoicetype';
 
-    private $module;
+    private $translator;
 
-    public function __construct(\Module $module)
+    public function __construct(LegacyTranslator $translator)
     {
-        $this->module = $module;
+        $this->translator = $translator;
     }
 
     public function getParent(): string
@@ -36,9 +37,9 @@ final class WidgetAlignmentChoiceType extends AbstractType
     {
         $resolver->setDefaults([
             'choices' => [
-                $this->module->l('Left', self::TRANSLATION_SOURCE) => Alignment::Left()->value,
-                $this->module->l('Center', self::TRANSLATION_SOURCE) => Alignment::Center()->value,
-                $this->module->l('Right', self::TRANSLATION_SOURCE) => Alignment::Right()->value,
+                $this->translator->l('Left', self::TRANSLATION_SOURCE) => Alignment::Left()->value,
+                $this->translator->l('Center', self::TRANSLATION_SOURCE) => Alignment::Center()->value,
+                $this->translator->l('Right', self::TRANSLATION_SOURCE) => Alignment::Right()->value,
             ],
         ]);
     }

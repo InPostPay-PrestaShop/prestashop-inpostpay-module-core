@@ -6,6 +6,7 @@ namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Form\Type\Consent\ConsentType;
+use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -17,16 +18,16 @@ final class ConsentsConfigurationType extends AbstractType
 {
     private const TRANSLATION_SOURCE = 'consentsconfigurationtype';
 
-    private $module;
+    private $translator;
 
-    public function __construct(\Module $module)
+    public function __construct(LegacyTranslator $translator)
     {
-        $this->module = $module;
+        $this->translator = $translator;
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options): void
     {
-        $view['consents']->vars['add_consent_label'] = $this->module->l('Add another consent', self::TRANSLATION_SOURCE);
+        $view['consents']->vars['add_consent_label'] = $this->translator->l('Add another consent', self::TRANSLATION_SOURCE);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

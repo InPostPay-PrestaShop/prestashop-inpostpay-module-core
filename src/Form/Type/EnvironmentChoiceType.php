@@ -7,6 +7,7 @@ namespace izi\prestashop\Form\Type;
 use izi\prestashop\Environment\EnvironmentType;
 use izi\prestashop\Environment\UatEnvironment;
 use izi\prestashop\Form\DataTransformer\EnumDataTransformer;
+use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -16,11 +17,11 @@ final class EnvironmentChoiceType extends AbstractType
 {
     private const TRANSLATION_SOURCE = 'environmentchoicetype';
 
-    private $module;
+    private $translator;
 
-    public function __construct(\Module $module)
+    public function __construct(LegacyTranslator $translator)
     {
-        $this->module = $module;
+        $this->translator = $translator;
     }
 
     public function getParent(): string
@@ -43,8 +44,8 @@ final class EnvironmentChoiceType extends AbstractType
     private function getChoices(): array
     {
         $choices = [
-            $this->module->l('Sandbox', self::TRANSLATION_SOURCE) => EnvironmentType::Sandbox()->value,
-            $this->module->l('Production', self::TRANSLATION_SOURCE) => EnvironmentType::Production()->value,
+            $this->translator->l('Sandbox', self::TRANSLATION_SOURCE) => EnvironmentType::Sandbox()->value,
+            $this->translator->l('Production', self::TRANSLATION_SOURCE) => EnvironmentType::Production()->value,
         ];
 
         if (!class_exists(UatEnvironment::class)) {
@@ -52,7 +53,7 @@ final class EnvironmentChoiceType extends AbstractType
         }
 
         return array_merge([
-            $this->module->l('UAT', self::TRANSLATION_SOURCE) => EnvironmentType::Uat()->value,
+            $this->translator->l('UAT', self::TRANSLATION_SOURCE) => EnvironmentType::Uat()->value,
         ], $choices);
     }
 }

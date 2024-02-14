@@ -7,6 +7,7 @@ namespace izi\prestashop\Form\Type\Consent;
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\ObjectModel\Repository\CmsPageRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
+use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
@@ -22,9 +23,9 @@ final class ConsentType extends AbstractType implements ChoiceLoaderInterface
     private const TRANSLATION_SOURCE = 'consenttype';
 
     /**
-     * @var \Module
+     * @var LegacyTranslator
      */
-    private $module;
+    private $translator;
 
     /**
      * @var \Context
@@ -41,9 +42,9 @@ final class ConsentType extends AbstractType implements ChoiceLoaderInterface
     /**
      * @param CmsPageRepository $cmsPageRepository
      */
-    public function __construct(\Module $module, \Context $context, ObjectRepositoryInterface $cmsPageRepository)
+    public function __construct(LegacyTranslator $translator, \Context $context, ObjectRepositoryInterface $cmsPageRepository)
     {
-        $this->module = $module;
+        $this->translator = $translator;
         $this->context = $context;
         $this->cmsPageRepository = $cmsPageRepository;
     }
@@ -55,17 +56,17 @@ final class ConsentType extends AbstractType implements ChoiceLoaderInterface
                 'choice_loader' => $this,
                 'choice_value' => 'id',
                 'choice_label' => 'meta_title',
-                'label' => $this->module->l('Details page', self::TRANSLATION_SOURCE),
-                'help' => $this->module->l('Specifies the page to which your customer will be redirected for a target who clicks on a given consent in the InPost mobile app.', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->l('Details page', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('Specifies the page to which your customer will be redirected for a target who clicks on a given consent in the InPost mobile app.', self::TRANSLATION_SOURCE),
             ])
             ->add('descriptions', TranslatableType::class, [
-                'label' => $this->module->l('Consent text in the mobile app', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->l('Consent text in the mobile app', self::TRANSLATION_SOURCE),
                 'type' => TextType::class,
-                'help' => $this->module->l('Add a description to be displayed with the consent in the InPost mobile app.', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('Add a description to be displayed with the consent in the InPost mobile app.', self::TRANSLATION_SOURCE),
             ])
             ->add('requirementType', ConsentRequirementChoiceType::class, [
-                'label' => $this->module->l('Requiredness', self::TRANSLATION_SOURCE),
-                'help' => $this->module->l('Specify whether consent is required or optional.', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->l('Requiredness', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('Specify whether consent is required or optional.', self::TRANSLATION_SOURCE),
             ]);
     }
 

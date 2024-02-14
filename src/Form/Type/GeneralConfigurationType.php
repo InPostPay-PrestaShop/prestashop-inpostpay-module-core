@@ -8,6 +8,7 @@ use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
 use izi\prestashop\Hook\Front\DisplayIziThankYou;
 use izi\prestashop\Hook\Front\DisplayOrderConfirmation;
 use izi\prestashop\Hook\Front\DisplayPaymentReturn;
+use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -19,11 +20,11 @@ final class GeneralConfigurationType extends AbstractType
 {
     private const TRANSLATION_SOURCE = 'generalconfigurationtype';
 
-    private $module;
+    private $translator;
 
-    public function __construct(\Module $module)
+    public function __construct(LegacyTranslator $translator)
     {
-        $this->module = $module;
+        $this->translator = $translator;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -31,12 +32,12 @@ final class GeneralConfigurationType extends AbstractType
         $builder
             ->add('enableForEveryone', ChoiceType::class, [
                 'choices' => [
-                    $this->module->l('to everyone', self::TRANSLATION_SOURCE) => true,
-                    $this->module->l('to testers', self::TRANSLATION_SOURCE) => false,
+                    $this->translator->l('to everyone', self::TRANSLATION_SOURCE) => true,
+                    $this->translator->l('to testers', self::TRANSLATION_SOURCE) => false,
                 ],
                 'property_path' => 'generalConfiguration.enabledForEveryone',
-                'label' => $this->module->l('Display widget', self::TRANSLATION_SOURCE),
-                'help' => $this->module->l('If you select "to testers" the widget will be visible only to those who are supposed to see it. To display the widget in this mode in a web browser, type the address of your store with \'?showIzi=true\' Example: https://mojsklep.pl?showIzi=true', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->l('Display widget', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('If you select "to testers" the widget will be visible only to those who are supposed to see it. To display the widget in this mode in a web browser, type the address of your store with \'?showIzi=true\' Example: https://mojsklep.pl?showIzi=true', self::TRANSLATION_SOURCE),
             ])
             ->add('thankYouDisplayHook', ChoiceType::class, [
                 'choices' => [
@@ -45,8 +46,8 @@ final class GeneralConfigurationType extends AbstractType
                     DisplayIziThankYou::getHookName() => DisplayIziThankYou::getHookName(),
                 ],
                 'property_path' => 'generalConfiguration.thankYouDisplayHook',
-                'label' => $this->module->l('Order confirmation page display hook', self::TRANSLATION_SOURCE),
-                'help' => sprintf($this->module->l('If you choose the \'%s\' hook you have to manually implement it in the templates/checkout/order-confirmation.tpl file \'{hook h="%s" order=$order}\'.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
+                'label' => $this->translator->l('Order confirmation page display hook', self::TRANSLATION_SOURCE),
+                'help' => sprintf($this->translator->l('If you choose the \'%s\' hook you have to manually implement it in the templates/checkout/order-confirmation.tpl file \'{hook h="%s" order=$order}\'.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
             ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,
@@ -60,10 +61,10 @@ final class GeneralConfigurationType extends AbstractType
             ->add('maxSuggestedProducts', IntegerType::class, [
                 'property_path' => 'generalConfiguration.maxSuggestedProducts',
                 'required' => false,
-                'label' => $this->module->l('Maximum number of suggested products', self::TRANSLATION_SOURCE),
-                'help' => $this->module->l('To show suggested products, complete the Accessories Products section in the product configuration.', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->l('Maximum number of suggested products', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('To show suggested products, complete the Accessories Products section in the product configuration.', self::TRANSLATION_SOURCE),
                 'attr' => [
-                    'placeholder' => $this->module->l('unlimited', self::TRANSLATION_SOURCE),
+                    'placeholder' => $this->translator->l('unlimited', self::TRANSLATION_SOURCE),
                     'min' => 0,
                 ],
             ]);
