@@ -98,9 +98,9 @@ final class Consent implements \JsonSerializable
         return $this;
     }
 
-    public function getRequirementType(): ConsentRequirementType
+    public function getRequirementType(): ?ConsentRequirementType
     {
-        return $this->requirementType ?? ConsentRequirementType::Optional();
+        return $this->requirementType;
     }
 
     public function setRequirementType(?ConsentRequirementType $requirementType): self

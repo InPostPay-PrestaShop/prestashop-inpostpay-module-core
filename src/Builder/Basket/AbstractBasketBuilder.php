@@ -6,6 +6,7 @@ namespace izi\prestashop\Builder\Basket;
 
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\Consent;
+use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Common\Basket\Product;
 use izi\prestashop\Common\Basket\Quantity;
@@ -488,7 +489,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
                 $page['url'],
                 $consent->getDescription($languageId),
                 $consent->getVersion(),
-                $consent->getRequirementType()
+                $consent->getRequirementType() ?? ConsentRequirementType::Optional()
             );
         }
 

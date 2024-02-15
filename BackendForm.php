@@ -1,8 +1,13 @@
 <?php
 
 use izi\prestashop\Common\Basket\ConsentRequirementType;
+use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\Consent;
+use izi\prestashop\Configuration\DTO\HtmlStyles;
+use izi\prestashop\Environment\EnvironmentType;
+use izi\prestashop\Environment\UatEnvironment;
 use izi\prestashop\View\Widget\Alignment;
+use izi\prestashop\View\Widget\Configuration as WidgetConfiguration;
 use izi\prestashop\View\Widget\FrameStyle;
 use izi\prestashop\View\Widget\Variant;
 use izi\prestashop\Hook\Front\DisplayPaymentReturn;
@@ -191,7 +196,7 @@ trait BackendForm
                 'label' => $this->l('Zgody Wymagane Raz Tekst'),
                 'lang' => true,
                 'name' => 'INPOST_PAY_terms_options_required_once_text',
-                'consent_cms_ids' => ConsentRequirementType::RequiredOnce(),
+                'consent_descriptions' => ConsentRequirementType::RequiredOnce(),
             ],
             [
                 'type' => 'select',
@@ -442,8 +447,8 @@ trait BackendForm
         ];
 
         $translationsDirection = [
-            'up' => $this->l('Góra'),
-            'down' => $this->l('Dół'),
+            'top' => $this->l('Góra'),
+            'bottom' => $this->l('Dół'),
             'left' => $this->l('Lewo'),
             'right' => $this->l('Prawo'),
         ];
@@ -475,6 +480,8 @@ trait BackendForm
                     'id' => 'id_option',
                     'name' => 'name',
                 ],
+                'widget_config' => $place,
+                'widget_attribute' => 'alignment',
             ];
             $fields[] = [
                 'type' => 'select',
@@ -485,6 +492,8 @@ trait BackendForm
                     'id' => 'id_option',
                     'name' => 'name',
                 ],
+                'widget_config' => $place,
+                'widget_attribute' => 'darkMode',
             ];
             $fields[] = [
                 'type' => 'select',
@@ -495,6 +504,8 @@ trait BackendForm
                     'id' => 'id_option',
                     'name' => 'name',
                 ],
+                'widget_config' => $place,
+                'widget_attribute' => 'variant',
             ];
             $fields[] = [
                 'type' => 'select',
@@ -505,6 +516,8 @@ trait BackendForm
                     'id' => 'id_option',
                     'name' => 'name',
                 ],
+                'widget_config' => $place,
+                'widget_attribute' => 'frameStyle',
             ];
             $fields[] = [
                 'type' => 'text',
@@ -513,6 +526,8 @@ trait BackendForm
                 'hint' => $this->l('Valid values range: 220 - 600 px', 'backendform'),
                 'class' => 'text-right fixed-width-xl',
                 'suffix' => 'px',
+                'widget_config' => $place,
+                'widget_attribute' => 'minWidthPx',
             ];
             $fields[] = [
                 'type' => 'text',
@@ -521,17 +536,20 @@ trait BackendForm
                 'hint' => $this->l('Valid values range: 220 - 600 px', 'backendform'),
                 'class' => 'text-right fixed-width-xl',
                 'suffix' => 'px',
+                'widget_config' => $place,
+                'widget_attribute' => 'maxWidthPx',
             ];
-            if ($place === 'cart') {
-                foreach (['up', 'down', 'left', 'right'] as $direction) {
-                    $fields[] = [
-                        'type' => 'text',
-                        'label' => sprintf($this->l('Margines %s'), $translationsDirection[$direction]),
-                        'name' => 'INPOST_PAY_margin_' . $place . '_' . $direction,
-                        'suffix' => 'px',
-                        'class' => 'text-right fixed-width-xl',
-                    ];
-                }
+
+            foreach (['top', 'bottom', 'left', 'right'] as $direction) {
+                $fields[] = [
+                    'type' => 'text',
+                    'label' => sprintf($this->l('Margines %s'), $translationsDirection[$direction]),
+                    'name' => 'INPOST_PAY_margin_' . $place . '_' . $direction,
+                    'suffix' => 'px',
+                    'class' => 'text-right fixed-width-xl',
+                    'widget_styles' => $place,
+                    'widget_style' => 'margin' . ucfirst($direction),
+                ];
             }
         }
 
@@ -555,6 +573,8 @@ trait BackendForm
             $languageIds = \Language::getLanguages(false, false, true);
             $descriptionMaps = [];
             $consentData = [];
+            $widgetConfig = [];
+            $widgetStyles = [];
 
             foreach ($this->formFields() as $field) {
                 if (!empty($field['lang'])) {
@@ -577,6 +597,18 @@ trait BackendForm
                 }
 
                 if ($field['name'] === 'INPOST_PAY_client_secret' && $configValue === '*****') {
+                    continue;
+                }
+
+                if (isset($field['widget_config'])) {
+                    $widgetConfig[$field['widget_config']][$field['widget_attribute']] = $configValue;
+
+                    continue;
+                }
+
+                if (isset($field['widget_styles'])) {
+                    $widgetStyles[$field['widget_styles']][$field['widget_style']] = $configValue;
+
                     continue;
                 }
 
@@ -606,7 +638,10 @@ trait BackendForm
             \Configuration::updateValue('INPOST_PAY_OS_DESCRIPTION_MAP', array_map(static function (array $map) {
                 return json_encode(array_filter($map));
             }, $descriptionMaps));
+
             $this->updateConsents($consentData);
+            $this->updateWidgetConfig($widgetConfig);
+            $this->updateWidgetStyles($widgetStyles);
 
             (new \izi\prestashop\Configuration\Adapter\Configuration())->removeMatching('INPOST_PAY_CACHE_*');
 
@@ -646,31 +681,47 @@ trait BackendForm
             if (!$value) {
                 $osDescriptions[$language['id_lang']] = [];
             } else {
-                $osDescriptions[$language['id_lang']] = json_decode($value, true) ?? [];
+                $decoded = json_decode($value, true);
+                $osDescriptions[$language['id_lang']] = null !== $decoded ? $decoded : [];
             }
         }
 
-        $consents = json_decode(\Configuration::get('INPOST_PAY_CONSENTS'), true) ?? [];
+        $consents = json_decode(\Configuration::get('INPOST_PAY_CONSENTS'), true);
+        $consents = null !== $consents ? $consents : [];
         $consentsByType = [];
         foreach ($consents as $consent) {
             $consentsByType[$consent['requirementType']]['descriptions'] = $consent['descriptions'];
             $consentsByType[$consent['requirementType']]['cms_ids'][] = $consent['cmsPageId'];
         }
 
+        $widgetConfigs = [
+            'cart' => json_decode(\Configuration::get('INPOST_PAY_CART_WIDGET_CONFIG'), true),
+            'details' => json_decode(\Configuration::get('INPOST_PAY_PRODUCT_CARD_WIDGET_CONFIG'), true),
+        ];
+
+        $widgetStyles = [
+            'cart' => json_decode(\Configuration::get('INPOST_PAY_CART_HTML_STYLES'), true),
+            'details' => json_decode(\Configuration::get('INPOST_PAY_PRODUCT_HTML_STYLES'), true),
+        ];
+
         foreach ($this->formFields() as $field) {
             if (isset($field['id_order_state'])) {
                 foreach ($helper->languages as $language) {
                     $helper->tpl_vars['fields_value'][$field['name']][$language['id_lang']] = \Tools::getValue(
                         sprintf('%s_%d', $field['name'], $language['id_lang']),
-                        $osDescriptions[$language['id_lang']][$field['id_order_state']] ?? null
+                        isset($osDescriptions[$language['id_lang']][$field['id_order_state']]) ? $osDescriptions[$language['id_lang']][$field['id_order_state']] : null
                     );
                 }
             } elseif (isset($field['consent_cms_ids'])) {
-                $cmsIds = $consentsByType[$field['consent_cms_ids']->value]['cms_ids'] ?? [];
+                $cmsIds = isset($consentsByType[$field['consent_cms_ids']->value]['cms_ids']) ? $consentsByType[$field['consent_cms_ids']->value]['cms_ids'] : [];
                 $helper->tpl_vars['fields_value'][$field['name'] . '[]'] = $cmsIds;
             } elseif (isset($field['consent_descriptions'])) {
-                $descriptions = $consentsByType[$field['consent_descriptions']->value]['descriptions'] ?? [];
+                $descriptions = isset($consentsByType[$field['consent_descriptions']->value]['descriptions']) ? $consentsByType[$field['consent_descriptions']->value]['descriptions'] : null;
                 $helper->tpl_vars['fields_value'][$field['name']] = $descriptions;
+            } elseif (isset($field['widget_config'])) {
+                $helper->tpl_vars['fields_value'][$field['name']] = isset($widgetConfigs[$field['widget_config']][$field['widget_attribute']]) ? $widgetConfigs[$field['widget_config']][$field['widget_attribute']] : null;
+            } elseif (isset($field['widget_styles'])) {
+                $helper->tpl_vars['fields_value'][$field['name']] = isset($widgetStyles[$field['widget_styles']][$field['widget_style']]) ? $widgetStyles[$field['widget_styles']][$field['widget_style']] : null;
             } elseif ($field['name'] === 'INPOST_PAY_client_secret') {
                 $helper->tpl_vars['fields_value'][$field['name']] = \Configuration::get($field['name']) ? '*****' : '';
             } elseif (isset($field['multiple']) && $field['multiple']) {
@@ -683,28 +734,28 @@ trait BackendForm
         return $helper->generateForm([$form]);
     }
 
-    protected function EnvironmentOptions(): array
+    protected function EnvironmentOptions()
     {
         $options = [];
-        if (defined('IZI_LOGGER')) {
+        if (class_exists(UatEnvironment::class)) {
             $options[] = [
-                'id_option' => \izi\InPostIzi::ENVIRONMENT_DEVELOP,
+                'id_option' => EnvironmentType::Uat()->value,
                 'name' => 'Deweloperskie',
             ];
         }
         $options[] = [
-            'id_option' => \izi\InPostIzi::ENVIRONMENT_SANDBOX,
+            'id_option' => EnvironmentType::Sandbox()->value,
             'name' => 'Sandbox',
         ];
         $options[] = [
-            'id_option' => \izi\InPostIzi::ENVIRONMENT_PRODUCTION,
+            'id_option' => EnvironmentType::Production()->value,
             'name' => 'Produkcyjne',
         ];
 
         return $options;
     }
 
-    protected function ShowOptions(): array
+    protected function ShowOptions()
     {
         return [
             [
@@ -811,7 +862,7 @@ trait BackendForm
         return $options;
     }
 
-    protected function AlignmentOptions(): array
+    protected function AlignmentOptions()
     {
         return [
             [
@@ -829,7 +880,7 @@ trait BackendForm
         ];
     }
 
-    protected function BackgroundOptions(): array
+    protected function BackgroundOptions()
     {
         return [
             [
@@ -843,7 +894,7 @@ trait BackendForm
         ];
     }
 
-    protected function VariantOptions(): array
+    protected function VariantOptions()
     {
         return [
             [
@@ -857,7 +908,7 @@ trait BackendForm
         ];
     }
 
-    protected function getFrameStyleChoices(): array
+    protected function getFrameStyleChoices()
     {
         return [
             [
@@ -895,5 +946,64 @@ trait BackendForm
         }
 
         \Configuration::updateValue('INPOST_PAY_CONSENTS', json_encode($consents));
+    }
+
+    private function updateWidgetConfig(array $configs)
+    {
+        foreach ($configs as $place => $config) {
+            if ('cart' === $place) {
+                $bindingPlace = BindingPlace::BasketSummary();
+                $basket = true;
+                $configKey = 'INPOST_PAY_CART_WIDGET_CONFIG';
+            } else {
+                $bindingPlace = BindingPlace::ProductCard();
+                $basket = false;
+                $configKey = 'INPOST_PAY_PRODUCT_CARD_WIDGET_CONFIG';
+            }
+
+            $minWidth = $this->getWidgetWidth((int) $config['minWidthPx']);
+            $maxWidth = $this->getWidgetWidth((int) $config['maxWidthPx']);
+
+            $variant = Variant::tryFrom($config['variant']);
+
+            $configuration = (new WidgetConfiguration($bindingPlace, $basket))
+                ->setVariant($variant !== null ? $variant : Variant::Secondary())
+                ->setDarkMode((bool) $config['darkMode'])
+                ->setAlignment(Alignment::tryFrom($config['alignment']))
+                ->setFrameStyle(FrameStyle::tryFrom($config['frameStyle']))
+                ->setMinWidthPx($minWidth)
+                ->setMaxWidthPx($maxWidth);
+
+            \Configuration::updateValue($configKey, json_encode($configuration));
+        }
+    }
+
+    private function updateWidgetStyles(array $styles)
+    {
+        foreach ($styles as $place => $values) {
+            if ('cart' === $place) {
+                $configKey = 'INPOST_PAY_CART_HTML_STYLES';
+            } else {
+                $configKey = 'INPOST_PAY_PRODUCT_HTML_STYLES';
+            }
+
+            $htmlStyles = (new HtmlStyles())
+                ->setMarginTop($values['marginTop'])
+                ->setMarginLeft($values['marginLeft'])
+                ->setMarginRight($values['marginRight'])
+                ->setMarginBottom($values['marginBottom']);
+
+            \Configuration::updateValue($configKey, json_encode($htmlStyles));
+        }
+    }
+
+    /**
+     * @param int $width
+     *
+     * @return int|null
+     */
+    private function getWidgetWidth($width)
+    {
+        return WidgetConfiguration::WIDTH_MIN_PX <= $width && WidgetConfiguration::WIDTH_MAX_PX >= $width ? $width : null;
     }
 }

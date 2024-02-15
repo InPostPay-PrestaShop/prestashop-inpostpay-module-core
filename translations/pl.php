@@ -24,7 +24,7 @@ $_MODULE['<{inpostizi}prestashop>environmentchoicetype_756d97bb256b8580d4d71ee0c
 $_MODULE['<{inpostizi}prestashop>environmentchoicetype_19dd6c1cec504ac854645f352eb03209'] = 'UAT';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_0ba29c6a1afacf586b03a26162c72274'] = 'Środowisko';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_02a5fb45d7cc2eb4a4913f760b397416'] = 'Wybierz środowisko, na którym chcesz pokazać usługę InPost Pay. Pamiętaj, aby przed przejściem na środowisko produkcyjne upewnić się, że usługa w Twoim sklepie działa prawidłowo';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_fd282be0a539046c5c22736ef41f4350'] = 'Początkowy status zamówienia utworzonego przez InPost Pay';
+$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_fd282be0a539046c5c22736ef41f4350'] = 'Status zamówienia utworzonego przez InPost Pay';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_05a5fcc9d88a553b80b2633aa4556d58'] = 'Status dla zamówienia opłaconego przez InPost Pay';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_33af8066d3c83110d4bd897f687cedd2'] = 'Statusy zamówień';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_69fca9ac67c830f1ff66e4643f948282'] = 'Włącz płatności zgodne z podpisaną umową z Aion';

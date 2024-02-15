@@ -60,17 +60,6 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         }
 
         return clone $this->cartWidgetConfig;
-
-//        $minWidth = $this->getWidgetWidth((int) $this->configuration->get('INPOST_PAY_min_width_cart'));
-//        $maxWidth = $this->getWidgetWidth((int) $this->configuration->get('INPOST_PAY_max_width_cart'));
-//
-//        return (new Configuration(BindingPlace::BasketSummary(), true))
-//            ->setVariant(Variant::tryFrom((string) $this->configuration->get('INPOST_PAY_variant_cart')) ?? Variant::Secondary())
-//            ->setDarkMode((bool) $this->configuration->get('INPOST_PAY_background_cart'))
-//            ->setAlignment(Alignment::tryFrom((string) $this->configuration->get('INPOST_PAY_alignment_cart')))
-//            ->setFrameStyle(FrameStyle::tryFrom((string) $this->configuration->get('INPOST_PAY_frame_style_cart')))
-//            ->setMinWidth($minWidth)
-//            ->setMaxWidth($maxWidth);
     }
 
     public function getCartPageHtmlStyles(): HtmlStyles
@@ -80,22 +69,6 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         }
 
         return clone $this->cartHtmlStyles;
-
-//        if (0 < $marginLeft = (int) $this->configuration->get('INPOST_PAY_margin_cart_left')) {
-//            yield 'margin-left' => sprintf('%dpx', $marginLeft);
-//        }
-//
-//        if (0 < $marginRight = (int) $this->configuration->get('INPOST_PAY_margin_cart_right')) {
-//            yield 'margin-right' => sprintf('%dpx', $marginRight);
-//        }
-//
-//        if (0 < $marginTop = (int) $this->configuration->get('INPOST_PAY_margin_cart_up')) {
-//            yield 'margin-top' => sprintf('%dpx', $marginTop);
-//        }
-//
-//        if (0 < $marginBottom = (int) $this->configuration->get('INPOST_PAY_margin_cart_down')) {
-//            yield 'margin-bottom' => sprintf('%dpx', $marginBottom);
-//        }
     }
 
     public function getProductCardHtmlStyles(): HtmlStyles
@@ -119,17 +92,6 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         }
 
         return clone $this->productWidgetConfig;
-
-//        $minWidth = $this->getWidgetWidth((int) $this->configuration->get('INPOST_PAY_min_width_details'));
-//        $maxWidth = $this->getWidgetWidth((int) $this->configuration->get('INPOST_PAY_max_width_details'));
-//
-//        return (new Configuration(BindingPlace::ProductCard(), false))
-//            ->setVariant(Variant::tryFrom((string) $this->configuration->get('INPOST_PAY_variant_details')) ?? Variant::Secondary())
-//            ->setDarkMode((bool) $this->configuration->get('INPOST_PAY_background_details'))
-//            ->setAlignment(Alignment::tryFrom((string) $this->configuration->get('INPOST_PAY_alignment_details')))
-//            ->setFrameStyle(FrameStyle::tryFrom((string) $this->configuration->get('INPOST_PAY_frame_style_details')))
-//            ->setMinWidth($minWidth)
-//            ->setMaxWidth($maxWidth);
     }
 
     public function copy(): GuiConfigurationInterface
@@ -241,9 +203,4 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             return null;
         }
     }
-
-//    private function getWidgetWidth(int $width): ?int
-//    {
-//        return Configuration::WIDTH_MIN_PX <= $width && Configuration::WIDTH_MAX_PX >= $width ? $width : null;
-//    }
 }
