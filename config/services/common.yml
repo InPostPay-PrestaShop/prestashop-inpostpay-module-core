@@ -193,7 +193,7 @@ services:
     class: izi\prestashop\Log\Handler\RotatingFileHandlerFactory
     public: false
     arguments:
-      - '%kernel.environment%'
+      - '@=service("izi\\prestashop\\Configuration\\AdvancedConfigurationInterface").isDebugEnabled() ? "dev" : "prod"'
 
   inpost.izi.basket_app_logger:
     class: Psr\Log\LoggerInterface

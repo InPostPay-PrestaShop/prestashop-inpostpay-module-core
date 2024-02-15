@@ -22,18 +22,16 @@ final class AdvancedConfigurationType extends AbstractType
         $this->translator = $translator;
     }
 
-
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('debugEnabled', SwitchType::class, [
                 'required' => false,
                 'choices' => [
-                    $this->translator->l('Enable debug mode', self::TRANSLATION_SOURCE) => false,
-                    $this->translator->l('Disable debug mode', self::TRANSLATION_SOURCE) => true,
+                    $this->translator->l('Disable debug mode', self::TRANSLATION_SOURCE) => false,
+                    $this->translator->l('Enable debug mode', self::TRANSLATION_SOURCE) => true,
                 ],
             ]);
-
     }
 
     public function configureOptions(OptionsResolver $resolver): void
