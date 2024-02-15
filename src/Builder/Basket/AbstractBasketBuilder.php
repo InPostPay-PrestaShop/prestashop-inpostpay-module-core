@@ -176,7 +176,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $customizationId = array_key_exists('id_customization', $product) ? (int) $product['id_customization'] : 0;
 
         $category = $model->getDefaultCategory();
-        $description = \Tools::substr(trim(strip_tags($model->description)), 0, 1000);
+        $description = $this->formatDescription($model);
         $link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->cart->id_lang, null, $combinationId);
 
         return new Product(
@@ -194,6 +194,22 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $this->getProductAttributes($product),
             $this->getProductVariants($product)
         );
+    }
+
+    private function formatDescription(\Product $product): string
+    {
+        $description = strip_tags($product->description);
+        $description = trim(preg_replace('/\s+/', ' ', $description));
+
+        if ('' === $description) {
+            return '';
+        }
+
+        $description = htmlentities($description, ENT_HTML401, 'utf-8', false);
+        $description = htmlspecialchars_decode($description);
+        $description = preg_replace('/&(?:#\d+|[a-zA-Z]+);/', '', $description);
+
+        return \Tools::substr($description, 0, 1000);
     }
 
     private function getImageUrl(array $product, \Product $model, int $combinationId): string
