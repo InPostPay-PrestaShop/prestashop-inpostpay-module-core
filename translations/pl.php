@@ -71,7 +71,7 @@ $_MODULE['<{inpostizi}prestashop>widgetframestylechoicetype_bef2481eda40bd121482
 $_MODULE['<{inpostizi}prestashop>widgetframestylechoicetype_b7f41fc1412ad2ee75e9b2635d3b9d5c'] = 'Okrągłe';
 $_MODULE['<{inpostizi}prestashop>widgetframestylechoicetype_7545c5d3ad246a683a197a2903a4d5e6'] = 'Kwadratowe';
 $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_a63706eecfa33f67b315f978392ad7ae'] = 'Wyrównanie';
-$_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_59948a1a9743ccef9725e835fc5d8464'] = 'Dla podstron produktu Woocommerce umożliwia dodawanie widgetów w różnych częściach podstrony. Wybierz umiejscowienie pasujące do Twojego szablonu kierując się wskazówkami dostępnymi w Przewodniku Merchanta.';
+$_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_59948a1a9743ccef9725e835fc5d8464'] = 'Określa orientację widżetu w dostępnej dla niego przestrzeni. Jeśli szablon przydziela wąską przestrzeń dla widżetu, ustawienie to nie wpłynie na jego wygląd.';
 $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_a9ded1e5ce5d75814730bb4caaf49419'] = 'Tło';
 $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_c6252ce8f855c90f0e5379b07da7b7c9'] = 'Określa czy widget znajduje się na jasnym czy ciemnym tle w Twoim sklepie. Ustawienie ma wpływ na kolor czcionki, zadbaj o to, aby była widoczna.';
 $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_9914a0ce04a7b7b6a8e39bec55064b82'] = 'Jasne';
