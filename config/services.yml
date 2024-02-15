@@ -51,7 +51,7 @@ services:
     tags:
       - { name: form.type }
     arguments:
-      - '@inpost.izi.context'
+      - '@?inpost.izi.context'
       - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
 
   izi\prestashop\Form\Type\ShippingConfigurationType:
@@ -102,13 +102,13 @@ services:
     tags:
       - { name: form.type }
     arguments:
-      - '@inpost.izi.context'
+      - '@?inpost.izi.context'
       - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
 
   izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader
     arguments:
-      - '@inpost.izi.object_model.order_state_repository'
+      - '@?inpost.izi.object_model.order_state_repository'
 
   izi\prestashop\Form\ChoiceList\CarrierChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\CarrierChoiceLoader
@@ -118,7 +118,7 @@ services:
   izi\prestashop\Form\ChoiceList\DayChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\DayChoiceLoader
     arguments:
-      - '@izi\prestashop\Configuration\Factory\DayFactory'
+      - '@?izi\prestashop\Configuration\Factory\DayFactory'
 
   izi\prestashop\Form\ChoiceList\HourChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\HourChoiceLoader
@@ -137,7 +137,7 @@ services:
       - { name: validator.constraint_validator }
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
-      - '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
+      - '@?izi\prestashop\BasketApp\AuthorizationProviderFactory'
 
   izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory:
     class: izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory
@@ -153,8 +153,8 @@ services:
       - { name: form.type }
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
-      - '@inpost.izi.context'
-      - '@izi\prestashop\ObjectModel\Repository\CmsPageRepository'
+      - '@?inpost.izi.context'
+      - '@?izi\prestashop\ObjectModel\Repository\CmsPageRepository'
 
   izi\prestashop\Form\Type\Consent\ConsentRequirementChoiceType:
     class: izi\prestashop\Form\Type\Consent\ConsentRequirementChoiceType
@@ -222,16 +222,16 @@ services:
   izi\prestashop\Handler\Config\DownloadModuleDataHandler:
     class: izi\prestashop\Handler\Config\DownloadModuleDataHandler
     arguments:
-      - '@inpost.izi.module'
-      - '@inpost.izi.context'
-      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@?inpost.izi.module'
+      - '@?inpost.izi.context'
+      - '@?izi\prestashop\ObjectModel\ObjectManagerInterface'
       - '%inpost.izi.logs_dir%'
 
   izi\prestashop\Form\Provider\DefaultCurrencyProviderInterface: '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
   izi\prestashop\Form\Provider\DefaultCurrencyProvider:
     class: izi\prestashop\Form\Provider\DefaultCurrencyProvider
     arguments:
-      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@?izi\prestashop\Configuration\Adapter\Configuration'
 
   izi\prestashop\Twig\Extension\LegacyTranslationExtension:
     class: izi\prestashop\Twig\Extension\LegacyTranslationExtension
@@ -249,7 +249,7 @@ services:
       - { name: inpost.izi.status_checker }
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
-      - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+      - '@?izi\prestashop\ObjectModel\Repository\CarrierRepository'
 
   izi\prestashop\Translation\LegacyTranslator:
     class: izi\prestashop\Translation\LegacyTranslator
