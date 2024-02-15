@@ -1,5 +1,5 @@
+import TranslatableInput from '@components/translatable-input';
+
 $(document).ready(() => {
-  window.prestashop.component.initComponents([
-    'TranslatableInput',
-  ]);
+  new TranslatableInput();
 });

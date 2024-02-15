@@ -22,11 +22,19 @@ const getEntries = () => {
   return entry;
 }
 
+const moduleDir = path.resolve(__dirname, '../');
+
 module.exports = {
   entry: getEntries(),
   output: {
     filename: 'js/admin/[name].js',
-    path: path.resolve(__dirname, '../views/'),
+    path: path.resolve(moduleDir, 'views/'),
+  },
+  resolve: {
+    extensions: ['.js'],
+    alias: {
+      '@components': path.resolve(moduleDir, '../../admin-dev/themes/new-theme/js/components'),
+    },
   },
   module: {
     rules: [
