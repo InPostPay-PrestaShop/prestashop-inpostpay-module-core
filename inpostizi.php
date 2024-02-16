@@ -22,6 +22,7 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -47,7 +48,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.4.1';
+        $this->version = '1.4.3';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
         $this->bootstrap = true;
@@ -89,8 +90,20 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return false;
         }
 
+        $this->setUpRoutingLoaderResolver();
+
         return parent::install()
             && $this->registerHook(HookExecutor::getHooksToInstall(_PS_VERSION_));
+    }
+
+    /**
+     * @return bool
+     */
+    public function uninstall()
+    {
+        $this->setUpRoutingLoaderResolver();
+
+        return parent::uninstall();
     }
 
     /**
@@ -121,6 +134,21 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         }
 
         return \Db::getInstance()->insert('module_currency', $data);
+    }
+
+    /**
+     * @return string
+     */
+    public function getContent()
+    {
+        try {
+            /** @var UrlGeneratorInterface $router */
+            $router = $this->get('router');
+        } catch (ServiceNotFoundException $e) {
+            return $this->doGetContent();
+        }
+
+        \Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
     }
 
     /**
@@ -315,5 +343,22 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             sprintf('%s/config/services/sf28.yml', rtrim($this->getLocalPath(), '/')),
             $configurator,
         ];
+    }
+
+    /**
+     * Accesses the public "routing.loader" service in order to provide a @see \Symfony\Component\Config\Loader\LoaderResolverInterface
+     * to the routing configuration loader used by @see \PrestaShop\PrestaShop\Adapter\Module\Tab\ModuleTabRegister
+     */
+    private function setUpRoutingLoaderResolver()
+    {
+        if (\Tools::version_compare(_PS_VERSION_, '1.7.7')) {
+            return;
+        }
+
+        try {
+            $this->get('routing.loader');
+        } catch (\Exception $e) {
+            // ignore silently
+        }
     }
 }

@@ -1,0 +1,11 @@
+<div class="page-head-tabs" id="head_tabs">
+  <ul class="nav nav-pills">
+    {% for id, item in nav_items %}
+      <li class="nav-item">
+        <a href="{{ item.url }}" id="{{ id }}" class="nav-link tab{% if item.active %} active current{% endif %}">
+          {{ item.label }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>

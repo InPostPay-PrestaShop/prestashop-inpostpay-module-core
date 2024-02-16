@@ -41,6 +41,11 @@ final class ConfigurationCache implements CacheInterface
         $this->clock = $clock;
     }
 
+    public static function getConfigKeyPrefix(): string
+    {
+        return sprintf(self::CONFIG_KEY_PATTERN, '');
+    }
+
     /**
      * @return mixed
      */

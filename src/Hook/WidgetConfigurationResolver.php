@@ -114,8 +114,8 @@ final class WidgetConfigurationResolver
             ->setDarkMode($options['dark_mode'])
             ->setAlignment($options['alignment'])
             ->setFrameStyle($options['frame_style'])
-            ->setMinWidth($options['min_width'])
-            ->setMaxWidth($options['max_width'])
+            ->setMinWidthPx($options['min_width'])
+            ->setMaxWidthPx($options['max_width'])
             ->setProductId($options['product_id']);
     }
 

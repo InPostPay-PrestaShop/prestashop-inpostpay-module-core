@@ -13,6 +13,11 @@ class Connection
         $this->db = $db ?? \Db::getInstance();
     }
 
+    public function getPlatformVersion(): string
+    {
+        return $this->db->getVersion();
+    }
+
     public function save(\ObjectModel $model)
     {
         return $this->execute(function () use ($model) {

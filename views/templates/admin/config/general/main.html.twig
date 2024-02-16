@@ -1,0 +1,42 @@
+<div class="row mt-n3">
+  <div class="col-lg-2 col-md-3 mt-3">
+    {{ form_row(form.apiConfiguration.environmentType) }}
+  </div>
+  <div class="col-lg-2 col-md-3 mt-3">
+    {{ form_row(form.enableForEveryone) }}
+  </div>
+  <div class="col-lg-2 col-md-3 mt-3">
+    {{ form_row(form.apiConfiguration.clientCredentials.clientId) }}
+  </div>
+  <div class="col-lg-2 col-md-3 mt-3">
+    {{ form_row(form.apiConfiguration.clientCredentials.clientSecret) }}
+  </div>
+  <div class="col-lg-2 col-md-3 mt-3">
+    {{ form_row(form.ordersConfiguration.pointOfSaleId) }}
+  </div>
+</div>
+
+<div class="row mt-n3 inpostizi-checkboxes">
+  <div class="col-lg-auto mt-3">
+    {{ form_row(form.ordersConfiguration.bankPaymentEnabled) }}
+  </div>
+  <div class="col-lg-auto mt-3">
+    {{ form_row(form.ordersConfiguration.carrierPaymentEnabled) }}
+  </div>
+</div>
+
+<div class="row mt-n3">
+  <div class="col-xl-3 col-lg-4 col-md-6 mt-3">
+    {{ form_row(form.ordersConfiguration.initialStatusId) }}
+  </div>
+  <div class="col-xl-3 col-lg-4 col-md-6 mt-3">
+    {{ form_row(form.ordersConfiguration.paidStatusId) }}
+  </div>
+</div>
+
+<div class="row mt-3">
+  <div class="col-xl-3 col-lg-4 col-md-6">
+    {{ form_row(form.thankYouDisplayHook) }}
+  </div>
+</div>
+

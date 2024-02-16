@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\WidgetConfigurationInterface;
+use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -23,7 +23,7 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
      */
     private $renderer;
 
-    public function __construct(WidgetConfigurationInterface $configuration, WidgetInterface $module, RendererInterface $renderer)
+    public function __construct(GuiConfigurationInterface $configuration, WidgetInterface $module, RendererInterface $renderer)
     {
         $this->configuration = $configuration;
         $this->module = $module;
@@ -57,7 +57,7 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
 
         return $this->renderer->render('module:inpostizi/views/templates/hook/mymodule.tpl', [
             'widget' => $widget,
-            'styles' => [],
+            'styles' => $this->getHtmlStyles(),
         ]);
     }
 }

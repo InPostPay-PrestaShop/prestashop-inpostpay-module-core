@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\WidgetConfigurationInterface;
+use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\View\Templating\RendererInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
@@ -21,7 +21,7 @@ final class DisplayShoppingCartFooter implements HookInterface
      */
     private $renderer;
 
-    public function __construct(WidgetConfigurationInterface $configuration, WidgetInterface $module, RendererInterface $renderer)
+    public function __construct(GuiConfigurationInterface $configuration, WidgetInterface $module, RendererInterface $renderer)
     {
         $this->configuration = $configuration;
         $this->module = $module;

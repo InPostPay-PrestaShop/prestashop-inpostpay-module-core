@@ -1,0 +1,17 @@
+
+.inpostizi-btn-preview {
+
+  &__content {
+    padding: 20px 30px;
+
+    &--light {
+      border: 1px solid $border-color;
+      background: $gray-200;
+    }
+
+    &--dark {
+      border: 1px solid $gray-600;
+      background: $gray-500;
+    }
+  }
+}

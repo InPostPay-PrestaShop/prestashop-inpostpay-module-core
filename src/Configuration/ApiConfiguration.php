@@ -8,18 +8,17 @@ use izi\prestashop\Environment\EnvironmentInterface;
 use izi\prestashop\Environment\EnvironmentType;
 use izi\prestashop\OAuth2\Authentication\ClientCredentials;
 use izi\prestashop\OAuth2\Authentication\ClientCredentialsInterface;
-use izi\prestashop\OAuth2\Authentication\ClientCredentialsRepositoryInterface;
 use izi\prestashop\OAuth2\Token\AccessTokenInterface;
 use izi\prestashop\OAuth2\Token\AccessTokenRepositoryInterface;
 use izi\prestashop\OAuth2\Token\BearerToken;
 use Symfony\Component\Serializer\SerializerInterface;
 
-final class ApiConfiguration implements ClientCredentialsRepositoryInterface, AccessTokenRepositoryInterface, ApiConfigurationInterface
+final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRepositoryInterface, PersistentConfigurationInterface
 {
     private const ENVIRONMENT_TYPE = 'INPOST_PAY_environment';
     private const OAUTH2_CLIENT_ID = 'INPOST_PAY_client_id';
-    private const OAUTH2_CLIENT_SECRET = 'INPOST_PAY_client_secret';
-    private const ACCESS_TOKEN = 'INPOST_PAY_ACCESS_TOKEN';
+    public const OAUTH2_CLIENT_SECRET = 'INPOST_PAY_client_secret';
+    public const ACCESS_TOKEN = 'INPOST_PAY_ACCESS_TOKEN';
 
     /**
      * @var ConfigurationInterface

@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\View\Widget;
 
 use izi\prestashop\Common\BindingPlace;
+use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @implements \IteratorAggregate<string, string>
- */
 final class Configuration implements \IteratorAggregate, \JsonSerializable
 {
     public const WIDTH_MIN_PX = 220;
@@ -66,13 +64,17 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
 
     /**
      * @var int|null
+     *
+     * @Assert\Range(min=Configuration::WIDTH_MIN_PX, max=Configuration::WIDTH_MAX_PX)
      */
-    private $minWidth;
+    private $minWidthPx;
 
     /**
      * @var int|null
+     *
+     * @Assert\Range(min=Configuration::WIDTH_MIN_PX, max=Configuration::WIDTH_MAX_PX)
      */
-    private $maxWidth;
+    private $maxWidthPx;
 
     /**
      * @var FrameStyle|null
@@ -212,24 +214,24 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
 
     public function getMinWidthPx(): ?int
     {
-        return $this->minWidth;
+        return $this->minWidthPx;
     }
 
-    public function setMinWidth(?int $minWidthPx): self
+    public function setMinWidthPx(?int $minWidth): self
     {
-        $this->minWidth = $minWidthPx;
+        $this->minWidthPx = $minWidth;
 
         return $this;
     }
 
     public function getMaxWidthPx(): ?int
     {
-        return $this->maxWidth;
+        return $this->maxWidthPx;
     }
 
-    public function setMaxWidth(?int $maxWidthPx): self
+    public function setMaxWidthPx(?int $maxWidth): self
     {
-        $this->maxWidth = $maxWidthPx;
+        $this->maxWidthPx = $maxWidth;
 
         return $this;
     }
@@ -290,12 +292,12 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
             yield 'class' => $this->alignment->getHtmlClass();
         }
 
-        if (null !== $this->minWidth) {
-            yield 'style' => sprintf('min-width: %dpx;', $this->minWidth);
+        if (null !== $this->minWidthPx) {
+            yield 'style' => sprintf('min-width: %dpx;', $this->minWidthPx);
         }
 
-        if (null !== $this->maxWidth) {
-            yield 'max_width' => (string) $this->maxWidth;
+        if (null !== $this->maxWidthPx) {
+            yield 'max_width' => (string) $this->maxWidthPx;
         }
 
         if (null !== $this->frameStyle) {

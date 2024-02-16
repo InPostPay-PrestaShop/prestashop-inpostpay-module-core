@@ -1,0 +1,21 @@
+
+<div class="form-group">
+  {% if label is defined  %}
+    <label>
+      {{ label }}
+    </label>
+  {% endif %}
+
+  <div class="row mx-n1">
+    <div class="col-8 px-1">
+      {{ form_errors(dayForm) }}
+
+      {{ form_widget(dayForm) }}
+    </div>
+    <div class="col-4 px-1">
+      {{ form_errors(hourForm) }}
+
+      {{ form_widget(hourForm) }}
+    </div>
+  </div>
+</div>

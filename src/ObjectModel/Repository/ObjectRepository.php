@@ -56,9 +56,13 @@ class ObjectRepository implements ObjectRepositoryInterface
     /**
      * @return T[]
      */
-    public function findAll(): array
+    public function findAll(int $languageId = null): array
     {
-        return $this->findBy([], [$this->metadata['primary'] => 'ASC']);
+        $criteria = null === $languageId
+            ? []
+            : ['id_lang' => $languageId];
+
+        return $this->findBy($criteria, [$this->metadata['primary'] => 'ASC']);
     }
 
     /**
@@ -76,10 +80,12 @@ class ObjectRepository implements ObjectRepositoryInterface
      */
     public function findBy(array $criteria, array $orderBy = null, int $limit = null, int $offset = null): array
     {
+        $languageId = isset($criteria['id_lang']) ? (int) $criteria['id_lang'] : null;
+
         return $this
             ->createFindByQueryBuilder($criteria, $orderBy, $limit, $offset)
             ->build()
-            ->getResult();
+            ->getResult($languageId);
     }
 
     public function createQueryBuilder(string $alias): QueryBuilder

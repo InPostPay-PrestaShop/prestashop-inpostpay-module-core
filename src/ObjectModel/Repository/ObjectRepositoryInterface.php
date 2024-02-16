@@ -24,7 +24,7 @@ interface ObjectRepositoryInterface
     /**
      * @return T[]
      */
-    public function findAll(): array;
+    public function findAll(int $languageId = null): array;
 
     /**
      * @return T|null

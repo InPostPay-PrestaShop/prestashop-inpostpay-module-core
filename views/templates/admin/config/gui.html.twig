@@ -1,0 +1,58 @@
+{% extends '@Modules/inpostizi/views/templates/admin/layout/basic-layout.html.twig' %}
+
+{% form_theme form '@Modules/inpostizi/views/templates/admin/config/form_theme.html.twig' %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col">
+
+      <div class="card">
+        {{ form_start(form) }}
+        <h3 class="card-header">
+          <i class="material-icons">palette</i> {{ layoutTitle }}
+        </h3>
+
+        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
+          {{ form_errors(form) }}
+
+          {% include '@Modules/inpostizi/views/templates/admin/config/gui/form.html.twig' with {
+            widgetDisplay: form.widgetDisplayedOnCartPage,
+            widgetConfig: form.cartPageWidgetConfiguration,
+            widgetStyles: form.cartPageHtmlStyles,
+          } %}
+        </div>
+
+        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
+          {% include '@Modules/inpostizi/views/templates/admin/config/gui/form.html.twig' with {
+            widgetDisplay: form.widgetDisplayedOnProductCard,
+            widgetConfig: form.productCardWidgetConfiguration,
+            widgetStyles: form.productCardHtmlStyles,
+          } %}
+
+          {{ form_rest(form) }}
+        </div>
+
+        <div class="card-footer clearfix">
+          <a href="{{ path('admin_module_manage') }}" class="btn btn-outline-secondary">{{ 'Back'|trans({}, 'Admin.Global') }}</a>
+
+          <button class="btn btn-primary float-right">{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
+        </div>
+        {{ form_end(form) }}
+      </div>
+
+    </div>
+  </div>
+{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/gui.css') }}" />
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script type="text/javascript" src="https://izi-sandbox.inpost.pl/inpostizi.js">
+  </script>
+  <script type="text/javascript" src="{{ asset('../modules/inpostizi/views/js/admin/gui.js') }}">
+  </script>
+{% endblock %}
