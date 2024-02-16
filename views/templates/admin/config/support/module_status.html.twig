@@ -22,7 +22,7 @@
     {% if not status.OK %}
       <div class="col-12 border-bottom">
         <div class="p-3">
-          <ul>
+          <ul class="mb-0">
             {% for error in status.errors %}
               <li>{{ error|raw }}</li>
             {% endfor %}
