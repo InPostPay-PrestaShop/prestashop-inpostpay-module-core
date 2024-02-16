@@ -50,7 +50,7 @@ final class OrdersConfigurationType extends AbstractType
             ])
             ->add('pointOfSaleId', TextType::class, [
                 'label' => $this->translator->l('POS ID', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('For sandbox environment - enter a random string of characters. In the case of a production environment - log into InPost and get the POS ID', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('For sandbox environment contact InPost. In the case of a production environment - log into InPost and get the POS ID', self::TRANSLATION_SOURCE),
             ]);
     }
 
