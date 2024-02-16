@@ -4,6 +4,9 @@ docker-build: build-back
 build-back:
 	docker-compose run --rm php sh -c "composer install"
 
+build-back-prod:
+	docker-compose run --rm php sh -c "composer install --no-dev -o"
+
 build-zip:
 	rm -rf inpostizi.zip
 	cp -Ra $(PWD) /tmp/inpostizi
@@ -21,4 +24,7 @@ build-zip:
 	zip -r inpostizi.zip inpostizi
 	rm -rf $(PWD)/inpostizi
 
-build-zip-prod: build-back build-zip
+rm-uat-files:
+	zip -d inpostizi.zip "inpostizi/src/Environment/UatEnvironment.php"
+
+build-zip-prod: build-back-prod build-zip rm-uat-files

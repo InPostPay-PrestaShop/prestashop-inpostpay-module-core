@@ -13,7 +13,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class InPostIziUpdater_1_4_3
+class InPostIziUpdater_1_5_0
 {
     private const CART_WIDGET_CONFIG_MAP = [
         'INPOST_PAY_alignment_cart' => 'alignment',
@@ -287,7 +287,7 @@ class InPostIziUpdater_1_4_3
  *
  * @return bool
  */
-function upgrade_module_1_4_3(\Module $module)
+function upgrade_module_1_5_0(\Module $module)
 {
-    return (new InPostIziUpdater_1_4_3(\Db::getInstance()))->upgrade();
+    return (new InPostIziUpdater_1_5_0(\Db::getInstance()))->upgrade();
 }
