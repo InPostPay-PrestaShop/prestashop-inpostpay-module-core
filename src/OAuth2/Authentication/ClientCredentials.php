@@ -18,7 +18,7 @@ final class ClientCredentials implements ClientCredentialsInterface
     /**
      * @var string|null
      *
-     * @Assert\NotBlank(allowNull=true)
+     * @Assert\NotBlank()
      */
     private $clientSecret;
 
