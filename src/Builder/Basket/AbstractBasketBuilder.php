@@ -6,7 +6,7 @@ namespace izi\prestashop\Builder\Basket;
 
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\Consent;
-use izi\prestashop\Common\Basket\ConsentType;
+use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Common\Basket\Product;
 use izi\prestashop\Common\Basket\Quantity;
@@ -17,6 +17,7 @@ use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductVariant;
 use izi\prestashop\Common\PromoCode;
+use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\ContextManager;
 
 abstract class AbstractBasketBuilder implements BasketBuilderInterface
@@ -30,6 +31,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      * @var ContextManager
      */
     private $contextManager;
+
+    /**
+     * @var ConsentsConfigurationInterface
+     */
+    private $consentsConfiguration;
 
     /**
      * @var DeliveryFactory
@@ -51,10 +57,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private $additionalInformation;
 
-    public function __construct(\Cart $cart, ContextManager $contextManager)
+    public function __construct(\Cart $cart, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration)
     {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
+        $this->consentsConfiguration = $consentsConfiguration;
         $this->deliveryFactory = new DeliveryFactory();
     }
 
@@ -176,7 +183,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $customizationId = array_key_exists('id_customization', $product) ? (int) $product['id_customization'] : 0;
 
         $category = $model->getDefaultCategory();
-        $description = \Tools::substr(trim(strip_tags($model->description)), 0, 1000);
+        $description = $this->formatDescription($model);
         $link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->cart->id_lang, null, $combinationId);
 
         return new Product(
@@ -194,6 +201,22 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $this->getProductAttributes($product),
             $this->getProductVariants($product)
         );
+    }
+
+    private function formatDescription(\Product $product): string
+    {
+        $description = strip_tags($product->description);
+        $description = trim(preg_replace('/\s+/', ' ', $description));
+
+        if ('' === $description) {
+            return '';
+        }
+
+        $description = htmlentities($description, ENT_HTML401, 'utf-8', false);
+        $description = htmlspecialchars_decode($description);
+        $description = preg_replace('/&(?:#\d+|[a-zA-Z]+);/', '', $description);
+
+        return \Tools::substr($description, 0, 1000);
     }
 
     private function getImageUrl(array $product, \Product $model, int $combinationId): string
@@ -449,51 +472,41 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getConsents(): array
     {
-        $consents = [];
+        $configConsents = $this->consentsConfiguration->getConsents((int) $this->cart->id_shop);
+
+        if ([] === $configConsents) {
+            return [];
+        }
+
         $context = \Context::getContext();
+        $languageId = (int) $this->cart->id_lang;
 
-        $selectedRequired = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required'));
-        $requiredText = $this->getConfiguration('INPOST_PAY_terms_options_required_text');
+        $cmsPages = \CMS::getCMSPages($languageId, null, true, $this->cart->id_shop);
 
-        $selectedRequiredOnce = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required_once'));
-        $requiredOnceText = $this->getConfiguration('INPOST_PAY_terms_options_required_once_text');
-
-        $selectedAdditional = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_additional'));
-        $requiredAdditionalText = $this->getConfiguration('INPOST_PAY_terms_options_additional_text');
-
-        $cmsPages = \CMS::getCMSPages($this->cart->id_lang, null, true, $this->cart->id_shop);
-
-        $consentId = 1;
-
+        $cmsPagesById = [];
         foreach ($cmsPages as $page) {
-            $cmsId = $page['id_cms'];
-            $link = $context->link->getCMSLink($cmsId, $page['link_rewrite'], null, $this->cart->id_lang, $this->cart->id_shop);
+            $cmsPagesById[$page['id_cms']] = $page;
+        }
 
-            if (in_array($cmsId, $selectedRequired, false)) {
-                $consents[] = new Consent(
-                    (string) $consentId++,
-                    $link,
-                    $requiredText,
-                    '1',
-                    ConsentType::RequiredAlways()
-                );
-            } elseif (in_array($cmsId, $selectedRequiredOnce, false)) {
-                $consents[] = new Consent(
-                    (string) $consentId++,
-                    $link,
-                    $requiredOnceText,
-                    '1',
-                    ConsentType::RequiredOnce()
-                );
-            } elseif (in_array($cmsId, $selectedAdditional, false)) {
-                $consents[] = new Consent(
-                    (string) $consentId++,
-                    $link,
-                    $requiredAdditionalText,
-                    '1',
-                    ConsentType::Optional()
-                );
+        $consents = [];
+
+        foreach ($configConsents as $consent) {
+            if (!isset($cmsPagesById[$cmsId = $consent->getCmsPageId()])) {
+                continue;
             }
+
+            $page = &$cmsPagesById[$cmsId];
+            if (!isset($page['url'])) {
+                $page['url'] = $context->link->getCMSLink($cmsId, $page['link_rewrite'], null, $languageId, $this->cart->id_shop);
+            }
+
+            $consents[] = new Consent(
+                $consent->getId(),
+                $page['url'],
+                $consent->getDescription($languageId),
+                $consent->getVersion(),
+                $consent->getRequirementType() ?? ConsentRequirementType::Optional()
+            );
         }
 
         return $consents;
@@ -650,8 +663,16 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
                     continue;
                 }
 
+                if (!$accessory['available_for_order']) {
+                    continue;
+                }
+
                 if ($accessory['customizable'] > 1) {
                     continue; // product requires customization
+                }
+
+                if (!$accessory['allow_oosp'] && $accessory['quantity'] < $accessory['minimal_quantity']) {
+                    continue;
                 }
 
                 $relatedProductsById[$accessoryId] = $accessory;

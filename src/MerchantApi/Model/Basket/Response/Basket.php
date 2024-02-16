@@ -92,7 +92,7 @@ final class Basket implements \JsonSerializable
         return $this->consents;
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return get_object_vars($this);
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\WidgetConfigurationInterface;
+use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Payment\PaymentCurrencyChecker;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -28,7 +28,7 @@ final class ActionGetPaymentOptions implements HookInterface
     private $currencyChecker;
 
     /**
-     * @var WidgetConfigurationInterface
+     * @var GuiConfigurationInterface
      */
     private $configuration;
 
@@ -40,7 +40,7 @@ final class ActionGetPaymentOptions implements HookInterface
     /**
      * @param \PaymentModule & WidgetInterface $paymentModule
      */
-    public function __construct(\PaymentModule $paymentModule, PaymentCurrencyChecker $currencyChecker, WidgetConfigurationInterface $configuration, RendererInterface $renderer)
+    public function __construct(\PaymentModule $paymentModule, PaymentCurrencyChecker $currencyChecker, GuiConfigurationInterface $configuration, RendererInterface $renderer)
     {
         $this->paymentModule = $paymentModule;
         $this->currencyChecker = $currencyChecker;
@@ -71,7 +71,7 @@ final class ActionGetPaymentOptions implements HookInterface
         }
 
         $widget = $this->paymentModule->renderWidget(self::HOOK_NAME, [
-            'config' => $this->configuration->getCheckoutConfiguration(),
+            'config' => $this->configuration->getCheckoutWidgetConfiguration(),
             'request' => $parameters['request'] ?? null,
         ]);
 

@@ -26,7 +26,7 @@ class OrderProduct extends Product
         $product->product_description = $basketProduct->product_description;
         $product->product_link = $basketProduct->product_link;
         $product->product_image = $basketProduct->product_image;
-        $product->base_price = $basketProduct->base_price;
+        $product->base_price = $basketProduct->promo_price;
         $product->product_attributes = $basketProduct->product_attributes;
         $product->variants = $basketProduct->variants;
         $product->quantity = OrderQuantity::fromBasketQuantity($basketProduct->quantity);

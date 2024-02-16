@@ -99,6 +99,7 @@ services:
     arguments:
       - '@inpost.izi.db'
 
+  izi\prestashop\Configuration\ApiConfigurationInterface: '@izi\prestashop\Configuration\ApiConfiguration'
   izi\prestashop\Configuration\ApiConfiguration:
     class: izi\prestashop\Configuration\ApiConfiguration
     public: false
@@ -106,21 +107,49 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
 
+  izi\prestashop\Configuration\OrdersConfigurationInterface: '@izi\prestashop\Configuration\OrdersConfiguration'
   izi\prestashop\Configuration\OrdersConfiguration:
     class: izi\prestashop\Configuration\OrdersConfiguration
     public: false
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
 
-  izi\prestashop\Configuration\WidgetConfiguration:
-    class: izi\prestashop\Configuration\WidgetConfiguration
+  izi\prestashop\Configuration\GeneralConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
+  izi\prestashop\Configuration\GeneralConfiguration:
+    class: izi\prestashop\Configuration\GeneralConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  izi\prestashop\Configuration\ShippingConfigurationInterface: '@izi\prestashop\Configuration\ShippingConfiguration'
+  izi\prestashop\Configuration\ShippingConfiguration:
+    class: izi\prestashop\Configuration\ShippingConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+      - '@izi\prestashop\Configuration\Factory\DayFactory'
+      - '@izi\prestashop\Configuration\Factory\HourFactory'
+
+  izi\prestashop\Configuration\ConsentsConfigurationInterface: '@izi\prestashop\Configuration\ConsentsConfiguration'
+  izi\prestashop\Configuration\ConsentsConfiguration:
+    class: izi\prestashop\Configuration\ConsentsConfiguration
     public: false
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
 
-  izi\prestashop\Configuration\ThankYouWidgetConfiguration:
-    class: izi\prestashop\Configuration\ThankYouWidgetConfiguration
+  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfiguration:
+    class: izi\prestashop\Configuration\GuiConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+
+  izi\prestashop\Configuration\AdvancedConfigurationInterface: '@izi\prestashop\Configuration\AdvancedConfiguration'
+  izi\prestashop\Configuration\AdvancedConfiguration:
+    class: izi\prestashop\Configuration\AdvancedConfiguration
     public: false
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
@@ -164,7 +193,7 @@ services:
     class: izi\prestashop\Log\Handler\RotatingFileHandlerFactory
     public: false
     arguments:
-      - '%kernel.environment%'
+      - '@=service("izi\\prestashop\\Configuration\\AdvancedConfigurationInterface").isDebugEnabled() ? "dev" : "prod"'
 
   inpost.izi.basket_app_logger:
     class: Psr\Log\LoggerInterface
@@ -276,9 +305,41 @@ services:
     arguments:
       - '@inpost.izi.repository_locator'
 
+  izi\prestashop\ObjectModel\Repository\CmsPageRepository:
+    class: izi\prestashop\ObjectModel\Repository\CmsPageRepository
+    public: false
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   izi\prestashop\ObjectModel\Repository\CurrencyRepository:
     class: izi\prestashop\ObjectModel\Repository\CurrencyRepository
     public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Currency }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\ObjectModel\Repository\CarrierRepository:
+    class: izi\prestashop\ObjectModel\Repository\CarrierRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Carrier }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\ObjectModel\Repository\ConfigurationRepository:
+    class: izi\prestashop\ObjectModel\Repository\ConfigurationRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Configuration }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\ObjectModel\Repository\HookRepository:
+    class: izi\prestashop\ObjectModel\Repository\HookRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Hook }
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
@@ -438,7 +499,7 @@ services:
     public: true
     arguments:
       - '@inpost.izi.context'
-      - '@izi\prestashop\Configuration\WidgetConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
   izi\prestashop\Builder\Basket\BasketBuilderFactory:
@@ -447,6 +508,7 @@ services:
     arguments:
       - '@inpost.izi.clock'
       - '@izi\prestashop\ContextManager'
+      - '@izi\prestashop\Configuration\ConsentsConfiguration'
 
   izi\prestashop\Cache\ConfigurationCache:
     class: izi\prestashop\Cache\ConfigurationCache
@@ -465,3 +527,13 @@ services:
     public: false
     arguments:
       - '@inpost.izi.event_dispatcher'
+
+  izi\prestashop\Configuration\Factory\DayFactoryInterface: '@izi\prestashop\Configuration\Factory\DayFactory'
+  izi\prestashop\Configuration\Factory\DayFactory:
+    class: izi\prestashop\Configuration\Factory\DayFactory
+    arguments:
+      - '@inpost.izi.module'
+
+  izi\prestashop\Configuration\Factory\HourFactoryInterface: '@izi\prestashop\Configuration\Factory\HourFactory'
+  izi\prestashop\Configuration\Factory\HourFactory:
+    class: izi\prestashop\Configuration\Factory\HourFactory

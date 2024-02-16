@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\ThankYouWidgetConfigurationInterface;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderLazyArray;
 use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderDetailLazyArray;
@@ -20,14 +20,9 @@ final class DisplayIziThankYou implements HookInterface
      */
     private $paymentModule;
 
-    /**
-     * @var \ThankYouWidgetConfigurationInterface
-     */
-    private $configuration;
-
     public function __construct(
         \PaymentModule $paymentModule,
-        ThankYouWidgetConfigurationInterface $configuration
+        GeneralConfigurationInterface $configuration
     )
     {
         $this->paymentModule = $paymentModule;

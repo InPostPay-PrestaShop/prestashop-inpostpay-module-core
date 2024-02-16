@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\WidgetConfigurationInterface;
+use izi\prestashop\Configuration\GuiConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 trait CartWidgetRendererTrait
 {
     /**
-     * @var WidgetConfigurationInterface
+     * @var GuiConfigurationInterface
      */
     private $configuration;
 
@@ -21,12 +21,12 @@ trait CartWidgetRendererTrait
 
     private function renderWidget(array $parameters, string $hookName = null): string
     {
-        if (!$this->configuration->isDisplayedOnCartPage()) {
+        if (!$this->configuration->isWidgetDisplayedOnCartPage()) {
             return '';
         }
 
         return $this->module->renderWidget($hookName, [
-            'config' => $this->configuration->getCartPageConfiguration(),
+            'config' => $this->configuration->getCartPageWidgetConfiguration(),
             'request' => $parameters['request'] ?? null,
         ]);
     }

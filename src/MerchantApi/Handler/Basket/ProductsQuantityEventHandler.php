@@ -10,8 +10,6 @@ use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
 {
@@ -23,9 +21,9 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
     private $module;
 
     /**
-     * @var LegacyTranslatorInterface|TranslatorInterface
+     * @var \Context
      */
-    private $translator;
+    private $context;
 
     /**
      * @var ObjectManagerInterface
@@ -40,7 +38,7 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
     public function __construct(\Module $module, \Context $context, ObjectManagerInterface $manager, LoggerInterface $logger)
     {
         $this->module = $module;
-        $this->translator = $context->getTranslator();
+        $this->context = $context;
         $this->manager = $manager;
         $this->logger = $logger;
     }
@@ -90,8 +88,15 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
             return null;
         }
 
-        if (null !== $error = $this->checkQuantity($cart, $productId, $combinationId, $customizationId, $quantity)) {
+        if (null !== $error = $this->checkMinimalQuantity($productId, $combinationId, $quantity, (int) $cart->id_lang)) {
             return $error;
+        }
+
+        $availableQuantity = $this->getAvailableQuantity($cart, $productId, $combinationId, $customizationId);
+        if (null !== $availableQuantity && $deltaQuantity > $availableQuantity) {
+            return $this->context->getTranslator()->trans('The available purchase order quantity for this product is %quantity%.', [
+                '%quantity%' => $availableQuantity + $currentQuantity,
+            ], 'Shop.Notifications.Error');
         }
 
         try {
@@ -162,9 +167,9 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
         return null;
     }
 
-    private function checkQuantity(\Cart $cart, int $productId, int $combinationId, int $customizationId, int $quantity): ?string
+    private function checkMinimalQuantity(int $productId, int $combinationId, int $quantity, int $languageId): ?string
     {
-        $product = $this->manager->getRepository(\Product::class)->find($productId, (int) $cart->id_lang);
+        $product = $this->manager->getRepository(\Product::class)->find($productId, $languageId);
 
         if (null === $product) {
             throw new \RuntimeException('Product does not exist');
@@ -178,21 +183,14 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
             ? $product->minimal_quantity
             : $combination->minimal_quantity;
 
-        if ($quantity < $minimalQuantity) {
-            return $this->translator->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
-                '%product%' => $product->name,
-                '%quantity%' => $minimalQuantity,
-            ], 'Shop.Notifications.Error');
+        if ($quantity >= $minimalQuantity) {
+            return null;
         }
 
-        $availableQuantity = $this->getAvailableQuantity($cart, $productId, $combinationId, $customizationId);
-        if (null !== $availableQuantity && $quantity > $availableQuantity) {
-            return $this->translator->trans('The available purchase order quantity for this product is %quantity%.', [
-                '%quantity%' => $availableQuantity,
-            ], 'Shop.Notifications.Error');
-        }
-
-        return null;
+        return $this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
+            '%product%' => $product->name,
+            '%quantity%' => $minimalQuantity,
+        ], 'Shop.Notifications.Error');
     }
 
     // TODO refactor static calls

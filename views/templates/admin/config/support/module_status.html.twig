@@ -1,0 +1,63 @@
+{% extends "@Modules/inpostizi/views/templates/admin/config/support/partials/block.html.twig" %}
+
+{% block support_block_extra_classes %}mb-3{% endblock %}
+
+{% block support_block_header_content %}
+  <i class="material-icons mr-2">check_circle</i>
+  <span>
+    {{ 'Module status'|legacy_trans }}:
+
+    {% if status.OK %}
+      <span class="text-success text-uppercase">OK</span>
+    {% else %}
+      <span class="text-danger text-uppercase">{{ 'Error'|trans({}, 'validators') }}</span>
+    {% endif %}
+  </span>
+{% endblock %}
+
+{% block support_block_body_extra_classes %}p-0{% endblock %}
+
+{% block support_block_body_content %}
+  <div class="row no-gutters">
+    {% if not status.OK %}
+      <div class="col-12 border-bottom">
+        <div class="p-3">
+          <ul class="mb-0">
+            {% for error in status.errors %}
+              <li>{{ error|raw }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+    <div class="col-6 border-right">
+      <div class="p-3">
+        <a href="{{ path('admin_inpost_izi_config_download_data') }}" class="btn btn-sm btn-block px-0 d-flex justify-content-center align-items-center btn-link">
+          <span class="material-icons btn-icon">content_copy</span>
+          {{ 'Download logs and module data'|legacy_trans }}
+        </a>
+      </div>
+    </div>
+    <div class="col-6">
+      {{ form_start(form) }}
+
+        {{ form_errors(form) }}
+        <div class="p-3 d-flex align-items-center justify-content-center h-100">
+          {{ form_widget(form.debugEnabled, {
+            'label': 'Debug mode',
+            'attr': {
+              'class': 'form-check-input',
+              'data-toggle': 'toggle',
+              'data-on': 'On',
+              'data-off': 'Off',
+              'data-onstyle': 'success',
+              'data-offstyle': 'danger',
+              'data-size': 'sm',
+            },
+          }) }}
+        </div>
+
+      {{ form_end(form) }}
+    </div>
+  </div>
+{% endblock %}

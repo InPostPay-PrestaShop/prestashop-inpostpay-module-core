@@ -74,7 +74,7 @@ final class UpdateOrderHandler implements UpdateOrderHandlerInterface
             return;
         }
 
-        $statusId = $this->configuration->getPaidOrderStatusId((int) $order->id_shop);
+        $statusId = $this->configuration->getPaidStatusId((int) $order->id_shop);
         if (0 >= $statusId || $statusId === (int) $order->current_state) {
             return;
         }

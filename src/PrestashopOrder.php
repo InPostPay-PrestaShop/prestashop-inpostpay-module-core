@@ -3,6 +3,7 @@
 namespace izi\prestashop;
 
 use izi\item\order\OrderProduct;
+use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\traits\PriceFactoryTrait;
 
 class PrestashopOrder
@@ -51,33 +52,22 @@ class PrestashopOrder
             return $data->consents;
         }
 
+        $config = json_decode(\Configuration::get('INPOST_PAY_CONSENTS'), true) ?? [];
+
+        if ([] === $config) {
+            return [];
+        }
+
         $consents = [];
 
-        $selectedRequired = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required'));
-        $selectedRequiredOnce = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required_once'));
-        $selectedAdditional = explode(',', $this->getConfiguration('INPOST_PAY_terms_options_required_additional'));
+        foreach ($config as $consent) {
+            $date = \DateTimeImmutable::createFromFormat(\DateTime::RFC3339, $consent['dateUpdated']);
 
-        $cmsPages = \CMS::getCMSPages($this->order->id_lang, null, true, $this->order->id_shop);
-        $consentId = 1;
-
-        foreach ($cmsPages as $page) {
-            $cmsId = $page['id_cms'];
-
-            if (in_array($cmsId, $selectedRequired, false)) {
-                $consents[] = [
-                    'consent_id' => $consentId++,
-                    'consent_version' => 1,
-                    'is_accepted' => true,
-                ];
-            } elseif (in_array($cmsId, $selectedRequiredOnce, false)) {
-                $consents[] = [
-                    'consent_id' => $consentId++,
-                    'consent_version' => 1,
-                    'is_accepted' => true,
-                ];
-            } elseif (in_array($cmsId, $selectedAdditional, false)) {
-                ++$consentId;
-            }
+            $consents[] = [
+                'consent_id' => $consent['id'],
+                'consent_version' => false === $date ? '0' : (string) $date->getTimestamp(),
+                'is_accepted' => $consent['requirementType'] !== ConsentRequirementType::Optional()->value,
+            ];
         }
 
         return $consents;

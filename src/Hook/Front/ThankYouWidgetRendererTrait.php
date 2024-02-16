@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\ThankYouWidgetConfiguration;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 
 trait ThankYouWidgetRendererTrait
 {
     /**
-     * @var ThankYouWidgetConfiguration
+     * @var GeneralConfigurationInterface
      */
     private $configuration;
 
@@ -25,13 +25,13 @@ trait ThankYouWidgetRendererTrait
      */
     private function shouldBeRendered(string $hookName, \Order $order): bool
     {
-        if ($this->paymentModule->name !== $order->module ||
-            !$this->configuration->shouldDisplayHook($hookName)
-        ) {
-            return false;
-        }
+        return $this->paymentModule->name === $order->module
+            && $this->shouldDisplayHook($hookName);
+    }
 
-        return true;
+    private function shouldDisplayHook(string $hookName): bool
+    {
+        return $this->configuration->getThankYouDisplayHook() === $hookName;
     }
 
     /**
@@ -39,6 +39,6 @@ trait ThankYouWidgetRendererTrait
      */
     private function renderWidgetBlock(): string
     {
-        return '<inpost-thank-you/>';
+        return '<inpost-thank-you></inpost-thank-you>';
     }
 }

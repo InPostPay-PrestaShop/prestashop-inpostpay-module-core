@@ -1,0 +1,9 @@
+
+.inpostizi-checkboxes {
+  .form-group {
+    [class*="col-"] {
+      padding-left: 0;
+      padding-right: 0;
+    }
+  }
+}

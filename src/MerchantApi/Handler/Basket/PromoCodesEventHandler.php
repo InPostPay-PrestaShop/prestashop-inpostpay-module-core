@@ -10,8 +10,6 @@ use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class PromoCodesEventHandler implements BasketEventHandlerInterface
 {
@@ -28,11 +26,6 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
     private $context;
 
     /**
-     * @var LegacyTranslatorInterface|TranslatorInterface
-     */
-    private $translator;
-
-    /**
      * @var ObjectManagerInterface
      */
     private $manager;
@@ -46,7 +39,6 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
     {
         $this->module = $module;
         $this->context = $context;
-        $this->translator = $context->getTranslator();
         $this->manager = $manager;
         $this->logger = $logger;
     }
@@ -104,11 +96,11 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
     private function addCartRule(\Cart $cart, string $code): ?string
     {
         if ('' === $code) {
-            return $this->translator->trans('You must enter a voucher code.', [], 'Shop.Notifications.Error');
+            return $this->context->getTranslator()->trans('You must enter a voucher code.', [], 'Shop.Notifications.Error');
         }
 
         if (!\Validate::isCleanHtml($code)) {
-            return $this->translator->trans('The voucher code is invalid.', [], 'Shop.Notifications.Error');
+            return $this->context->getTranslator()->trans('The voucher code is invalid.', [], 'Shop.Notifications.Error');
         }
 
         $cartRule = $this->manager->getRepository(\CartRule::class)->findOneBy([
@@ -117,7 +109,7 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
         ]);
 
         if (null === $cartRule) {
-            return $this->translator->trans('This voucher does not exist.', [], 'Shop.Notifications.Error');
+            return $this->context->getTranslator()->trans('This voucher does not exist.', [], 'Shop.Notifications.Error');
         }
 
         $context = $this->context->cloneContext();

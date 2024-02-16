@@ -27,7 +27,14 @@ const initGetOrderCompleteIfCartBound = async () => {
   }
 
   if (bindingData?.inpost_basket_id && bindingData?.status === 'SUCCESS') {
-    return iziGetOrderComplete();
+    const result = await iziGetOrderComplete();
+
+    // We have to handle it by ourselves because inpostizi don't run iziGetOrderComplete if there is not button on the page
+    if ('redirect' === result?.action && result.redirect) {
+      window.location.href = result.redirect
+    } else if ('refresh' === result?.action) {
+      window.location = window.location.href
+    }
   }
 }
 

@@ -1,0 +1,27 @@
+<p class="h3 mb-3">
+  {{ form_label(widgetConfig, null, {
+    'label_attr': {
+      'class': 'p-0'
+    }
+  }) }}
+</p>
+
+<div class="row mt-n3">
+
+  <div class="col-lg-7 col-md-6 col-12 mt-3 mr-auto">
+    {% include '@Modules/inpostizi/views/templates/admin/config/gui/config.html.twig' with {
+      form: widgetConfig,
+      formDisplay: widgetDisplay,
+    } %}
+
+    {% include '@Modules/inpostizi/views/templates/admin/config/gui/styles.html.twig' with {
+      form: widgetStyles,
+    } %}
+  </div>
+  <div class="col-lg-4 col-md-6 col-12 mt-3">
+    {% include '@Modules/inpostizi/views/templates/admin/config/gui/preview.html.twig' with {
+      form: widgetConfig,
+    } %}
+  </div>
+</div>
+

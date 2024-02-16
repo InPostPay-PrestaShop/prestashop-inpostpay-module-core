@@ -28,8 +28,8 @@ final class ConfigurationFactory implements ConfigurationFactoryInterface
             ->setDarkMode((bool) \Configuration::get('INPOST_PAY_background_cart'))
             ->setAlignment(Alignment::tryFrom((string) \Configuration::get('INPOST_PAY_alignment_cart')))
             ->setFrameStyle(FrameStyle::tryFrom((string) \Configuration::get('INPOST_PAY_frame_style_cart')))
-            ->setMinWidth($minWidth)
-            ->setMaxWidth($maxWidth)
+            ->setMinWidthPx($minWidth)
+            ->setMaxWidthPx($maxWidth)
             ->setLanguage(Language::tryFrom($this->context->language->iso_code) ?? Language::En())
             ->setCount($this->getCartProductsCount());
     }
@@ -59,8 +59,8 @@ final class ConfigurationFactory implements ConfigurationFactoryInterface
             ->setDarkMode((bool) \Configuration::get('INPOST_PAY_background_details'))
             ->setAlignment(Alignment::tryFrom((string) \Configuration::get('INPOST_PAY_alignment_details')))
             ->setFrameStyle(FrameStyle::tryFrom((string) \Configuration::get('INPOST_PAY_frame_style_details')))
-            ->setMinWidth($minWidth)
-            ->setMaxWidth($maxWidth)
+            ->setMinWidthPx($minWidth)
+            ->setMaxWidthPx($maxWidth)
             ->setLanguage(Language::tryFrom($this->context->language->iso_code) ?? Language::En())
             ->setCount($this->getCartProductsCount())
             ->setProductId((string) $productId);

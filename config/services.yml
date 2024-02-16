@@ -1,0 +1,257 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $module: '@inpost.izi.module'
+      $context: '@inpost.izi.context'
+      $clock: '@inpost.izi.clock'
+
+  izi\prestashop\Controller\Admin\ConfigurationController:
+    class: izi\prestashop\Controller\Admin\ConfigurationController
+    tags:
+      - { name: controller.service_arguments }
+
+  izi\prestashop\View\Asset\AssetManagerInterface: '@izi\prestashop\View\Asset\AdminAssetManager'
+  izi\prestashop\View\Asset\AdminAssetManager:
+    class: izi\prestashop\View\Asset\AdminAssetManager
+
+  izi\prestashop\Form\Type\GeneralConfigurationType:
+    class: izi\prestashop\Form\Type\GeneralConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\ApiConfigurationType:
+    class: izi\prestashop\Form\Type\ApiConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\EnvironmentChoiceType:
+    class: izi\prestashop\Form\Type\EnvironmentChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\ClientCredentialsType:
+    class: izi\prestashop\Form\Type\ClientCredentialsType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\MaskedPasswordType:
+    class: izi\prestashop\Form\Type\MaskedPasswordType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\OrdersConfigurationType:
+    class: izi\prestashop\Form\Type\OrdersConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\OrderStateChoiceType:
+    class: izi\prestashop\Form\Type\OrderStateChoiceType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@?inpost.izi.context'
+      - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
+
+  izi\prestashop\Form\Type\ShippingConfigurationType:
+    class: izi\prestashop\Form\Type\ShippingConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\AdvancedConfigurationType:
+    class: izi\prestashop\Form\Type\AdvancedConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\ShippingType:
+    class: izi\prestashop\Form\Type\ShippingType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\MoneyCurrencyType:
+    class: izi\prestashop\Form\Type\MoneyCurrencyType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
+
+  izi\prestashop\Form\Type\Shipping\CarrierChoiceType:
+    class: izi\prestashop\Form\Type\Shipping\CarrierChoiceType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Form\ChoiceList\CarrierChoiceLoader'
+
+  izi\prestashop\Form\Type\Shipping\HourChoiceType:
+    class: izi\prestashop\Form\Type\Shipping\HourChoiceType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Form\ChoiceList\HourChoiceLoader'
+
+  izi\prestashop\Form\Type\Shipping\DayChoiceType:
+    class: izi\prestashop\Form\Type\Shipping\DayChoiceType
+    tags:
+      - { name: form.type }
+    bind:
+      $choiceLoader: '@izi\prestashop\Form\ChoiceList\DayChoiceLoader'
+
+  izi\prestashop\Form\Type\OrderStatusDescriptionMapType:
+    class: izi\prestashop\Form\Type\OrderStatusDescriptionMapType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@?inpost.izi.context'
+      - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
+
+  izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader
+    arguments:
+      - '@?inpost.izi.object_model.order_state_repository'
+
+  izi\prestashop\Form\ChoiceList\CarrierChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\CarrierChoiceLoader
+    bind:
+      $repository: '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+
+  izi\prestashop\Form\ChoiceList\DayChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\DayChoiceLoader
+    arguments:
+      - '@?izi\prestashop\Configuration\Factory\DayFactory'
+
+  izi\prestashop\Form\ChoiceList\HourChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\HourChoiceLoader
+    bind:
+      $hourFactory: '@izi\prestashop\Configuration\Factory\HourFactory'
+
+  izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler
+    bind:
+      $cache: '@izi\prestashop\Cache\ConfigurationCache'
+
+  izi\prestashop\Validator\InPostApiCredentialsValidator:
+    class: izi\prestashop\Validator\InPostApiCredentialsValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@?izi\prestashop\BasketApp\AuthorizationProviderFactory'
+
+  izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory:
+    class: izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory
+
+  izi\prestashop\Form\Type\ConsentsConfigurationType:
+    class: izi\prestashop\Form\Type\ConsentsConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Consent\ConsentType:
+    class: izi\prestashop\Form\Type\Consent\ConsentType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@?inpost.izi.context'
+      - '@?izi\prestashop\ObjectModel\Repository\CmsPageRepository'
+
+  izi\prestashop\Form\Type\Consent\ConsentRequirementChoiceType:
+    class: izi\prestashop\Form\Type\Consent\ConsentRequirementChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler
+
+  izi\prestashop\Form\Type\GuiConfigurationType:
+    class: izi\prestashop\Form\Type\GuiConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\HtmlStylesType:
+    class: izi\prestashop\Form\Type\HtmlStylesType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Widget\WidgetConfigurationType:
+    class: izi\prestashop\Form\Type\Widget\WidgetConfigurationType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Widget\WidgetAlignmentChoiceType:
+    class: izi\prestashop\Form\Type\Widget\WidgetAlignmentChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Widget\WidgetVariantChoiceType:
+    class: izi\prestashop\Form\Type\Widget\WidgetVariantChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Widget\WidgetFrameStyleChoiceType:
+    class: izi\prestashop\Form\Type\Widget\WidgetFrameStyleChoiceType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\TypeExtension\UnitTypeExtension:
+    class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
+    tags:
+      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }
+
+  izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler
+
+  izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler
+
+  izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler
+
+  izi\prestashop\Handler\Config\CheckStatusHandlerInterface: '@izi\prestashop\Handler\Config\CheckStatusHandler'
+  izi\prestashop\Handler\Config\CheckStatusHandler:
+    class: izi\prestashop\Handler\Config\CheckStatusHandler
+    arguments:
+      - !tagged inpost.izi.status_checker
+
+  izi\prestashop\Handler\Config\DownloadModuleDataHandlerInterface: '@izi\prestashop\Handler\Config\DownloadModuleDataHandler'
+  izi\prestashop\Handler\Config\DownloadModuleDataHandler:
+    class: izi\prestashop\Handler\Config\DownloadModuleDataHandler
+    arguments:
+      - '@?inpost.izi.module'
+      - '@?inpost.izi.context'
+      - '@?izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '%inpost.izi.logs_dir%'
+
+  izi\prestashop\Form\Provider\DefaultCurrencyProviderInterface: '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
+  izi\prestashop\Form\Provider\DefaultCurrencyProvider:
+    class: izi\prestashop\Form\Provider\DefaultCurrencyProvider
+    arguments:
+      - '@?izi\prestashop\Configuration\Adapter\Configuration'
+
+  izi\prestashop\Twig\Extension\LegacyTranslationExtension:
+    class: izi\prestashop\Twig\Extension\LegacyTranslationExtension
+    tags:
+      - { name: 'twig.extension' }
+
+  izi\prestashop\Handler\Config\Status\ConfigurationStatusChecker:
+    class: izi\prestashop\Handler\Config\Status\ConfigurationStatusChecker
+    tags:
+      - { name: inpost.izi.status_checker }
+
+  izi\prestashop\Handler\Config\Status\DeliveryOptionsStatusChecker:
+    class: izi\prestashop\Handler\Config\Status\DeliveryOptionsStatusChecker
+    tags:
+      - { name: inpost.izi.status_checker }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@?izi\prestashop\ObjectModel\Repository\CarrierRepository'
+
+  izi\prestashop\Translation\LegacyTranslator:
+    class: izi\prestashop\Translation\LegacyTranslator
+    arguments:
+      - inpostizi

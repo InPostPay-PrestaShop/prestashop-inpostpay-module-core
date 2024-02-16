@@ -10,7 +10,7 @@ const updateCartHandler = async (event) => {
     try {
       const { count = null } = await getCartCountRequest();
 
-      if (count) {
+      if (typeof count === 'number') {
         dispatchInpostUpdateCount(count);
       }
     } catch (e) {

@@ -1,0 +1,42 @@
+{% extends "@Modules/inpostizi/views/templates/admin/config/support/partials/block.html.twig" %}
+
+{% block support_block_extra_classes %}mb-0{% endblock %}
+
+{% block support_block_header %}
+{% endblock %}
+
+{% block support_block_body_extra_classes %}p-4{% endblock %}
+
+{% block support_block_body_content %}
+  <div class="row mt-n3 align-items-center">
+    <div class="col-md-9 col-lg-7 mr-auto col-12 mt-3">
+      <p class="h2 mb-4">
+        {{ 'InPost Pay plugin configuration'|legacy_trans }}
+      </p>
+      <p class="mb-3">
+        {{ 'Take care of the correct exposure of the InPost Pay service, so that:'|legacy_trans }}
+      </p>
+
+      <ul class="mb-3">
+        <li class="mb-1">
+          {{ 'Buyers quickly recognize that when they make a purchase from your store, they can benefit from a fast and secure purchase and delivery service by a company whose services they know and trust, which directly contributes to customers\' purchasing decisions.'|legacy_trans }}
+        </li>
+        <li>
+          {{ 'With the correct placement of the widget, you help your customers notice the InPost Pay service, which will allow them to finalize their purchases on your site without having to enter their data, which is especially important for customers who prefer anonymous shopping without logging in.'|legacy_trans }}
+        </li>
+      </ul>
+
+      <p class="mb-0">
+        {{ 'Check out Merchant\'s dedicated Guide to the correct implementation of the InPost Pay service. It gathers in one place information on the current branding of InPost Pay, guidelines for the visual implementation of the widget, and best practices worth following when building a positive user experience among online shoppers. You can find Merchant\'s guide in the "useful links" section.'|legacy_trans }}
+      </p>
+    </div>
+    <div class="col-lg-4 col-md-3 col-12 mt-3">
+      <iframe
+        style="max-width: 100%; width: 100%; aspect-ratio: 5/3"
+        src="https://www.youtube.com/embed/xw25aFIUIIo?si=m1w2tT2mbGPVgs9R"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen></iframe>
+    </div>
+  </div>
+{% endblock %}

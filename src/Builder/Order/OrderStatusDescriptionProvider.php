@@ -33,7 +33,7 @@ class OrderStatusDescriptionProvider
         $orderStateId = (int) $order->current_state;
         $languageId = (int) $order->id_lang;
 
-        return $this->configuration->getOrderStatusDescription($orderStateId, $languageId, (int) $order->id_shop)
+        return $this->configuration->getStatusDescription($orderStateId, $languageId, (int) $order->id_shop)
             ?? $this->getOrderStateName($orderStateId, $languageId);
     }
 

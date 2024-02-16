@@ -6,6 +6,7 @@ namespace izi\prestashop\Builder\Basket;
 
 use izi\prestashop\Builder\Basket\BasketAppRequestBuilderInterface as RequestBuilder;
 use izi\prestashop\Builder\Basket\MerchantApiResponseBuilderInterface as ResponseBuilder;
+use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\ContextManager;
 use izi\prestashop\Entities\BasketInterface;
 use Psr\Clock\ClockInterface;
@@ -22,17 +23,23 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
      */
     private $contextManager;
 
-    public function __construct(ClockInterface $clock, ContextManager $contextManager)
+    /**
+     * @var ConsentsConfigurationInterface
+     */
+    private $consentsConfiguration;
+
+    public function __construct(ClockInterface $clock, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration)
     {
         $this->clock = $clock;
         $this->contextManager = $contextManager;
+        $this->consentsConfiguration = $consentsConfiguration;
     }
 
     public function createRequestBuilder(BasketInterface $basket): RequestBuilder
     {
         $cart = $this->getCart($basket);
 
-        return (new BasketAppRequestBuilder($cart, $this->contextManager))
+        return (new BasketAppRequestBuilder($cart, $this->contextManager, $this->consentsConfiguration))
             ->setExpirationDate($this->getExpirationDate());
     }
 
@@ -40,7 +47,7 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
     {
         $cart = $this->getCart($basket);
 
-        return (new MerchantApiResponseBuilder($cart, $this->contextManager))
+        return (new MerchantApiResponseBuilder($cart, $this->contextManager, $this->consentsConfiguration))
             ->setExpirationDate($this->getExpirationDate());
     }
 
