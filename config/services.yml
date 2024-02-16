@@ -3,9 +3,9 @@ services:
     public: false
     autowire: true
     bind:
-      $module: '@inpost.izi.module'
-      $context: '@inpost.izi.context'
-      $clock: '@inpost.izi.clock'
+      $module: '@?inpost.izi.module'
+      $context: '@?inpost.izi.context'
+      $clock: '@?inpost.izi.clock'
 
   izi\prestashop\Controller\Admin\ConfigurationController:
     class: izi\prestashop\Controller\Admin\ConfigurationController
@@ -113,7 +113,7 @@ services:
   izi\prestashop\Form\ChoiceList\CarrierChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\CarrierChoiceLoader
     bind:
-      $repository: '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+      $repository: '@?izi\prestashop\ObjectModel\Repository\CarrierRepository'
 
   izi\prestashop\Form\ChoiceList\DayChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\DayChoiceLoader
@@ -123,13 +123,13 @@ services:
   izi\prestashop\Form\ChoiceList\HourChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\HourChoiceLoader
     bind:
-      $hourFactory: '@izi\prestashop\Configuration\Factory\HourFactory'
+      $hourFactory: '@?izi\prestashop\Configuration\Factory\HourFactory'
 
   izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler
     bind:
-      $cache: '@izi\prestashop\Cache\ConfigurationCache'
+      $cache: '@?izi\prestashop\Cache\ConfigurationCache'
 
   izi\prestashop\Validator\InPostApiCredentialsValidator:
     class: izi\prestashop\Validator\InPostApiCredentialsValidator
@@ -141,6 +141,10 @@ services:
 
   izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory:
     class: izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory
+    arguments:
+      - '@?izi\prestashop\Configuration\ApiConfigurationInterface'
+      - '@?izi\prestashop\Configuration\OrdersConfigurationInterface'
+      - '@?izi\prestashop\Configuration\GeneralConfigurationInterface'
 
   izi\prestashop\Form\Type\ConsentsConfigurationType:
     class: izi\prestashop\Form\Type\ConsentsConfigurationType
@@ -225,7 +229,7 @@ services:
       - '@?inpost.izi.module'
       - '@?inpost.izi.context'
       - '@?izi\prestashop\ObjectModel\ObjectManagerInterface'
-      - '%inpost.izi.logs_dir%'
+      - '@=container.hasParameter("inpost.izi.logs_dir") ? parameter("inpost.izi.logs_dir") : ""'
 
   izi\prestashop\Form\Provider\DefaultCurrencyProviderInterface: '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
   izi\prestashop\Form\Provider\DefaultCurrencyProvider:
