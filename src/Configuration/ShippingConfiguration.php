@@ -87,7 +87,7 @@ final class ShippingConfiguration implements ShippingConfigurationInterface, Per
     public function getCourierShippingOptions(int $shopId = null): Shipping
     {
         if (!isset($this->courierShippingOptions[(int) $shopId])) {
-            $this->courierShippingOptions[(int) $shopId] = $this->loadApmShippingOptions($shopId);
+            $this->courierShippingOptions[(int) $shopId] = $this->loadCourierShippingOptions($shopId);
         }
 
         return clone $this->courierShippingOptions[(int) $shopId];
