@@ -13,6 +13,7 @@ services:
     arguments:
       - izi\prestashop\Command\UpdateOrderTrackingNumbersCommand: '@izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface'
         izi\prestashop\Command\UpdateBasketCommand: '@izi\prestashop\Handler\UpdateBasketHandlerInterface'
+        izi\prestashop\Command\UnbindBasketCommand: '@izi\prestashop\Handler\UnbindBasketHandlerInterface'
 
   inpost.izi.hook_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
