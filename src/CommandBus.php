@@ -62,12 +62,12 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
         return [
             UpdateOrderTrackingNumbersCommand::class => UpdateOrderTrackingNumbersHandlerInterface::class,
             UpdateBasketCommand::class => UpdateBasketHandlerInterface::class,
+            UnbindBasketCommand::class => UnbindBasketHandlerInterface::class,
 
             /* widget */
             GetClientDetailsCommand::class => GetClientDetailsHandlerInterface::class,
             BindBasketCommand::class => '?' . BindBasketHandlerInterface::class,
             GenerateDeepLinkCommand::class => '?' . GenerateDeepLinkHandlerInterface::class,
-            UnbindBasketCommand::class => '?' . UnbindBasketHandlerInterface::class,
             GetBindingConfirmationCommand::class => '?' . GetBindingConfirmationHandlerInterface::class,
             GetOrderEventsCommand::class => '?' . GetOrderEventsHandlerInterface::class,
 

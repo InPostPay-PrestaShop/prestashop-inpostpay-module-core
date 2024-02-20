@@ -48,7 +48,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.5.2';
+        $this->version = '1.5.3';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
         $this->bootstrap = true;
