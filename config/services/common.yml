@@ -254,6 +254,16 @@ services:
       - '@izi\prestashop\BasketApp\BasketAppClientInterface'
       - '@inpost.izi.general_logger'
 
+  izi\prestashop\Handler\UnbindBasketHandlerInterface: '@izi\prestashop\Handler\UnbindBasketHandler'
+  izi\prestashop\Handler\UnbindBasketHandler:
+    class: izi\prestashop\Handler\UnbindBasketHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\BasketApp\BasketAppClient'
+
   izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider:
     class: izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider
     public: false
