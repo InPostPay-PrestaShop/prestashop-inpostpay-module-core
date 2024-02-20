@@ -18,6 +18,7 @@ use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductVariant;
 use izi\prestashop\Common\PromoCode;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
+use izi\prestashop\Configuration\DTO;
 use izi\prestashop\ContextManager;
 
 abstract class AbstractBasketBuilder implements BasketBuilderInterface
@@ -503,13 +504,24 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $consents[] = new Consent(
                 $consent->getId(),
                 $page['url'],
-                $consent->getDescription($languageId),
+                $this->getConsentDescription($consent, $languageId),
                 $consent->getVersion(),
                 $consent->getRequirementType() ?? ConsentRequirementType::Optional()
             );
         }
 
         return $consents;
+    }
+
+    private function getConsentDescription(DTO\Consent $consent, int $languageId): string
+    {
+        if ($description = $consent->getDescription($languageId)) {
+            return $description;
+        }
+
+        $defaultLanguageId = (int) $this->getConfiguration('PS_LANG_DEFAULT');
+
+        return $consent->getDescription($defaultLanguageId);
     }
 
     /**

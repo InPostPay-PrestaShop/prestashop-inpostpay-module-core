@@ -113,9 +113,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
     private function setOrderStatusDescriptionMapping(array $data): void
     {
-        $data = array_filter($data);
+        $data = array_map('array_filter', $data);
 
-        $this->configuration->set(self::STATUS_DESCRIPTION_MAP, json_encode($data));
+        $this->configuration->set(self::STATUS_DESCRIPTION_MAP, array_map('json_encode', $data));
 
         $this->descriptionMappings = [];
         foreach ($data as $languageId => $map) {
