@@ -454,7 +454,7 @@ class PrestashopOrder
     {
         $orderStateId = (int) $order->current_state;
         $config = \Configuration::get('INPOST_PAY_OS_DESCRIPTION_MAP', $order->id_lang, null, $order->id_shop);
-        $map = $config ? [] : json_decode($config, true);
+        $map = $config ? json_decode($config, true) : [];
 
         return $map[$orderStateId] ?? (new \OrderState($orderStateId, $order->id_lang))->name;
     }
