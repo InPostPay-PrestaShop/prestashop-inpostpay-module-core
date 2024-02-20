@@ -14,7 +14,6 @@ use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
-use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Configuration\ShippingConfiguration;
@@ -91,8 +90,7 @@ final class ConfigurationController extends AbstractController
     {
         $this->checkAccess();
 
-        $consents = $configuration->getConsents() ?: [new Consent()];
-        $command = new UpdateConsentsConfigurationCommand(...$consents);
+        $command = new UpdateConsentsConfigurationCommand(...$configuration->getConsents());
 
         $form = $this->createForm(ConsentsConfigurationType::class, $command);
 

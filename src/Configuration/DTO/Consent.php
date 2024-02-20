@@ -6,6 +6,7 @@ namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Uuid\Uuid;
+use izi\prestashop\Validator\NotBlankInDefaultLanguage;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class Consent implements \JsonSerializable
@@ -25,9 +26,7 @@ final class Consent implements \JsonSerializable
     /**
      * @var string[]
      *
-     * @Assert\All({
-     *   @Assert\NotBlank(),
-     * })
+     * @NotBlankInDefaultLanguage()
      */
     private $descriptions;
 
@@ -144,5 +143,15 @@ final class Consent implements \JsonSerializable
             'requirementType' => $this->getRequirementType(),
             'dateUpdated' => $this->dateUpdated->format(\DateTime::RFC3339),
         ];
+    }
+
+    /**
+     * Returns a required violation message "field_name" parameter.
+     *
+     * @see \PrestaShop\PrestaShop\Core\ConstraintValidator\DefaultLanguageValidator::validate
+     */
+    public function getName(): string
+    {
+        return '';
     }
 }
