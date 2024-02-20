@@ -40,7 +40,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
             return $this->types[$key];
         }
 
-        return $this->types[$key] = $this->getPropertyTypesFromDocBlock($class, (string) $property);
+        return $this->types[$key] = $this->getPropertyTypesFromDocBlock((string) $class, (string) $property);
     }
 
     private function getPropertyTypesFromDocBlock(string $class, string $property): ?array
@@ -122,7 +122,15 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
             }
 
             foreach ($node->uses as $use) {
-                $useStatements[$use->alias ?? $use->name->getLast()] = (string) $use->name;
+                if (null === $use->alias) {
+                    $alias = $use->name->getLast();
+                } elseif (is_string($use->alias)) {
+                    $alias = $use->alias;
+                } else {
+                    $alias = $use->alias->name;
+                }
+
+                $useStatements[$alias] = (string) $use->name;
             }
         }
 
