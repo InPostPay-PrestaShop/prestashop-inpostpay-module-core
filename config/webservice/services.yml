@@ -1,2 +1,26 @@
 imports:
   - { resource: ../services/sf34.yml }
+
+services:
+  izi\prestashop\CommandBus:
+    class: izi\prestashop\CommandBus
+    arguments:
+      - '@inpost.izi.command_handler_locator'
+
+  inpost.izi.command_handler_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - izi\prestashop\Command\UpdateOrderTrackingNumbersCommand: '@izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface'
+        izi\prestashop\Command\UpdateBasketCommand: '@izi\prestashop\Handler\UpdateBasketHandlerInterface'
+
+  inpost.izi.hook_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - actionObjectCartDeleteBefore: '@izi\prestashop\Hook\Common\ActionCartDeleteBefore'
+        actionCartSave: '@izi\prestashop\Hook\Common\ActionCartSave'
+        actionObjectInPostShipmentModelAddAfter: '@izi\prestashop\Hook\Common\ActionShipmentAddAfter'
+        actionObjectInPostShipmentModelUpdateBefore: '@izi\prestashop\Hook\Common\ActionShipmentUpdateBefore'
+        actionObjectInPostShipmentModelUpdateAfter: '@izi\prestashop\Hook\Common\ActionShipmentUpdateAfter'
+        actionValidateOrder: '@izi\prestashop\Hook\Common\ActionValidateOrder'
