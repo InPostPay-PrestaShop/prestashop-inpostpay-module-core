@@ -184,7 +184,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $customizationId = array_key_exists('id_customization', $product) ? (int) $product['id_customization'] : 0;
 
         $category = $model->getDefaultCategory();
-        $description = $this->formatDescription($model);
+        $description = $this->formatDescription((string) $model->description) ?: $this->formatDescription((string) $model->description_short);
         $link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->cart->id_lang, null, $combinationId);
 
         return new Product(
@@ -204,9 +204,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         );
     }
 
-    private function formatDescription(\Product $product): string
+    private function formatDescription(string $description): string
     {
-        $description = strip_tags($product->description);
+        $description = strip_tags($description);
         $description = trim(preg_replace('/\s+/', ' ', $description));
 
         if ('' === $description) {
