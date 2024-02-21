@@ -56,8 +56,8 @@ class InPostIziUpdater_1_5_0
             && $this->updateConsentStructure()
             && $this->updateWidgetConfigStructure();
 
-        \Tools::clearSf2Cache('dev');
         \Tools::clearSf2Cache('prod');
+        \Tools::clearSf2Cache('dev');
 
         return $result;
     }
