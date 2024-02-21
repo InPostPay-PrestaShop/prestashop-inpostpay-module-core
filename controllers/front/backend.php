@@ -14,7 +14,10 @@ use izi\prestashop\MerchantApi\Firewall\MerchantApiAuthenticator;
 use izi\prestashop\OAuth2\Exception\OAuth2ExceptionInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+use Symfony\Component\Debug\ErrorHandler as LegacyErrorHandler;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\ErrorHandler\ErrorHandler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -106,6 +109,8 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 
     public function postProcess()
     {
+        $this->registerErrorHandler();
+
         $request = $this->module->getCurrentRequest();
 
         $response = $this->handle($request);
@@ -340,5 +345,26 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
                 'error_message' => $message,
             ], 404)
             : new Response($message, 404);
+    }
+
+    private function registerErrorHandler(): void
+    {
+        $handler = class_exists(ErrorHandler::class)
+            ? ErrorHandler::register()
+            : LegacyErrorHandler::register();
+
+        $handler->throwAt(E_ERROR, true);
+        $handler->setDefaultLogger($this->module->getLogger(), [
+            E_DEPRECATED => LogLevel::DEBUG,
+            E_USER_DEPRECATED => LogLevel::DEBUG,
+            E_NOTICE => LogLevel::DEBUG,
+            E_USER_NOTICE => LogLevel::DEBUG,
+            E_STRICT => LogLevel::DEBUG,
+            E_WARNING => LogLevel::DEBUG,
+            E_USER_WARNING => LogLevel::DEBUG,
+            E_USER_ERROR => LogLevel::CRITICAL,
+            E_RECOVERABLE_ERROR => LogLevel::CRITICAL,
+            E_ERROR => LogLevel::CRITICAL,
+        ]);
     }
 }
