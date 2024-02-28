@@ -23,6 +23,6 @@ final class SandboxEnvironment implements EnvironmentInterface
 
     public function getDeepLinkUri(): string
     {
-        return 'inpost://izilinksandbox';
+        return 'inpostsandbox://izilink';
     }
 }

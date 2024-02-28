@@ -23,6 +23,6 @@ final class UatEnvironment implements EnvironmentInterface
 
     public function getDeepLinkUri(): string
     {
-        return 'inpost://izilinkuat';
+        return 'inpostuat://izilink';
     }
 }
