@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Form\Type;
 
+use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Configuration\DTO\ShippingConfiguration;
+use izi\prestashop\Form\Type\Shipping\ShippingOptionsType;
 use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -24,19 +26,13 @@ final class ShippingConfigurationType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('courierShippingOptions', ShippingType::class, [
+            ->add('courierShippingOptions', ShippingOptionsType::class, [
                 'label' => $this->translator->l('Courier', self::TRANSLATION_SOURCE),
-                'required' => false,
-                'shippingIdLabel' => $this->translator->l('Courier', self::TRANSLATION_SOURCE),
-                'shippingPriceLabel' => $this->translator->l('Courier package weekend net price', self::TRANSLATION_SOURCE),
-                'shippingCodPriceLabel' => $this->translator->l('Courier COD net price', self::TRANSLATION_SOURCE),
+                'delivery_type' => DeliveryType::Courier(),
             ])
-            ->add('apmShippingOptions', ShippingType::class, [
-                'label' => $this->translator->l('Paczkomat', self::TRANSLATION_SOURCE),
-                'required' => false,
-                'shippingIdLabel' => $this->translator->l('Paczkomat', self::TRANSLATION_SOURCE),
-                'shippingPriceLabel' => $this->translator->l('Paczkomat package weekend net price', self::TRANSLATION_SOURCE),
-                'shippingCodPriceLabel' => $this->translator->l('Paczkomat package COD net price', self::TRANSLATION_SOURCE),
+            ->add('apmShippingOptions', ShippingOptionsType::class, [
+                'label' => $this->translator->l('Parcel Locker', self::TRANSLATION_SOURCE),
+                'delivery_type' => DeliveryType::Apm(),
             ]);
     }
 

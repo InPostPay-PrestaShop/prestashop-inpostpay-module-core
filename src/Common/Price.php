@@ -47,4 +47,22 @@ final class Price implements \JsonSerializable
     {
         return get_object_vars($this);
     }
+
+    public function add(self $price): self
+    {
+        return new self(
+            $this->net + $price->net,
+            $this->gross + $price->gross,
+            $this->vat + $price->vat
+        );
+    }
+
+    public function sub(self $price): self
+    {
+        return new self(
+            $this->net - $price->net,
+            $this->gross - $price->gross,
+            $this->vat - $price->vat
+        );
+    }
 }

@@ -23,16 +23,16 @@ $_MODULE['<{inpostizi}prestashop>environmentchoicetype_2652eec977dcb2a5aea85f5be
 $_MODULE['<{inpostizi}prestashop>environmentchoicetype_756d97bb256b8580d4d71ee0c547804e'] = 'Produkcja';
 $_MODULE['<{inpostizi}prestashop>environmentchoicetype_19dd6c1cec504ac854645f352eb03209'] = 'UAT';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_0ba29c6a1afacf586b03a26162c72274'] = 'Środowisko';
-$_MODULE['<{inpostizi}prestashop>apiconfigurationtype_02a5fb45d7cc2eb4a4913f760b397416'] = 'Wybierz środowisko, na którym chcesz pokazać usługę InPost Pay. Pamiętaj, aby przed przejściem na środowisko produkcyjne upewnić się, że usługa w Twoim sklepie działa prawidłowo';
+$_MODULE['<{inpostizi}prestashop>apiconfigurationtype_02a5fb45d7cc2eb4a4913f760b397416'] = 'Wybierz środowisko, na którym chcesz pokazać usługę InPost Pay. Pamiętaj, aby przed przejściem na środowisko produkcyjne upewnić się, że usługa w Twoim sklepie działa prawidłowo.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_fd282be0a539046c5c22736ef41f4350'] = 'Status zamówienia utworzonego przez InPost Pay';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_05a5fcc9d88a553b80b2633aa4556d58'] = 'Status dla zamówienia opłaconego przez InPost Pay';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_33af8066d3c83110d4bd897f687cedd2'] = 'Statusy zamówień';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_69fca9ac67c830f1ff66e4643f948282'] = 'Włącz płatności zgodne z podpisaną umową z Aion';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_50b5c5b98ff1773e551421f082fed261'] = 'Metody płatności zostały określone na umowie o obsługę bramki płatniczej';
+$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_50b5c5b98ff1773e551421f082fed261'] = 'Metody płatności zostały określone na umowie o obsługę bramki płatniczej.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_304adc8d65de68c0bbae5f7774f03914'] = 'Włącz płatność przy odbiorze zgodnie z podpisaną umową z InPost';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e1bbdbf5c497c484c061c4c2a0359e58'] = 'Płatność przy odbiorze będzie dostępna tylko wtedy, kiedy posiadasz podpisaną umowę z InPost na świadczenie tej usługi w Twoim sklepie.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e9adbbd1cd7eff7e1a588c31f79521d5'] = 'POS ID';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_d3188981fad68a05eec51ac57e69feca'] = 'W przypadku środowiska sandbox skontaktuj się z InPost. W przypadku środowiska produkcyjnego - zaloguj się do InPost i pobierz POS ID';
+$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_d3188981fad68a05eec51ac57e69feca'] = 'W przypadku środowiska sandbox skontaktuj się z InPost. W przypadku środowiska produkcyjnego - zaloguj się do InPost i pobierz POS ID.';
 $_MODULE['<{inpostizi}prestashop>htmlstylestype_9d768809cb57b85ec5e4e4693839692e'] = 'Margines górny';
 $_MODULE['<{inpostizi}prestashop>htmlstylestype_af1c33bd64cf61f9245b75131e2e06f1'] = 'Margines lewy';
 $_MODULE['<{inpostizi}prestashop>htmlstylestype_08d4382960e54a51b0225995753fb95c'] = 'Margines prawy';
@@ -42,7 +42,7 @@ $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_7f77e3d7178f0b1979d13
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_8e906720a71264257a3cc58aa9015402'] = 'wszystkim';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_685686674acfe4bdb5fb224164555bd6'] = 'testerom';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_ac6329ea064b9212be7e442cb46bf68f'] = 'Wyświetla widget';
-$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_917c439021cdab2b538264aba987c53f'] = 'Jeśli wybierzesz \"testerom\" widget będzie widoczny tylko dla osób, które mają go zobaczyć. W celu wyświetlenia widgetu w ym trybie w przeglądarce internetowej wpisz adres Twojego sklepu z dopiskiem ?showIzi=true Przykład: https://mojsklep.pl?showIzi=true ';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_917c439021cdab2b538264aba987c53f'] = 'Jeśli wybierzesz \"testerom\" widget będzie widoczny tylko dla osób, które mają go zobaczyć. W celu wyświetlenia widgetu w ym trybie w przeglądarce internetowej wpisz adres Twojego sklepu z dopiskiem \'?showIzi=true\'. Przykład: https://mojsklep.pl?showIzi=true';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_4bef0602617f4fe6bd9e178ebe91d5c7'] = 'Hook do wyświetlania widgetu na stronie potwierdzenia zamówienia';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_935b322389e5f6b6419447b0879ca67b'] = 'Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku templates/checkout/order-confirmation.tpl \'{hook h=\"%s\" order=$order}\'.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_7a440309fc897f07a1d99a07af29d8db'] = 'Maksymalna liczba produktów sugerowanych';

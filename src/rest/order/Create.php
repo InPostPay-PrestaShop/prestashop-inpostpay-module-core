@@ -4,16 +4,17 @@ namespace izi\prestashop\rest\order;
 
 use izi\item\order\InvoiceDetails;
 use izi\prestashop\CartSession;
+use izi\prestashop\Common\Delivery\DeliveryType;
+use izi\prestashop\Common\Delivery\ServiceCode;
+use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
+use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
 use izi\prestashop\MerchantApi\Exception\InternalServerErrorException;
-use izi\prestashop\traits\CarrierFinderTrait;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
 
 class Create
 {
-    use CarrierFinderTrait;
-
     private const TRANSLATION_SOURCE = 'create';
 
     /**
@@ -31,11 +32,17 @@ class Create
      */
     private $module;
 
-    public function __construct(\Context $context = null, Hashing $crypto = null, \PaymentModule $module = null)
+    /**
+     * @var ShippingConfigurationInterface
+     */
+    private $shippingConfiguration;
+
+    public function __construct(\Context $context = null, Hashing $crypto = null, \PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null)
     {
         $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
         $this->module = $module ?? \Module::getInstanceByName('inpostizi');
+        $this->shippingConfiguration = $shippingConfiguration ?? $this->module->get(ShippingConfigurationInterface::class);
     }
 
     /**
@@ -82,7 +89,15 @@ class Create
 
     private function createOrder(\Cart $cart, $data): int
     {
-        if (null === $carrierId = $this->getCarrierId($data->delivery->delivery_type)) {
+        $deliveryType = DeliveryType::from($data->delivery->delivery_type);
+        $serviceCodes = $this->getServiceCodes($data->delivery);
+
+        $shopId = (int) $cart->id_shop;
+
+        $shippingOptions = $this->shippingConfiguration->getShippingOptions($deliveryType, $shopId);
+        $carrierReferenceId = $shippingOptions->getCarrierMapping(...$serviceCodes)->getReferenceId();
+
+        if (null === $carrierReferenceId || null === $carrierId = $this->getCarrierId($carrierReferenceId, $shopId)) {
             throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $data->delivery->delivery_type));
         }
 
@@ -90,7 +105,7 @@ class Create
 
         $this->setUpContext($cart);
         $this->updateCart($cart, $data, $customer, $carrierId);
-        $this->adjustHandlingCost($data);
+        $this->adjustHandlingCost($shippingOptions, $serviceCodes);
         $this->validateCart($cart);
 
         $this->module->validateOrder(
@@ -313,9 +328,9 @@ class Create
         return $customer;
     }
 
-    private function adjustHandlingCost($data): void
+    private function adjustHandlingCost(ShippingOptions $shippingOptions, array $serviceCodes): void
     {
-        if (0. === $deliveryOptionsCost = $this->getAdditionalDeliveryOptionsCost($data->delivery)) {
+        if (0. === $deliveryOptionsCost = $this->getAdditionalDeliveryOptionsCost($shippingOptions, $serviceCodes)) {
             return;
         }
 
@@ -325,20 +340,24 @@ class Create
         \Cart::resetStaticCache();
     }
 
-    private function getAdditionalDeliveryOptionsCost($deliveryData): float
+    /**
+     * @param ServiceCode[] $serviceCodes
+     */
+    private function getAdditionalDeliveryOptionsCost(ShippingOptions $shippingOptions, array $serviceCodes): float
     {
-        if (
-            !isset($deliveryData->delivery_codes) ||
-            !is_array($deliveryData->delivery_codes) ||
-            [] === $deliveryData->delivery_codes
-        ) {
+        if ([] === $serviceCodes) {
             return 0.;
         }
 
         $additionalCostsPln = 0.;
-        foreach ($deliveryData->delivery_codes as $optionCode) {
-            $configKey = sprintf('INPOST_PAY_payment_%s_%s', strtolower($deliveryData->delivery_type), strtolower($optionCode));
-            $additionalCostsPln += (float) str_replace(',', '.', \Configuration::get($configKey));
+        foreach ($serviceCodes as $serviceCode) {
+            $serviceOptions = $shippingOptions->getServiceOptions($serviceCode);
+
+            if (null === $serviceOptions || null === $additionalCost = $serviceOptions->getAdditionalCost()) {
+                continue;
+            }
+
+            $additionalCostsPln += $additionalCost;
         }
 
         if (0. >= $additionalCostsPln) {
@@ -485,5 +504,34 @@ class Create
         $this->context->getTranslator()->setLocale($this->context->language->locale);
 
         \Shop::setContext(\Shop::CONTEXT_SHOP, $cart->id_shop);
+    }
+
+    private function getCarrierId(int $referenceId, int $shopId): ?int
+    {
+        if (0 >= $referenceId) {
+            return null;
+        }
+
+        if (false === $carrier = \Carrier::getCarrierByReference($referenceId)) {
+            return null;
+        }
+
+        if (!$carrier->active || !$carrier->isAssociatedToShop($shopId)) {
+            return null;
+        }
+
+        return (int) $carrier->id;
+    }
+
+    private function getServiceCodes($deliveryData): array
+    {
+        if (
+            !isset($deliveryData->delivery_codes) ||
+            !is_array($deliveryData->delivery_codes)
+        ) {
+            return [];
+        }
+
+        return array_map([ServiceCode::class, 'from'], $deliveryData->delivery_codes);
     }
 }

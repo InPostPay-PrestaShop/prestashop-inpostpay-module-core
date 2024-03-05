@@ -58,12 +58,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private $additionalInformation;
 
-    public function __construct(\Cart $cart, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration)
+    public function __construct(\Cart $cart, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration, DeliveryFactory $deliveryFactory)
     {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
         $this->consentsConfiguration = $consentsConfiguration;
-        $this->deliveryFactory = new DeliveryFactory();
+        $this->deliveryFactory = $deliveryFactory;
     }
 
     /**

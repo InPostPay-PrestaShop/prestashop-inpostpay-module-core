@@ -150,15 +150,23 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
             return new Type($type, $nullable);
         }
 
+        if (preg_match('/<([a-z|]*),\s*([^,]*)>$/', $type, $matches)) {
+            return $this->resolveCollectionType($matches[1], $matches[2], $context, $nullable);
+        }
+
         if (false !== strpos($type, '|')) {
             return $this->resolveCompoundType($type, $context);
         }
 
         if ('[]' === substr($type, -2)) {
-            return $this->resolveCollectionType($type, $context, $nullable);
+            return $this->resolveArrayType($type, $context, $nullable);
         }
 
         $className = $this->resolveClassName($type, $context);
+
+        if (!class_exists($className)) {
+            return null;
+        }
 
         return new Type(Type::BUILTIN_TYPE_OBJECT, $nullable, $className);
     }
@@ -184,7 +192,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
         return $result;
     }
 
-    private function resolveCollectionType(string $type, array $context, bool $nullable): Type
+    private function resolveArrayType(string $type, array $context, bool $nullable): Type
     {
         if ('mixed[]' === $type) {
             $collectionKeyType = null;
@@ -195,6 +203,24 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
         }
 
         return new Type(Type::BUILTIN_TYPE_ARRAY, $nullable, null, true, $collectionKeyType, $collectionValueType);
+    }
+
+    private function resolveCollectionType(string $collectionKeyTypes, string $collectionValueType, array $context, bool $nullable): Type
+    {
+        $collectionKeyType = $this->resolveType($collectionKeyTypes, $context);
+
+        if (is_array($collectionKeyType)) {
+            $collectionKeyType = null;
+        }
+
+        return new Type(
+            Type::BUILTIN_TYPE_ARRAY,
+            $nullable,
+            null,
+            true,
+            $collectionKeyType,
+            $this->resolveType($collectionValueType, $context)
+        );
     }
 
     private function resolveClassName(string $type, array $context): string
