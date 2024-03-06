@@ -11,6 +11,7 @@ use izi\prestashop\OAuth2\Authentication\ClientCredentialsInterface;
 use izi\prestashop\OAuth2\Token\AccessTokenInterface;
 use izi\prestashop\OAuth2\Token\AccessTokenRepositoryInterface;
 use izi\prestashop\OAuth2\Token\BearerToken;
+use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRepositoryInterface, PersistentConfigurationInterface
@@ -91,7 +92,11 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
             return null;
         }
 
-        return $this->accessToken = $this->serializer->deserialize($value, BearerToken::class, 'json');
+        try {
+            return $this->accessToken = $this->serializer->deserialize($value, BearerToken::class, 'json');
+        } catch (ExceptionInterface $e) {
+            return null;
+        }
     }
 
     public function saveToken(AccessTokenInterface $accessToken): void

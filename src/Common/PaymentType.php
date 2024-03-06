@@ -44,8 +44,8 @@ final class PaymentType extends StringEnum
      */
     public static function getBankProvidedPaymentOptions(): array
     {
-        return array_udiff(self::cases(), self::getCarrierProvidedPaymentOptions(), static function (self $type1, self $type2) {
-            return $type1 !== $type2;
+        return array_udiff(self::cases(), self::getCarrierProvidedPaymentOptions(), static function (self $type1, self $type2): int {
+            return $type1->value <=> $type2->value;
         });
     }
 }

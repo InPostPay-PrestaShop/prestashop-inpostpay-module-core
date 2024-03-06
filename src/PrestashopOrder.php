@@ -3,14 +3,11 @@
 namespace izi\prestashop;
 
 use izi\item\order\OrderProduct;
+use izi\prestashop\BasketApp\BasketAppClientInterface;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
-use izi\prestashop\traits\PriceFactoryTrait;
 
 class PrestashopOrder
 {
-    use PriceFactoryTrait;
-
-    private $orderId;
     private $basketId;
     private $order;
     private $customer;
@@ -106,136 +103,6 @@ class PrestashopOrder
         }, $basket->products);
     }
 
-    public function mapCartProduct($item)
-    {
-        $product = $this->mapProductData($item);
-
-        $product->quantity = $this->readQuantity($item);
-        $product->base_price = $this->readCartProductBasePrice($item);
-        $product->promo_price = $this->readCartProductPromoPrice($item);
-
-        return $product;
-    }
-
-    public function readCartProductPromoPrice($item)
-    {
-        $productSimple = $item->get_product();
-
-        $gross = wc_get_price_including_tax($productSimple);
-        $net = wc_get_price_excluding_tax($productSimple);
-
-        return $this->createPrice($net, $gross);
-    }
-
-    public function readCartProductBasePrice($item)
-    {
-        $productSimple = $item->get_product();
-
-        $gross = wc_get_price_including_tax($productSimple, ['price' => $productSimple->get_regular_price()]);
-        $net = wc_get_price_excluding_tax($productSimple, ['price' => $productSimple->get_regular_price()]);
-
-        return $this->createPrice($net, $gross);
-    }
-
-    public function readQuantity($item)
-    {
-        $quantity = $this->readStockQuantity();
-        $quantity->quantity = $item->get_quantity();
-
-        return $quantity;
-    }
-
-    public function readStockQuantity()
-    {
-        $quantity = new \izi\item\order\OrderQuantity();
-
-        $quantity->quantity_type = \izi\item\Quantity::INTEGER;
-        $quantity->quantity_unit = 'pcs';
-
-        return $quantity;
-    }
-
-    public function mapProductData($cartItem)
-    {
-        if (!$cartItem->get_product()) {
-            return;
-        }
-        $product = new OrderProduct();
-
-        $product->product_id = $cartItem->get_product_id();
-        if (isset($cartItem->get_product()->get_category_ids()[0])) {
-            $product->product_category = $cartItem->get_product()->get_category_ids()[0];
-        }
-        $product->ean = $cartItem->get_product()->get_sku() ?: '0';
-        $product->product_name = $cartItem->get_product()->get_name();
-        $product->product_description = strip_shortcodes(strip_tags($cartItem->get_product()->get_description()));
-        $product->product_link = $cartItem->get_product()->get_permalink();
-
-        $image = wp_get_attachment_image_src(get_post_thumbnail_id($cartItem->get_product()->get_id()), 'single-post-thumbnail');
-        if ($image && $image[0]) {
-            $product->product_image = $image[0];
-        } else {
-            $product->product_image = '';
-        }
-
-        $product->variants = $this->mapProductVariables($cartItem->get_product());
-        $product->product_attributes = $this->mapProductAttributes($cartItem->get_product());
-
-        return $product;
-    }
-
-    public function mapProductAttributes($productSimple)
-    {
-        $array = [];
-
-        foreach ($productSimple->get_attributes() as $attribute) {
-            if ($attribute->get_visible() && $attribute->get_variation() === false) {
-                foreach ($attribute->get_options() as $option) {
-                    $array[] = $this->mapProductAttribute($attribute->get_name(), $option);
-                }
-            }
-        }
-
-        return $array;
-    }
-
-    public function mapProductAttribute($name, $value)
-    {
-        $productAttribute = new \izi\item\ProductAttribute();
-
-        $productAttribute->attribute_name = $name;
-        $productAttribute->attribute_value = $value;
-
-        return $productAttribute;
-    }
-
-    public function mapProductVariables($productSimple)
-    {
-        $array = [];
-
-        foreach ($productSimple->get_attributes() as $attribute) {
-            if ($attribute->get_visible() && $attribute->get_variation() === true) {
-                $array[] = $this->mapProductVariable($attribute);
-            }
-        }
-
-        return $array;
-    }
-
-    public function mapProductVariable($attribute)
-    {
-        $variant = new \izi\item\Variant();
-
-        $variant->variant_id = $attribute->get_id();
-        $variant->variant_name = $attribute->get_name();
-        $variant->variant_values = implode(', ', $attribute->get_options());
-
-        $variant->variant_description = '';
-        $variant->variant_type = '';
-
-        return $variant;
-    }
-
     public function mapClientAddress()
     {
         $clientAddress = new \izi\item\order\ClientAddress();
@@ -261,37 +128,34 @@ class PrestashopOrder
 
     public function mapDelivery()
     {
+        $data = $this->getOrderData();
         $delivery = new \izi\item\order\Delivery();
 
-        $deliveryCodes = []; //explode(',', get_post_meta($this->orderId, 'delivery_codes', true));
+        $deliveryCodes = $data && isset($data->delivery->delivery_codes) ? $data->delivery->delivery_codes : [];
 
-        $additionalDeliveryOprionDictionary = [
+        $serviceNameDictionary = [
             'PWW' => 'Paczka w Weekend',
             'COD' => 'Pobranie',
         ];
-        $additionalDeliveryOprionsName = [];
-        foreach ($deliveryCodes as $code) {
-            if (!$code) {
-                continue;
-            }
-            $net = esc_attr(get_option('izi_transport_price_' . strtolower($code)));
-            $gross = $net * 1.23;
-            $additionalDeliveryOprionsName[] = $additionalDeliveryOprionDictionary[$code];
-            $delivery->delivery_options = [[
-                'delivery_name' => $additionalDeliveryOprionDictionary[$code],
-                'delivery_code_value' => $code,
-                'delivery_option_price' => [
-                    'net' => $net,
-                    'gross' => number_format($gross, 2),
-                    'vat' => number_format($gross - $net, 2),
-                ],
-            ]];
-        }
 
-        $data = $this->getOrderData();
+        $delivery->delivery_options = array_map(function ($code) use ($serviceNameDictionary) {
+            return [
+                'delivery_name' => $serviceNameDictionary[$code] ?? $code,
+                'delivery_code_value' => $code,
+                'delivery_option_price' => $this->createPrice(0., 0.),
+            ];
+        }, $deliveryCodes);
 
         $delivery->delivery_type = $data && isset($data->delivery->delivery_type) ? $data->delivery->delivery_type : 'COURIER';
-        $this->setDeliveryPrice($delivery);
+        $delivery->delivery_price = $this->createPrice(
+            $this->order->total_shipping_tax_excl,
+            $this->order->total_shipping_tax_incl
+        );
+        $delivery->delivery_date = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
+            ->setTimestamp(strtotime('+2 days'))
+            ->setTime(12, 0)
+            ->setTimezone(new \DateTimeZone(BasketAppClientInterface::DATETIME_ZONE))
+            ->format(BasketAppClientInterface::DATETIME_FORMAT);
 
         $delivery->mail = $this->order->getCustomer()->email;
         $delivery->phone_number = $this->mapPhone();
@@ -305,23 +169,6 @@ class PrestashopOrder
         }
 
         return $delivery;
-    }
-
-    private function setDeliveryPrice(&$deliveryObject)
-    {
-        $wooDeliveryPrice = new PrestaDeliveryPrice();
-
-        $cartId = CartSession::getCartIdByBasketId($this->basketId);
-        $cart = new \Cart($cartId);
-
-        $delivery = $wooDeliveryPrice->mapDelivery($cart);
-
-        foreach ($delivery as $option) {
-            if ($deliveryObject->delivery_type == $option->delivery_type) {
-                $deliveryObject->delivery_price = $option->delivery_price;
-                $deliveryObject->delivery_date = $option->delivery_date;
-            }
-        }
     }
 
     public function mapDeliveryAddress()
@@ -457,5 +304,25 @@ class PrestashopOrder
         $map = $config ? json_decode($config, true) : [];
 
         return $map[$orderStateId] ?? (new \OrderState($orderStateId, $order->id_lang))->name;
+    }
+
+    private function createPrice(float $net, float $gross): \izi\item\Price
+    {
+        $net = \Tools::ps_round($net, 2);
+        $gross = \Tools::ps_round($gross, 2);
+        $vat = $gross - $net;
+
+        $price = new \izi\item\Price();
+
+        $price->net = $this->formatPrice($net);
+        $price->gross = $this->formatPrice($gross);
+        $price->vat = $this->formatPrice($vat);
+
+        return $price;
+    }
+
+    private function formatPrice(float $price): string
+    {
+        return number_format($price, 2, '.', '');
     }
 }

@@ -2,10 +2,22 @@
 
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\BindingPlace;
+use izi\prestashop\Common\Delivery\DeliveryType;
+use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Configuration\DTO\HtmlStyles;
+use izi\prestashop\Configuration\DTO\Shipping\CarrierMapping;
+use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;
+use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
+use izi\prestashop\Configuration\DTO\Shipping\TimeOfWeek;
+use izi\prestashop\Configuration\DTO\Shipping\TimeOfWeekRange;
+use izi\prestashop\Configuration\DTO\Shipping\WeekDay;
+use izi\prestashop\Configuration\DTO\ShippingConfiguration;
+use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Environment\EnvironmentType;
 use izi\prestashop\Environment\UatEnvironment;
+use izi\prestashop\Translation\LegacyTranslator;
+use izi\prestashop\Translation\ServiceNameTranslator;
 use izi\prestashop\View\Widget\Alignment;
 use izi\prestashop\View\Widget\Configuration as WidgetConfiguration;
 use izi\prestashop\View\Widget\FrameStyle;
@@ -223,218 +235,117 @@ trait BackendForm
 
     protected function paymentFormFields()
     {
-        return [
-            [
+        return array_merge(
+            $this->getShippingConfigFields(DeliveryType::Courier(), 'Kurier'),
+            $this->getShippingConfigFields(DeliveryType::Apm(), 'Paczkomat')
+        );
+    }
+
+    private function getShippingConfigFields(DeliveryType $deliveryType, $typeLabel)
+    {
+        return array_merge(
+            $this->getCarrierMappingFields($deliveryType, $typeLabel),
+            ...array_map(function (ServiceCode $serviceCode) use ($deliveryType, $typeLabel) {
+                return $this->getServiceOptionsFields($deliveryType, $serviceCode, $typeLabel);
+            }, $deliveryType->getAvailableServiceCodes())
+        );
+    }
+
+    private function getCarrierMappingFields(DeliveryType $deliveryType, $typeLabel)
+    {
+        $fields = [];
+        $carrierOptions = $this->DeliveryOptions();
+
+        foreach (ServiceCode::getAvailableCombinations($deliveryType) as $serviceCodes) {
+            $name = sprintf('carrier_mapping_%s_%s', $deliveryType->value, $this->getCarrierMappingKey($serviceCodes));
+
+            $fields[] = [
                 'type' => 'select',
                 'class' => 'fixed-width-xxl',
-                'label' => $this->l('Kurier'),
-                'name' => 'INPOST_PAY_payment_courier',
+                'label' => $this->getCarrierMappingLabel($typeLabel, $serviceCodes),
+                'name' => $name,
                 'options' => [
-                    'query' => $this->DeliveryOptions(),
+                    'query' => $carrierOptions,
                     'id' => 'id_option',
                     'name' => 'name',
+                    'default' => [
+                        'label' => '--',
+                        'value' => null,
+                    ],
                 ],
-            ],
+                'carrier_mapping' => [$deliveryType, $serviceCodes],
+            ];
+        }
+
+        return $fields;
+    }
+    
+    private function getServiceOptionsFields(DeliveryType $deliveryType, ServiceCode $serviceCode, $typeLabel)
+    {
+        $serviceName = $this->getServiceName($serviceCode);
+
+        $fields = [
             [
                 'type' => 'text',
-                'label' => $this->l('Kurier paczka w weekend netto'),
-                'name' => 'INPOST_PAY_payment_courier_pww',
+                'label' => sprintf('%s %s netto', $typeLabel, $serviceName),
+                'name' => sprintf('service_cost_%s_%s', $deliveryType->value, $serviceCode->value),
                 'class' => 'text-right fixed-width-xl',
                 'suffix' => 'PLN',
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Kurier paczka w weekend dostępne od dnia'),
-                'name' => 'INPOST_PAY_payment_courier_pww_from_day',
-                'options' => [
-                    'query' => $this->DayOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Kurier paczka w weekend dostępne od godziny'),
-                'name' => 'INPOST_PAY_payment_courier_pww_from_time',
-                'options' => [
-                    'query' => $this->TimeOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Kurier paczka w weekend dostępne do dnia'),
-                'name' => 'INPOST_PAY_payment_courier_pww_to_day',
-                'options' => [
-                    'query' => $this->DayOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Kurier paczka w weekend dostępne do godziny'),
-                'name' => 'INPOST_PAY_payment_courier_pww_to_time',
-                'options' => [
-                    'query' => $this->TimeOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'text',
-                'label' => $this->l('Kurier pobranie netto'),
-                'name' => 'INPOST_PAY_payment_courier_cod',
-                'class' => 'text-right fixed-width-xl',
-                'suffix' => 'PLN',
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Kurier pobranie dostępne od dnia'),
-                'name' => 'INPOST_PAY_payment_courier_cod_from_day',
-                'options' => [
-                    'query' => $this->DayOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Kurier pobranie dostępne od godziny'),
-                'name' => 'INPOST_PAY_payment_courier_cod_from_time',
-                'options' => [
-                    'query' => $this->TimeOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Kurier pobranie dostępne do dnia'),
-                'name' => 'INPOST_PAY_payment_courier_cod_to_day',
-                'options' => [
-                    'query' => $this->DayOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Kurier pobranie dostępne do godziny'),
-                'name' => 'INPOST_PAY_payment_courier_cod_to_time',
-                'options' => [
-                    'query' => $this->TimeOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'class' => 'fixed-width-xxl',
-                'label' => $this->l('Paczkomat'),
-                'name' => 'INPOST_PAY_payment_apm',
-                'options' => [
-                    'query' => $this->DeliveryOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'text',
-                'label' => $this->l('Paczkomat paczka w weekend netto'),
-                'name' => 'INPOST_PAY_payment_apm_pww',
-                'class' => 'text-right fixed-width-xl',
-                'suffix' => 'PLN',
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Paczkomat paczka w weekend dostępne od dnia'),
-                'name' => 'INPOST_PAY_payment_apm_pww_from_day',
-                'options' => [
-                    'query' => $this->DayOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Paczkomat paczka w weekend dostępne od godziny'),
-                'name' => 'INPOST_PAY_payment_apm_pww_from_time',
-                'options' => [
-                    'query' => $this->TimeOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Paczkomat paczka w weekend dostępne do dnia'),
-                'name' => 'INPOST_PAY_payment_apm_pww_to_day',
-                'options' => [
-                    'query' => $this->DayOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Paczkomat paczka w weekend dostępne do godziny'),
-                'name' => 'INPOST_PAY_payment_apm_pww_to_time',
-                'options' => [
-                    'query' => $this->TimeOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'text',
-                'label' => $this->l('Paczkomat pobranie netto'),
-                'name' => 'INPOST_PAY_payment_apm_cod',
-                'class' => 'text-right fixed-width-xl',
-                'suffix' => 'PLN',
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Paczkomat pobranie dostępne od dnia'),
-                'name' => 'INPOST_PAY_payment_apm_cod_from_day',
-                'options' => [
-                    'query' => $this->DayOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Paczkomat pobranie dostępne od godziny'),
-                'name' => 'INPOST_PAY_payment_apm_cod_from_time',
-                'options' => [
-                    'query' => $this->TimeOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Paczkomat pobranie dostępne do dnia'),
-                'name' => 'INPOST_PAY_payment_apm_cod_to_day',
-                'options' => [
-                    'query' => $this->DayOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
-            ],
-            [
-                'type' => 'select',
-                'label' => $this->l('Paczkomat pobranie dostępne do godziny'),
-                'name' => 'INPOST_PAY_payment_apm_cod_to_time',
-                'options' => [
-                    'query' => $this->TimeOptions(),
-                    'id' => 'id_option',
-                    'name' => 'name',
-                ],
+                'service_option' => ['cost', $deliveryType, $serviceCode],
             ],
         ];
+
+        if (!$serviceCode->isAvailabilityTimeDependent()) {
+            return $fields;
+        }
+
+        return array_merge($fields, [
+            [
+                'type' => 'select',
+                'label' => sprintf('%s %s dostępne od dnia', $typeLabel, $serviceName),
+                'name' => sprintf('service_start_day_%s_%s', $deliveryType->value, $serviceCode->value),
+                'options' => [
+                    'query' => $this->DayOptions(),
+                    'id' => 'id_option',
+                    'name' => 'name',
+                ],
+                'service_option' => ['start_day', $deliveryType, $serviceCode],
+            ],
+            [
+                'type' => 'select',
+                'label' => sprintf('%s %s dostępne od godziny', $typeLabel, $serviceName),
+                'hint' => 'test',
+                'name' => sprintf('service_start_time_%s_%s', $deliveryType->value, $serviceCode->value),
+                'options' => [
+                    'query' => $this->TimeOptions(),
+                    'id' => 'id_option',
+                    'name' => 'name',
+                ],
+                'service_option' => ['start_time', $deliveryType, $serviceCode],
+            ],
+            [
+                'type' => 'select',
+                'label' => sprintf('%s %s dostępne do dnia', $typeLabel, $serviceName),
+                'name' => sprintf('service_end_day_%s_%s', $deliveryType->value, $serviceCode->value),
+                'options' => [
+                    'query' => $this->DayOptions(),
+                    'id' => 'id_option',
+                    'name' => 'name',
+                ],
+                'service_option' => ['end_day', $deliveryType, $serviceCode],
+            ],
+            [
+                'type' => 'select',
+                'label' => sprintf('%s %s dostępne do godziny', $typeLabel, $serviceName),
+                'name' => sprintf('service_end_time_%s_%s', $deliveryType->value, $serviceCode->value),
+                'options' => [
+                    'query' => $this->TimeOptions(),
+                    'id' => 'id_option',
+                    'name' => 'name',
+                ],
+                'service_option' => ['end_time', $deliveryType, $serviceCode],
+            ],
+        ]);
     }
 
     protected function guiFormFields()
@@ -575,6 +486,8 @@ trait BackendForm
             $consentData = [];
             $widgetConfig = [];
             $widgetStyles = [];
+            $carrierMappings = [];
+            $serviceOptions = [];
 
             foreach ($this->formFields() as $field) {
                 if (!empty($field['lang'])) {
@@ -585,6 +498,21 @@ trait BackendForm
                     }
                 } else {
                     $configValue = Tools::getValue($field['name']);
+                }
+
+                if (isset($field['carrier_mapping'])) {
+                    list($deliveryType, $serviceCodes) = $field['carrier_mapping'];
+                    $referenceId = empty($configValue) ? null : (int) $configValue;
+                    $carrierMappings[$deliveryType->value][] = new CarrierMapping($referenceId, ...$serviceCodes);
+
+                    continue;
+                }
+
+                if (isset($field['service_option'])) {
+                    list($option, $deliveryType, $serviceCode) = $field['service_option'];
+                    $serviceOptions[$deliveryType->value][$serviceCode->value][$option] = $configValue;
+
+                    continue;
                 }
 
                 if (isset($field['id_order_state'])) {
@@ -607,7 +535,7 @@ trait BackendForm
                 }
 
                 if (isset($field['widget_styles'])) {
-                    $widgetStyles[$field['widget_styles']][$field['widget_style']] = $configValue;
+                    $widgetStyles[$field['widget_styles']][$field['widget_style']] = $configValue === '' ? null : (int) $configValue;
 
                     continue;
                 }
@@ -642,6 +570,7 @@ trait BackendForm
             $this->updateConsents($consentData);
             $this->updateWidgetConfig($widgetConfig);
             $this->updateWidgetStyles($widgetStyles);
+            $this->updateShippingConfiguration($carrierMappings, $serviceOptions);
 
             (new \izi\prestashop\Configuration\Adapter\Configuration())->removeMatching('INPOST_PAY_CACHE_*');
 
@@ -704,8 +633,17 @@ trait BackendForm
             'details' => json_decode(\Configuration::get('INPOST_PAY_PRODUCT_HTML_STYLES'), true),
         ];
 
+        $shippingConfig = $this->get(ShippingConfigurationInterface::class);
+
         foreach ($this->formFields() as $field) {
-            if (isset($field['id_order_state'])) {
+            if (isset($field['carrier_mapping'])) {
+                list($deliveryType, $serviceCodes) = $field['carrier_mapping'];
+                $helper->tpl_vars['fields_value'][$field['name']] = $shippingConfig->getShippingOptions($deliveryType)->getCarrierMapping(...$serviceCodes)->getReferenceId();
+            } elseif (isset($field['service_option'])) {
+                list($option, $deliveryType, $serviceCode) = $field['service_option'];
+                $options = $shippingConfig->getShippingOptions($deliveryType)->getServiceOptions($serviceCode);
+                $helper->tpl_vars['fields_value'][$field['name']] = null === $options ? null : $this->getOptionValue($options, $option);
+            } elseif (isset($field['id_order_state'])) {
                 foreach ($helper->languages as $language) {
                     $helper->tpl_vars['fields_value'][$field['name']][$language['id_lang']] = \Tools::getValue(
                         sprintf('%s_%d', $field['name'], $language['id_lang']),
@@ -732,6 +670,30 @@ trait BackendForm
         }
 
         return $helper->generateForm([$form]);
+    }
+
+    private function getOptionValue(ServiceOptions $options, $name)
+    {
+        if ('cost' === $name) {
+            return $options->getAdditionalCost();
+        }
+
+        if (null === $timeRange = $options->getAvailabilityRange()) {
+            return null;
+        }
+
+        switch ($name) {
+            case 'start_day':
+                return $timeRange->getStart()->getWeekDay()->value;
+            case 'start_time':
+                return $timeRange->getStart()->getTime()->format('H:i');
+            case 'end_day':
+                return $timeRange->getEnd()->getWeekDay()->value;
+            case 'end_time':
+                return $timeRange->getEnd()->getTime()->format('H:i');
+            default:
+                return null;
+        }
     }
 
     protected function EnvironmentOptions()
@@ -841,7 +803,7 @@ trait BackendForm
         $options = [];
         foreach (['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota', 'Niedziela'] as $key => $name) {
             $options[] = [
-                'id_option' => $key,
+                'id_option' => $key + 1,
                 'name' => $name,
             ];
         }
@@ -852,10 +814,12 @@ trait BackendForm
     protected function TimeOptions()
     {
         $options = [];
-        for ($i = 1; $i < 25; ++$i) {
+        foreach (range(0, 23) as $hour) {
+            $time = \DateTime::createFromFormat('G', $hour)->format('H:i');
+
             $options[] = [
-                'id_option' => $i,
-                'name' => $i . ':00',
+                'id_option' => $time,
+                'name' => $time,
             ];
         }
 
@@ -935,7 +899,7 @@ trait BackendForm
             $requirementType = ConsentRequirementType::from($requirementType);
 
             foreach ($data['cms_ids'] as $cmsPageId) {
-                $consents = new Consent(
+                $consents[] = new Consent(
                     null,
                     (int) $cmsPageId,
                     $data['descriptions'],
@@ -997,6 +961,47 @@ trait BackendForm
         }
     }
 
+    private function updateShippingConfiguration(array $carrierMappings, array $serviceOptions)
+    {
+        $configuration = new ShippingConfiguration(
+            $this->createShippingOptions($carrierMappings['APM'], $serviceOptions['APM']),
+            $this->createShippingOptions($carrierMappings['COURIER'], $serviceOptions['COURIER'])
+        );
+
+        $this->get(ShippingConfigurationInterface::class)->persist($configuration);
+    }
+
+    private function createShippingOptions(array $carrierMappings, array $serviceOptions)
+    {
+        foreach ($serviceOptions as $code => $options) {
+            $serviceCode = ServiceCode::from($code);
+            $availabilityRange = $serviceCode->isAvailabilityTimeDependent() ? $this->createTimeRange($options) : null;
+
+            $serviceOptions[] = new ServiceOptions(
+                $serviceCode,
+                $options['cost'],
+                $availabilityRange
+            );
+        }
+
+        return new ShippingOptions($carrierMappings, $serviceOptions);
+    }
+
+    private function createTimeRange(array $options)
+    {
+        $start = new TimeOfWeek(
+            WeekDay::from((int) $options['start_day']),
+            \DateTimeImmutable::createFromFormat('H:i', $options['start_time'])
+        );
+
+        $end = new TimeOfWeek(
+            WeekDay::from((int) $options['end_day']),
+            \DateTimeImmutable::createFromFormat('H:i', $options['end_time'])
+        );
+
+        return new TimeOfWeekRange($start, $end);
+    }
+
     /**
      * @param int $width
      *
@@ -1005,5 +1010,40 @@ trait BackendForm
     private function getWidgetWidth($width)
     {
         return WidgetConfiguration::WIDTH_MIN_PX <= $width && WidgetConfiguration::WIDTH_MAX_PX >= $width ? $width : null;
+    }
+
+    private function getCarrierMappingKey(array $serviceCodes)
+    {
+        if ([] === $serviceCodes) {
+            return 'default';
+        }
+
+        return implode(':', array_map(static function (ServiceCode $serviceCode) {
+            return $serviceCode->value;
+        }, $serviceCodes));
+    }
+
+    private function getCarrierMappingLabel($typeLabel, array $serviceCodes)
+    {
+        $label = sprintf('Mapowanie przewoźnika: %s', $typeLabel);
+
+        if ([] === $serviceCodes) {
+            return $label;
+        }
+
+        return sprintf('%s (%s)', $label, implode(' + ', array_map(function (ServiceCode $serviceCode) {
+            return $this->getServiceName($serviceCode);
+        }, $serviceCodes)));
+    }
+
+    private function getServiceName(ServiceCode $serviceCode)
+    {
+        static $translator;
+
+        if (!isset($translator)) {
+            $translator = new ServiceNameTranslator(new LegacyTranslator($this->name));
+        }
+
+        return $translator->getName($serviceCode);
     }
 }

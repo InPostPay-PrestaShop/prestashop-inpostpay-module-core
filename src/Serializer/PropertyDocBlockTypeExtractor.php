@@ -160,6 +160,10 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
 
         $className = $this->resolveClassName($type, $context);
 
+        if (!class_exists($className)) {
+            return null;
+        }
+
         return new Type(Type::BUILTIN_TYPE_OBJECT, $nullable, $className);
     }
 

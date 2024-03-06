@@ -28,27 +28,45 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
      */
     private $consentsConfiguration;
 
-    public function __construct(ClockInterface $clock, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration)
+    /**
+     * @var DeliveryFactory
+     */
+    private $deliveryFactory;
+
+    public function __construct(ClockInterface $clock, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration, DeliveryFactory $deliveryFactory)
     {
         $this->clock = $clock;
         $this->contextManager = $contextManager;
         $this->consentsConfiguration = $consentsConfiguration;
+        $this->deliveryFactory = $deliveryFactory;
     }
 
     public function createRequestBuilder(BasketInterface $basket): RequestBuilder
     {
         $cart = $this->getCart($basket);
 
-        return (new BasketAppRequestBuilder($cart, $this->contextManager, $this->consentsConfiguration))
-            ->setExpirationDate($this->getExpirationDate());
+        $builder = new BasketAppRequestBuilder(
+            $cart,
+            $this->contextManager,
+            $this->consentsConfiguration,
+            $this->deliveryFactory
+        );
+
+        return $builder->setExpirationDate($this->getExpirationDate());
     }
 
     public function createResponseBuilder(BasketInterface $basket): ResponseBuilder
     {
         $cart = $this->getCart($basket);
 
-        return (new MerchantApiResponseBuilder($cart, $this->contextManager, $this->consentsConfiguration))
-            ->setExpirationDate($this->getExpirationDate());
+        $builder = new MerchantApiResponseBuilder(
+            $cart,
+            $this->contextManager,
+            $this->consentsConfiguration,
+            $this->deliveryFactory
+        );
+
+        return $builder->setExpirationDate($this->getExpirationDate());
     }
 
     private function getCart(BasketInterface $basket): \Cart

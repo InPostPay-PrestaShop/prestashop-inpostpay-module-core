@@ -164,28 +164,28 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
     {
         $value = $this->serializer->serialize($config, 'json');
         $this->configuration->set(self::CART_PAGE_WIDGET_CONFIG, $value);
-        $this->cartWidgetConfig = $config;
+        $this->cartWidgetConfig = clone $config;
     }
 
     private function setCartPageHtmlStyles(HtmlStyles $styles): void
     {
         $value = $this->serializer->serialize($styles, 'json');
         $this->configuration->set(self::CART_PAGE_HTML_STYLES, $value);
-        $this->cartHtmlStyles = $styles;
+        $this->cartHtmlStyles = clone $styles;
     }
 
     private function setProductPageWidgetConfig(Configuration $config): void
     {
         $value = $this->serializer->serialize($config, 'json');
         $this->configuration->set(self::PRODUCT_CARD_WIDGET_CONFIG, $value);
-        $this->productWidgetConfig = $config;
+        $this->productWidgetConfig = clone $config;
     }
 
     private function setProductCardHtmlStyles(HtmlStyles $styles): void
     {
         $value = $this->serializer->serialize($styles, 'json');
         $this->configuration->set(self::PRODUCT_CARD_HTML_STYLES, $value);
-        $this->productHtmlStyles = $styles;
+        $this->productHtmlStyles = clone $styles;
     }
 
     /**

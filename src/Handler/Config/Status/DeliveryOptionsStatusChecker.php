@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Handler\Config\Status;
 
-use izi\prestashop\Configuration\DTO\Shipping;
+use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\ObjectModel\Repository\CarrierRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
@@ -52,13 +52,13 @@ final class DeliveryOptionsStatusChecker implements StatusCheckerInterface
         return [$this->translator->l('No delivery option is available.', self::TRANSLATION_SOURCE)];
     }
 
-    private function isDeliveryOptionAvailable(Shipping $options): bool
+    private function isDeliveryOptionAvailable(ShippingOptions $options): bool
     {
-        if (null === $referenceId = $options->getCarrierId()) {
+        if (null === $carrierId = $options->getCarrierMapping()->getReferenceId()) {
             return false;
         }
 
-        if (null === $carrier = $this->carrierRepository->findOneByReferenceId($referenceId)) {
+        if (null === $carrier = $this->carrierRepository->findOneByReferenceId($carrierId)) {
             return false;
         }
 

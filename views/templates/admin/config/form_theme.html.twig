@@ -78,22 +78,20 @@
   </div>
 {%- endblock integer_widget -%}
 
-{% block form_label -%}
-  {{- parent() -}}
-
+{% block form_label_errors -%}
   {% if help is defined and help is not null %}
     <span
-      class="help-box"
-      data-toggle="popover"
-      data-html="true"
-      data-trigger="hover"
-      data-placement="top"
-      data-content="{{ help }}"
-    >
-       </span>
+        class="help-box mr-0"
+        data-toggle="popover"
+        data-html="true"
+        data-trigger="hover"
+        data-placement="top"
+        data-content="{{ help }}"
+    ></span>
   {% endif %}
-{%- endblock form_label %}
 
+  {{- parent() -}}
+{%- endblock form_label_errors %}
 
 {% block checkbox_widget -%}
   <div class="custom-control custom-checkbox">
@@ -125,3 +123,68 @@
     </label>
   </div>
 {%- endblock checkbox_widget %}
+
+{% block shipping_options_row %}
+  {% if label is not same as(false) %}
+    <label class="h3 mb-3" for="{{ form.vars.id }}">
+      {{ label }}
+    </label>
+  {% endif %}
+
+  {{ form_errors(form) }}
+  {{ form_rest(form) }}
+{% endblock %}
+
+{% block carrier_mappings_row %}
+  <div class="row mt-n2 align-items-end">
+    {% for child in form %}
+      <div class="col-xl-3 col-md-6 col-12 mt-2">
+        {{ form_row(child) }}
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}
+
+{% block service_options_row %}
+  {% if label is not same as(false) %}
+    <label class="h4" for="{{ form.vars.id }}">
+      {{ label }}
+    </label>
+  {% endif %}
+
+  <div class="row mt-n2">
+    <div class="col-xl-4 col-md-6 col-12 mt-2">
+      {{ form_row(form.additionalCost) }}
+    </div>
+    <div class="offset-xl-0 offset-6"></div>
+
+    {{ form_rest(form) }}
+  </div>
+{% endblock %}
+
+{% block time_of_week_range_row %}
+  {{ form_rest(form) }}
+{% endblock %}
+
+{% block time_of_week_row %}
+  <div class="col-xl-4 col-md-6 col-12 mt-2">
+    <fieldset class="form-group">
+      {{ form_label(form, null, {'label_attr': { 'class': 'p-0 mb-2'} }) }}
+
+      <div class="row mx-n1">
+        <div class="col-sm px-1">
+          {{ form_widget(form.weekDay) }}
+          {{ form_errors(form.weekDay) }}
+        </div>
+        <div class="col-sm px-1">
+          {{ form_widget(form.time) }}
+          {{ form_errors(form.time) }}
+        </div>
+
+        {{ form_rest(form) }}
+      </div>
+    </fieldset>
+  </div>
+{% endblock %}
+
+{% block form_help %}{% endblock %}
