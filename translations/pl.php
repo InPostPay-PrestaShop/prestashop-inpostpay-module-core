@@ -1,9 +1,10 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{inpostizi}prestashop>backendform_2dfdb958b3ae13c2547fee83621a12fc'] = 'Pozostaw puste, aby przedstawić nazwę statusu zamówienia.';
 $_MODULE['<{inpostizi}prestashop>backendform_eece09ac17d5231cd1e8524a5b8c73a6'] = 'Pozostaw puste, aby nie ograniczać ilości.';
+$_MODULE['<{inpostizi}prestashop>backendform_676920a78d244925b69637c60c7192c7'] = 'Dozwolone wartości: 220 - 600 px';
 $_MODULE['<{inpostizi}prestashop>backendform_c888438d14855d7d96a2724ee9c306bd'] = 'Ustawienia zaktualizowane';
 $_MODULE['<{inpostizi}prestashop>backendform_c9cc8cce247e49bae79f15173ce97354'] = 'Zapisz';
 $_MODULE['<{inpostizi}prestashop>inpostizi_be39a2c31fd39417d193787b0745002d'] = 'InPost Pay';
@@ -14,11 +15,7 @@ $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_27bc9eb9abc57172f8620ed18e
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_bb54cce5a0fb4e80d1b2dce5a28d6efb'] = 'Strona koszyka';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_e6f28601734051de0cef66878bac1c0e'] = 'Strona produktu';
 $_MODULE['<{inpostizi}prestashop>shippingconfigurationtype_5055d1a4444c630d6839f48ab48aef91'] = 'Kurier';
-$_MODULE['<{inpostizi}prestashop>shippingconfigurationtype_b5ee07a8d0abb36f906071d9e599d4b8'] = 'Kurier paczka w weekend cena netto';
-$_MODULE['<{inpostizi}prestashop>shippingconfigurationtype_2b41a828f27609bd38ab61b2306c6808'] = 'Kurier pobranie paczka w weekend cena netto';
-$_MODULE['<{inpostizi}prestashop>shippingconfigurationtype_40f9f308a329f3eaa2339cd56a9e3c42'] = 'Paczkomat';
-$_MODULE['<{inpostizi}prestashop>shippingconfigurationtype_7a86cd09470f2d5a8e57a2b426c38946'] = 'Paczkomat paczka w weekend cena netto';
-$_MODULE['<{inpostizi}prestashop>shippingconfigurationtype_a8487ba12a2f08e20c1c43e1160e1daf'] = 'Paczkomat pobranie paczka w weekend cena netto';
+$_MODULE['<{inpostizi}prestashop>shippingconfigurationtype_39b6fda48dbec22f92c82517456047c2'] = 'Paczkomat';
 $_MODULE['<{inpostizi}prestashop>environmentchoicetype_2652eec977dcb2a5aea85f5bec235b05'] = 'Sandbox';
 $_MODULE['<{inpostizi}prestashop>environmentchoicetype_756d97bb256b8580d4d71ee0c547804e'] = 'Produkcja';
 $_MODULE['<{inpostizi}prestashop>environmentchoicetype_19dd6c1cec504ac854645f352eb03209'] = 'UAT';
@@ -82,6 +79,20 @@ $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_bd89a3ed71a0de371f29ffc
 $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_d3058eb8a80e6516dd3ab5eaaebc318a'] = 'Styl ramki';
 $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_2d2249b2cf3287be50493c62d0b7f8a1'] = 'Minimalna szerokość';
 $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_477964da3b7a710156efc82fc4bc72e2'] = 'Maksymalna szerokość';
+$_MODULE['<{inpostizi}prestashop>carriermappingstype_cbbd3439308c58e0773f34e9f9954a9b'] = 'Mapowanie przewoźnika';
+$_MODULE['<{inpostizi}prestashop>serviceoptionstype_a25eac9fbba5c5aace5aa74ac02fabae'] = 'Dodatkowy koszt';
+$_MODULE['<{inpostizi}prestashop>serviceoptionstype_4927147ff7bc490186490bda85714ca4'] = 'Wartość netto kwoty do doliczenia do ceny przewoźnika w przypadku, gdy usługa zostanie wybrana.';
+$_MODULE['<{inpostizi}prestashop>weekdaychoicetype_6f8522e0610541f1ef215a22ffa66ff6'] = 'Poniedziałek';
+$_MODULE['<{inpostizi}prestashop>weekdaychoicetype_5792315f09a5d54fb7e3d066672b507f'] = 'Wtorek';
+$_MODULE['<{inpostizi}prestashop>weekdaychoicetype_796c163589f295373e171842f37265d5'] = 'Środa';
+$_MODULE['<{inpostizi}prestashop>weekdaychoicetype_78ae6f0cd191d25147e252dc54768238'] = 'Czwartek';
+$_MODULE['<{inpostizi}prestashop>weekdaychoicetype_c33b138a163847cdb6caeeb7c9a126b4'] = 'Piątek';
+$_MODULE['<{inpostizi}prestashop>weekdaychoicetype_8b7051187b9191cdcdae6ed5a10e5adc'] = 'Sobota';
+$_MODULE['<{inpostizi}prestashop>weekdaychoicetype_9d1a0949c39e66a0cd65240bc0ac9177'] = 'Niedziela';
+$_MODULE['<{inpostizi}prestashop>timeofweekrangetype_1432596d084873bee8df589b0b01448c'] = 'Dostępna od';
+$_MODULE['<{inpostizi}prestashop>timeofweekrangetype_62628cfd1cdd77d02c32812f048bada3'] = 'włącznie';
+$_MODULE['<{inpostizi}prestashop>timeofweekrangetype_0a0b945c925ac8eb94a4ad328fc54840'] = 'Dostępna do';
+$_MODULE['<{inpostizi}prestashop>timeofweekrangetype_a4293995cfbfa9ce60ce71ade2ff75f7'] = 'wyłącznie';
 $_MODULE['<{inpostizi}prestashop>productsquantityeventhandler_6db1f42edb02275ddc7077ae731fa407'] = 'Tego produktu nie ma w Twoim koszyku.';
 $_MODULE['<{inpostizi}prestashop>productsquantityeventhandler_e241dce2751f423f20aa8a1dabda0ead'] = 'Nie można zaktualizować ilości produktu.';
 $_MODULE['<{inpostizi}prestashop>productsquantityeventhandler_b9980de9208115d9102e3ed27df896ec'] = 'Może usunąć produkt z koszyka.';
@@ -93,6 +104,8 @@ $_MODULE['<{inpostizi}prestashop>actiongetpaymentoptions_a9e819aadeb05ca1df49418
 $_MODULE['<{inpostizi}prestashop>actionfrontcontrollersetmedia_05e070788d5522addd174a9baa153f9f'] = 'Coś poszło nie tak. Spróbuj ponownie później.';
 $_MODULE['<{inpostizi}prestashop>create_be503ee264d6b76ab103af34b1a92c58'] = 'Dla tego koszyka zostało już utworzone zamówienie.';
 $_MODULE['<{inpostizi}prestashop>create_d1363ee7cb061a5b383fd7a829dd9e5b'] = 'Wybrana opcja dostawy nie jest dostępna.';
+$_MODULE['<{inpostizi}prestashop>servicenametranslator_469ded86e4fce0e962b4d91cc7d426ce'] = 'Płatność za pobraniem';
+$_MODULE['<{inpostizi}prestashop>servicenametranslator_7e0df2de796409e39b5ee6060c457be7'] = 'Paczka w Weekend';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_6d723e264f50033f7475fc6987af0df8'] = 'Aktualnie wybrana waluta nie jest obsługiwana.';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_28cf121fadf3ad860f04b535a29d2d96'] = 'W koszyku nie ma żadnych produktów.';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_782990a55975fc9d54d74f3ffb2c7dad'] = 'Koszyk nie istnieje.';
@@ -114,20 +127,11 @@ $_MODULE['<{inpostizi}prestashop>inpostapicredentialsvalidator_e221b0fd3e879543e
 $_MODULE['<{inpostizi}prestashop>inpostapicredentialsvalidator_235c2a9074a916290e7079c69bf197b5'] = 'Nie można połączyć się z serwerem autoryzacji.';
 $_MODULE['<{inpostizi}prestashop>inpostapicredentialsvalidator_b57a7d1ed0c1f93b304b8b8e7fc41898'] = 'Nie można zweryfikować danych klienta.';
 $_MODULE['<{inpostizi}prestashop>inpostapicredentialsvalidator_ca6b295039b53a17b2175aded3b6e0d2'] = 'Przyznany token dostępu nie posiada wszystkich wymaganych uprawnień. W celu rozwiązania tego problemu, skontaktuj się z pomocą techniczną.';
-$_MODULE['<{inpostizi}prestashop>dayfactory_6f8522e0610541f1ef215a22ffa66ff6'] = 'Poniedziałek';
-$_MODULE['<{inpostizi}prestashop>dayfactory_5792315f09a5d54fb7e3d066672b507f'] = 'Wtorek';
-$_MODULE['<{inpostizi}prestashop>dayfactory_796c163589f295373e171842f37265d5'] = 'Środa';
-$_MODULE['<{inpostizi}prestashop>dayfactory_78ae6f0cd191d25147e252dc54768238'] = 'Czwartek';
-$_MODULE['<{inpostizi}prestashop>dayfactory_c33b138a163847cdb6caeeb7c9a126b4'] = 'Piątek';
-$_MODULE['<{inpostizi}prestashop>dayfactory_8b7051187b9191cdcdae6ed5a10e5adc'] = 'Sobota';
-$_MODULE['<{inpostizi}prestashop>dayfactory_9d1a0949c39e66a0cd65240bc0ac9177'] = 'Niedziela';
 $_MODULE['<{inpostizi}prestashop>deliveryoptionsstatuschecker_3194a4d8bc60ba3e66ddd94f10f32889'] = 'Nie jest dostępna żadna opcja dostawy.';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_341b3a9691b47feef924ec0e1db4856c'] = 'Konfiguracja nie jest kompletna - zweryfikuj i prześlij formularz w zakładce \"ustawienia\".';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_7cca0b355fe9f13f75ed5a2399a172be'] = 'Żadna metoda płatności nie jest włączona - konfigurację można zmienić w zakładce \"ustawienia\".';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_d64fff9bf53342093407f32d61b278b1'] = 'Dane dostępowe do API nie zostały skonfigurowane.';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_0befa43bc12a10af2a8897889570b8ee'] = 'Problem z dostępem do API: %s';
-$_MODULE['<{inpostizi}prestashop>admin_template_translations_1432596d084873bee8df589b0b01448c'] = 'Dostępny od';
-$_MODULE['<{inpostizi}prestashop>admin_template_translations_0a0b945c925ac8eb94a4ad328fc54840'] = 'Dostępny do';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_afc2a4a7af3445e015c1aeb370e9b6b7'] = 'Wybierz język do tłumaczenia ';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_dd1ba1872df91985ed1ca4cde2dfe669'] = 'Aktualności';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_c9083ac6d8937ca4bdb37f3bfcd7f7c5'] = 'Link do modułu';

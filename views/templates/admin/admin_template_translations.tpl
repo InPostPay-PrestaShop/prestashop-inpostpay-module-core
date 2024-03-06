@@ -1,5 +1,3 @@
-{l s='Available from' mod='inpostizi'}
-{l s='Available to' mod='inpostizi'}
 {l s='Choose a translation for your language' mod='inpostizi'}
 
 {l s='News' mod='inpostizi'}

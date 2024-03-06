@@ -26,9 +26,11 @@ final class TimeOfWeekRangeType extends AbstractType
         $builder
             ->add('start', TimeOfWeekType::class, [
                 'label' => $this->translator->l('Available from', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('inclusive', self::TRANSLATION_SOURCE),
             ])
             ->add('end', TimeOfWeekType::class, [
                 'label' => $this->translator->l('Available to', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('exclusive', self::TRANSLATION_SOURCE),
             ]);
     }
 
