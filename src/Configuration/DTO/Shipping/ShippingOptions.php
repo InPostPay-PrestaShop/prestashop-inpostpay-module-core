@@ -61,7 +61,7 @@ final class ShippingOptions implements \JsonSerializable
             }
         }
 
-        return new CarrierMapping(null, ...$serviceCodes);
+        return new CarrierMapping(null, $serviceCodes);
     }
 
     /**

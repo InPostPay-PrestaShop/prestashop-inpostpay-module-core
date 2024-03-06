@@ -119,7 +119,7 @@ class InPostIziUpdater_1_6_0
         $mappings = [];
 
         foreach (ServiceCode::getAvailableCombinations($deliveryType) as $serviceCodes) {
-            $mappings[] = new CarrierMapping($referenceId, ...$serviceCodes);
+            $mappings[] = new CarrierMapping($referenceId, $serviceCodes);
         }
 
         return $mappings;

@@ -28,7 +28,7 @@ final class CarrierMappingType extends AbstractType
             ->setDefaults([
                 'data_class' => CarrierMapping::class,
                 'empty_data' => function (Options $options) {
-                    return new CarrierMapping(null, ...$options['service_codes']);
+                    return new CarrierMapping(null, $options['service_codes']);
                 },
                 'service_codes' => [],
             ])

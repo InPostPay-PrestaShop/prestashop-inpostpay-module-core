@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration\DTO\Shipping;
 
 use izi\prestashop\Common\Delivery\ServiceCode;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class CarrierMapping implements \JsonSerializable
 {
@@ -15,10 +16,17 @@ final class CarrierMapping implements \JsonSerializable
 
     /**
      * @var ServiceCode[]
+     *
+     * @Assert\All(
+     *     @Assert\Type(ServiceCode::class),
+     * )
      */
     private $serviceCodes;
 
-    public function __construct(int $referenceId = null, ServiceCode ...$serviceCodes)
+    /**
+     * @param ServiceCode[] $serviceCodes
+     */
+    public function __construct(int $referenceId = null, array $serviceCodes = [])
     {
         $this->referenceId = $referenceId;
         $this->serviceCodes = $serviceCodes;

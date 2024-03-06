@@ -503,7 +503,7 @@ trait BackendForm
                 if (isset($field['carrier_mapping'])) {
                     list($deliveryType, $serviceCodes) = $field['carrier_mapping'];
                     $referenceId = empty($configValue) ? null : (int) $configValue;
-                    $carrierMappings[$deliveryType->value][] = new CarrierMapping($referenceId, ...$serviceCodes);
+                    $carrierMappings[$deliveryType->value][] = new CarrierMapping($referenceId, $serviceCodes);
 
                     continue;
                 }
