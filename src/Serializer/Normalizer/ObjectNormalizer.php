@@ -52,6 +52,7 @@ final class ObjectNormalizer extends BaseNormalizer
 
         $reflectionClass = new \ReflectionClass($class);
         $object = $this->instantiateObject($normalizedData, $class, $context, $reflectionClass, $allowedAttributes, $format);
+        $resolvedClass = get_class($object);
 
         foreach ($normalizedData as $attribute => $value) {
             if ($this->nameConverter) {
@@ -62,6 +63,8 @@ final class ObjectNormalizer extends BaseNormalizer
             $ignored = in_array($attribute, $this->ignoredAttributes);
 
             if ($allowed && !$ignored) {
+                $value = $this->validateAndDenormalize($resolvedClass, $attribute, $value, $format, $context);
+
                 try {
                     $this->propertyAccessor->setValue($object, $attribute, $value);
                 } catch (NoSuchPropertyException $exception) {
