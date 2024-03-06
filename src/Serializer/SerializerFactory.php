@@ -54,7 +54,7 @@ final class SerializerFactory
         $class = new \ReflectionClass(ObjectNormalizer::class);
         $params = $class->getConstructor()->getParameters();
 
-        return 3 < count($params) || \Tools::version_compare(_PS_VERSION_, '1.7.5.1', '>=')
+        return 3 < count($params) && \Tools::version_compare(_PS_VERSION_, '1.7.5.1', '>=')
             ? new ObjectNormalizer(null, null, null, $typeExtractor)
             : new CustomObjectNormalizer(null, null, null, $typeExtractor);
     }
