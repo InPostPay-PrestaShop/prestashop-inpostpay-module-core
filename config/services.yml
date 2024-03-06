@@ -263,3 +263,11 @@ services:
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@?izi\prestashop\ObjectModel\Repository\CarrierRepository'
+
+  izi\prestashop\Translation\LegacyTranslator:
+    class: izi\prestashop\Translation\LegacyTranslator
+    arguments:
+      - inpostizi
+
+  izi\prestashop\Translation\ServiceNameTranslator:
+    class: izi\prestashop\Translation\ServiceNameTranslator
