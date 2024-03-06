@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer as BaseNormalizer;
 
 /**
- * Denormalizes nested objects on Sf 2.8.
+ * Denormalizes nested objects & array elements on PS versions where the Serializer version present by default is lower than needed.
  *
  * @internal
  *

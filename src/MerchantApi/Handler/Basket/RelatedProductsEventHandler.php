@@ -173,9 +173,9 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
     {
         foreach ($cart->getProducts() as $cartProduct) {
             if (
-                $productId === (int) $cartProduct['id_product'] &&
-                $combinationId === (int) $cartProduct['id_product_attribute'] &&
-                0 === $cartProduct['id_customization']
+                $productId === (int) $cartProduct['id_product']
+                && $combinationId === (int) $cartProduct['id_product_attribute']
+                && 0 === $cartProduct['id_customization']
             ) {
                 return true;
             }

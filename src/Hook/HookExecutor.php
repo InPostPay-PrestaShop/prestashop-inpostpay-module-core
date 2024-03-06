@@ -76,8 +76,8 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
                     $hookNames[] = $alias;
                 }
             } elseif (
-                !is_subclass_of($class, PrestaShopVersionAwareHookInterface::class) ||
-                $class::getVersionRange()->contains($psVersion)
+                !is_subclass_of($class, PrestaShopVersionAwareHookInterface::class)
+                || $class::getVersionRange()->contains($psVersion)
             ) {
                 $hookNames[] = $hookName;
             }

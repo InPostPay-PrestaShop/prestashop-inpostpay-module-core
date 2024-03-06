@@ -526,8 +526,8 @@ class Create
     private function getServiceCodes($deliveryData): array
     {
         if (
-            !isset($deliveryData->delivery_codes) ||
-            !is_array($deliveryData->delivery_codes)
+            !isset($deliveryData->delivery_codes)
+            || !is_array($deliveryData->delivery_codes)
         ) {
             return [];
         }

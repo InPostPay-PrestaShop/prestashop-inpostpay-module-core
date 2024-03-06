@@ -339,8 +339,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $finalPrice = $this->getFinalPrice();
 
         if (
-            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_REDUCTION, false, true) ||
-            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_GIFT, false, true)
+            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_REDUCTION, false, true)
+            || [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_GIFT, false, true)
         ) {
             $promoPrice = $this->getPromoPrice();
         } else {

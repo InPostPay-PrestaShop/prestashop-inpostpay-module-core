@@ -71,8 +71,8 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
             $code = trim($promoCode->getCode());
 
             if (
-                !in_array($code, $currentCodes, true) &&
-                null !== $error = $this->addCartRule($cart, $code)
+                !in_array($code, $currentCodes, true)
+                && null !== $error = $this->addCartRule($cart, $code)
             ) {
                 return Notice::error($error);
             }

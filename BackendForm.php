@@ -961,25 +961,28 @@ trait BackendForm
         }
     }
 
-    private function updateShippingConfiguration(array $carrierMappings, array $serviceOptions)
+    private function updateShippingConfiguration(array $carrierMappings, array $serviceOptionsData)
     {
         $configuration = new ShippingConfiguration(
-            $this->createShippingOptions($carrierMappings['APM'], $serviceOptions['APM']),
-            $this->createShippingOptions($carrierMappings['COURIER'], $serviceOptions['COURIER'])
+            $this->createShippingOptions($carrierMappings['APM'], $serviceOptionsData['APM']),
+            $this->createShippingOptions($carrierMappings['COURIER'], $serviceOptionsData['COURIER'])
         );
 
         $this->get(ShippingConfigurationInterface::class)->persist($configuration);
     }
 
-    private function createShippingOptions(array $carrierMappings, array $serviceOptions)
+    private function createShippingOptions(array $carrierMappings, array $serviceOptionsData)
     {
-        foreach ($serviceOptions as $code => $options) {
+        $serviceOptions = [];
+
+        foreach ($serviceOptionsData as $code => $options) {
             $serviceCode = ServiceCode::from($code);
+            $cost = $options['cost'] === '' ? null : (float) str_replace(',', '.', $options['cost']);
             $availabilityRange = $serviceCode->isAvailabilityTimeDependent() ? $this->createTimeRange($options) : null;
 
             $serviceOptions[] = new ServiceOptions(
                 $serviceCode,
-                $options['cost'],
+                $cost,
                 $availabilityRange
             );
         }
