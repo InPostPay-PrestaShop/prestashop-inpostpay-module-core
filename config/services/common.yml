@@ -148,7 +148,10 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
 
-  izi\prestashop\Configuration\AdvancedConfigurationInterface: '@izi\prestashop\Configuration\AdvancedConfiguration'
+  izi\prestashop\Configuration\AdvancedConfigurationInterface:
+    alias: izi\prestashop\Configuration\AdvancedConfiguration
+    public: true
+
   izi\prestashop\Configuration\AdvancedConfiguration:
     class: izi\prestashop\Configuration\AdvancedConfiguration
     public: false
