@@ -6,14 +6,16 @@ namespace izi\prestashop\Form\Type\Shipping;
 
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
-use izi\prestashop\Form\DataMapper\ArrayTrimmingDataMapper;
+use izi\prestashop\Configuration\DTO\Shipping\CarrierMapping;
 use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Translation\ServiceNameTranslator;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-final class CarrierMappingsType extends AbstractType
+final class CarrierMappingsType extends AbstractType implements DataMapperInterface
 {
     private const TRANSLATION_SOURCE = 'carriermappingstype';
 
@@ -44,7 +46,7 @@ final class CarrierMappingsType extends AbstractType
             ]);
         }
 
-        $builder->setDataMapper(new ArrayTrimmingDataMapper());
+        $builder->setDataMapper($this);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -56,26 +58,33 @@ final class CarrierMappingsType extends AbstractType
             ->setAllowedTypes('delivery_type', DeliveryType::class);
     }
 
-    private function getServiceCodeCombinations(DeliveryType $deliveryType): array
+    public function mapDataToForms($viewData, $forms): void
     {
-        $combinations = [[]];
-        $serviceCodes = $deliveryType->getAvailableServiceCodes();
-
-        foreach ($serviceCodes as $serviceCode) {
-            $combinations[] = [$serviceCode];
+        if (null === $viewData) {
+            return;
         }
 
-        while ($serviceCode = array_shift($serviceCodes)) {
-            $combination = [$serviceCode];
-
-            foreach ($serviceCodes as $serviceCode) {
-                $combination[] = $serviceCode;
-            }
-
-            $combinations[] = $combination;
+        if (!is_array($viewData)) {
+            throw new UnexpectedTypeException($viewData, 'array');
         }
 
-        return $combinations;
+        foreach ($forms as $form) {
+            $data = $this->getCarrierMappingByServiceCodes(
+                $viewData,
+                $form->getConfig()->getOption('service_codes')
+            );
+
+            $form->setData($data);
+        }
+    }
+
+    public function mapFormsToData($forms, &$viewData): void
+    {
+        $viewData = [];
+
+        foreach ($forms as $form) {
+            $viewData[] = $form->getData();
+        }
     }
 
     private function getChildName(ServiceCode ...$serviceCodes): string
@@ -100,5 +109,26 @@ final class CarrierMappingsType extends AbstractType
         return sprintf('%s (%s)', $label, implode(' + ', array_map(function (ServiceCode $serviceCode): string {
             return $this->serviceNameTranslator->getName($serviceCode);
         }, $serviceCodes)));
+    }
+
+    /**
+     * @param CarrierMapping[] $mappings
+     * @param ServiceCode[] $serviceCodes
+     */
+    private function getCarrierMappingByServiceCodes(array $mappings, array $serviceCodes): ?CarrierMapping
+    {
+        foreach ($mappings as $mapping) {
+            $mappingServiceCodes = $mapping->getServiceCodes();
+
+            $diff = array_udiff($serviceCodes, $mappingServiceCodes, static function (ServiceCode $code1, ServiceCode $code2): int {
+                return $code1->value <=> $code2->value;
+            });
+
+            if ([] === $diff && count($mappingServiceCodes) === count($serviceCodes)) {
+                return $mapping;
+            }
+        }
+
+        return null;
     }
 }

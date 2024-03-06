@@ -119,22 +119,10 @@ class InPostIziUpdater_1_6_0
         $mappings = [];
 
         foreach (ServiceCode::getAvailableCombinations($deliveryType) as $serviceCodes) {
-            $key = $this->getCarrierMappingKey($serviceCodes);
-            $mappings[$key] = new CarrierMapping($referenceId, ...$serviceCodes);
+            $mappings[] = new CarrierMapping($referenceId, ...$serviceCodes);
         }
 
         return $mappings;
-    }
-
-    private function getCarrierMappingKey(array $serviceCodes): string
-    {
-        if ([] === $serviceCodes) {
-            return 'default';
-        }
-
-        return implode(':', array_map(static function (ServiceCode $serviceCode): string {
-            return $serviceCode->value;
-        }, $serviceCodes));
     }
 
     private function getOptionalServices(array $config, DeliveryType $deliveryType): array
@@ -143,7 +131,7 @@ class InPostIziUpdater_1_6_0
 
         foreach ($deliveryType->getAvailableServiceCodes() as $serviceCode) {
             $key = $serviceCode->value;
-            $services[$key] = $this->getServiceOptions($config[$key], $serviceCode);
+            $services[] = $this->getServiceOptions($config[$key], $serviceCode);
         }
 
         return $services;
@@ -207,7 +195,7 @@ class InPostIziUpdater_1_6_0
         return $this->db->executeS($sql) ?: [];
     }
 
-    private function groupConfigValuesByShop(array $data, array &$configIds = []): array
+    private function groupConfigValuesByShop(array $data): array
     {
         $dataByShopGroup = [];
         foreach ($data as $row) {
@@ -217,8 +205,6 @@ class InPostIziUpdater_1_6_0
             if (null === $dateUpdated || $row['date_upd'] < $dateUpdated) {
                 $dataByShopGroup[(int) $row['id_shop_group']][(int) $row['id_shop']]['date_upd'] = $row['date_upd'];
             }
-
-            $configIds[] = $row['id_configuration'];
         }
 
         return $dataByShopGroup;

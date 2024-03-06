@@ -503,8 +503,7 @@ trait BackendForm
                 if (isset($field['carrier_mapping'])) {
                     list($deliveryType, $serviceCodes) = $field['carrier_mapping'];
                     $referenceId = empty($configValue) ? null : (int) $configValue;
-                    $key = $this->getCarrierMappingKey($serviceCodes);
-                    $carrierMappings[$deliveryType->value][$key] = new CarrierMapping($referenceId, ...$serviceCodes);
+                    $carrierMappings[$deliveryType->value][] = new CarrierMapping($referenceId, ...$serviceCodes);
 
                     continue;
                 }
@@ -978,7 +977,7 @@ trait BackendForm
             $serviceCode = ServiceCode::from($code);
             $availabilityRange = $serviceCode->isAvailabilityTimeDependent() ? $this->createTimeRange($options) : null;
 
-            $serviceOptions[$code] = new ServiceOptions(
+            $serviceOptions[] = new ServiceOptions(
                 $serviceCode,
                 $options['cost'],
                 $availabilityRange

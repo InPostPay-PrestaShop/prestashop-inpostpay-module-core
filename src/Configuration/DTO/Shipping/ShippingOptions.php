@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration\DTO\Shipping;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class ShippingOptions implements \JsonSerializable
 {
     /**
-     * @var Collection<int|string, CarrierMapping>
+     * @var CarrierMapping[]
      *
      * @Assert\Valid()
      * @Assert\All(
@@ -22,7 +20,7 @@ final class ShippingOptions implements \JsonSerializable
     private $carrierMappings;
 
     /**
-     * @var Collection<int|string, ServiceOptions>
+     * @var ServiceOptions[]
      *
      * @Assert\Valid()
      * @Assert\All(
@@ -37,8 +35,8 @@ final class ShippingOptions implements \JsonSerializable
      */
     public function __construct(array $carrierMappings = [], array $optionalServices = [])
     {
-        $this->carrierMappings = new ArrayCollection($carrierMappings);
-        $this->optionalServices = new ArrayCollection($optionalServices);
+        $this->carrierMappings = $carrierMappings;
+        $this->optionalServices = $optionalServices;
     }
 
     /**
@@ -46,12 +44,11 @@ final class ShippingOptions implements \JsonSerializable
      */
     public function getCarrierMappings(): array
     {
-        return $this->carrierMappings->toArray();
+        return $this->carrierMappings;
     }
 
     public function getCarrierMapping(ServiceCode ...$serviceCodes): CarrierMapping
     {
-        /** @var CarrierMapping $carrierMapping */
         foreach ($this->carrierMappings as $carrierMapping) {
             $mappingServiceCodes = $carrierMapping->getServiceCodes();
 
@@ -72,7 +69,7 @@ final class ShippingOptions implements \JsonSerializable
      */
     public function setCarrierMappings(array $carrierMappings): self
     {
-        $this->carrierMappings = new ArrayCollection($carrierMappings);
+        $this->carrierMappings = $carrierMappings;
 
         return $this;
     }
@@ -82,7 +79,7 @@ final class ShippingOptions implements \JsonSerializable
      */
     public function getOptionalServices(): array
     {
-        return $this->optionalServices->toArray();
+        return $this->optionalServices;
     }
 
     public function getServiceOptions(ServiceCode $serviceCode): ?ServiceOptions
@@ -101,27 +98,24 @@ final class ShippingOptions implements \JsonSerializable
      */
     public function setOptionalServices(array $optionalServices): self
     {
-        $this->optionalServices = new ArrayCollection($optionalServices);
+        $this->optionalServices = $optionalServices;
 
         return $this;
     }
 
     public function __clone()
     {
-        $this->carrierMappings = $this->carrierMappings->map(static function (CarrierMapping $mapping) {
+        $this->carrierMappings = array_map(static function (CarrierMapping $mapping) {
             return clone $mapping;
-        });
+        }, $this->carrierMappings);
 
-        $this->optionalServices = $this->optionalServices->map(static function (ServiceOptions $options) {
+        $this->optionalServices = array_map(static function (ServiceOptions $options) {
             return clone $options;
-        });
+        }, $this->optionalServices);
     }
 
     public function jsonSerialize(): array
     {
-        return [
-            'carrierMappings' => $this->carrierMappings->toArray(),
-            'optionalServices' => $this->optionalServices->toArray(),
-        ];
+        return get_object_vars($this);
     }
 }
