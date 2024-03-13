@@ -8,6 +8,7 @@ use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use izi\prestashop\Configuration\DTO\Shipping\TimeOfWeek;
 use izi\prestashop\Configuration\DTO\Shipping\TimeOfWeekRange;
 use izi\prestashop\Configuration\DTO\Shipping\WeekDay;
+use izi\prestashop\Hook\Front\ActionGetPaymentOptions;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -51,9 +52,15 @@ class InPostIziUpdater_1_6_0
      */
     private $db;
 
-    public function __construct(\Db $db)
+    /**
+     * @var \Module
+     */
+    private $module;
+
+    public function __construct(\Db $db, \Module $module)
     {
         $this->db = $db;
+        $this->module = $module;
     }
 
     public function upgrade(): bool
@@ -61,6 +68,8 @@ class InPostIziUpdater_1_6_0
         if (!$this->updateShippingConfigStructure()) {
             return false;
         }
+
+        $this->module->unregisterHook(ActionGetPaymentOptions::HOOK_NAME);
 
         \Tools::clearSf2Cache('prod');
         \Tools::clearSf2Cache('dev');
@@ -237,5 +246,5 @@ class InPostIziUpdater_1_6_0
  */
 function upgrade_module_1_6_0(\Module $module)
 {
-    return (new InPostIziUpdater_1_6_0(\Db::getInstance()))->upgrade();
+    return (new InPostIziUpdater_1_6_0(\Db::getInstance(), $module))->upgrade();
 }
