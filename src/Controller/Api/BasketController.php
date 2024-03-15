@@ -52,7 +52,7 @@ final class BasketController extends AbstractApiController
     {
         $this->bus->handle(new DeleteBasketBindingCommand($basketId));
 
-        return new JsonResponse();
+        return JsonResponse::create()->setContent(null);
     }
 
     private function basketResponse(Basket $basket, string $basketId): JsonResponse

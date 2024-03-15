@@ -98,6 +98,13 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             'regex' => '#^/inpost/v1/izi/basket/(?<basketId>.+)/binding$#',
             'controller' => [BasketController::class, 'deleteBinding'],
         ],
+        [
+            'path' => '/inpost/v1/izi/basket/{basketId}/binding/delete',
+            'methods' => ['POST'],
+            'prefix' => '/inpost/v1/izi/basket/',
+            'regex' => '#^/inpost/v1/izi/basket/(?<basketId>.+)/binding/delete$#',
+            'controller' => [BasketController::class, 'deleteBinding'],
+        ],
     ];
 
     /**
