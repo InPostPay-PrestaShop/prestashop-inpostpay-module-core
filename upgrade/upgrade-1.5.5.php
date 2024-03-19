@@ -14,7 +14,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-class InPostIziUpdater_1_6_0
+class InPostIziUpdater_1_5_5
 {
     private const APM_CONFIG_MAP = [
         'INPOST_PAY_payment_apm' => 'mappingId',
@@ -244,7 +244,7 @@ class InPostIziUpdater_1_6_0
  *
  * @return bool
  */
-function upgrade_module_1_6_0(\Module $module)
+function upgrade_module_1_5_5(\Module $module)
 {
-    return (new InPostIziUpdater_1_6_0(\Db::getInstance(), $module))->upgrade();
+    return (new InPostIziUpdater_1_5_5(\Db::getInstance(), $module))->upgrade();
 }
