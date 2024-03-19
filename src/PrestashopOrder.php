@@ -225,7 +225,15 @@ class PrestashopOrder
 
     public function readPhone()
     {
-        return explode(' ', $this->deliveryDetails->phone, 2);
+        foreach (['phone', 'phone_mobile'] as $field) {
+            $value = (string) $this->deliveryDetails->{$field};
+
+            if ('' !== $value && preg_match('/^\+\d+ /', $value)) {
+                return explode(' ', $value, 2);
+            }
+        }
+
+        return ['+48', $this->deliveryDetails->phone];
     }
 
     private function readComments()

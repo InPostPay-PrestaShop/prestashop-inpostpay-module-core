@@ -160,7 +160,7 @@ services:
 
   inpost.izi.environment:
     class: izi\prestashop\Environment\EnvironmentInterface
-    public: false
+    public: true
     factory: [ '@izi\prestashop\Configuration\ApiConfiguration', getEnvironment ]
 
   izi\prestashop\Environment\AuthServerUriCollection:

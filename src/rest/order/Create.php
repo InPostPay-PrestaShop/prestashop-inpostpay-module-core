@@ -173,10 +173,14 @@ class Create
 
     private function createDeliveryAddress($accountInfo, \Customer $customer, $deliveryAddress = null): int
     {
-        $address = new \Address();
+        $address = $this->createNewAddress();
 
         $address->id_customer = $customer->id;
-        $address->phone = $accountInfo->phone_number->country_prefix . ' ' . $accountInfo->phone_number->phone;
+
+        $this->setPhoneNumber($address, $accountInfo);
+        if (!$address->phone && !$address->phone_mobile) {
+            $address->phone = $this->formatPhoneNumber($accountInfo);
+        }
 
         if (null !== $deliveryAddress) {
             $this->fillWithDeliveryAddressData($address, $deliveryAddress);
@@ -194,6 +198,10 @@ class Create
         }
 
         $address->alias = \Tools::substr($address->address1, 0, 32);
+
+        if (true !== $validationResult = $address->validateFields(false, true)) {
+            throw new CannotCreateOrderException(sprintf($this->module->l('Delivery address is not valid: %s', self::TRANSLATION_SOURCE), $validationResult));
+        }
 
         if (!$address->add()) {
             throw new InternalServerErrorException('Could not create delivery address.');
@@ -218,7 +226,10 @@ class Create
 
     private function createInvoiceAddress($invoiceDetails, $accountInfo, \Customer $customer): int
     {
-        $address = new \Address();
+        $address = $this->createNewAddress();
+
+        $this->setPhoneNumber($address, $accountInfo);
+
         $address->id_customer = $customer->id;
         $address->firstname = !empty($invoiceDetails->name) ? $invoiceDetails->name : $accountInfo->name;
         $address->lastname = !empty($invoiceDetails->surname) ? $invoiceDetails->surname : $accountInfo->surname;
@@ -240,17 +251,46 @@ class Create
             }
         }
 
-        if ($addressId = $this->getExistingAddressId($customer, $address, ['phone'])) {
+        if ($addressId = $this->getExistingAddressId($customer, $address, ['phone', 'phone_mobile'])) {
             return $addressId;
         }
 
         $address->alias = \Tools::substr($address->address1 . ' ' . $address->address2, 0, 32);
+
+        if (true !== $validationResult = $address->validateFields(false, true)) {
+            throw new CannotCreateOrderException(sprintf($this->module->l('Invoice address is not valid: %s', self::TRANSLATION_SOURCE), $validationResult));
+        }
 
         if (!$address->add()) {
             throw new InternalServerErrorException('Could not create invoice address.');
         }
 
         return $address->id;
+    }
+
+    private function createNewAddress(): \Address
+    {
+        return class_exists(\CustomerAddress::class) ? new \CustomerAddress() : new \Address();
+    }
+
+    private function setPhoneNumber(\Address $address, $accountInfo): void
+    {
+        if ([] === $requiredFields = $address->getFieldsRequiredDB()) {
+            return;
+        }
+
+        $phoneNumber = $this->formatPhoneNumber($accountInfo);
+
+        foreach (['phone', 'phone_mobile'] as $field) {
+            if (in_array($field, $requiredFields, true)) {
+                $address->{$field} = $phoneNumber;
+            }
+        }
+    }
+
+    private function formatPhoneNumber($accountInfo): string
+    {
+        return $accountInfo->phone_number->country_prefix . ' ' . $accountInfo->phone_number->phone;
     }
 
     private function getExistingAddressId(\Customer $customer, \Address $address, array $ignoreFields = []): ?int
@@ -285,6 +325,7 @@ class Create
             'company',
             'vat_number',
             'phone',
+            'phone_mobile',
         ], $ignoreFields);
 
         foreach ($comparedFields as $field) {
@@ -308,18 +349,22 @@ class Create
         $customer->firstname = $accountInfo->name;
         $customer->lastname = $accountInfo->surname;
 
-        if (!\Validate::isLoadedObject($customer)) {
+        if ($newCustomer = !\Validate::isLoadedObject($customer)) {
             $password = \Tools::passwdGen(8, 'RANDOM');
 
             $customer->id_lang = $cart->id_lang;
             $customer->passwd = $this->crypto->hash($password);
             $customer->is_guest = true;
+        }
 
-            if (!$customer->add()) {
-                throw new InternalServerErrorException('Could not create customer account.');
-            }
-        } elseif (!$customer->update()) {
-            throw new InternalServerErrorException('Could not update customer account.');
+        if (true !== $validationResult = $customer->validateFields(false, true)) {
+            throw new CannotCreateOrderException(sprintf($this->module->l('Customer data is not valid: %s', self::TRANSLATION_SOURCE), $validationResult));
+        }
+
+        if (!$customer->save()) {
+            throw $newCustomer
+                ? new InternalServerErrorException('Could not create customer account.')
+                : new InternalServerErrorException('Could not update customer account.');
         }
 
         $cart->id_customer = $customer->id;
@@ -389,6 +434,10 @@ class Create
 
         $message->message = $data->order_details->order_comments;
 
+        if (!$message->validateFields(false)) {
+            throw new CannotCreateOrderException($this->module->l('Order comments are not valid.', self::TRANSLATION_SOURCE));
+        }
+
         if (!$message->save()) {
             throw new InternalServerErrorException('Could not save order comments.');
         }
@@ -402,14 +451,19 @@ class Create
 
         try {
             $model = new \InPostCartChoiceModel($cartId);
-            $model->id = $cartId;
+
+            if ($newModel = 0 === (int) $model->id) {
+                $model->id = $cartId;
+            }
+
             $model->service = 'APM' === $delivery->delivery_type ? 'inpost_locker_standard' : 'inpost_courier_standard';
             if ('APM' === $delivery->delivery_type) {
                 $model->point = $delivery->delivery_point;
             }
             $model->email = $delivery->mail;
             $model->phone = $delivery->phone_number->phone;
-            $model->save();
+
+            $newModel ? $model->add() : $model->update();
         } catch (\Exception $e) {
             $this->module->getLogger()->error('Could not save shipment data: {error}', [
                 'error' => $e,
