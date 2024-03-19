@@ -104,6 +104,10 @@ $_MODULE['<{inpostizi}prestashop>actiongetpaymentoptions_a9e819aadeb05ca1df49418
 $_MODULE['<{inpostizi}prestashop>actionfrontcontrollersetmedia_05e070788d5522addd174a9baa153f9f'] = 'Coś poszło nie tak. Spróbuj ponownie później.';
 $_MODULE['<{inpostizi}prestashop>create_be503ee264d6b76ab103af34b1a92c58'] = 'Dla tego koszyka zostało już utworzone zamówienie.';
 $_MODULE['<{inpostizi}prestashop>create_d1363ee7cb061a5b383fd7a829dd9e5b'] = 'Wybrana opcja dostawy nie jest dostępna.';
+$_MODULE['<{inpostizi}prestashop>create_adfdd411bc1770971d1d4d05458e8701'] = 'Adres dostawy nie jest poprawny: %s';
+$_MODULE['<{inpostizi}prestashop>create_5da7b3dc1a91973a4cf0f9fd3201ce0a'] = 'Adres rozliczeniowy nie jest poprawny: %s';
+$_MODULE['<{inpostizi}prestashop>create_a7bf47f259b0e675d565b57d5bead1b4'] = 'Dane klienta nie są poprawne: %s';
+$_MODULE['<{inpostizi}prestashop>create_f609bb09ff74c0ba85a8ad6491985fec'] = 'Uwagi do zamówienia nie są poprawne.';
 $_MODULE['<{inpostizi}prestashop>servicenametranslator_469ded86e4fce0e962b4d91cc7d426ce'] = 'Płatność za pobraniem';
 $_MODULE['<{inpostizi}prestashop>servicenametranslator_7e0df2de796409e39b5ee6060c457be7'] = 'Paczka w Weekend';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_6d723e264f50033f7475fc6987af0df8'] = 'Aktualnie wybrana waluta nie jest obsługiwana.';
