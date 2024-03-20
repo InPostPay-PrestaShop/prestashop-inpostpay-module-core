@@ -279,7 +279,7 @@ trait BackendForm
 
         return $fields;
     }
-    
+
     private function getServiceOptionsFields(DeliveryType $deliveryType, ServiceCode $serviceCode, $typeLabel)
     {
         $serviceName = $this->getServiceName($serviceCode);
@@ -314,7 +314,7 @@ trait BackendForm
             [
                 'type' => 'select',
                 'label' => sprintf('%s %s dostępne od godziny', $typeLabel, $serviceName),
-                'hint' => 'test',
+                'hint' => 'włącznie',
                 'name' => sprintf('service_start_time_%s_%s', $deliveryType->value, $serviceCode->value),
                 'options' => [
                     'query' => $this->TimeOptions(),
@@ -337,6 +337,7 @@ trait BackendForm
             [
                 'type' => 'select',
                 'label' => sprintf('%s %s dostępne do godziny', $typeLabel, $serviceName),
+                'hint' => 'wyłącznie',
                 'name' => sprintf('service_end_time_%s_%s', $deliveryType->value, $serviceCode->value),
                 'options' => [
                     'query' => $this->TimeOptions(),
@@ -721,11 +722,11 @@ trait BackendForm
     {
         return [
             [
-                'id_option' => 1,
+                'id_option' => 0,
                 'name' => 'Testerom',
             ],
             [
-                'id_option' => 2,
+                'id_option' => 1,
                 'name' => 'Wszystkim',
             ],
         ];
