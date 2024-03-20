@@ -53,7 +53,22 @@ const useHttpRequest = (url, method, body = null, headers = {}) => {
    */
   const getResponse = async () => new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch(getURL(), getOptions());
+      const options = getOptions();
+      const url = getURL();
+
+      let response = await fetch(url, options);
+
+      if (405 === response.status && ['DELETE', 'PUT'].includes(options.method)) {
+        response = await fetch(url, {
+          ...options,
+          method: 'POST',
+          headers: {
+            ...options.headers,
+            "X-HTTP-Method-Override": options.method,
+          },
+        });
+      }
+
       if (response.status === 204) {
         resolve();
         return;

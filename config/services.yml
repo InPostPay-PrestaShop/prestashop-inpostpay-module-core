@@ -64,18 +64,6 @@ services:
     tags:
       - { name: form.type }
 
-  izi\prestashop\Form\Type\ShippingType:
-    class: izi\prestashop\Form\Type\ShippingType
-    tags:
-      - { name: form.type }
-
-  izi\prestashop\Form\Type\MoneyCurrencyType:
-    class: izi\prestashop\Form\Type\MoneyCurrencyType
-    tags:
-      - { name: form.type }
-    arguments:
-      - '@izi\prestashop\Form\Provider\DefaultCurrencyProvider'
-
   izi\prestashop\Form\Type\Shipping\CarrierChoiceType:
     class: izi\prestashop\Form\Type\Shipping\CarrierChoiceType
     tags:
@@ -83,19 +71,45 @@ services:
     arguments:
       - '@izi\prestashop\Form\ChoiceList\CarrierChoiceLoader'
 
-  izi\prestashop\Form\Type\Shipping\HourChoiceType:
-    class: izi\prestashop\Form\Type\Shipping\HourChoiceType
+  izi\prestashop\Form\Type\Shipping\CarrierMappingsType:
+    class: izi\prestashop\Form\Type\Shipping\CarrierMappingsType
     tags:
       - { name: form.type }
-    arguments:
-      - '@izi\prestashop\Form\ChoiceList\HourChoiceLoader'
 
-  izi\prestashop\Form\Type\Shipping\DayChoiceType:
-    class: izi\prestashop\Form\Type\Shipping\DayChoiceType
+  izi\prestashop\Form\Type\Shipping\CarrierMappingType:
+    class: izi\prestashop\Form\Type\Shipping\CarrierMappingType
     tags:
       - { name: form.type }
-    bind:
-      $choiceLoader: '@izi\prestashop\Form\ChoiceList\DayChoiceLoader'
+
+  izi\prestashop\Form\Type\Shipping\OptionalServicesType:
+    class: izi\prestashop\Form\Type\Shipping\OptionalServicesType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Shipping\ServiceOptionsType:
+    class: izi\prestashop\Form\Type\Shipping\ServiceOptionsType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Shipping\ShippingOptionsType:
+    class: izi\prestashop\Form\Type\Shipping\ShippingOptionsType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Shipping\TimeOfWeekType:
+    class: izi\prestashop\Form\Type\Shipping\TimeOfWeekType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Shipping\TimeOfWeekRangeType:
+    class: izi\prestashop\Form\Type\Shipping\TimeOfWeekRangeType
+    tags:
+      - { name: form.type }
+
+  izi\prestashop\Form\Type\Shipping\WeekDayChoiceType:
+    class: izi\prestashop\Form\Type\Shipping\WeekDayChoiceType
+    tags:
+      - { name: form.type }
 
   izi\prestashop\Form\Type\OrderStatusDescriptionMapType:
     class: izi\prestashop\Form\Type\OrderStatusDescriptionMapType
@@ -114,16 +128,6 @@ services:
     class: izi\prestashop\Form\ChoiceList\CarrierChoiceLoader
     bind:
       $repository: '@?izi\prestashop\ObjectModel\Repository\CarrierRepository'
-
-  izi\prestashop\Form\ChoiceList\DayChoiceLoader:
-    class: izi\prestashop\Form\ChoiceList\DayChoiceLoader
-    arguments:
-      - '@?izi\prestashop\Configuration\Factory\DayFactory'
-
-  izi\prestashop\Form\ChoiceList\HourChoiceLoader:
-    class: izi\prestashop\Form\ChoiceList\HourChoiceLoader
-    bind:
-      $hourFactory: '@?izi\prestashop\Configuration\Factory\HourFactory'
 
   izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler:
@@ -204,6 +208,11 @@ services:
     tags:
       - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }
 
+  izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension:
+    class: izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension
+    tags:
+      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\TimeType }
+
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler
@@ -259,3 +268,6 @@ services:
     class: izi\prestashop\Translation\LegacyTranslator
     arguments:
       - inpostizi
+
+  izi\prestashop\Translation\ServiceNameTranslator:
+    class: izi\prestashop\Translation\ServiceNameTranslator

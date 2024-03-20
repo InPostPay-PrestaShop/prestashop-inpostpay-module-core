@@ -133,9 +133,9 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
     {
         foreach ($cart->getProducts() as $product) {
             if (
-                $productId === (int) $product['id_product'] &&
-                $combinationId === (int) $product['id_product_attribute'] &&
-                $customizationId === (int) $product['id_customization']
+                $productId === (int) $product['id_product']
+                && $combinationId === (int) $product['id_product_attribute']
+                && $customizationId === (int) $product['id_customization']
             ) {
                 return (int) $product['cart_quantity'];
             }

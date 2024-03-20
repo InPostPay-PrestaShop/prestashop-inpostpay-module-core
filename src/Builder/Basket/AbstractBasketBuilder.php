@@ -58,12 +58,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private $additionalInformation;
 
-    public function __construct(\Cart $cart, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration)
+    public function __construct(\Cart $cart, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration, DeliveryFactory $deliveryFactory)
     {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
         $this->consentsConfiguration = $consentsConfiguration;
-        $this->deliveryFactory = new DeliveryFactory();
+        $this->deliveryFactory = $deliveryFactory;
     }
 
     /**
@@ -339,8 +339,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $finalPrice = $this->getFinalPrice();
 
         if (
-            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_REDUCTION, false, true) ||
-            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_GIFT, false, true)
+            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_REDUCTION, false, true)
+            || [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_GIFT, false, true)
         ) {
             $promoPrice = $this->getPromoPrice();
         } else {

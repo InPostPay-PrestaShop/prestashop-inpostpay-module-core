@@ -34,8 +34,7 @@ final class CarrierChoiceType extends AbstractType
     {
         $resolver->setDefaults([
             'choice_loader' => $this->choiceLoader,
-            'choice_value' => 'id',
-            'placeholder' => false,
+            'choice_value' => 'id_reference',
             'choice_label' => function (\Carrier $carrier): string {
                 return $carrier->name ?? '';
             },

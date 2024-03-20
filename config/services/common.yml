@@ -121,15 +121,16 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
 
-  izi\prestashop\Configuration\ShippingConfigurationInterface: '@izi\prestashop\Configuration\ShippingConfiguration'
+  izi\prestashop\Configuration\ShippingConfigurationInterface:
+    alias: izi\prestashop\Configuration\ShippingConfiguration
+    public: true # todo
+
   izi\prestashop\Configuration\ShippingConfiguration:
     class: izi\prestashop\Configuration\ShippingConfiguration
     public: false
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
-      - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
-      - '@izi\prestashop\Configuration\Factory\DayFactory'
-      - '@izi\prestashop\Configuration\Factory\HourFactory'
+      - '@inpost.izi.serializer'
 
   izi\prestashop\Configuration\ConsentsConfigurationInterface: '@izi\prestashop\Configuration\ConsentsConfiguration'
   izi\prestashop\Configuration\ConsentsConfiguration:
@@ -147,7 +148,10 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
 
-  izi\prestashop\Configuration\AdvancedConfigurationInterface: '@izi\prestashop\Configuration\AdvancedConfiguration'
+  izi\prestashop\Configuration\AdvancedConfigurationInterface:
+    alias: izi\prestashop\Configuration\AdvancedConfiguration
+    public: true
+
   izi\prestashop\Configuration\AdvancedConfiguration:
     class: izi\prestashop\Configuration\AdvancedConfiguration
     public: false
@@ -156,7 +160,7 @@ services:
 
   inpost.izi.environment:
     class: izi\prestashop\Environment\EnvironmentInterface
-    public: false
+    public: true
     factory: [ '@izi\prestashop\Configuration\ApiConfiguration', getEnvironment ]
 
   izi\prestashop\Environment\AuthServerUriCollection:
@@ -519,6 +523,7 @@ services:
       - '@inpost.izi.clock'
       - '@izi\prestashop\ContextManager'
       - '@izi\prestashop\Configuration\ConsentsConfiguration'
+      - '@izi\prestashop\Builder\Basket\DeliveryFactory'
 
   izi\prestashop\Cache\ConfigurationCache:
     class: izi\prestashop\Cache\ConfigurationCache
@@ -538,12 +543,21 @@ services:
     arguments:
       - '@inpost.izi.event_dispatcher'
 
-  izi\prestashop\Configuration\Factory\DayFactoryInterface: '@izi\prestashop\Configuration\Factory\DayFactory'
-  izi\prestashop\Configuration\Factory\DayFactory:
-    class: izi\prestashop\Configuration\Factory\DayFactory
+  izi\prestashop\Builder\Basket\DeliveryFactory:
+    class: izi\prestashop\Builder\Basket\DeliveryFactory
+    public: false
     arguments:
-      - '@inpost.izi.module'
+      - '@izi\prestashop\Configuration\ShippingConfigurationInterface'
+      - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+      - '@inpost.izi.clock'
+      - '@izi\prestashop\Translation\ServiceNameTranslator'
 
-  izi\prestashop\Configuration\Factory\HourFactoryInterface: '@izi\prestashop\Configuration\Factory\HourFactory'
-  izi\prestashop\Configuration\Factory\HourFactory:
-    class: izi\prestashop\Configuration\Factory\HourFactory
+  izi\prestashop\Translation\LegacyTranslator:
+    class: izi\prestashop\Translation\LegacyTranslator
+    arguments:
+      - inpostizi
+
+  izi\prestashop\Translation\ServiceNameTranslator:
+    class: izi\prestashop\Translation\ServiceNameTranslator
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'

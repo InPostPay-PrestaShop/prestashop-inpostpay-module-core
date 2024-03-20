@@ -38,6 +38,7 @@ final class ConsentsConfigurationType extends AbstractType
                 'by_reference' => false,
                 'allow_add' => true,
                 'allow_delete' => true,
+                'label' => false,
             ]);
     }
 
@@ -45,6 +46,7 @@ final class ConsentsConfigurationType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => UpdateConsentsConfigurationCommand::class,
+            'label' => false,
         ]);
     }
 }

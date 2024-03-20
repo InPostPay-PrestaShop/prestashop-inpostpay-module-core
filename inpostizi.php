@@ -5,12 +5,14 @@ use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
 use izi\prestashop\DependencyInjection\ContainerFactory;
+use izi\prestashop\DependencyInjection\Exception\ContainerNotFoundException;
 use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
 use izi\prestashop\Hook\WidgetConfigurationResolver;
 use izi\prestashop\Hook\WidgetRenderer;
 use izi\prestashop\Installer\DatabaseInstaller;
+use PrestaShop\PrestaShop\Adapter\ContainerBuilder as PrestaShopContainerBuilder;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Psr\Log\LoggerInterface;
@@ -35,6 +37,8 @@ class InPostIzi extends PaymentModule implements WidgetInterface
 {
     use BackendForm;
 
+    private static $loggerServiceId = 'inpost.izi.general_logger';
+
     /**
      * @var bool use bootstrap styles on the module configuration page
      */
@@ -48,7 +52,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.5.4';
+        $this->version = '1.5.5';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
         $this->bootstrap = true;
@@ -160,12 +164,12 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             ? lcfirst(\Tools::substr($methodName, 4))
             : $methodName;
 
-        $parameters = isset($arguments[0]) ? $arguments[0] : [];
-        if (!isset($parameters['request'])) {
-            $parameters['request'] = $this->getCurrentRequest();
-        }
-
         try {
+            $parameters = isset($arguments[0]) ? $arguments[0] : [];
+            if (!isset($parameters['request'])) {
+                $parameters['request'] = $this->getCurrentRequest();
+            }
+
             return $this
                 ->get(HookExecutorInterface::class)
                 ->execute($hookName, $parameters);
@@ -206,11 +210,21 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $container->get($serviceName);
         }
 
-        if (false === $service) {
-            throw new \RuntimeException('DI container was not found.');
+        if (false !== $service) {
+            return $service;
         }
 
-        return $service;
+        if (!$this->context->controller instanceof \FrontController || !class_exists(PrestaShopContainerBuilder::class)) {
+            throw ContainerNotFoundException::create();
+        }
+
+        try {
+            $container = PrestaShopContainerBuilder::getContainer('front', _PS_MODE_DEV_);
+        } catch (\Exception $e) {
+            throw ContainerNotFoundException::create($e);
+        }
+
+        return $container->get($serviceName);
     }
 
     /**
@@ -278,7 +292,11 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     public function getLogger()
     {
-        return $this->get('inpost.izi.general_logger');
+        try {
+            return $this->get(self::$loggerServiceId);
+        } catch (ContainerNotFoundException $e) {
+            return $this->getLegacyContainer()->get(self::$loggerServiceId);
+        }
     }
 
     /**

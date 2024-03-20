@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Configuration\OrdersConfigurationInterface;

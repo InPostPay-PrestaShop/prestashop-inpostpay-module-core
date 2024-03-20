@@ -38,7 +38,6 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\ActionShipmentUpdateAfter::HOOK_NAME => Common\ActionShipmentUpdateAfter::class,
             Front\ActionCartControllerAjaxUpdateResponse::HOOK_NAME => '?' . Front\ActionCartControllerAjaxUpdateResponse::class,
             Front\ActionFrontControllerSetMedia::HOOK_NAME => '?' . Front\ActionFrontControllerSetMedia::class,
-            Front\ActionGetPaymentOptions::HOOK_NAME => '?' . Front\ActionGetPaymentOptions::class,
             Front\DisplayOrderConfirmation::HOOK_NAME => '?' . Front\DisplayOrderConfirmation::class,
             Front\DisplayPaymentReturn::HOOK_NAME => '?' . Front\DisplayPaymentReturn::class,
             Front\DisplayIziThankYou::HOOK_NAME => '?' . Front\DisplayIziThankYou::class,
@@ -76,8 +75,8 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
                     $hookNames[] = $alias;
                 }
             } elseif (
-                !is_subclass_of($class, PrestaShopVersionAwareHookInterface::class) ||
-                $class::getVersionRange()->contains($psVersion)
+                !is_subclass_of($class, PrestaShopVersionAwareHookInterface::class)
+                || $class::getVersionRange()->contains($psVersion)
             ) {
                 $hookNames[] = $hookName;
             }

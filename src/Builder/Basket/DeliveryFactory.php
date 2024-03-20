@@ -9,86 +9,164 @@ use izi\prestashop\Common\Basket\DeliveryOption;
 use izi\prestashop\Common\Basket\OptionalService;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
+use izi\prestashop\Common\Price;
+use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;
+use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
+use izi\prestashop\Configuration\ShippingConfigurationInterface;
+use izi\prestashop\ObjectModel\Repository\CarrierRepository;
+use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
+use izi\prestashop\Translation\ServiceNameTranslator;
+use Psr\Clock\ClockInterface;
 
 class DeliveryFactory
 {
+    /**
+     * @var ShippingConfigurationInterface
+     */
+    private $configuration;
+
+    /**
+     * @var ObjectRepositoryInterface
+     */
+    private $carrierRepository;
+
+    /**
+     * @var ClockInterface
+     */
+    private $clock;
+
+    /**
+     * @var ServiceNameTranslator
+     */
+    private $serviceNameTranslator;
+
+    /**
+     * @param CarrierRepository $carrierRepository
+     */
+    public function __construct(ShippingConfigurationInterface $configuration, ObjectRepositoryInterface $carrierRepository, ClockInterface $clock, ServiceNameTranslator $serviceNameTranslator)
+    {
+        $this->configuration = $configuration;
+        $this->carrierRepository = $carrierRepository;
+        $this->clock = $clock;
+        $this->serviceNameTranslator = $serviceNameTranslator;
+    }
+
     /**
      * @return DeliveryOption[]
      */
     public function getAvailableDeliveryOptions(\Cart $cart): array
     {
-        $options = [];
+        $deliveryOptions = [];
 
-        $free = null;
+        $deliveryDate = $this->getDeliveryDate();
+        $isFreeShipping = null;
 
         foreach (DeliveryType::cases() as $deliveryType) {
-            if (null === $carrier = $this->getCarrier($deliveryType)) {
+            $options = $this->configuration->getShippingOptions($deliveryType, (int) $cart->id_shop);
+            $referenceId = $options->getCarrierMapping()->getReferenceId();
+
+            if (null === $referenceId || null === $carrier = $this->getCarrier($cart, $referenceId)) {
                 continue;
             }
 
-            $carrierId = (int) $carrier->id;
-
-            if (!$this->isDeliveryOptionAvailable($cart, $carrierId)) {
-                continue;
+            if (!isset($isFreeShipping)) {
+                $isFreeShipping = $this->hasFreeShippingCartRule($cart);
             }
 
-            if (!isset($free)) {
-                $free = $this->hasFreeShippingCartRule($cart);
-            }
+            $price = $isFreeShipping
+                ? PriceFactory::create(0., 0.)
+                : $this->getCarrierPrice($cart, (int) $carrier->id);
 
-            if (!$free) {
-                $gross = $cart->getPackageShippingCost($carrierId);
-                $net = $cart->getPackageShippingCost($carrierId, false);
-            } else {
-                $gross = $net = 0.0;
-            }
-
-            // TODO make configurable?
-            $deliveryDate = (new \DateTimeImmutable())->setTimestamp(strtotime('+2 days'))->setTime(12, 0);
-
-            $options[] = new DeliveryOption(
+            $deliveryOptions[] = new DeliveryOption(
                 $deliveryType,
                 $deliveryDate,
-                PriceFactory::create($net, $gross),
-                $this->getOptionalServices($deliveryType, $cart, $carrier)
+                $price,
+                $this->getOptionalServices($deliveryType, $cart, $options, $carrier, $isFreeShipping)
             );
         }
 
-        return $options;
+        return $deliveryOptions;
     }
 
     /**
      * @return OptionalService[]
      */
-    private function getOptionalServices(DeliveryType $deliveryType, \Cart $cart, \Carrier $carrier): array
+    private function getOptionalServices(DeliveryType $deliveryType, \Cart $cart, ShippingOptions $options, \Carrier $defaultCarrier, bool $isFreeShipping): array
     {
         $services = [];
 
-        foreach (ServiceCode::cases() as $code) {
-            if (!$this->checkServiceAvailability($code, $deliveryType)) {
+        foreach ($deliveryType->getAvailableServiceCodes() as $serviceCode) {
+            if (null === $carrierId = $options->getCarrierMapping($serviceCode)->getReferenceId()) {
                 continue;
             }
 
-            if (0. >= $netPrice = (float) \Configuration::get(sprintf('INPOST_PAY_payment_%s_%s', strtolower($deliveryType->value), strtolower($code->value)))) {
+            $serviceOptions = $options->getServiceOptions($serviceCode);
+
+            if (null === $serviceOptions || !$this->checkServiceAvailability($serviceCode, $serviceOptions)) {
                 continue;
             }
 
-            $address = $this->getTaxAddress($cart);
-            $grossPrice = $carrier->getTaxCalculator($address)->addTaxes($netPrice);
+            if ($carrierId === (int) $defaultCarrier->id_reference) {
+                $carrier = $defaultCarrier;
+            } elseif (null === $carrier = $this->getCarrier($cart, $carrierId)) {
+                continue;
+            }
+
+            $servicePrice = $this->getServicePrice($serviceOptions, $cart, $carrier, $defaultCarrier, $isFreeShipping);
+
+            if (0 > $servicePrice->getNet()) {
+                continue;
+            }
 
             $services[] = new OptionalService(
-                $this->getOptionalServiceName($code),
-                $code,
-                PriceFactory::create($netPrice, $grossPrice)
+                $this->serviceNameTranslator->getName($serviceCode),
+                $serviceCode,
+                $servicePrice
             );
         }
 
         return $services;
     }
 
+    private function getServicePrice(ServiceOptions $options, \Cart $cart, \Carrier $carrier, \Carrier $defaultCarrier, bool $isFreeShipping): Price
+    {
+        $serviceCost = $this->getServiceAdditionalCost($options, $cart, $carrier);
+
+        if ($isFreeShipping || $carrier === $defaultCarrier) {
+            return $serviceCost;
+        }
+
+        $carrierPrice = $this->getCarrierPrice($cart, (int) $carrier->id);
+        $defaultCarrierPrice = $this->getCarrierPrice($cart, (int) $defaultCarrier->id);
+
+        return $serviceCost
+            ->add($carrierPrice)
+            ->sub($defaultCarrierPrice);
+    }
+
+    private function getServiceAdditionalCost(ServiceOptions $options, \Cart $cart, \Carrier $carrier): Price
+    {
+        if (0. === $net = $options->getAdditionalCost() ?? 0.) {
+            return PriceFactory::create(0., 0.);
+        }
+
+        $address = $this->getTaxAddress($cart);
+        $gross = $carrier->getTaxCalculator($address)->addTaxes($net);
+
+        return PriceFactory::create($net, $gross);
+    }
+
+    private function getCarrierPrice(\Cart $cart, int $carrierId): Price
+    {
+        $net = $cart->getPackageShippingCost($carrierId, false);
+        $gross = $cart->getPackageShippingCost($carrierId);
+
+        return PriceFactory::create($net, $gross);
+    }
+
     private function getTaxAddress(\Cart $cart): \Address
     {
-        if ($type = \Configuration::get('PS_TAX_ADDRESS_TYPE')) {
+        if (in_array($type = \Configuration::get('PS_TAX_ADDRESS_TYPE'), ['id_address_delivery', 'id_address_invoice'])) {
             $addressId = $cart->$type;
         } else {
             $addressId = $cart->id_address_delivery;
@@ -97,46 +175,16 @@ class DeliveryFactory
         return new \Address($addressId);
     }
 
-    // TODO translate
-    private function getOptionalServiceName(ServiceCode $code): string
+    private function checkServiceAvailability(ServiceCode $serviceCode, ServiceOptions $options): bool
     {
-        switch ($code) {
-            case ServiceCode::Cod():
-                return 'Pobranie';
-            case ServiceCode::Pww():
-                return 'Paczka w Weekend';
-            default:
-                return $code->value;
-        }
-    }
-
-    private function checkServiceAvailability(ServiceCode $option, DeliveryType $deliveryType): bool
-    {
-        $dayOfWeek = date('N');
-        $hour = date('H');
-
-        $deliveryType = strtolower($deliveryType->value);
-        $option = strtolower($option->value);
-
-//      TODO: implement new config?
-        $dayFrom = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_from_day');
-        $dayTo = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_to_day');
-        $hourFrom = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_from_time');
-        $hourTo = \Configuration::get('INPOST_PAY_payment_' . $deliveryType . '_' . $option . '_to_time');
-
-        if ($dayOfWeek < $dayFrom || $dayOfWeek > $dayTo) {
-            return false;
+        if (!$serviceCode->isAvailabilityTimeDependent()) {
+            return true;
         }
 
-        if ($dayOfWeek === $dayFrom && $hour < $hourFrom) {
-            return false;
-        }
+        $availability = $options->getAvailabilityRange();
 
-        if ($dayOfWeek === $dayTo && $hour > $hourTo) {
-            return false;
-        }
-
-        return true;
+        return null === $availability
+            || $availability->contains($this->clock->now());
     }
 
     private function isDeliveryOptionAvailable(\Cart $cart, int $carrierId): bool
@@ -162,18 +210,23 @@ class DeliveryFactory
         return [] !== $cart->getCartRules(\CartRule::FILTER_ACTION_SHIPPING, false);
     }
 
-    private function getCarrier(DeliveryType $deliveryType): ?\Carrier
+    private function getCarrier(\Cart $cart, int $referenceId): ?\Carrier
     {
-        if (0 >= $referenceId = (int) \Configuration::get('INPOST_PAY_payment_' . strtolower($deliveryType->value))) {
-            return null;
-        }
+        $carrier = $this->carrierRepository->findOneByReferenceId($referenceId);
 
-        $carrier = \Carrier::getCarrierByReference($referenceId);
-
-        if (false === $carrier) {
+        if (null === $carrier || !$this->isDeliveryOptionAvailable($cart, (int) $carrier->id)) {
             return null;
         }
 
         return $carrier;
+    }
+
+    // TODO make configurable?
+    private function getDeliveryDate(): \DateTimeImmutable
+    {
+        return $this->clock
+            ->now()
+            ->setTimestamp(strtotime('+2 days'))
+            ->setTime(12, 0);
     }
 }

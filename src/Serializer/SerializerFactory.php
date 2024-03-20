@@ -11,6 +11,7 @@ use izi\prestashop\Serializer\Normalizer\JsonSerializableNormalizer as JsonSeria
 use izi\prestashop\Serializer\Normalizer\ObjectNormalizer as CustomObjectNormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceNormalizer;
 use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\FileReflector;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -53,7 +54,7 @@ final class SerializerFactory
         $class = new \ReflectionClass(ObjectNormalizer::class);
         $params = $class->getConstructor()->getParameters();
 
-        return 3 < count($params)
+        return 3 < count($params) && \Tools::version_compare(_PS_VERSION_, '1.7.5.1', '>=')
             ? new ObjectNormalizer(null, null, null, $typeExtractor)
             : new CustomObjectNormalizer(null, null, null, $typeExtractor);
     }
@@ -62,7 +63,10 @@ final class SerializerFactory
     {
         $typeExtractors = [];
 
-        if (class_exists(DocBlock::class)) {
+        if (
+            class_exists(DocBlock::class)
+            && (\Tools::version_compare(_PS_VERSION_, '1.7.4', '>=') || class_exists(FileReflector::class))
+        ) {
             $typeExtractors[] = new PhpDocExtractor();
         } else {
             $typeExtractors[] = new PropertyDocBlockTypeExtractor();
