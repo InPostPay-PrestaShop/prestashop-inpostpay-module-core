@@ -38,9 +38,9 @@ final class OrderStatusDescriptionMapType extends AbstractType
             $builder
                 ->add($orderState->id, TextType::class, [
                     'required' => false,
-                    'label' => $orderState->name[$this->context->language->id],
+                    'label' => $orderState->name[$this->context->language->id] ?? sprintf('Order state #%d', $orderState->id),
                     'attr' => [
-                        'placeholder' => $orderState->name[$builder->getName()],
+                        'placeholder' => $orderState->name[$builder->getName()] ?? '',
                     ],
                 ]);
         }
