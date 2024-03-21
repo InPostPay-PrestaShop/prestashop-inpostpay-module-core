@@ -1,4 +1,4 @@
-import iziBindingCompleteHandler from "../handler/inziBindingCompleteHandler";
+import iziBindingCompleteHandler from "../handler/iziBindingCompleteHandler";
 
 const bindIziButtonEvents = () => {
   const inpostButtons = document.querySelectorAll('inpost-izi-button');

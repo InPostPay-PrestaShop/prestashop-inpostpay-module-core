@@ -1,5 +1,5 @@
 import widgetState from "../state/widgetState";
-import evenSourceCleanupHandler from "./evenSourceCleanupHandler";
+import eventSourceCleanupHandler from "./eventSourceCleanupHandler";
 
 const iziBindingCompleteHandler = (e) => {
   const { setCartBound, getCartBound } = widgetState();
@@ -14,7 +14,7 @@ const iziBindingCompleteHandler = (e) => {
   }
 
   if (!getCartBound()) {
-    evenSourceCleanupHandler();
+    eventSourceCleanupHandler();
   }
 }
 

@@ -1,5 +1,5 @@
 import widgetState from "../state/widgetState";
-import evenSourceCleanupHandler from "./evenSourceCleanupHandler";
+import eventSourceCleanupHandler from "./eventSourceCleanupHandler";
 
 const modalCloseHack = () => {
   // DUMMY HACK - STAYS FOR NOW - for some reason modal is not removed from DOM after close in inpostizi.js
@@ -23,7 +23,7 @@ const iziModalClosedEventHandler = (event) => {
   // DUMB CONDITION RACE FIX - modal is closed before binding is complete
   setTimeout(() => {
     if (!getCartBound()) {
-      evenSourceCleanupHandler();
+      eventSourceCleanupHandler();
     }
   }, 50);
 }
