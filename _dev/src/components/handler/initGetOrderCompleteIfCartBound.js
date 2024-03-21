@@ -1,6 +1,6 @@
 import iziGetIsBound from "../actions/iziGetIsBound";
 import iziGetOrderComplete from "../actions/iziGetOrderComplete";
-import evenSourceCleanupHandler from "./evenSourceCleanupHandler";
+import eventSourceCleanupHandler from "./eventSourceCleanupHandler";
 
 const isCartBound = () => new Promise((resolve, reject) => {
   // If we don't get EventSource message in 1000ms we reject promise
@@ -22,7 +22,7 @@ const initGetOrderCompleteIfCartBound = async () => {
   try {
     bindingData = await isCartBound();
   } catch (e) {
-    evenSourceCleanupHandler();
+    eventSourceCleanupHandler();
     return;
   }
 
