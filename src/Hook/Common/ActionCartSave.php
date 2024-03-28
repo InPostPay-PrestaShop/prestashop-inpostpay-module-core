@@ -46,6 +46,10 @@ final class ActionCartSave implements HookInterface
     {
         $cart = $parameters['cart'] ?? null;
 
+        if (null === $cart && array_key_exists('cart', $parameters)) {
+            return; // TODO: try to get cart from backtrace or use different hooks
+        }
+
         if (!$cart instanceof \Cart) {
             throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Cart::class, is_object($cart) ? get_class($cart) : gettype($cart)));
         }
