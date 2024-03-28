@@ -210,7 +210,7 @@ class Create
         return $address->id;
     }
 
-    private function fillWithDeliveryAddressData(\Address $address, $deliveryAddress): void
+    private function fillWithDeliveryAddressData(\AddressCore $address, $deliveryAddress): void
     {
         if (isset($deliveryAddress->name)) {
             $name = preg_split('/\s+/', $deliveryAddress->name, 2, PREG_SPLIT_NO_EMPTY);
@@ -268,12 +268,12 @@ class Create
         return $address->id;
     }
 
-    private function createNewAddress(): \Address
+    private function createNewAddress(): \AddressCore
     {
         return class_exists(\CustomerAddress::class) ? new \CustomerAddress() : new \Address();
     }
 
-    private function setPhoneNumber(\Address $address, $accountInfo): void
+    private function setPhoneNumber(\AddressCore $address, $accountInfo): void
     {
         if ([] === $requiredFields = $address->getFieldsRequiredDB()) {
             return;
@@ -293,7 +293,7 @@ class Create
         return $accountInfo->phone_number->country_prefix . ' ' . $accountInfo->phone_number->phone;
     }
 
-    private function getExistingAddressId(\Customer $customer, \Address $address, array $ignoreFields = []): ?int
+    private function getExistingAddressId(\Customer $customer, \AddressCore $address, array $ignoreFields = []): ?int
     {
         if ($customer->is_guest) {
             return null;
@@ -312,7 +312,7 @@ class Create
         return null;
     }
 
-    private function isSameAddress(\Address $address, array $data, array $ignoreFields): bool
+    private function isSameAddress(\AddressCore $address, array $data, array $ignoreFields): bool
     {
         $comparedFields = array_diff([
             'firstname',
