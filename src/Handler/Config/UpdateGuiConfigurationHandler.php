@@ -7,9 +7,12 @@ namespace izi\prestashop\Handler\Config;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Handler\CommandHandlerTrait;
 
 final class UpdateGuiConfigurationHandler implements UpdateGuiConfigurationHandlerInterface
 {
+    use CommandHandlerTrait;
+
     /**
      * @var GuiConfigurationInterface
      */

@@ -4,7 +4,7 @@
 
 {% block content %}
   <div class="row justify-content-center">
-    <div class="col">
+    <div class="col-xs-12 col-12">
 
       <div class="card">
         {{ form_start(form) }}
@@ -12,24 +12,24 @@
           <i class="material-icons">settings</i> {{ layoutTitle }}
         </h3>
 
-        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
+        <div class="card-body panel-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
           {{ form_errors(form) }}
 
-          {% include '@Modules/inpostizi/views/templates/admin/config/general/main.html.twig' with form %}
+          {% include '@Modules/inpostizi/views/templates/admin/config/general/main.html.twig' %}
         </div>
 
-        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
-          {% include '@Modules/inpostizi/views/templates/admin/config/general/order_statuses.html.twig' with form %}
+        <div class="card-body panel-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
+          {% include '@Modules/inpostizi/views/templates/admin/config/general/order_statuses.html.twig' %}
         </div>
 
-        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
-          {% include '@Modules/inpostizi/views/templates/admin/config/general/products.html.twig' with form %}
+        <div class="card-body panel-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
+          {% include '@Modules/inpostizi/views/templates/admin/config/general/products.html.twig' %}
 
           {{ form_rest(form) }}
         </div>
 
         <div class="card-footer clearfix">
-          <a href="{{ path('admin_module_manage') }}" class="btn btn-outline-secondary">{{ 'Back'|trans({}, 'Admin.Global') }}</a>
+          <a href="{{ path('admin_module_manage') }}" class="btn btn-outline-secondary">{{ 'Back'|trans }}</a>
 
           <button class="btn btn-primary float-right">{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
         </div>

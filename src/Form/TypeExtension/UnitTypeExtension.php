@@ -36,10 +36,12 @@ final class UnitTypeExtension extends AbstractTypeExtension
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        if (!$resolver->isDefined('unit')) {
-            $resolver
-                ->setDefined('unit')
-                ->setAllowedTypes('unit', 'string');
+        if ($resolver->isDefined('unit')) {
+            return;
         }
+
+        $resolver
+            ->setDefined('unit')
+            ->setAllowedTypes('unit', 'string');
     }
 }

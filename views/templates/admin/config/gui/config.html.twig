@@ -1,12 +1,12 @@
 
 <div class="row mt-n2">
-  <div class="col-xxl-auto col-12 mt-2">
+  <div class="col-xxl-auto col-12 col-xs-12 mt-2">
     {{ form_row(formDisplay) }}
   </div>
 
   {% for formElement in form %}
     {% if formElement.vars.name not in ['minWidthPx', 'maxWidthPx'] %}
-      <div class="col-xl col-sm-6 col-12 mt-2">
+      <div class="col-xl col-lg-3 col-sm-6 col-12 col-xs-12 mt-2">
         {{ form_row(formElement) }}
       </div>
     {% endif %}
@@ -14,10 +14,10 @@
 </div>
 
 <div class="row">
-  <div class="col-xl-3 col-sm-6 col-12 mt-2">
+  <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
     {{ form_row(form.minWidthPx) }}
   </div>
-  <div class="col-xl-3 col-sm-6 col-12 mt-2">
+  <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
     {{ form_row(form.maxWidthPx) }}
   </div>
 </div>

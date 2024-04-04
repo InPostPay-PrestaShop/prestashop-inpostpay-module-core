@@ -1,0 +1,35 @@
+.row-flex {
+  display: flex;
+  flex-wrap: wrap;
+
+  &:after,
+  &:before {
+    display: none;
+  }
+}
+
+.content-div .row {
+  @extend .row-flex;
+}
+
+.col {
+  flex: 1 1 0;
+  width: auto;
+  max-width: 100%;
+}
+
+.col-auto {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
+}
+
+.no-gutters {
+  margin-left: 0;
+  margin-right: 0;
+
+  > * {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

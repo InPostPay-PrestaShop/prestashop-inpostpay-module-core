@@ -1,5 +1,6 @@
 <?php
 
+use izi\prestashop\AdminKernel;
 use izi\prestashop\Common\Currency;
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
@@ -24,30 +25,30 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/BackendForm.php';
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
 
 class InPostIzi extends PaymentModule implements WidgetInterface
 {
-    use BackendForm;
-
     private static $loggerServiceId = 'inpost.izi.general_logger';
-
-    /**
-     * @var bool use bootstrap styles on the module configuration page
-     */
-    public $bootstrap;
 
     /**
      * @var ContainerInterface|null
      */
     private $legacyContainer;
+
+    /**
+     * @var KernelInterface|null
+     */
+    private $adminKernel;
 
     public function __construct()
     {
@@ -55,7 +56,6 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $this->version = '1.5.8';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
-        $this->bootstrap = true;
 
         $this->ps_versions_compliancy = [
             'min' => '1.7.0.0',
@@ -140,19 +140,16 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         return \Db::getInstance()->insert('module_currency', $data);
     }
 
-    /**
-     * @return string
-     */
     public function getContent()
     {
         try {
             /** @var UrlGeneratorInterface $router */
             $router = $this->get('router');
-        } catch (ServiceNotFoundException $e) {
-            return $this->doGetContent();
-        }
 
-        \Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
+            \Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
+        } catch (ServiceNotFoundException $e) {
+            $this->handleConfigPageRequest();
+        }
     }
 
     /**
@@ -318,11 +315,11 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     private function getLegacyContainer()
     {
-        if (isset($this->legacyContainer)) {
-            return $this->legacyContainer;
+        if (!isset($this->legacyContainer)) {
+            $this->legacyContainer = $this->createContainer();
         }
 
-        return $this->legacyContainer = $this->createContainer();
+        return $this->legacyContainer;
     }
 
     /**
@@ -378,5 +375,42 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         } catch (\Exception $e) {
             // ignore silently
         }
+    }
+
+    private function handleConfigPageRequest()
+    {
+        $request = $this->getCurrentRequest();
+        $request->query->remove('controllerUri');
+
+        $response = $this->getAdminKernel()->handle($request);
+
+        $this->context->cookie->write();
+        $response->send();
+
+        exit;
+    }
+
+    /**
+     * @return KernelInterface
+     */
+    private function getAdminKernel()
+    {
+        if (isset($this->adminKernel)) {
+            return $this->adminKernel;
+        }
+
+        global $kernel;
+
+        if (!$kernel instanceof KernelInterface) {
+            throw new \RuntimeException('PS application kernel instance was not found.');
+        }
+
+        // In case of some very early 1.7 versions, session may not have already been started by PS application.
+        $kernel->getContainer()->get('session')->start();
+
+        $this->adminKernel = new AdminKernel($kernel, _PS_VERSION_);
+        $this->adminKernel->boot();
+
+        return $this->adminKernel;
     }
 }

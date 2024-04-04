@@ -5,9 +5,6 @@
             "izi\\prestashop\\": "src/",
             "izi\\": "lib/"
         },
-        "files": [
-            "bootstrap.php"
-        ],
         "exclude-from-classmap": [
             "src/Environment/UatEnvironment.php"
         ]
@@ -19,12 +16,7 @@
         "psr/http-client": "^1.0",
         "symfony/service-contracts": "^1.10",
         "psr/simple-cache": "^1.0",
-        "maennchen/zipstream-php": "^2.1",
-        "symfony/config": "^3.4.31"
-    },
-    "replace": {
-        "symfony/filesystem": "^3.4 || ^4.4",
-        "symfony/polyfill-ctype": "^1.11"
+        "maennchen/zipstream-php": "^2.1"
     },
     "config": {
         "preferred-install": "dist",

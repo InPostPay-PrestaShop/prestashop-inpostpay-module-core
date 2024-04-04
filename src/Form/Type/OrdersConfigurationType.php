@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\OrdersConfiguration;
+use izi\prestashop\Form\Type\TranslatableType as TranslatableTypePolyfill;
 use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
 use Symfony\Component\Form\AbstractType;
@@ -26,6 +27,10 @@ final class OrdersConfigurationType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $translatableClass = class_exists(TranslatableType::class)
+            ? TranslatableType::class
+            : TranslatableTypePolyfill::class;
+
         $builder
             ->add('initialStatusId', OrderStateChoiceType::class, [
                 'label' => $this->translator->l('Initial order status', self::TRANSLATION_SOURCE),
@@ -33,8 +38,7 @@ final class OrdersConfigurationType extends AbstractType
             ->add('paidStatusId', OrderStateChoiceType::class, [
                 'label' => $this->translator->l('Paid order status', self::TRANSLATION_SOURCE),
             ])
-            // TODO: polyfill type for PS < 1.7.6
-            ->add('statusDescriptionMap', TranslatableType::class, [
+            ->add('statusDescriptionMap', $translatableClass, [
                 'label' => $this->translator->l('Order statuses', self::TRANSLATION_SOURCE),
                 'type' => OrderStatusDescriptionMapType::class,
             ])

@@ -2,6 +2,9 @@
 imports:
   - { resource: ../services/sf34.yml }
 
+parameters:
+  container.autowiring.strict_mode: true
+
 services:
   _defaults:
     public: false

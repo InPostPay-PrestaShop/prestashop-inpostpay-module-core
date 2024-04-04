@@ -1,27 +1,27 @@
 {% use 'bootstrap_4_layout.html.twig' %}
 
 {% block _consents_configuration_consents_widget %}
-  {% with {'child': prototype} %}
-    <div {{ block('widget_container_attributes') }} data-prototype="{{ block('consent_collection_item_widget')|e('html_attr') }}">
-      <div class="js-consent-collection-item-container">
-        {% for child in form %}
-          <div class="js-consent-collection-item">
-            {{ block('consent_collection_item_widget') }}
-          </div>
-        {% endfor %}
-      </div>
+  {% set child = prototype %}
 
-      <button type="button" class="js-add-consent-collection-item btn btn-outline-primary">
-        <i class="material-icons">add_circle</i>
-        {{ add_consent_label }}
-      </button>
+  <div {{ block('widget_container_attributes') }} data-prototype="{{ block('consent_collection_item_widget')|e('html_attr') }}">
+    <div class="js-consent-collection-item-container">
+      {% for child in form %}
+        <div class="js-consent-collection-item">
+          {{ block('consent_collection_item_widget') }}
+        </div>
+      {% endfor %}
     </div>
-  {% endwith %}
+
+    <button type="button" class="js-add-consent-collection-item btn btn-outline-primary">
+      <i class="material-icons">add_circle</i>
+      {{ add_consent_label }}
+    </button>
+  </div>
 {% endblock %}
 
 {% block consent_collection_item_widget %}
-  <div class="input-group row">
-    <div class="col-3">
+  <div class="row d-flex">
+    <div class="col-xs-3 col-3">
       {{ form_label(child.cmsPageId, null, {
         'label_attr': {
           'class': 'p-0 mb-2'
@@ -33,7 +33,7 @@
       </div>
     </div>
 
-    <div class="col-5">
+    <div class="col-xs-5 col-5">
       <div class="d-flex">
         {{ form_label(child.descriptions, null, {
           'label_attr': {
@@ -46,7 +46,7 @@
       </div>
     </div>
 
-    <div class="col-3">
+    <div class="col-xs-3 col-3">
       {{ form_label(child.requirementType, null, {
         'label_attr': {
           'class': 'p-0 mb-2'
@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <div class="input-group-btn col-1 m-auto">
+    <div class="col-xs-1 col-1 m-auto">
       <button type="button" class="js-remove-consent-collection-item btn btn-outline-secondary float-right btn-sm" title="{{ 'Remove'|trans({}, 'Admin.Actions') }}">
         <i class="material-icons icon-delete">clear</i>
       </button>
@@ -71,17 +71,23 @@
     {{- block('form_widget_simple') -}}
 
     {% if form.vars.unit is defined %}
-      <div class="input-group-append">
+      <div class="input-group-append input-group-addon">
         <span class="input-group-text">{{ form.vars.unit }}</span>
       </div>
     {% endif %}
   </div>
 {%- endblock integer_widget -%}
 
-{% block form_label_errors -%}
+{% block form_label -%}
+  {% if help is defined and help is not null %}
+    <span class="d-flex align-items-baseline">
+  {% endif %}
+
+  {{- parent() -}}
+
   {% if help is defined and help is not null %}
     <span
-        class="help-box mr-0"
+        class="help-box mr-0 ml-2"
         data-toggle="popover"
         data-html="true"
         data-trigger="hover"
@@ -90,8 +96,10 @@
     ></span>
   {% endif %}
 
-  {{- parent() -}}
-{%- endblock form_label_errors %}
+  {% if help is defined and help is not null %}
+    </span>
+  {% endif %}
+{%- endblock form_label %}
 
 {% block checkbox_widget -%}
   <div class="custom-control custom-checkbox">
@@ -102,6 +110,7 @@
       {% if value is defined %} value="{{ value }}"{% endif %}
       {% if checked %} checked="checked"{% endif %}
     >
+    <span class="custom-control-indicator"></span>
     <label
       class="custom-control-label"
       for="{{ id }}"
@@ -111,7 +120,7 @@
       {% endif %}
       {% if help is defined and help is not null %}
         <span
-          class="help-box"
+          class="help-box ml-1"
           data-toggle="popover"
           data-html="true"
           data-trigger="hover"
@@ -138,7 +147,7 @@
 {% block carrier_mappings_row %}
   <div class="row mt-n2 align-items-end">
     {% for child in form %}
-      <div class="col-xl-3 col-md-6 col-12 mt-2">
+      <div class="col-xl-3 col-md-6 col-12 col-xs-12 mt-2">
         {{ form_row(child) }}
       </div>
     {% endfor %}
@@ -153,7 +162,7 @@
   {% endif %}
 
   <div class="row mt-n2">
-    <div class="col-xl-4 col-md-6 col-12 mt-2">
+    <div class="col-xl-4 col-md-6 col-12 col-xs-12 mt-2">
       {{ form_row(form.additionalCost) }}
     </div>
     <div class="offset-xl-0 offset-6"></div>
@@ -167,16 +176,16 @@
 {% endblock %}
 
 {% block time_of_week_row %}
-  <div class="col-xl-4 col-md-6 col-12 mt-2">
+  <div class="col-xl-4 col-md-6 col-12 col-xs-12 mt-2">
     <fieldset class="form-group">
-      {{ form_label(form, null, {'label_attr': { 'class': 'p-0 mb-2'} }) }}
+      {{ form_label(form, null, {'compound': false }) }}
 
-      <div class="row mx-n1">
-        <div class="col-sm px-1">
+      <div class="row row-flex mx-n1">
+        <div class="col-xs-12 col col-sm px-1">
           {{ form_widget(form.weekDay) }}
           {{ form_errors(form.weekDay) }}
         </div>
-        <div class="col-sm px-1">
+        <div class="col-xs-12 col col-sm px-1">
           {{ form_widget(form.time) }}
           {{ form_errors(form.time) }}
         </div>
@@ -188,3 +197,56 @@
 {% endblock %}
 
 {% block form_help %}{% endblock %}
+
+{% block inpostizi_translatable_widget -%}
+  {% set formClass = form.vars.attr.class|default('') ~ ' input-group locale-input-group js-locale-input-group d-flex'|trim %}
+  <div class="{{ formClass }}">
+    {% for translateField in form %}
+      {% set classes = translateField.vars.attr.class|default('') ~ ' js-locale-input'%}
+      {% set classes = classes ~ ' js-locale-' ~ translateField.vars.label %}
+      {% if default_locale.id_lang != translateField.vars.name %}
+        {% set classes = classes ~ ' d-none' %}
+      {% endif %}
+      <div class="{{ classes }}" style="flex-grow: 1;">
+        {{ form_widget(translateField, {'attr': {'class': translateField.vars.attr.class|default('') ~ ' w-100'}}) }}
+      </div>
+    {% endfor %}
+    {% if not hide_locales %}
+      <div class="dropdown ml-2">
+        <button class="btn btn-outline-secondary dropdown-toggle js-locale-btn"
+                type="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                id="{{ form.vars.id }}_dropdown"
+        >
+          {{ form.vars.default_locale.iso_code }}
+        </button>
+        <div class="dropdown-menu dropdown-menu-right locale-dropdown-menu" aria-labelledby="{{ form.vars.id }}_dropdown">
+          {% for locale in locales %}
+            <span class="dropdown-item js-locale-item" data-locale="{{ locale.iso_code }}">{{ locale.name }}</span>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{%- endblock inpostizi_translatable_widget %}
+
+{% block inpostizi_switch_widget %}
+  <span class="ps-switch">
+    {% for choice in choices %}
+      {% set inputId = id ~'_' ~ choice.value %}
+      <input id="{{inputId}}"
+          {{ block('attributes') }}
+          name="{{ full_name }}"
+          value="{{ choice.value }}"
+          {% if choice is selectedchoice(value) %}checked=""{% endif %}
+          {% if disabled %}disabled=""{% endif %}
+          type="radio"
+          aria-label="{{ choice.label|trans({}, choice_translation_domain) }}"
+      >
+      <label for="{{inputId}}">{{ choice.label|trans({}, choice_translation_domain) }}</label>
+    {% endfor %}
+    <span class="slide-button"></span>
+  </span>
+{% endblock inpostizi_switch_widget %}

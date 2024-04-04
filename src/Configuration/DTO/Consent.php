@@ -144,14 +144,4 @@ final class Consent implements \JsonSerializable
             'dateUpdated' => $this->dateUpdated->format(\DateTime::RFC3339),
         ];
     }
-
-    /**
-     * Returns a required violation message "field_name" parameter.
-     *
-     * @see \PrestaShop\PrestaShop\Core\ConstraintValidator\DefaultLanguageValidator::validate
-     */
-    public function getName(): string
-    {
-        return '';
-    }
 }

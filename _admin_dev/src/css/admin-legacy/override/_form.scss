@@ -1,0 +1,30 @@
+
+.content-div {
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+
+  .input-group .input-group-addon {
+    color: #6c868e;
+    border-left: 1px solid #bbcdd2;
+  }
+}
+
+.form-group.has-error {
+  .form-control {
+    border-color: #c05c67;
+  }
+
+  .help-block {
+    color: #c05c67;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+  }
+}
+
+.help-box {
+  flex-shrink: 0;
+  flex-grow: 0;
+}

@@ -11,6 +11,10 @@
 {% block stylesheets %}
   {{ parent() }}
   <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/admin.css') }}" />
+
+  {% if is_legacy_admin_page %}
+    <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/admin-legacy.css') }}" />
+  {% endif %}
 {% endblock %}
 
 {% block javascripts %}

@@ -1,0 +1,11 @@
+framework:
+  translator: ~
+  form: ~
+  csrf_protection: ~
+  session:
+    storage_id: session.storage.php_bridge # session is started by PS application
+    handler_id: ~
+  validation:
+    enable_annotations: true
+  templating:
+    engines: [ twig ]

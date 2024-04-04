@@ -1,5 +1,6 @@
 # common FO/BO configuration
 parameters:
+  inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.logger_config:
     type: rotating_file
     path: '%inpost.izi.logs_dir%/izi.log'
@@ -49,7 +50,7 @@ services:
   izi\prestashop\Hook\HookExecutor:
     class: izi\prestashop\Hook\HookExecutor
     arguments:
-      - '@inpost.izi.hook_locator'
+      - '@?inpost.izi.hook_locator'
       - '@inpost.izi.module'
 
   inpost.izi.psr17_factory:
@@ -317,7 +318,7 @@ services:
     class: izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactory
     public: false
     arguments:
-      - '@inpost.izi.repository_locator'
+      - '@?inpost.izi.repository_locator'
 
   izi\prestashop\ObjectModel\Repository\CmsPageRepository:
     class: izi\prestashop\ObjectModel\Repository\CmsPageRepository
@@ -541,7 +542,7 @@ services:
     class: izi\prestashop\Event\Adapter\EventDispatcher
     public: false
     arguments:
-      - '@inpost.izi.event_dispatcher'
+      - '@?inpost.izi.event_dispatcher'
 
   izi\prestashop\Builder\Basket\DeliveryFactory:
     class: izi\prestashop\Builder\Basket\DeliveryFactory
