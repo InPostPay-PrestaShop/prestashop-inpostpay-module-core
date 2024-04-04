@@ -16,7 +16,7 @@ final class CarrierMappingType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->add('referenceId', CarrierChoiceType::class, [
-            'required' => $options['required'],
+            'required' => false,
             'label' => false,
             'placeholder' => '--',
         ]);
@@ -32,6 +32,15 @@ final class CarrierMappingType extends AbstractType
                 },
                 'service_codes' => [],
             ])
-            ->setAllowedTypes('service_codes', ServiceCode::class . '[]');
+            ->setAllowedTypes('service_codes', ['array']) // Sf 2.8 resolver does not understand "FQCN[]" syntax => use normalizer instead
+            ->setNormalizer('service_codes', static function (Options $options, array $value) {
+                return array_map(static function ($value) {
+                    if ($value instanceof ServiceCode) {
+                        return $value;
+                    }
+
+                    return ServiceCode::from($value);
+                }, $value);
+            });
     }
 }

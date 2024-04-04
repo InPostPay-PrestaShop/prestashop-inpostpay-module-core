@@ -7,9 +7,12 @@ namespace izi\prestashop\Handler\Config;
 use izi\prestashop\Command\Config\UpdateAdvancedConfigurationCommand;
 use izi\prestashop\Configuration\AdvancedConfiguration;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
+use izi\prestashop\Handler\CommandHandlerTrait;
 
 final class UpdateAdvancedConfigurationHandler implements UpdateAdvancedConfigurationHandlerInterface
 {
+    use CommandHandlerTrait;
+
     /**
      * @var AdvancedConfigurationInterface
      */

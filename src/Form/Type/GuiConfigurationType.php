@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\GuiConfiguration;
+use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 use izi\prestashop\Form\Type\Widget\WidgetConfigurationType;
 use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
@@ -25,8 +26,12 @@ final class GuiConfigurationType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $switchClass = class_exists(SwitchType::class)
+            ? SwitchType::class
+            : SwitchTypePolyfill::class;
+
         $builder
-            ->add('widgetDisplayedOnCartPage', SwitchType::class, [
+            ->add('widgetDisplayedOnCartPage', $switchClass, [
                 'required' => false,
                 'label' => $this->translator->l('Displayed', self::TRANSLATION_SOURCE),
                 'help' => $this->translator->l('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', self::TRANSLATION_SOURCE),
@@ -37,7 +42,7 @@ final class GuiConfigurationType extends AbstractType
             ->add('cartPageHtmlStyles', HtmlStylesType::class, [
                 'label' => false,
             ])
-            ->add('widgetDisplayedOnProductCard', SwitchType::class, [
+            ->add('widgetDisplayedOnProductCard', $switchClass, [
                 'required' => false,
                 'label' => $this->translator->l('Displayed', self::TRANSLATION_SOURCE),
                 'help' => $this->translator->l('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', self::TRANSLATION_SOURCE),

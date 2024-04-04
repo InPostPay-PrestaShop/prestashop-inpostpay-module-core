@@ -11,10 +11,13 @@ use izi\prestashop\Configuration\GeneralConfiguration;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
+use izi\prestashop\Handler\CommandHandlerTrait;
 use Psr\SimpleCache\CacheInterface;
 
 final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurationHandlerInterface
 {
+    use CommandHandlerTrait;
+
     /**
      * @var ApiConfigurationInterface
      */
@@ -46,11 +49,6 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
         $this->ordersConfiguration = $ordersConfiguration;
         $this->generalConfiguration = $generalConfiguration;
         $this->cache = $cache;
-    }
-
-    public static function getHandledCommandClass(): string
-    {
-        return UpdateGeneralConfigurationCommand::class;
     }
 
     public function __invoke(UpdateGeneralConfigurationCommand $command)
