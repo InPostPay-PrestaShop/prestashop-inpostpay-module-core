@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace izi\prestashop\Form\Type;
+namespace izi\prestashop\Form\Type\Widget;
 
 use izi\prestashop\Configuration\DTO\HtmlStyles;
 use izi\prestashop\Translation\LegacyTranslator;

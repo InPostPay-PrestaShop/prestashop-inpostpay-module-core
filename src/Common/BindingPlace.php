@@ -12,6 +12,10 @@ use izi\prestashop\Enum\StringEnum;
  * @method static self BasketPopup()
  * @method static self OrderCreate()
  * @method static self ThankYouPage()
+ * @method static self LoginPage()
+ * @method static self RegisterformPage()
+ * @method static self CheckoutPage()
+ * @method static self MinicartPage()
  */
 final class BindingPlace extends StringEnum
 {
@@ -20,4 +24,8 @@ final class BindingPlace extends StringEnum
     private const BASKET_POPUP = 'BASKET_POPUP';
     private const ORDER_CREATE = 'ORDER_CREATE';
     private const THANK_YOU_PAGE = 'THANK_YOU_PAGE';
+    private const LOGIN_PAGE = 'LOGIN_PAGE';
+    private const REGISTERFORM_PAGE = 'REGISTERFORM_PAGE';
+    private const CHECKOUT_PAGE = 'CHECKOUT_PAGE';
+    private const MINICART_PAGE = 'MINICART_PAGE';
 }

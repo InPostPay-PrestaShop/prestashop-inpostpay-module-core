@@ -5,143 +5,137 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Common\BindingPlace;
-use izi\prestashop\Configuration\GuiConfigurationInterface;
-use izi\prestashop\View\Widget\Configuration;
 use Symfony\Component\Validator\Constraints as Assert;
+use izi\prestashop\Configuration\GuiConfigurationInterface;
 
 final class GuiConfiguration implements GuiConfigurationInterface
 {
     /**
-     * @var bool|null
-     */
-    private $widgetDisplayedOnCartPage;
-
-    /**
-     * @var Configuration|null
+     * @var WidgetDisplayConfiguration|null
      *
-     * @Assert\NotNull()
      * @Assert\Valid()
      */
-    private $cartPageWidgetConfiguration;
+    private $cartWidgetDisplayConfiguration;
 
     /**
-     * @var HtmlStyles|null
+     * @var WidgetDisplayConfiguration|null
      *
-     * @Assert\NotNull()
      * @Assert\Valid()
      */
-    private $cartPageHtmlStyles;
+    private $productWidgetDisplayConfiguration;
 
     /**
-     * @var bool|null
-     */
-    private $widgetDisplayedOnProductCard;
-
-    /**
-     * @var Configuration|null
+     * @var WidgetDisplayConfiguration|null
      *
-     * @Assert\NotNull()
      * @Assert\Valid()
      */
-    private $productCardWidgetConfiguration;
+    private $loginPageWidgetDisplayConfiguration;
 
     /**
-     * @var HtmlStyles|null
+     * @var WidgetDisplayConfiguration|null
      *
-     * @Assert\NotNull()
      * @Assert\Valid()
      */
-    private $productCardHtmlStyles;
+    private $registerFormPageWidgetDisplayConfiguration;
+
+    /**
+     * @var WidgetDisplayConfiguration|null
+     *
+     * @Assert\Valid()
+     */
+    private $checkoutPageWidgetDisplayConfiguration;
+
+    /**
+     * @var WidgetDisplayConfiguration|null
+     *
+     * @Assert\Valid()
+     */
+    private $miniCartPageWidgetDisplayConfiguration;
 
     public function __construct(
-        bool $widgetDisplayedOnCartPage = false,
-        Configuration $cartPageWidgetConfiguration = null,
-        HtmlStyles $cartPageHtmlStyles = null,
-        bool $widgetDisplayedOnProductCard = false,
-        Configuration $productCardWidgetConfiguration = null,
-        HtmlStyles $productCardHtmlStyles = null
+        WidgetDisplayConfiguration $cartWidgetDisplayConfiguration = null,
+        WidgetDisplayConfiguration $productWidgetDisplayConfiguration = null,
+        WidgetDisplayConfiguration $loginPageWidgetDisplayConfiguration = null,
+        WidgetDisplayConfiguration $registerFormPageWidgetDisplayConfiguration = null,
+        WidgetDisplayConfiguration $checkoutPageWidgetDisplayConfiguration = null,
+        WidgetDisplayConfiguration $miniCartPageWidgetDisplayConfiguration = null
     ) {
-        $this->widgetDisplayedOnCartPage = $widgetDisplayedOnCartPage;
-        $this->cartPageWidgetConfiguration = $cartPageWidgetConfiguration;
-        $this->cartPageHtmlStyles = $cartPageHtmlStyles;
-        $this->widgetDisplayedOnProductCard = $widgetDisplayedOnProductCard;
-        $this->productCardWidgetConfiguration = $productCardWidgetConfiguration;
-        $this->productCardHtmlStyles = $productCardHtmlStyles;
+        $this->cartWidgetDisplayConfiguration = $cartWidgetDisplayConfiguration;
+        $this->productWidgetDisplayConfiguration = $productWidgetDisplayConfiguration;
+        $this->loginPageWidgetDisplayConfiguration = $loginPageWidgetDisplayConfiguration;
+        $this->registerFormPageWidgetDisplayConfiguration = $registerFormPageWidgetDisplayConfiguration;
+        $this->checkoutPageWidgetDisplayConfiguration = $checkoutPageWidgetDisplayConfiguration;
+        $this->miniCartPageWidgetDisplayConfiguration = $miniCartPageWidgetDisplayConfiguration;
     }
 
-    public function getCheckoutWidgetConfiguration(): Configuration
+    public function getCartWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->getCartPageWidgetConfiguration();
+        return $this->cartWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::BasketSummary());
     }
 
-    public function isWidgetDisplayedOnCartPage(): bool
+    public function setCartWidgetDisplayConfiguration(?WidgetDisplayConfiguration $cartWidgetDisplayConfiguration): self
     {
-        return true === $this->widgetDisplayedOnCartPage;
-    }
-
-    public function setWidgetDisplayedOnCartPage(?bool $widgetDisplayedOnCartPage): self
-    {
-        $this->widgetDisplayedOnCartPage = $widgetDisplayedOnCartPage;
+        $this->cartWidgetDisplayConfiguration = $cartWidgetDisplayConfiguration;
 
         return $this;
     }
 
-    public function getCartPageWidgetConfiguration(): Configuration
+    public function getProductWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->cartPageWidgetConfiguration ?? new Configuration(BindingPlace::BasketSummary(), true);
+        return $this->productWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::ProductCard());
     }
 
-    public function setCartPageWidgetConfiguration(?Configuration $cartPageWidgetConfiguration): self
+    public function setProductWidgetDisplayConfiguration(?WidgetDisplayConfiguration $productWidgetDisplayConfiguration): self
     {
-        $this->cartPageWidgetConfiguration = $cartPageWidgetConfiguration;
+        $this->productWidgetDisplayConfiguration = $productWidgetDisplayConfiguration;
 
         return $this;
     }
 
-    public function getCartPageHtmlStyles(): HtmlStyles
+    public function getLoginPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->cartPageHtmlStyles ?? new HtmlStyles();
+        return $this->loginPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::LoginPage());
     }
 
-    public function setCartPageHtmlStyles(?HtmlStyles $cartPageHtmlStyles): self
+    public function setLoginPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $loginPageWidgetDisplayConfiguration): self
     {
-        $this->cartPageHtmlStyles = $cartPageHtmlStyles;
+        $this->loginPageWidgetDisplayConfiguration = $loginPageWidgetDisplayConfiguration;
 
         return $this;
     }
 
-    public function isWidgetDisplayedOnProductCard(): bool
+    public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return true === $this->widgetDisplayedOnProductCard;
+        return $this->registerFormPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::RegisterformPage());
     }
 
-    public function setWidgetDisplayedOnProductCard(?bool $widgetDisplayedOnProductCard): self
+    public function setRegisterFormPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $registerFormPageWidgetDisplayConfiguration): self
     {
-        $this->widgetDisplayedOnProductCard = $widgetDisplayedOnProductCard;
+        $this->registerFormPageWidgetDisplayConfiguration = $registerFormPageWidgetDisplayConfiguration;
 
         return $this;
     }
 
-    public function getProductCardWidgetConfiguration(): Configuration
+    public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->productCardWidgetConfiguration ?? new Configuration(BindingPlace::ProductCard());
+        return $this->checkoutPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::CheckoutPage());
     }
 
-    public function setProductCardWidgetConfiguration(?Configuration $productCardWidgetConfiguration): self
+    public function setCheckoutPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $checkoutPageWidgetDisplayConfiguration): self
     {
-        $this->productCardWidgetConfiguration = $productCardWidgetConfiguration;
+        $this->checkoutPageWidgetDisplayConfiguration = $checkoutPageWidgetDisplayConfiguration;
 
         return $this;
     }
 
-    public function getProductCardHtmlStyles(): HtmlStyles
+    public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->productCardHtmlStyles ?? new HtmlStyles();
+        return $this->miniCartPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::MinicartPage());
     }
 
-    public function setProductCardHtmlStyles(?HtmlStyles $productCardHtmlStyles): self
+    public function setMiniCartPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $miniCartPageWidgetDisplayConfiguration): self
     {
-        $this->productCardHtmlStyles = $productCardHtmlStyles;
+        $this->miniCartPageWidgetDisplayConfiguration = $miniCartPageWidgetDisplayConfiguration;
 
         return $this;
     }

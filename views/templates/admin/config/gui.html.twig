@@ -12,24 +12,68 @@
           <i class="material-icons">palette</i> {{ layoutTitle }}
         </h3>
 
-        <div class="card-body panel-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
-          {{ form_errors(form) }}
+        {{ form_errors(form) }}
 
-          {% include '@Modules/inpostizi/views/templates/admin/config/gui/form.html.twig' with {
-            widgetDisplay: form.widgetDisplayedOnCartPage,
-            widgetConfig: form.cartPageWidgetConfiguration,
-            widgetStyles: form.cartPageHtmlStyles,
-          } %}
-        </div>
+        {% set widgetForms = [
+          form.cartWidgetDisplayConfiguration,
+          form.productWidgetDisplayConfiguration,
+          form.loginPageWidgetDisplayConfiguration,
+          form.registerFormPageWidgetDisplayConfiguration,
+          form.checkoutPageWidgetDisplayConfiguration,
+          form.miniCartPageWidgetDisplayConfiguration
+        ] %}
 
-        <div class="card-body panel-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
-          {% include '@Modules/inpostizi/views/templates/admin/config/gui/form.html.twig' with {
-            widgetDisplay: form.widgetDisplayedOnProductCard,
-            widgetConfig: form.productCardWidgetConfiguration,
-            widgetStyles: form.productCardHtmlStyles,
-          } %}
+        {% set activeIndex = 0 %}
 
-          {{ form_rest(form) }}
+        {% for widgetForm in widgetForms %}
+          {% if widgetForm.vars.valid == false and activeIndex == 0 %}
+            {% set activeIndex = loop.index0 %}
+          {% endif %}
+        {% endfor %}
+
+        <ul class="nav nav-pills border-top-0 bg-light" id="gui_tabs" role="tablist">
+          {% for widgetForm in widgetForms %}
+            <li class="nav-item" role="presentation">
+              <a
+                class="nav-link
+                {% if activeIndex == loop.index0 %}active{% endif %}
+                {% if widgetForm.vars.valid == false %}text-danger{% endif %}
+                "
+                id="{{ widgetForm.vars.id }}-tab"
+                data-toggle="tab"
+                data-target="#{{ widgetForm.vars.id }}"
+                href="#{{ widgetForm.vars.id }}"
+                role="tab"
+              >
+                {{ widgetForm.vars.label }}
+
+                {% if widgetForm.vars.valid == false %}
+                  <span
+                      class="material-icons"
+                      data-toggle="popover"
+                      data-trigger="hover"
+                      data-placement="top"
+                      data-content="{{ 'This widget is not configured correctly, correct the values in the form.'|legacy_trans }}"
+                  >error</span>
+                {% endif %}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="tab-content p-0" id="gui_tabs_content">
+          {% for widgetForm in widgetForms %}
+            <div
+              class="
+                tab-pane fade
+                {% if activeIndex == loop.index0 %}show active{% endif %}
+              "
+              id="{{ widgetForm.vars.id }}"
+              role="tabpanel"
+            >
+              {{ form_widget(widgetForm) }}
+            </div>
+          {% endfor %}
         </div>
 
         <div class="card-footer clearfix">
