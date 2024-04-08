@@ -117,6 +117,11 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         return new HtmlStyles();
     }
 
+    private function isBasketByBinding(BindingPlace $bindingPlace): bool
+    {
+        return $bindingPlace !== BindingPlace::ProductCard();
+    }
+
     private function loadWidgetConfiguration(BindingPlace $bindingPlace): Configuration
     {
         $value = $this->configuration->get($this->getConfigurationWidgetConfigKey($bindingPlace));
@@ -125,7 +130,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             return $config;
         }
 
-        return new Configuration($bindingPlace, true);
+        return new Configuration($bindingPlace, $this->isBasketByBinding($bindingPlace));
     }
 
     private function getWidgetDisplayConfigurationByBinding(BindingPlace $bindingPlace): WidgetDisplayConfiguration
@@ -150,32 +155,32 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
 
     public function getCartWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->getWidgetDisplayConfigurationByBinding(BindingPlace::BasketSummary());
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::BasketSummary());
     }
 
     public function getProductWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->getWidgetDisplayConfigurationByBinding(BindingPlace::ProductCard());
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::ProductCard());
     }
 
     public function getLoginPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->getWidgetDisplayConfigurationByBinding(BindingPlace::LoginPage());
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::LoginPage());
     }
 
     public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->getWidgetDisplayConfigurationByBinding(BindingPlace::RegisterformPage());
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::RegisterformPage());
     }
 
     public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->getWidgetDisplayConfigurationByBinding(BindingPlace::CheckoutPage());
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::CheckoutPage());
     }
 
     public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->getWidgetDisplayConfigurationByBinding(BindingPlace::MinicartPage());
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::MinicartPage());
     }
 
     private function getHtmlStyleConfigKey(BindingPlace $bindingPlace): string

@@ -55,7 +55,7 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
             return '';
         }
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/mymodule.tpl', [
+        return $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
             'widget' => $widget,
             'styles' => $this->getHtmlStyles(),
         ]);

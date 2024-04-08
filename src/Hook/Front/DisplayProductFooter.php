@@ -49,7 +49,7 @@ final class DisplayProductFooter implements HookInterface
             return '';
         }
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/mymodule.tpl', [
+        return $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
             'widget' => $widget,
             'styles' => [],
         ]);

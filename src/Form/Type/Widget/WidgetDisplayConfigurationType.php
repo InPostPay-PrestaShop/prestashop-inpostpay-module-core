@@ -8,19 +8,26 @@ use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
 use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class WidgetDisplayConfigurationType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'widgetdisplayconfiguration';
+    private const TRANSLATION_SOURCE = 'widgetdisplayconfigurationtype';
 
     private $translator;
 
     public function __construct(LegacyTranslator $translator)
     {
         $this->translator = $translator;
+    }
+
+    public function buildView(FormView $view, FormInterface $form, array $options): void
+    {
+        $view->vars['description'] = $options['description'];
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -45,8 +52,14 @@ final class WidgetDisplayConfigurationType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
+        $resolver->setRequired([
+            'description',
+        ]);
+        $resolver->setAllowedTypes('description', 'string');
+
         $resolver->setDefaults([
             'data_class' => WidgetDisplayConfiguration::class,
+            'description' => '',
         ]);
     }
 }

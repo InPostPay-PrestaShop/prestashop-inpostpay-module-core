@@ -119,6 +119,46 @@ services:
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
+  izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop:
+    class: izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop:
+    class: izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter:
+    class: izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayIziCartPreviewButton:
+    class: izi\prestashop\Hook\Front\DisplayIziCartPreviewButton
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
   izi\prestashop\Controller\WidgetController:
     class: izi\prestashop\Controller\WidgetController
     public: true

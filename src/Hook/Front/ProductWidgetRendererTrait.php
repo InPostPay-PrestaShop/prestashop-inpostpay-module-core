@@ -25,12 +25,14 @@ trait ProductWidgetRendererTrait
             return '';
         }
 
-        if (!$this->configuration->isWidgetDisplayedOnProductCard()) {
+        $productWidget = $this->configuration->getProductWidgetDisplayConfiguration();
+
+
+        if (!$productWidget->isDisplayed()) {
             return '';
         }
 
-        $configuration = $this->configuration
-            ->getProductCardWidgetConfiguration()
+        $configuration = $productWidget->getWidgetConfiguration()
             ->setProductId((string) $productId);
 
         return $this->module->renderWidget($hookName, [
@@ -41,7 +43,8 @@ trait ProductWidgetRendererTrait
 
     private function getHtmlStyles(): array
     {
-        $styles = $this->configuration->getProductCardHtmlStyles();
+        $productWidget = $this->configuration->getProductWidgetDisplayConfiguration();
+        $styles = $productWidget->getHtmlStyles();
 
         return is_array($styles)
             ? $styles

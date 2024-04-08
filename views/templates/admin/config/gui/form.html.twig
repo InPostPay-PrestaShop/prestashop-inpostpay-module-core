@@ -6,6 +6,12 @@
   }) }}
 </p>
 
+{% if form.vars.description is not empty %}
+  <p class="mb-4">
+    {{ form.vars.description|raw }}
+  </p>
+{% endif %}
+
 <div class="row row-flex mt-n3">
 
   <div class="col-lg-7 col-md-6 col-12 col-xs-12 mt-3 mr-auto">

@@ -86,7 +86,7 @@ final class ActionGetPaymentOptions implements HookInterface
 
     private function createPaymentOption(string $widget): PaymentOption
     {
-        $additionalInfo = $this->renderer->render('module:inpostizi/views/templates/hook/mymodule.tpl', [
+        $additionalInfo = $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
             'widget' => $widget,
             'styles' => [],
         ]);

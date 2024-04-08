@@ -56,7 +56,7 @@ final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInte
 
     public function getWidgetConfiguration(): Configuration
     {
-        return $this->widgetConfiguration ?? new Configuration($this->bindingPlace, true);
+        return $this->widgetConfiguration ?? new Configuration($this->bindingPlace, false);
     }
 
     public function setWidgetConfiguration(?Configuration $widgetConfiguration): self
