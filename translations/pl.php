@@ -37,7 +37,7 @@ $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_e6f28601734051de0cef66878b
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_fb681449a1261a91eba2fad584f43331'] = 'Widget będzie wyświetlany na stronie produktu.';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_024588fa3c938f335a36fec9f17624f4'] = 'Strona logowania';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_89e511ba0171925a36570b7f342d38a2'] = 'Widget będzie wyświetlany na stronie logowania, pod formularzem logowania.';
-$_MODULE['<{inpostizi}prestashop>guiconfigurationtype_6b0a73cbb6db5290d1efe67976ef14c0'] = 'Strona rejestrowania';
+$_MODULE['<{inpostizi}prestashop>guiconfigurationtype_6b0a73cbb6db5290d1efe67976ef14c0'] = 'Strona rejestracji';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_24facc1d99d4510804eb2474c30b5bd6'] = 'Widget będzie wyświetlany na stronie rejestracji, nad formularzem rejestracji.';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_30ae44c4afa98b529400daa23dfc0202'] = 'Strona zamówienia';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_9d7278cdb71e13934fa097ee3d470e26'] = 'Widget będzie wyświetlany na stronie realizacji zamówienia powyżej podsumowania zamówienia.';
@@ -49,6 +49,8 @@ $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_ac6329ea064b9212be7e44
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_917c439021cdab2b538264aba987c53f'] = 'Jeśli wybierzesz \"testerom\" widget będzie widoczny tylko dla osób, które mają go zobaczyć. W celu wyświetlenia widgetu w ym trybie w przeglądarce internetowej wpisz adres Twojego sklepu z dopiskiem \'?showIzi=true\'. Przykład: https://mojsklep.pl?showIzi=true';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_4bef0602617f4fe6bd9e178ebe91d5c7'] = 'Hook do wyświetlania widgetu na stronie potwierdzenia zamówienia';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_935b322389e5f6b6419447b0879ca67b'] = 'Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku templates/checkout/order-confirmation.tpl \'{hook h=\"%s\" order=$order}\'.';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_a166db0fa22cc43fd81255c6480f9bff'] = 'Hook do wyświetlania widgetu na karcie produktu';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_e14e979d3bf9677c8f2f9d108297b95d'] = 'Możesz wybrać inny hook jeśli masz problem z wyświetleniem widgetu InPost Pay w domyślnym hooku.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_7a440309fc897f07a1d99a07af29d8db'] = 'Maksymalna liczba produktów sugerowanych';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_2d18889b4f14532c8f33c95a7af033c9'] = 'W celu pokazania produktów sugerowanych należy uzupełnić sekcję Produktów Powiązanych w konfiguracji produktu.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_958f470d0b1c8fb2b9e62b48e8903299'] = 'bez limitu';

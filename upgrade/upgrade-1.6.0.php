@@ -28,5 +28,13 @@ function upgrade_module_1_6_0(\Module $module)
     $module->registerHook(DisplayCheckoutSummaryTop::HOOK_NAME);
     $module->registerHook(DisplayIziCartPreviewButton::HOOK_NAME);
 
+    $productCardHook = DisplayProductActions::HOOK_NAME;
+
+    if (version_compare(_PS_VERSION_, '1.7.6', '<')) {
+        $productCardHook = DisplayProductAdditionalInfo::HOOK_NAME;
+    }
+
+    Configuration::updateValue('INPOST_PAY_PRODUCT_CARD_DISPLAY_HOOK', $productCardHook, false, 0, 0);
+
     return true;
 }

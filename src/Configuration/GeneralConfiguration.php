@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
+use izi\prestashop\Hook\Front\DisplayProductActions;
+use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
+
 final class GeneralConfiguration implements GeneralConfigurationInterface, PersistentConfigurationInterface
 {
     private const ENABLE_FOR_EVERYONE = 'INPOST_PAY_show_izi';
     private const MAX_SUGGESTED_PRODUCTS = 'INPOST_PAY_related_count';
     private const THANK_YOU_DISPLAY_HOOK = 'INPOST_PAY_THANK_YOU_DISPLAY';
+    private const PRODUCT_CARD_DISPLAY_HOOK = 'INPOST_PAY_PRODUCT_CARD_DISPLAY_HOOK';
 
     /**
      * @var ConfigurationInterface
@@ -42,8 +46,25 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
         return new DTO\GeneralConfiguration(
             $this->isEnabledForEveryone(),
             $this->getMaxSuggestedProducts(),
-            $this->getThankYouDisplayHook()
+            $this->getThankYouDisplayHook(),
+            $this->getProductCardDisplayHook()
         );
+    }
+
+    public function getProductCardDisplayHook(int $shopId = null): ?string
+    {
+        $hook = $this->configuration->get(self::PRODUCT_CARD_DISPLAY_HOOK, $shopId);
+
+        if (null === $hook) {
+            if (version_compare(_PS_VERSION_, '1.7.6', '<')) {
+                $hook = DisplayProductAdditionalInfo::HOOK_NAME;
+            } else {
+                $hook = DisplayProductActions::HOOK_NAME;
+            }
+
+        }
+
+        return $hook;
     }
 
     public function persist(GeneralConfigurationInterface $configuration): void
@@ -51,5 +72,6 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
         $this->configuration->set(self::ENABLE_FOR_EVERYONE, $configuration->isEnabledForEveryone());
         $this->configuration->set(self::MAX_SUGGESTED_PRODUCTS, $configuration->getMaxSuggestedProducts());
         $this->configuration->set(self::THANK_YOU_DISPLAY_HOOK, $configuration->getThankYouDisplayHook());
+        $this->configuration->set(self::PRODUCT_CARD_DISPLAY_HOOK, $configuration->getProductCardDisplayHook());
     }
 }

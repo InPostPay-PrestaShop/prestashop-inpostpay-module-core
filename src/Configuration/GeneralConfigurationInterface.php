@@ -11,4 +11,6 @@ interface GeneralConfigurationInterface
     public function getMaxSuggestedProducts(int $shopId = null): ?int;
 
     public function getThankYouDisplayHook(int $shopId = null): ?string;
+
+    public function getProductCardDisplayHook(int $shopId = null): ?string;
 }

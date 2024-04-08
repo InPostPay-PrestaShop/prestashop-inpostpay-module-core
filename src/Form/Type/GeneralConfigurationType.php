@@ -8,6 +8,8 @@ use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
 use izi\prestashop\Hook\Front\DisplayIziThankYou;
 use izi\prestashop\Hook\Front\DisplayOrderConfirmation;
 use izi\prestashop\Hook\Front\DisplayPaymentReturn;
+use izi\prestashop\Hook\Front\DisplayProductActions;
+use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
 use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -48,6 +50,15 @@ final class GeneralConfigurationType extends AbstractType
                 'property_path' => 'generalConfiguration.thankYouDisplayHook',
                 'label' => $this->translator->l('Order confirmation page display hook', self::TRANSLATION_SOURCE),
                 'help' => sprintf($this->translator->l('If you choose the \'%s\' hook you have to manually implement it in the templates/checkout/order-confirmation.tpl file \'{hook h="%s" order=$order}\'.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
+            ])
+            ->add('productCardDisplayHook', ChoiceType::class, [
+                'choices' => [
+                    DisplayProductAdditionalInfo::getHookName() => DisplayProductAdditionalInfo::getHookName(),
+                    DisplayProductActions::getHookName() => DisplayProductActions::getHookName(),
+                ],
+                'property_path' => 'generalConfiguration.productCardDisplayHook',
+                'label' => $this->translator->l('Product page hook used to display widget', self::TRANSLATION_SOURCE),
+                'help' => sprintf($this->translator->l('You can choose a different hook if you have problems displaying the InPost Pay widget on the product page.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
             ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,

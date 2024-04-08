@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Configuration\GeneralConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -22,9 +23,14 @@ final class DisplayProductFooter implements HookInterface
      */
     private $renderer;
 
-    public function __construct(GuiConfigurationInterface $configuration, WidgetInterface $module, RendererInterface $renderer)
-    {
+    public function __construct(
+        GuiConfigurationInterface $configuration,
+        GeneralConfiguration $generalConfiguration,
+        WidgetInterface $module,
+        RendererInterface $renderer
+    ) {
         $this->configuration = $configuration;
+        $this->generalConfiguration = $generalConfiguration;
         $this->module = $module;
         $this->renderer = $renderer;
     }
