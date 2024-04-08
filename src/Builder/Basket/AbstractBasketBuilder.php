@@ -20,6 +20,7 @@ use izi\prestashop\Common\PromoCode;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
 use izi\prestashop\ContextManager;
+use PrestaShop\PrestaShop\Core\Cart\Calculator;
 
 abstract class AbstractBasketBuilder implements BasketBuilderInterface
 {
@@ -387,6 +388,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function getFinalPrice(): Price
     {
+        // between PS 1.7.4 and 1.7.6 \Cart::BOTH_WITHOUT_SHIPPING calculation type does not take cart rules into the account
+        if (\Tools::version_compare(_PS_VERSION_, '1.7.4', '>=') && \Tools::version_compare(_PS_VERSION_, '1.7.6')) {
+            return $this->getCartTotalWithoutShipping();
+        }
+
         $gross = (float) $this->cart->getOrderTotal(true, \Cart::BOTH_WITHOUT_SHIPPING, null, null, false, true);
         $net = (float) $this->cart->getOrderTotal(false, \Cart::BOTH_WITHOUT_SHIPPING, null, null, false, true);
 
@@ -702,5 +708,35 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $config = $this->getConfiguration('INPOST_PAY_related_count');
 
         return false === $config || '' === $config ? null : (int) $config;
+    }
+
+    private function getCartTotalWithoutShipping(): Price
+    {
+        $calculator = $this->getCartCalculator();
+
+        $calculator->calculateRows();
+        $calculator->calculateCartRules();
+
+        $amount = $calculator->getRowTotal();
+
+        return PriceFactory::create(
+            $amount->getTaxExcluded(),
+            $amount->getTaxIncluded()
+        );
+    }
+
+    private function getCartCalculator(): Calculator
+    {
+        return (\Closure::bind(function (): Calculator {
+            $products = $this->getProducts();
+            $cartRules = $this->getTotalCalculationCartRules(self::BOTH_WITHOUT_SHIPPING, false);
+
+            /** @var array{obj: \CartRule} $cartRule */
+            foreach ($cartRules as $cartRule) {
+                $cartRule['obj']->free_shipping = false;
+            }
+
+            return $this->newCalculator($products, $cartRules, null);
+        }, $this->cart, \CartCore::class))();
     }
 }
