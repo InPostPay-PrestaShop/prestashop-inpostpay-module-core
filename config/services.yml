@@ -165,6 +165,7 @@ services:
       - '@izi\prestashop\Configuration\OrdersConfigurationInterface'
       - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
       - '@izi\prestashop\Cache\ConfigurationCache'
+      - '@inpost.izi.module'
 
   izi\prestashop\Validator\InPostApiCredentialsValidator:
     class: izi\prestashop\Validator\InPostApiCredentialsValidator
