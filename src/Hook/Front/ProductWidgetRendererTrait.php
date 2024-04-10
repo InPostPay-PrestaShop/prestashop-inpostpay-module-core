@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
@@ -13,6 +14,11 @@ trait ProductWidgetRendererTrait
      * @var GuiConfigurationInterface
      */
     private $configuration;
+
+    /**
+     * @var GeneralConfigurationInterface
+     */
+    private $generalConfiguration;
 
     /**
      * @var WidgetInterface
@@ -25,12 +31,13 @@ trait ProductWidgetRendererTrait
             return '';
         }
 
-        if (!$this->configuration->isWidgetDisplayedOnProductCard()) {
+        $productWidget = $this->configuration->getProductWidgetDisplayConfiguration();
+
+        if (!$productWidget->isDisplayed() || !$this->shouldDisplayWidget($hookName)) {
             return '';
         }
 
-        $configuration = $this->configuration
-            ->getProductCardWidgetConfiguration()
+        $configuration = $productWidget->getWidgetConfiguration()
             ->setProductId((string) $productId);
 
         return $this->module->renderWidget($hookName, [
@@ -39,9 +46,15 @@ trait ProductWidgetRendererTrait
         ]);
     }
 
+    private function shouldDisplayWidget(string $hookName): bool
+    {
+        return $hookName === $this->generalConfiguration->getProductCardDisplayHook();
+    }
+
     private function getHtmlStyles(): array
     {
-        $styles = $this->configuration->getProductCardHtmlStyles();
+        $productWidget = $this->configuration->getProductWidgetDisplayConfiguration();
+        $styles = $productWidget->getHtmlStyles();
 
         return is_array($styles)
             ? $styles

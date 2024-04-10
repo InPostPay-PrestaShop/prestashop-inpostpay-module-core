@@ -5,21 +5,20 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration;
 
 use izi\prestashop\Configuration\DTO\HtmlStyles;
+use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
 use izi\prestashop\View\Widget\Configuration;
 
 interface GuiConfigurationInterface
 {
-    public function getCheckoutWidgetConfiguration(): Configuration;
+    public function getCartWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
 
-    public function isWidgetDisplayedOnCartPage(): bool;
+    public function getProductWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
 
-    public function getCartPageWidgetConfiguration(): Configuration;
+    public function getLoginPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
 
-    public function getCartPageHtmlStyles(): HtmlStyles;
+    public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
 
-    public function isWidgetDisplayedOnProductCard(): bool;
+    public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
 
-    public function getProductCardWidgetConfiguration(): Configuration;
-
-    public function getProductCardHtmlStyles(): HtmlStyles;
+    public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
 }

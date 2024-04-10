@@ -29,6 +29,11 @@ services:
         displayExpressCheckout: '@izi\prestashop\Hook\Front\DisplayExpressCheckout'
         displayShoppingCart: '@izi\prestashop\Hook\Front\DisplayShoppingCart'
         displayShoppingCartFooter: '@izi\prestashop\Hook\Front\DisplayShoppingCartFooter'
+        displayCheckoutSummaryTop: '@izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop'
+        displayCustomerAccountFormTop: '@izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop'
+        displayCustomerLoginFormAfter: '@izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter'
+        displayIziCartPreviewButton: '@izi\prestashop\Hook\Front\DisplayIziCartPreviewButton'
+        displayIziCheckoutButton: '@izi\prestashop\Hook\Front\DisplayIziCheckoutButton'
 
   inpost.izi.basket_event_handler_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator

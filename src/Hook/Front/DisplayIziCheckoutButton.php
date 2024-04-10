@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
-use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
-use izi\prestashop\Hook\VersionRange;
+use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\View\Templating\RendererInterface;
-use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
+final class DisplayIziCheckoutButton implements HookInterface
 {
-    use ProductWidgetRendererTrait;
+    use ButtonWidgetRendererTrait;
 
-    public const HOOK_NAME = 'displayProductActions';
+    public const HOOK_NAME = 'displayIziCheckoutButton';
 
     /**
      * @var RendererInterface
@@ -25,7 +24,7 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
     private $renderer;
 
     /**
-     * @var GeneralConfiguration
+     * @var GeneralConfigurationInterface
      */
     private $generalConfiguration;
 
@@ -46,29 +45,22 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
         return self::HOOK_NAME;
     }
 
-    public static function getVersionRange(): VersionRange
-    {
-        return new VersionRange('1.7.6');
-    }
-
     /**
-     * @param array{product: ProductLazyArray, request: Request} $parameters
+     * @param array{request: Request} $parameters
      */
     public function execute(array $parameters): string
     {
-        $product = $parameters['product'] ?? null;
+        $binding = BindingPlace::CheckoutPage();
 
-        if (!isset($product['id_product']) || !is_numeric($product['id_product'])) {
-            throw new \InvalidArgumentException(sprintf('Parameter "product" expected to be an instance of "%s", "%s" given.', ProductLazyArray::class, is_object($product) ? get_class($product) : gettype($product)));
-        }
-
-        if ('' === $widget = $this->renderWidget((int) $product['id_product'], $parameters, self::HOOK_NAME)) {
+        if ($this->generalConfiguration->getCheckoutButtonDisplayHook() !== self::HOOK_NAME ||
+            '' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)
+        ) {
             return '';
         }
 
         return $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
             'widget' => $widget,
-            'styles' => $this->getHtmlStyles(),
+            'styles' => $this->getHtmlStyles($binding),
         ]);
     }
 }

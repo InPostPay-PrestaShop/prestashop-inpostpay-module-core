@@ -11,11 +11,11 @@ use izi\prestashop\View\Templating\RendererInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-final class DisplayShoppingCart implements HookInterface
+final class DisplayIziCartPreviewButton implements HookInterface
 {
     use ButtonWidgetRendererTrait;
 
-    public const HOOK_NAME = 'displayShoppingCart';
+    public const HOOK_NAME = 'displayIziCartPreviewButton';
 
     /**
      * @var RendererInterface
@@ -39,7 +39,7 @@ final class DisplayShoppingCart implements HookInterface
      */
     public function execute(array $parameters): string
     {
-        $binding = BindingPlace::BasketSummary();
+        $binding = BindingPlace::MiniCartPage();
 
         if ('' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)) {
             return '';

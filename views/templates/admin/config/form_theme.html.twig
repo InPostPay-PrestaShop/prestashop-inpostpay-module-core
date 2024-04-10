@@ -250,3 +250,11 @@
     <span class="slide-button"></span>
   </span>
 {% endblock inpostizi_switch_widget %}
+
+{% block widget_display_configuration_widget %}
+  <div class="card-body panel-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
+    {% include '@Modules/inpostizi/views/templates/admin/config/gui/form.html.twig' with {
+      form: form,
+    } %}
+  </div>
+{% endblock widget_display_configuration_widget %}

@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\GuiConfiguration;
-use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
-use izi\prestashop\Form\Type\Widget\WidgetConfigurationType;
+use izi\prestashop\Form\Type\Widget\WidgetDisplayConfiguration;
+use izi\prestashop\Form\Type\Widget\WidgetDisplayConfigurationType;
 use izi\prestashop\Translation\LegacyTranslator;
-use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -26,32 +25,30 @@ final class GuiConfigurationType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $switchClass = class_exists(SwitchType::class)
-            ? SwitchType::class
-            : SwitchTypePolyfill::class;
-
         $builder
-            ->add('widgetDisplayedOnCartPage', $switchClass, [
-                'required' => false,
-                'label' => $this->translator->l('Displayed', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', self::TRANSLATION_SOURCE),
-            ])
-            ->add('cartPageWidgetConfiguration', WidgetConfigurationType::class, [
+            ->add('cartWidgetDisplayConfiguration', WidgetDisplayConfigurationType::class, [
                 'label' => $this->translator->l('Cart page', self::TRANSLATION_SOURCE),
+                'description' => $this->translator->l('This widget will be displayed in the cart page, under submit button.', self::TRANSLATION_SOURCE),
             ])
-            ->add('cartPageHtmlStyles', HtmlStylesType::class, [
-                'label' => false,
-            ])
-            ->add('widgetDisplayedOnProductCard', $switchClass, [
-                'required' => false,
-                'label' => $this->translator->l('Displayed', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', self::TRANSLATION_SOURCE),
-            ])
-            ->add('productCardWidgetConfiguration', WidgetConfigurationType::class, [
+            ->add('productWidgetDisplayConfiguration', WidgetDisplayConfigurationType::class, [
                 'label' => $this->translator->l('Product card', self::TRANSLATION_SOURCE),
+                'description' => $this->translator->l('This widget will be displayed in the product page.', self::TRANSLATION_SOURCE),
             ])
-            ->add('productCardHtmlStyles', HtmlStylesType::class, [
-                'label' => false,
+            ->add('loginPageWidgetDisplayConfiguration', WidgetDisplayConfigurationType::class, [
+                'label' => $this->translator->l('Login page', self::TRANSLATION_SOURCE),
+                'description' => $this->translator->l('This widget will be displayed in the login page, under form submit button.', self::TRANSLATION_SOURCE),
+            ])
+            ->add('registerFormPageWidgetDisplayConfiguration', WidgetDisplayConfigurationType::class, [
+                'label' => $this->translator->l('Register page', self::TRANSLATION_SOURCE),
+                'description' => $this->translator->l('This widget will be displayed in the register page, above register form.', self::TRANSLATION_SOURCE),
+            ])
+            ->add('checkoutPageWidgetDisplayConfiguration', WidgetDisplayConfigurationType::class, [
+                'label' => $this->translator->l('Checkout page', self::TRANSLATION_SOURCE),
+                'description' => $this->translator->l('This widget will be displayed in the checkout page, above products summary.', self::TRANSLATION_SOURCE),
+            ])
+            ->add('miniCartPageWidgetDisplayConfiguration', WidgetDisplayConfigurationType::class, [
+                'label' => $this->translator->l('Cart preview', self::TRANSLATION_SOURCE),
+                'description' => $this->translator->l('This widget will be displayed in the cart preview. To display this hook you have to register custom hook in your template "{hook h=\'displayIziCartPreviewButton\'}"', self::TRANSLATION_SOURCE),
             ]);
     }
 

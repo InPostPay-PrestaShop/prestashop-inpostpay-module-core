@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\AliasedHookInterface;
 use izi\prestashop\Hook\VersionRange;
@@ -24,9 +25,14 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
      */
     private $renderer;
 
-    public function __construct(GuiConfigurationInterface $configuration, WidgetInterface $module, RendererInterface $renderer)
-    {
+    public function __construct(
+        GuiConfigurationInterface $configuration,
+        GeneralConfigurationInterface $generalConfiguration,
+        WidgetInterface $module,
+        RendererInterface $renderer
+    ) {
         $this->configuration = $configuration;
+        $this->generalConfiguration = $generalConfiguration;
         $this->module = $module;
         $this->renderer = $renderer;
     }
@@ -59,7 +65,7 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
             return '';
         }
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/mymodule.tpl', [
+        return $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
             'widget' => $widget,
             'styles' => $this->getHtmlStyles(),
         ]);

@@ -6,18 +6,36 @@ namespace izi\prestashop\Configuration;
 
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\HtmlStyles;
+use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
 use izi\prestashop\View\Widget\Configuration;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 final class GuiConfiguration implements GuiConfigurationInterface, PersistentConfigurationInterface
 {
-    private const ENABLE_CART_PAGE_WIDGET_DISPLAY = 'INPOST_PAY_show_button_cart';
-    private const CART_PAGE_WIDGET_CONFIG = 'INPOST_PAY_CART_WIDGET_CONFIG';
-    private const CART_PAGE_HTML_STYLES = 'INPOST_PAY_CART_HTML_STYLES';
-    private const ENABLE_PRODUCT_CARD_WIDGET_DISPLAY = 'INPOST_PAY_show_button_details';
+    private const BASKET_SUMMARY_WIDGET_DISPLAY = 'INPOST_PAY_show_button_cart';
+    private const BASKET_SUMMARY_WIDGET_CONFIG = 'INPOST_PAY_CART_WIDGET_CONFIG';
+    private const BASKET_SUMMARY_HTML_STYLES = 'INPOST_PAY_CART_HTML_STYLES';
+
+    private const PRODUCT_CARD_WIDGET_DISPLAY = 'INPOST_PAY_show_button_details';
     private const PRODUCT_CARD_WIDGET_CONFIG = 'INPOST_PAY_PRODUCT_CARD_WIDGET_CONFIG';
     private const PRODUCT_CARD_HTML_STYLES = 'INPOST_PAY_PRODUCT_HTML_STYLES';
+
+    private const LOGIN_PAGE_WIDGET_DISPLAY = 'INPOST_PAY_SHOW_LOGIN_PAGE_WIDGET';
+    private const LOGIN_PAGE_WIDGET_CONFIG = 'INPOST_PAY_LOGIN_PAGE_WIDGET_CONFIG';
+    private const LOGIN_PAGE_HTML_STYLES = 'INPOST_PAY_LOGIN_PAGE_HTML_STYLES';
+
+    private const REGISTERFORM_PAGE_WIDGET_DISPLAY = 'INPOST_PAY_SHOW_REGISTERFORM_PAGE_WIDGET';
+    private const REGISTERFORM_PAGE_WIDGET_CONFIG = 'INPOST_PAY_REGISTERFORM_PAGE_WIDGET_CONFIG';
+    private const REGISTERFORM_PAGE_HTML_STYLES = 'INPOST_PAY_REGISTERFORM_PAGE_HTML_STYLES';
+
+    private const CHECKOUT_PAGE_WIDGET_DISPLAY = 'INPOST_PAY_SHOW_CHECKOUT_PAGE_WIDGET';
+    private const CHECKOUT_PAGE_WIDGET_CONFIG = 'INPOST_PAY_CHECKOUT_PAGE_WIDGET_CONFIG';
+    private const CHECKOUT_PAGE_HTML_STYLES = 'INPOST_PAY_CHECKOUT_PAGE_HTML_STYLES';
+
+    private const MINICART_PAGE_WIDGET_DISPLAY = 'INPOST_PAY_SHOW_MINICART_PAGE_WIDGET';
+    private const MINICART_PAGE_WIDGET_CONFIG = 'INPOST_PAY_MINICART_PAGE_WIDGET_CONFIG';
+    private const MINICART_PAGE_HTML_STYLES = 'INPOST_PAY_MINICART_PAGE_HTML_STYLES';
 
     /**
      * @var ConfigurationInterface
@@ -29,10 +47,8 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
      */
     private $serializer;
 
-    private $cartWidgetConfig;
-    private $cartHtmlStyles;
-    private $productWidgetConfig;
-    private $productHtmlStyles;
+    private $loadedConfiguration = [];
+
 
     public function __construct(ConfigurationInterface $configuration, SerializerInterface $serializer)
     {
@@ -43,93 +59,56 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
     // TODO separate config?
     public function getCheckoutWidgetConfiguration(): Configuration
     {
-        return $this
-            ->getCartPageWidgetConfiguration()
-            ->setBindingPlace(BindingPlace::OrderCreate());
-    }
+        $widgetDisplayConfiguration = $this->getCartWidgetDisplayConfiguration();
+        $config = $widgetDisplayConfiguration->getWidgetConfiguration();
 
-    public function isWidgetDisplayedOnCartPage(): bool
-    {
-        return (bool) $this->configuration->get(self::ENABLE_CART_PAGE_WIDGET_DISPLAY);
-    }
-
-    public function getCartPageWidgetConfiguration(): Configuration
-    {
-        if (!isset($this->cartWidgetConfig)) {
-            $this->cartWidgetConfig = $this->loadCartPageWidgetConfig();
-        }
-
-        return clone $this->cartWidgetConfig;
-    }
-
-    public function getCartPageHtmlStyles(): HtmlStyles
-    {
-        if (!isset($this->cartHtmlStyles)) {
-            $this->cartHtmlStyles = $this->loadCartPageHtmlStyles();
-        }
-
-        return clone $this->cartHtmlStyles;
-    }
-
-    public function getProductCardHtmlStyles(): HtmlStyles
-    {
-        if (!isset($this->productHtmlStyles)) {
-            $this->productHtmlStyles = $this->loadProductCardHtmlStyles();
-        }
-
-        return clone $this->productHtmlStyles;
-    }
-
-    public function isWidgetDisplayedOnProductCard(): bool
-    {
-        return (bool) $this->configuration->get(self::ENABLE_PRODUCT_CARD_WIDGET_DISPLAY);
-    }
-
-    public function getProductCardWidgetConfiguration(): Configuration
-    {
-        if (!isset($this->productWidgetConfig)) {
-            $this->productWidgetConfig = $this->loadProductCardWidgetConfig();
-        }
-
-        return clone $this->productWidgetConfig;
+        return $config->setBindingPlace(BindingPlace::OrderCreate());
     }
 
     public function copy(): GuiConfigurationInterface
     {
         return new DTO\GuiConfiguration(
-            $this->isWidgetDisplayedOnCartPage(),
-            $this->getCartPageWidgetConfiguration(),
-            $this->getCartPageHtmlStyles(),
-            $this->isWidgetDisplayedOnProductCard(),
-            $this->getProductCardWidgetConfiguration(),
-            $this->getProductCardHtmlStyles()
+            $this->getCartWidgetDisplayConfiguration(),
+            $this->getProductWidgetDisplayConfiguration(),
+            $this->getLoginPageWidgetDisplayConfiguration(),
+            $this->getRegisterFormPageWidgetDisplayConfiguration(),
+            $this->getCheckoutPageWidgetDisplayConfiguration(),
+            $this->getMiniCartPageWidgetDisplayConfiguration()
         );
     }
 
     public function persist(GuiConfigurationInterface $configuration): void
     {
-        $this->configuration->set(self::ENABLE_CART_PAGE_WIDGET_DISPLAY, $configuration->isWidgetDisplayedOnCartPage());
-        $this->configuration->set(self::ENABLE_PRODUCT_CARD_WIDGET_DISPLAY, $configuration->isWidgetDisplayedOnProductCard());
-        $this->setCartPageWidgetConfig($configuration->getCartPageWidgetConfiguration());
-        $this->setCartPageHtmlStyles($configuration->getCartPageHtmlStyles());
-        $this->setProductPageWidgetConfig($configuration->getProductCardWidgetConfiguration());
-        $this->setProductCardHtmlStyles($configuration->getProductCardHtmlStyles());
+        $this->setWidgetDisplayConfiguration($configuration->getCartWidgetDisplayConfiguration());
+        $this->setWidgetDisplayConfiguration($configuration->getProductWidgetDisplayConfiguration());
+        $this->setWidgetDisplayConfiguration($configuration->getLoginPageWidgetDisplayConfiguration());
+        $this->setWidgetDisplayConfiguration($configuration->getRegisterFormPageWidgetDisplayConfiguration());
+        $this->setWidgetDisplayConfiguration($configuration->getCheckoutPageWidgetDisplayConfiguration());
+        $this->setWidgetDisplayConfiguration($configuration->getMiniCartPageWidgetDisplayConfiguration());
     }
 
-    private function loadCartPageWidgetConfig(): Configuration
+    private function setWidgetDisplayConfiguration(WidgetDisplayConfiguration $widgetDisplayConfig): void
     {
-        $value = $this->configuration->get(self::CART_PAGE_WIDGET_CONFIG);
-
-        if (null !== $value && $config = $this->deserialize($value, Configuration::class)) {
-            return $config;
-        }
-
-        return new Configuration(BindingPlace::BasketSummary(), true);
+        $this->configuration->set($this->getDisplayWidgetConfigKey($widgetDisplayConfig->getBinding()), $widgetDisplayConfig->isDisplayed());
+        $this->setHtmlStyles($widgetDisplayConfig->getHtmlStyles(), $widgetDisplayConfig->getBinding());
+        $this->setWidgetConfiguration($widgetDisplayConfig->getWidgetConfiguration(), $widgetDisplayConfig->getBinding());
     }
 
-    private function loadCartPageHtmlStyles(): HtmlStyles
+    private function setHtmlStyles(HtmlStyles $styles, BindingPlace $bindingPlace): void
     {
-        $value = $this->configuration->get(self::CART_PAGE_HTML_STYLES);
+        $value = $this->serializer->serialize($styles, 'json');
+        $this->configuration->set($this->getHtmlStyleConfigKey($bindingPlace), $value);
+    }
+
+    private function setWidgetConfiguration(Configuration $config, BindingPlace $bindingPlace): void
+    {
+        $value = $this->serializer->serialize($config, 'json');
+        $this->configuration->set($this->getConfigurationWidgetConfigKey($bindingPlace), $value);
+    }
+
+    private function loadHtmlStyles(BindingPlace $bindingPlace): HtmlStyles
+    {
+        $value = $this->configuration->get($this->getHtmlStyleConfigKey($bindingPlace));
 
         if (null !== $value && $styles = $this->deserialize($value, HtmlStyles::class)) {
             return $styles;
@@ -138,54 +117,107 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         return new HtmlStyles();
     }
 
-    private function loadProductCardWidgetConfig(): Configuration
+    private function isBasketByBinding(BindingPlace $bindingPlace): bool
     {
-        $value = $this->configuration->get(self::PRODUCT_CARD_WIDGET_CONFIG);
+        return $bindingPlace !== BindingPlace::ProductCard();
+    }
+
+    private function loadWidgetConfiguration(BindingPlace $bindingPlace): Configuration
+    {
+        $value = $this->configuration->get($this->getConfigurationWidgetConfigKey($bindingPlace));
 
         if (null !== $value && $config = $this->deserialize($value, Configuration::class)) {
             return $config;
         }
 
-        return new Configuration(BindingPlace::ProductCard());
+        return new Configuration($bindingPlace, $this->isBasketByBinding($bindingPlace));
     }
 
-    private function loadProductCardHtmlStyles(): HtmlStyles
+    private function getWidgetDisplayConfigurationByBinding(BindingPlace $bindingPlace): WidgetDisplayConfiguration
     {
-        $value = $this->configuration->get(self::PRODUCT_CARD_HTML_STYLES);
+        $key = $bindingPlace->value;
 
-        if (null !== $value && $styles = $this->deserialize($value, HtmlStyles::class)) {
-            return $styles;
+        if (!isset($this->loadedConfiguration[$key])) {
+            $this->loadedConfiguration[$key] = $this->loadWidgetDisplayConfigurationByBinding($bindingPlace);
         }
 
-        return new HtmlStyles();
+        return $this->loadedConfiguration[$key];
     }
 
-    private function setCartPageWidgetConfig(Configuration $config): void
+    private function loadWidgetDisplayConfigurationByBinding(BindingPlace $binding): WidgetDisplayConfiguration
     {
-        $value = $this->serializer->serialize($config, 'json');
-        $this->configuration->set(self::CART_PAGE_WIDGET_CONFIG, $value);
-        $this->cartWidgetConfig = clone $config;
+        $htmlStyles = $this->loadHtmlStyles($binding);
+        $configuration = $this->loadWidgetConfiguration($binding);
+        $displayed = (bool) $this->configuration->get($this->getDisplayWidgetConfigKey($binding));
+
+        return new WidgetDisplayConfiguration($binding, $displayed, $configuration, $htmlStyles);
     }
 
-    private function setCartPageHtmlStyles(HtmlStyles $styles): void
+    public function getCartWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        $value = $this->serializer->serialize($styles, 'json');
-        $this->configuration->set(self::CART_PAGE_HTML_STYLES, $value);
-        $this->cartHtmlStyles = clone $styles;
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::BasketSummary());
     }
 
-    private function setProductPageWidgetConfig(Configuration $config): void
+    public function getProductWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        $value = $this->serializer->serialize($config, 'json');
-        $this->configuration->set(self::PRODUCT_CARD_WIDGET_CONFIG, $value);
-        $this->productWidgetConfig = clone $config;
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::ProductCard());
     }
 
-    private function setProductCardHtmlStyles(HtmlStyles $styles): void
+    public function getLoginPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        $value = $this->serializer->serialize($styles, 'json');
-        $this->configuration->set(self::PRODUCT_CARD_HTML_STYLES, $value);
-        $this->productHtmlStyles = clone $styles;
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::LoginPage());
+    }
+
+    public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
+    {
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::RegisterFormPage());
+    }
+
+    public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
+    {
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::CheckoutPage());
+    }
+
+    public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
+    {
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::MiniCartPage());
+    }
+
+    private function getHtmlStyleConfigKey(BindingPlace $bindingPlace): string
+    {
+        $constantName = $bindingPlace->value . '_HTML_STYLES';
+        $classNamespace = self::class;
+
+        if (!defined($classNamespace . '::' . $constantName)) {
+            throw new \InvalidArgumentException('Invalid BindingPlace enum value.');
+        }
+
+        return constant($classNamespace. '::' . $constantName);
+    }
+
+    private function getDisplayWidgetConfigKey(BindingPlace $bindingPlace): string
+    {
+        $constantName = $bindingPlace->value . '_WIDGET_DISPLAY';
+        $classNamespace = self::class;
+
+        if (!defined($classNamespace . '::' . $constantName)) {
+            throw new \InvalidArgumentException('Invalid BindingPlace enum value.');
+        }
+
+        return constant($classNamespace. '::' . $constantName);
+    }
+
+
+    private function getConfigurationWidgetConfigKey(BindingPlace $bindingPlace): string
+    {
+        $constantName = $bindingPlace->value . '_WIDGET_CONFIG';
+        $classNamespace = self::class;
+
+        if (!defined($classNamespace . '::' . $constantName)) {
+            throw new \InvalidArgumentException('Invalid BindingPlace enum value.');
+        }
+
+        return constant($classNamespace. '::' . $constantName);
     }
 
     /**
@@ -203,4 +235,5 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             return null;
         }
     }
+
 }
