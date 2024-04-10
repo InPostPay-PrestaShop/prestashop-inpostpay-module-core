@@ -39,7 +39,7 @@ final class DisplayCustomerAccountFormTop implements HookInterface
      */
     public function execute(array $parameters): string
     {
-        $binding = BindingPlace::RegisterformPage();
+        $binding = BindingPlace::RegisterFormPage();
 
         if ('' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)) {
             return '';

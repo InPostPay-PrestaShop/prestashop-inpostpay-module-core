@@ -170,7 +170,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
 
     public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::RegisterformPage());
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::RegisterFormPage());
     }
 
     public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
@@ -180,7 +180,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
 
     public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::MinicartPage());
+        return clone $this->getWidgetDisplayConfigurationByBinding(BindingPlace::MiniCartPage());
     }
 
     private function getHtmlStyleConfigKey(BindingPlace $bindingPlace): string

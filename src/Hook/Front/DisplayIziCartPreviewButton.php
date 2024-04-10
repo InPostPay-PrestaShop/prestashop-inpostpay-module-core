@@ -39,7 +39,7 @@ final class DisplayIziCartPreviewButton implements HookInterface
      */
     public function execute(array $parameters): string
     {
-        $binding = BindingPlace::MinicartPage();
+        $binding = BindingPlace::MiniCartPage();
 
         if ('' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)) {
             return '';

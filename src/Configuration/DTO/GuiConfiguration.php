@@ -106,7 +106,7 @@ final class GuiConfiguration implements GuiConfigurationInterface
 
     public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->registerFormPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::RegisterformPage());
+        return $this->registerFormPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::RegisterFormPage());
     }
 
     public function setRegisterFormPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $registerFormPageWidgetDisplayConfiguration): self
@@ -130,7 +130,7 @@ final class GuiConfiguration implements GuiConfigurationInterface
 
     public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
     {
-        return $this->miniCartPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::MinicartPage());
+        return $this->miniCartPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::MiniCartPage());
     }
 
     public function setMiniCartPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $miniCartPageWidgetDisplayConfiguration): self

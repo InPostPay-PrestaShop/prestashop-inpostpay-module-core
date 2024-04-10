@@ -52,11 +52,11 @@ trait ButtonWidgetRendererTrait
                 return $this->configuration->getCartWidgetDisplayConfiguration();
             case BindingPlace::LoginPage():
                 return $this->configuration->getLoginPageWidgetDisplayConfiguration();
-            case BindingPlace::RegisterformPage():
+            case BindingPlace::RegisterFormPage():
                 return $this->configuration->getRegisterFormPageWidgetDisplayConfiguration();
             case BindingPlace::CheckoutPage():
                 return $this->configuration->getCheckoutPageWidgetDisplayConfiguration();
-            case BindingPlace::MinicartPage():
+            case BindingPlace::MiniCartPage():
                 return $this->configuration->getMiniCartPageWidgetDisplayConfiguration();
             default:
                 throw new \InvalidArgumentException(sprintf('Unknown binding place "%s".', $bindingPlace->value));
