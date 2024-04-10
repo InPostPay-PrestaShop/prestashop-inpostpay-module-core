@@ -13,4 +13,6 @@ interface GeneralConfigurationInterface
     public function getThankYouDisplayHook(int $shopId = null): ?string;
 
     public function getProductCardDisplayHook(int $shopId = null): ?string;
+    
+    public function getCheckoutButtonDisplayHook(int $shopId = null): ?string;
 }

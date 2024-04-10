@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\GeneralConfiguration;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\AliasedHookInterface;
 use izi\prestashop\Hook\VersionRange;
@@ -27,7 +27,7 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
 
     public function __construct(
         GuiConfigurationInterface $configuration,
-        GeneralConfiguration $generalConfiguration,
+        GeneralConfigurationInterface $generalConfiguration,
         WidgetInterface $module,
         RendererInterface $renderer
     ) {

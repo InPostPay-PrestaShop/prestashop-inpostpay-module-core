@@ -4,6 +4,7 @@ use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
 use izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop;
 use izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter;
 use izi\prestashop\Hook\Front\DisplayIziCartPreviewButton;
+use izi\prestashop\Hook\Front\DisplayIziCheckoutButton;
 use izi\prestashop\Hook\Front\DisplayProductActions;
 use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
 
@@ -27,6 +28,7 @@ function upgrade_module_1_6_0(\Module $module)
     $module->registerHook(DisplayCustomerAccountFormTop::HOOK_NAME);
     $module->registerHook(DisplayCheckoutSummaryTop::HOOK_NAME);
     $module->registerHook(DisplayIziCartPreviewButton::HOOK_NAME);
+    $module->registerHook(DisplayIziCheckoutButton::HOOK_NAME);
 
     $productCardHook = DisplayProductActions::HOOK_NAME;
 

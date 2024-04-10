@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Common\BindingPlace;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -22,8 +23,18 @@ final class DisplayCheckoutSummaryTop implements HookInterface
      */
     private $renderer;
 
-    public function __construct(GuiConfigurationInterface $configuration, WidgetInterface $module, RendererInterface $renderer)
-    {
+    /**
+     * @var GeneralConfigurationInterface
+     */
+    private $generalConfiguration;
+
+    public function __construct(
+        GuiConfigurationInterface $configuration,
+        GeneralConfigurationInterface $generalConfiguration,
+        WidgetInterface $module,
+        RendererInterface $renderer
+    ) {
+        $this->generalConfiguration = $generalConfiguration;
         $this->configuration = $configuration;
         $this->module = $module;
         $this->renderer = $renderer;
@@ -41,7 +52,9 @@ final class DisplayCheckoutSummaryTop implements HookInterface
     {
         $binding = BindingPlace::CheckoutPage();
 
-        if ('' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)) {
+        if ($this->generalConfiguration->getCheckoutButtonDisplayHook() !== self::HOOK_NAME ||
+            '' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)
+        ) {
             return '';
         }
 

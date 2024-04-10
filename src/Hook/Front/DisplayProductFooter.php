@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\GeneralConfiguration;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -25,7 +25,7 @@ final class DisplayProductFooter implements HookInterface
 
     public function __construct(
         GuiConfigurationInterface $configuration,
-        GeneralConfiguration $generalConfiguration,
+        GeneralConfigurationInterface $generalConfiguration,
         WidgetInterface $module,
         RendererInterface $renderer
     ) {

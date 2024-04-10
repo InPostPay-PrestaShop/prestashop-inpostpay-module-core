@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
+use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
+use izi\prestashop\Hook\Front\DisplayIziCheckoutButton;
 use izi\prestashop\Hook\Front\DisplayIziThankYou;
 use izi\prestashop\Hook\Front\DisplayOrderConfirmation;
 use izi\prestashop\Hook\Front\DisplayPaymentReturn;
@@ -59,6 +61,15 @@ final class GeneralConfigurationType extends AbstractType
                 'property_path' => 'generalConfiguration.productCardDisplayHook',
                 'label' => $this->translator->l('Product page hook used to display widget', self::TRANSLATION_SOURCE),
                 'help' => sprintf($this->translator->l('You can choose a different hook if you have problems displaying the InPost Pay widget on the product page.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
+            ])
+            ->add('checkoutButtonDisplayHook', ChoiceType::class, [
+                'choices' => [
+                    DisplayCheckoutSummaryTop::getHookName() => DisplayCheckoutSummaryTop::getHookName(),
+                    DisplayIziCheckoutButton::getHookName() => DisplayIziCheckoutButton::getHookName(),
+                ],
+                'property_path' => 'generalConfiguration.checkoutButtonDisplayHook',
+                'label' => $this->translator->l('Checkout process hook used to display widget', self::TRANSLATION_SOURCE),
+                'help' => sprintf($this->translator->l('If you choose the \'%s\' hook you have to manually implement it in the template \'{hook h="%s"}\'.', self::TRANSLATION_SOURCE), DisplayIziCheckoutButton::getHookName(), DisplayIziCheckoutButton::getHookName()),
             ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,

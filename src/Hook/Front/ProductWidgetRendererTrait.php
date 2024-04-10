@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\GeneralConfiguration;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
@@ -16,7 +16,7 @@ trait ProductWidgetRendererTrait
     private $configuration;
 
     /**
-     * @var GeneralConfiguration
+     * @var GeneralConfigurationInterface
      */
     private $generalConfiguration;
 
