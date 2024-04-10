@@ -53,14 +53,11 @@ final class WidgetDisplayConfigurationType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setRequired([
-            'description',
-        ]);
-        $resolver->setAllowedTypes('description', 'string');
-
         $resolver->setDefaults([
             'data_class' => WidgetDisplayConfiguration::class,
             'description' => '',
         ]);
+        
+        $resolver->setAllowedTypes('description', 'string');
     }
 }

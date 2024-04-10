@@ -48,7 +48,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
         $hook = $this->configuration->get(self::PRODUCT_CARD_DISPLAY_HOOK, $shopId);
 
         if (null === $hook) {
-            if (version_compare(_PS_VERSION_, '1.7.6', '<')) {
+            if (!DisplayProductActions::getVersionRange()->contains(_PS_VERSION_)) {
                 $hook = DisplayProductAdditionalInfo::HOOK_NAME;
             } else {
                 $hook = DisplayProductActions::HOOK_NAME;
