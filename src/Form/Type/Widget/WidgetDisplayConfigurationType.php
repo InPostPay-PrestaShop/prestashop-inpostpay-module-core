@@ -7,6 +7,7 @@ namespace izi\prestashop\Form\Type\Widget;
 use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
 use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 use izi\prestashop\Translation\LegacyTranslator;
+use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
