@@ -39,16 +39,29 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
     private $cache;
 
     /**
+     * @var \Module
+     */
+    private $module;
+
+    /**
      * @param ApiConfiguration $apiConfiguration
      * @param OrdersConfiguration $ordersConfiguration
      * @param GeneralConfiguration $generalConfiguration
+     * @param CacheInterface $cache
+     * @param \Module $module
      */
-    public function __construct(ApiConfigurationInterface $apiConfiguration, OrdersConfigurationInterface $ordersConfiguration, GeneralConfigurationInterface $generalConfiguration, CacheInterface $cache)
-    {
+    public function __construct(
+        ApiConfigurationInterface $apiConfiguration,
+        OrdersConfigurationInterface $ordersConfiguration,
+        GeneralConfigurationInterface $generalConfiguration,
+        CacheInterface $cache,
+        $module
+    ) {
         $this->apiConfiguration = $apiConfiguration;
         $this->ordersConfiguration = $ordersConfiguration;
         $this->generalConfiguration = $generalConfiguration;
         $this->cache = $cache;
+        $this->module = $module;
     }
 
     public function __invoke(UpdateGeneralConfigurationCommand $command)
@@ -56,6 +69,9 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
         $this->apiConfiguration->persist($command->getApiConfiguration());
         $this->ordersConfiguration->persist($command->getOrdersConfiguration());
         $this->generalConfiguration->persist($command->getGeneralConfiguration());
+
+        $this->module->registerHook($command->getGeneralConfiguration()->getProductCardDisplayHook());
+        $this->module->registerHook($command->getGeneralConfiguration()->getCheckoutButtonDisplayHook());
 
         $this->cache->clear();
     }
