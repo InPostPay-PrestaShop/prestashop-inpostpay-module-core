@@ -9,6 +9,11 @@
             "src/Environment/UatEnvironment.php"
         ]
     },
+    "autoload-dev": {
+        "psr-4": {
+            "InPost\\Izi\\PHPStan\\": "tests/phpstan"
+        }
+    },
     "require": {
         "php": ">=7.1.3",
         "psr/clock": "^1.0",
