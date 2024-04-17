@@ -34,7 +34,7 @@ final class ConsentType extends AbstractType implements ChoiceLoaderInterface
     private $context;
 
     /**
-     * @var ObjectRepositoryInterface
+     * @var CmsPageRepository
      */
     private $cmsPageRepository;
 

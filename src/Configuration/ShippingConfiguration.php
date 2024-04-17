@@ -9,6 +9,9 @@ use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * @implements PersistentConfigurationInterface<ShippingConfigurationInterface>
+ */
 final class ShippingConfiguration implements ShippingConfigurationInterface, PersistentConfigurationInterface
 {
     private const COURIER_SHIPPING_OPTIONS = 'INPOST_PAY_COURIER_SHIPPING_OPTIONS';

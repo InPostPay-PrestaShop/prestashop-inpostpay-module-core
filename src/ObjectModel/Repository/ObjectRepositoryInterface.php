@@ -36,5 +36,8 @@ interface ObjectRepositoryInterface
      */
     public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
+    /**
+     * @return QueryBuilder<T>
+     */
     public function createQueryBuilder(string $alias): QueryBuilder;
 }

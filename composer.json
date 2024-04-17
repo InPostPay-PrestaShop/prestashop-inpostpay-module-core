@@ -21,7 +21,8 @@
         "psr/http-client": "^1.0",
         "symfony/service-contracts": "^1.10",
         "psr/simple-cache": "^1.0",
-        "maennchen/zipstream-php": "^2.1"
+        "maennchen/zipstream-php": "^2.1",
+        "symfony/polyfill-php80": "^1.29"
     },
     "config": {
         "preferred-install": "dist",

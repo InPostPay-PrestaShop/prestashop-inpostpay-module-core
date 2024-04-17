@@ -11,6 +11,9 @@ parameters:
   reportUnmatchedIgnoredErrors: false
   phpVersion: 71300
   level: 5
+  treatPhpDocTypesAsCertain: false
+  scanDirectories:
+    - ../../../inpostshipping/classes
 
 services:
   -

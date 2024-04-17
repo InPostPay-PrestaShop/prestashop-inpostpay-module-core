@@ -7,9 +7,6 @@ namespace izi\prestashop\BasketApp\Basket\Request;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Common\PhoneNumber;
 
-/**
- * @template T of BindingMethod
- */
 final class BindingRequest implements \JsonSerializable
 {
     /**
@@ -18,7 +15,7 @@ final class BindingRequest implements \JsonSerializable
     private $browser;
 
     /**
-     * @var T|null
+     * @var BindingMethod|null
      */
     private $binding_method;
 
@@ -32,9 +29,6 @@ final class BindingRequest implements \JsonSerializable
      */
     private $phone_number;
 
-    /**
-     * @param T|null $binding_method
-     */
     private function __construct(Browser $browser, ?BindingMethod $binding_method = null, ?BindingPlace $binding_place = null, ?PhoneNumber $phone_number = null)
     {
         $this->browser = $browser;
@@ -43,17 +37,11 @@ final class BindingRequest implements \JsonSerializable
         $this->phone_number = $phone_number;
     }
 
-    /**
-     * @return self<BindingMethod::Phone>
-     */
     public static function byPhoneNumber(Browser $browser, PhoneNumber $phone_number, ?BindingPlace $binding_place = null): self
     {
         return new self($browser, BindingMethod::Phone(), $binding_place, $phone_number);
     }
 
-    /**
-     * @return self<BindingMethod::DeepLink>
-     */
     public static function byDeepLink(Browser $browser, ?BindingPlace $binding_place = null): self
     {
         return new self($browser, BindingMethod::DeepLink(), $binding_place);
@@ -64,9 +52,6 @@ final class BindingRequest implements \JsonSerializable
         return $this->browser;
     }
 
-    /**
-     * @return T|null
-     */
     public function getMethod(): ?BindingMethod
     {
         return $this->binding_method;

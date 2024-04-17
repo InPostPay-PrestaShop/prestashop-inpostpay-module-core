@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
+/**
+ * @implements PersistentConfigurationInterface<AdvancedConfigurationInterface>
+ */
 final class AdvancedConfiguration implements AdvancedConfigurationInterface, PersistentConfigurationInterface
 {
     private const DEBUG_ENABLED = 'INPOST_PAY_DEBUG_ENABLED';

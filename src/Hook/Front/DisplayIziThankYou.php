@@ -32,7 +32,7 @@ final class DisplayIziThankYou implements HookInterface
     }
 
     /**
-     * @param array{order: \OrderLazyArray} $parameters
+     * @param array{order?: OrderLazyArray} $parameters
      *
      * @return string
      */
@@ -41,7 +41,7 @@ final class DisplayIziThankYou implements HookInterface
         $order = $parameters['order'] ?? null;
 
         if (!$order instanceof OrderLazyArray) {
-            throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', OrderLazyArray::class, is_object($order) ? get_class($order) : gettype($order)));
+            throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', OrderLazyArray::class, get_debug_type($order)));
         }
 
         /** @var OrderDetailLazyArray $orderDetails */

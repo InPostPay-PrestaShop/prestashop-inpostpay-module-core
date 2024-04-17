@@ -14,11 +14,11 @@ class PriceNormalizer implements NormalizerInterface
     public function normalize($object, $format = null, array $context = []): array
     {
         if (!$object instanceof Price) {
-            throw new InvalidArgumentException('Expected object to be an instance of "%s", "%s" given.', Price::class, is_object($object) ? get_class($object) : gettype($object));
+            throw new InvalidArgumentException(sprintf('Expected object to be an instance of "%s", "%s" given.', Price::class, get_debug_type($object)));
         }
 
         if ('json' !== $format) {
-            throw new UnexpectedValueException('Expected format to be "json", "%s" given.', Price::class, $format ?? 'NULL');
+            throw new UnexpectedValueException(sprintf('Expected format to be "json", "%s" given.', is_string($format) ? $format : get_debug_type($format)));
         }
 
         return array_map(static function (float $amount) {

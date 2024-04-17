@@ -8,6 +8,9 @@ use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
 use izi\prestashop\Hook\Front\DisplayProductActions;
 use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
 
+/**
+ * @implements PersistentConfigurationInterface<GeneralConfigurationInterface>
+ */
 final class GeneralConfiguration implements GeneralConfigurationInterface, PersistentConfigurationInterface
 {
     private const ENABLE_FOR_EVERYONE = 'INPOST_PAY_show_izi';
@@ -17,7 +20,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
     private const CHECKOUT_BUTTON_DISPLAY_HOOK = 'INPOST_PAY_PRODUCT_CARD_DISPLAY_HOOK';
 
     /**
-     * @var ConfigurationInterface
+     * @var ShopAwareConfigurationInterface
      */
     private $configuration;
 

@@ -20,7 +20,7 @@ final class DeliveryOptionsStatusChecker implements StatusCheckerInterface
     private $translator;
 
     /**
-     * @var ObjectRepositoryInterface
+     * @var CarrierRepository
      */
     private $carrierRepository;
 

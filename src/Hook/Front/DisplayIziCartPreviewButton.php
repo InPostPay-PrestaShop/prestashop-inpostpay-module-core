@@ -35,7 +35,7 @@ final class DisplayIziCartPreviewButton implements HookInterface
     }
 
     /**
-     * @param array{request: Request} $parameters
+     * @param array{request?: Request} $parameters
      */
     public function execute(array $parameters): string
     {

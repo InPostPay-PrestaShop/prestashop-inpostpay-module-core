@@ -22,7 +22,7 @@ final class CartProxy implements BasketInterface
     private $manager;
 
     /**
-     * @var \Cart
+     * @var \Cart|null
      */
     private $cart;
 

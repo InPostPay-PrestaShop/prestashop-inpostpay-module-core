@@ -24,11 +24,6 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
      */
     private $renderer;
 
-    /**
-     * @var GeneralConfiguration
-     */
-    private $generalConfiguration;
-
     public function __construct(GuiConfigurationInterface $configuration, GeneralConfigurationInterface $generalConfiguration, WidgetInterface $module, RendererInterface $renderer)
     {
         $this->configuration = $configuration;
@@ -48,14 +43,14 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
     }
 
     /**
-     * @param array{product: ProductLazyArray, request: Request} $parameters
+     * @param array{product?: ProductLazyArray, request?: Request} $parameters
      */
     public function execute(array $parameters): string
     {
         $product = $parameters['product'] ?? null;
 
         if (!isset($product['id_product']) || !is_numeric($product['id_product'])) {
-            throw new \InvalidArgumentException(sprintf('Parameter "product" expected to be an instance of "%s", "%s" given.', ProductLazyArray::class, is_object($product) ? get_class($product) : gettype($product)));
+            throw new \InvalidArgumentException(sprintf('Parameter "product" expected to be an instance of "%s", "%s" given.', ProductLazyArray::class, get_debug_type($product)));
         }
 
         if ('' === $widget = $this->renderWidget((int) $product['id_product'], $parameters, self::HOOK_NAME)) {

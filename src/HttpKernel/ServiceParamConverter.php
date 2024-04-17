@@ -24,10 +24,12 @@ final class ServiceParamConverter implements ParamConverterInterface
         $this->container = $container;
     }
 
-    public function apply(Request $request, ParamConverter $configuration): void
+    public function apply(Request $request, ParamConverter $configuration): bool
     {
         $value = $this->container->get($configuration->getClass());
         $request->attributes->set($configuration->getName(), $value);
+
+        return true;
     }
 
     public function supports(ParamConverter $configuration): bool

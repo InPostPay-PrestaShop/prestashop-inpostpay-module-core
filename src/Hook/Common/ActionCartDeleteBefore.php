@@ -28,14 +28,14 @@ final class ActionCartDeleteBefore implements HookInterface
     }
 
     /**
-     * @param array{object: \Cart} $parameters
+     * @param array{object?: \Cart} $parameters
      */
     public function execute(array $parameters): void
     {
         $cart = $parameters['object'] ?? null;
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Parameter "object" expected to be an instance of "%s", "%s" given.', \Cart::class, is_object($cart) ? get_class($cart) : gettype($cart)));
+            throw new \InvalidArgumentException(sprintf('Parameter "object" expected to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
         }
 
         if (0 >= $cartId = (int) $cart->id) {

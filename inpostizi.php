@@ -26,6 +26,7 @@ use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpKernel\TerminableInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 if (!defined('_PS_VERSION_')) {
@@ -188,6 +189,8 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      * @template T
      *
      * @param string|class-string<T> $serviceName
+     *
+     * @phpstan-return ($serviceName is class-string<T> ? T : object)
      *
      * @return T|object
      */
@@ -380,10 +383,15 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $request = $this->getCurrentRequest();
         $request->query->remove('controllerUri');
 
-        $response = $this->getAdminKernel()->handle($request);
+        $kernel = $this->getAdminKernel();
+        $response = $kernel->handle($request);
 
         $this->context->cookie->write();
         $response->send();
+
+        if ($kernel instanceof TerminableInterface) {
+            $kernel->terminate($request, $response);
+        }
 
         exit;
     }

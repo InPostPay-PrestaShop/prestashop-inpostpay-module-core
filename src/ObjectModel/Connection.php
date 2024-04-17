@@ -46,19 +46,18 @@ class Connection
         try {
             $result = $closure();
         } catch (\PrestaShopDatabaseException $e) {
-            $result = false;
+            throw $this->normalizeException($e);
         }
 
-        if (false !== $result) {
+        if (false !== $result || !$error = $this->db->getNumberError()) {
             return $result;
         }
 
-        if (!$error = $this->db->getNumberError()) {
-            return false;
-        }
+        throw new \PrestaShopDatabaseException($this->db->getMsgError(), $error);
+    }
 
-        $message = isset($e) ? $e->getMessage() : $this->db->getMsgError();
-
-        throw new \PrestaShopDatabaseException($message, $error);
+    private function normalizeException(\PrestaShopDatabaseException $e): \PrestaShopDatabaseException
+    {
+        return new \PrestaShopDatabaseException($e->getMessage(), $this->db->getNumberError());
     }
 }

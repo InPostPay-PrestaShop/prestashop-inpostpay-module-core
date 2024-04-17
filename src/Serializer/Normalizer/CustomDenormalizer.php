@@ -24,7 +24,7 @@ final class CustomDenormalizer implements DenormalizerInterface
         }
 
         if (!is_array($data)) {
-            throw new InvalidArgumentException(sprintf('Data expected to be an array, "%s" given.', is_object($data) ? get_class($data) : gettype($data)));
+            throw new InvalidArgumentException(sprintf('Data expected to be an array, "%s" given.', get_debug_type($data)));
         }
 
         if (!is_subclass_of($type, DenormalizableInterface::class)) {

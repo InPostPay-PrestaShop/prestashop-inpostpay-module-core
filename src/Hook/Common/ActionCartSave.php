@@ -40,7 +40,7 @@ final class ActionCartSave implements HookInterface
     }
 
     /**
-     * @param array{cart: \Cart} $parameters
+     * @param array{cart?: \Cart} $parameters
      */
     public function execute(array $parameters): void
     {
@@ -51,7 +51,7 @@ final class ActionCartSave implements HookInterface
         }
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Cart::class, is_object($cart) ? get_class($cart) : gettype($cart)));
+            throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
         }
 
         if ($this->context->controller instanceof \ModuleFrontControllerCore && $this->module === $this->context->controller->module) {

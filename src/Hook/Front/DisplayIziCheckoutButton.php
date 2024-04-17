@@ -42,13 +42,14 @@ final class DisplayIziCheckoutButton implements HookInterface
     }
 
     /**
-     * @param array{request: Request} $parameters
+     * @param array{request?: Request} $parameters
      */
     public function execute(array $parameters): string
     {
         $binding = BindingPlace::CheckoutPage();
 
-        if ($this->generalConfiguration->getCheckoutButtonDisplayHook() !== self::HOOK_NAME
+        if (
+            self::HOOK_NAME !== $this->generalConfiguration->getCheckoutButtonDisplayHook()
             || '' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)
         ) {
             return '';

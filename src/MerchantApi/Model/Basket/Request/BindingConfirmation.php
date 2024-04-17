@@ -8,7 +8,7 @@ use izi\prestashop\BasketApp\Basket\Response\BasketBindingResponse;
 use izi\prestashop\BasketApp\Basket\Response\UpsertBasketResponse;
 use izi\prestashop\Common\PhoneNumber;
 
-final class BindingConfirmation implements \JsonSerializable
+final class BindingConfirmation implements \JsonSerializable, \Stringable
 {
     /**
      * @var BindingStatus

@@ -40,9 +40,7 @@ trait ButtonWidgetRendererTrait
         $configuration = $this->getConfigurationForBinding($bindingPlace);
         $styles = $configuration->getHtmlStyles();
 
-        return is_array($styles)
-            ? $styles
-            : iterator_to_array($styles);
+        return iterator_to_array($styles);
     }
 
     private function getConfigurationForBinding(BindingPlace $bindingPlace): WidgetDisplayConfiguration

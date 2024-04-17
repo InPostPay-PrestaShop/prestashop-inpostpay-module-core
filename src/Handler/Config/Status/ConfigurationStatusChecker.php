@@ -22,7 +22,7 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
     private $translator;
 
     /**
-     * @var OrdersConfigurationInterface
+     * @var OrdersConfiguration
      */
     private $ordersConfiguration;
 

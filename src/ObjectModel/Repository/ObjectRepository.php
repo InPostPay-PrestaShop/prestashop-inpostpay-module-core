@@ -88,6 +88,9 @@ class ObjectRepository implements ObjectRepositoryInterface
             ->getResult($languageId);
     }
 
+    /**
+     * @return QueryBuilder<T>
+     */
     public function createQueryBuilder(string $alias): QueryBuilder
     {
         $qb = $this->manager

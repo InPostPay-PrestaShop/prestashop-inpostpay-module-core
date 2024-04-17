@@ -8,6 +8,9 @@ namespace izi\prestashop\Enum;
  * @property string $name
  * @property T $value
  *
+ * @method static static from($value)
+ * @method static static|null tryFrom($value)
+ *
  * @internal
  */
 abstract class Enum implements \JsonSerializable
@@ -32,7 +35,7 @@ abstract class Enum implements \JsonSerializable
     /**
      * @param T $value
      */
-    private function __construct(string $name, $value)
+    final private function __construct(string $name, $value)
     {
         $this->_name = $name;
         $this->_value = $value;

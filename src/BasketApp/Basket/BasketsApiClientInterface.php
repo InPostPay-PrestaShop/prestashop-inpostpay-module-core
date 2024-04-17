@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace izi\prestashop\BasketApp\Basket;
 
 use izi\prestashop\BasketApp\Basket\Request\Basket;
-use izi\prestashop\BasketApp\Basket\Request\BindingMethod;
 use izi\prestashop\BasketApp\Basket\Request\BindingRequest;
 use izi\prestashop\BasketApp\Basket\Response\BasketBindingResponse;
 use izi\prestashop\BasketApp\Basket\Response\QrCode;
@@ -34,8 +33,6 @@ interface BasketsApiClientInterface
     public function deleteBasketBinding(string $basketId, bool $orderCompleted = false): void;
 
     /**
-     * @param BindingRequest<BindingMethod::Phone> $bindingRequest
-     *
      * @throws BasketAlreadyBoundException
      * @throws BasketExpiredException
      * @throws PhoneBindingUnavailableException
@@ -43,8 +40,6 @@ interface BasketsApiClientInterface
     public function bindBasketsByPhoneNumber(string $basketId, BindingRequest $bindingRequest): void;
 
     /**
-     * @param BindingRequest<BindingMethod::DeepLink> $bindingRequest
-     *
      * @throws BasketAlreadyBoundException
      * @throws BasketExpiredException
      */

@@ -11,6 +11,7 @@ use izi\prestashop\Configuration\GeneralConfiguration;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
+use izi\prestashop\Configuration\PersistentConfigurationInterface;
 use izi\prestashop\Handler\CommandHandlerTrait;
 use Psr\SimpleCache\CacheInterface;
 
@@ -19,17 +20,17 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
     use CommandHandlerTrait;
 
     /**
-     * @var ApiConfigurationInterface
+     * @var PersistentConfigurationInterface<ApiConfigurationInterface>
      */
     private $apiConfiguration;
 
     /**
-     * @var OrdersConfigurationInterface
+     * @var PersistentConfigurationInterface<OrdersConfigurationInterface>
      */
     private $ordersConfiguration;
 
     /**
-     * @var GeneralConfigurationInterface
+     * @var PersistentConfigurationInterface<GeneralConfigurationInterface>
      */
     private $generalConfiguration;
 
@@ -47,8 +48,6 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
      * @param ApiConfiguration $apiConfiguration
      * @param OrdersConfiguration $ordersConfiguration
      * @param GeneralConfiguration $generalConfiguration
-     * @param CacheInterface $cache
-     * @param \Module $module
      */
     public function __construct(ApiConfigurationInterface $apiConfiguration, OrdersConfigurationInterface $ordersConfiguration, GeneralConfigurationInterface $generalConfiguration, CacheInterface $cache, $module)
     {

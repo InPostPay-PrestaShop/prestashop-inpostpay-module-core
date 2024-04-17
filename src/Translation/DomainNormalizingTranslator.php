@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Translation;
 
-use Symfony\Component\Translation\MessageCatalogue;
+use Symfony\Component\Translation\MessageCatalogueInterface;
 use Symfony\Component\Translation\TranslatorBagInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -28,7 +28,7 @@ final class DomainNormalizingTranslator implements TranslatorInterface, Translat
         $this->translator = $translator;
     }
 
-    public function getCatalogue($locale = null): MessageCatalogue
+    public function getCatalogue($locale = null): MessageCatalogueInterface
     {
         return $this->translator->getCatalogue($locale);
     }

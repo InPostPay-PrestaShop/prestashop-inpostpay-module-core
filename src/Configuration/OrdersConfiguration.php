@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
+/**
+ * @implements PersistentConfigurationInterface<OrdersConfigurationInterface>
+ */
 final class OrdersConfiguration implements OrdersConfigurationInterface, PersistentConfigurationInterface
 {
     private const INITIAL_OS_ID = 'INPOST_PAY_INITIAL_OS_ID';

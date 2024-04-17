@@ -10,7 +10,7 @@ use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 class OrderStatusDescriptionProvider
 {
     /**
-     * @var ObjectRepositoryInterface
+     * @var ObjectRepositoryInterface<\OrderState>
      */
     private $repository;
 

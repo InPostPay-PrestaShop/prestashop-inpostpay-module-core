@@ -9,6 +9,9 @@ use izi\prestashop\Configuration\DTO\Consent;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * @implements PersistentConfigurationInterface<ConsentsConfigurationInterface>
+ */
 final class ConsentsConfiguration implements ConsentsConfigurationInterface, PersistentConfigurationInterface
 {
     private const CONSENTS = 'INPOST_PAY_CONSENTS';

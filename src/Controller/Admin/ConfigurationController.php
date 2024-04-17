@@ -12,6 +12,7 @@ use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
 use izi\prestashop\CommandBusInterface;
+use izi\prestashop\Configuration\AdvancedConfiguration;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfiguration;
@@ -179,6 +180,8 @@ final class ConfigurationController extends AbstractController
     }
 
     /**
+     * @param AdvancedConfiguration $configuration
+     *
      * @Route(path="/support", name="admin_inpost_izi_config_support", methods={"GET"})
      */
     public function support(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
@@ -199,6 +202,8 @@ final class ConfigurationController extends AbstractController
     }
 
     /**
+     * @param AdvancedConfiguration $configuration
+     *
      * @Route(path="/support", name="admin_inpost_izi_config_support_save", methods={"POST"})
      */
     public function supportSave(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
@@ -304,7 +309,7 @@ final class ConfigurationController extends AbstractController
 
     private function handleException(\Exception $e): void
     {
-        if ($this->container->getParameter('kernel.debug')) {
+        if ($this->getParameter('kernel.debug')) {
             throw $e;
         }
 

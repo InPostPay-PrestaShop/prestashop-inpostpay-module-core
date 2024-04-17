@@ -25,14 +25,14 @@ final class DisplayPaymentReturn implements HookInterface
     }
 
     /**
-     * @param array{order: \Order} $parameters
+     * @param array{order?: \Order} $parameters
      */
     public function execute(array $parameters): string
     {
         $order = $parameters['order'] ?? null;
 
         if (!$order instanceof \Order) {
-            throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Order::class, is_object($order) ? get_class($order) : gettype($order)));
+            throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($order)));
         }
 
         if ($this->shouldBeRendered(self::HOOK_NAME, $order)) {

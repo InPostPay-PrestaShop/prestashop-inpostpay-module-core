@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Handler\Config;
 
 use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
+use izi\prestashop\Configuration\PersistentConfigurationInterface;
 use izi\prestashop\Configuration\ShippingConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Handler\CommandHandlerTrait;
@@ -14,7 +15,7 @@ final class UpdateShippingConfigurationHandler implements UpdateShippingConfigur
     use CommandHandlerTrait;
 
     /**
-     * @var ShippingConfigurationInterface
+     * @var PersistentConfigurationInterface<ShippingConfigurationInterface>
      */
     private $configuration;
 

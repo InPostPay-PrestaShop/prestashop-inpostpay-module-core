@@ -35,7 +35,7 @@ final class ActionCartControllerAjaxUpdateResponse implements HookInterface
     }
 
     /**
-     * @param array{request: Request, value: string} $parameters
+     * @param array{request?: Request, value?: string} $parameters
      */
     public function execute(array $parameters): void
     {

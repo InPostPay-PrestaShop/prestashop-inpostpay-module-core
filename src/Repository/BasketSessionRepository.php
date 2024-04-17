@@ -104,6 +104,10 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
 
     public function persist(BasketSessionInterface $session): void
     {
+        if (!$session instanceof BasketSession) {
+            throw new \InvalidArgumentException(sprintf('Expected an instance of %s, %s given', BasketSession::class, get_class($session)));
+        }
+
         $model = $session->getModel();
         $this->doPersist($model);
 

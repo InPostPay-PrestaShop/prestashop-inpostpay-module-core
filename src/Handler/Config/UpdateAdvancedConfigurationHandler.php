@@ -7,6 +7,7 @@ namespace izi\prestashop\Handler\Config;
 use izi\prestashop\Command\Config\UpdateAdvancedConfigurationCommand;
 use izi\prestashop\Configuration\AdvancedConfiguration;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
+use izi\prestashop\Configuration\PersistentConfigurationInterface;
 use izi\prestashop\Handler\CommandHandlerTrait;
 
 final class UpdateAdvancedConfigurationHandler implements UpdateAdvancedConfigurationHandlerInterface
@@ -14,14 +15,14 @@ final class UpdateAdvancedConfigurationHandler implements UpdateAdvancedConfigur
     use CommandHandlerTrait;
 
     /**
-     * @var AdvancedConfigurationInterface
+     * @var PersistentConfigurationInterface<AdvancedConfigurationInterface>
      */
     private $configuration;
 
     /**
      * @param AdvancedConfiguration $configuration
      */
-    public function __construct(AdvancedConfiguration $configuration)
+    public function __construct(AdvancedConfigurationInterface $configuration)
     {
         $this->configuration = $configuration;
     }

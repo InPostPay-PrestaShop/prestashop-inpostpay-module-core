@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInterface
 {
-    /*
+    /**
      * @var BindingPlace
      */
     private $bindingPlace;

@@ -56,8 +56,6 @@ trait ProductWidgetRendererTrait
         $productWidget = $this->configuration->getProductWidgetDisplayConfiguration();
         $styles = $productWidget->getHtmlStyles();
 
-        return is_array($styles)
-            ? $styles
-            : iterator_to_array($styles);
+        return iterator_to_array($styles);
     }
 }

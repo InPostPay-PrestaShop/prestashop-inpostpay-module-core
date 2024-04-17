@@ -11,6 +11,9 @@ use izi\prestashop\View\Widget\Configuration;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * @implements PersistentConfigurationInterface<GuiConfigurationInterface>
+ */
 final class GuiConfiguration implements GuiConfigurationInterface, PersistentConfigurationInterface
 {
     private const BASKET_SUMMARY_WIDGET_DISPLAY = 'INPOST_PAY_show_button_cart';
