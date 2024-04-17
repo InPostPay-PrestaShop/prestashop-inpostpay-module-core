@@ -5,3 +5,4 @@ config_*.xml
 *.js.map
 .idea
 .DS_Store
+.php-cs-fixer.cache
