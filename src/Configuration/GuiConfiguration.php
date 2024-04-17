@@ -49,7 +49,6 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
 
     private $loadedConfiguration = [];
 
-
     public function __construct(ConfigurationInterface $configuration, SerializerInterface $serializer)
     {
         $this->configuration = $configuration;
@@ -192,7 +191,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             throw new \InvalidArgumentException('Invalid BindingPlace enum value.');
         }
 
-        return constant($classNamespace. '::' . $constantName);
+        return constant($classNamespace . '::' . $constantName);
     }
 
     private function getDisplayWidgetConfigKey(BindingPlace $bindingPlace): string
@@ -204,9 +203,8 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             throw new \InvalidArgumentException('Invalid BindingPlace enum value.');
         }
 
-        return constant($classNamespace. '::' . $constantName);
+        return constant($classNamespace . '::' . $constantName);
     }
-
 
     private function getConfigurationWidgetConfigKey(BindingPlace $bindingPlace): string
     {
@@ -217,7 +215,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             throw new \InvalidArgumentException('Invalid BindingPlace enum value.');
         }
 
-        return constant($classNamespace. '::' . $constantName);
+        return constant($classNamespace . '::' . $constantName);
     }
 
     /**
@@ -235,5 +233,4 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             return null;
         }
     }
-
 }

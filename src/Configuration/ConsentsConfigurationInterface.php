@@ -11,5 +11,5 @@ interface ConsentsConfigurationInterface
     /**
      * @return Consent[]
      */
-    public function getConsents(int $shopId = null): array;
+    public function getConsents(?int $shopId = null): array;
 }

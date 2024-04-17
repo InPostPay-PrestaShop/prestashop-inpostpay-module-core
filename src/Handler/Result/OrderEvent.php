@@ -19,7 +19,7 @@ final class OrderEvent implements \JsonSerializable
      */
     private $url;
 
-    private function __construct(string $action, string $url = null)
+    private function __construct(string $action, ?string $url = null)
     {
         $this->action = $action;
         $this->url = $url;

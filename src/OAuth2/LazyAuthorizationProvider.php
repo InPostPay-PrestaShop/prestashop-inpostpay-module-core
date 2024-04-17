@@ -36,7 +36,7 @@ final class LazyAuthorizationProvider implements AuthorizationProviderInterface
      */
     private $authProvider;
 
-    public function __construct(AuthorizationProviderFactoryInterface $factory, UriCollectionInterface $uriCollection, ClientCredentialsRepositoryInterface $credentialsRepository, AccessTokenRepositoryInterface $tokenRepository = null)
+    public function __construct(AuthorizationProviderFactoryInterface $factory, UriCollectionInterface $uriCollection, ClientCredentialsRepositoryInterface $credentialsRepository, ?AccessTokenRepositoryInterface $tokenRepository = null)
     {
         $this->factory = $factory;
         $this->uriCollection = $uriCollection;

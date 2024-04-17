@@ -297,7 +297,7 @@ final class ConfigurationController extends AbstractController
         return version_compare(_PS_VERSION_, '1.7.4.0', '<');
     }
 
-    private function trans(string $id, array $parameters = [], string $domain = null, string $locale = null): string
+    private function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
     {
         return $this->context->getTranslator()->trans($id, $parameters, $domain, $locale);
     }

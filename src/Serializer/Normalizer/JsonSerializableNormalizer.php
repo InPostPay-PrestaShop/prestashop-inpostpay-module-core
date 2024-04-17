@@ -14,6 +14,7 @@ use Symfony\Component\Serializer\SerializerInterface;
  * @internal
  *
  * @author Fred Cox <mcfedr@gmail.com>
+ *
  * @see \Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer
  */
 class JsonSerializableNormalizer implements NormalizerInterface, SerializerAwareInterface

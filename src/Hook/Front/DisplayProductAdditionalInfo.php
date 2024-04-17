@@ -25,12 +25,8 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
      */
     private $renderer;
 
-    public function __construct(
-        GuiConfigurationInterface $configuration,
-        GeneralConfigurationInterface $generalConfiguration,
-        WidgetInterface $module,
-        RendererInterface $renderer
-    ) {
+    public function __construct(GuiConfigurationInterface $configuration, GeneralConfigurationInterface $generalConfiguration, WidgetInterface $module, RendererInterface $renderer)
+    {
         $this->configuration = $configuration;
         $this->generalConfiguration = $generalConfiguration;
         $this->module = $module;

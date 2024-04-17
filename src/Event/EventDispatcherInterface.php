@@ -14,5 +14,5 @@ interface EventDispatcherInterface
      *
      * @return T the passed event
      */
-    public function dispatch(Event $event, string $eventName = null): Event;
+    public function dispatch(Event $event, ?string $eventName = null): Event;
 }

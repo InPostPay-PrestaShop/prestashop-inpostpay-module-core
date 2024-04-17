@@ -52,7 +52,6 @@ final class OptionalServicesType extends AbstractType implements DataMapperInter
             ->setAllowedTypes('delivery_type', DeliveryType::class);
     }
 
-
     public function mapDataToForms($viewData, $forms): void
     {
         if (null === $viewData) {

@@ -24,7 +24,7 @@ final class MerchantOrderStatusData implements \JsonSerializable
     /**
      * @param string[]|null $delivery_references_list
      */
-    public function __construct(MerchantOrderStatus $order_status = null, string $order_merchant_status_description = null, array $delivery_references_list = null)
+    public function __construct(?MerchantOrderStatus $order_status = null, ?string $order_merchant_status_description = null, ?array $delivery_references_list = null)
     {
         $this->order_status = $order_status;
         $this->order_merchant_status_description = $order_merchant_status_description;

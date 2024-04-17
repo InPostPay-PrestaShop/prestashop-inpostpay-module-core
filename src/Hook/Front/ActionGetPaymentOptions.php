@@ -18,7 +18,7 @@ final class ActionGetPaymentOptions implements HookInterface
     private const TRANSLATION_SOURCE = 'actiongetpaymentoptions';
 
     /**
-     * @var \PaymentModule & WidgetInterface
+     * @var \PaymentModule&WidgetInterface
      */
     private $paymentModule;
 
@@ -38,7 +38,7 @@ final class ActionGetPaymentOptions implements HookInterface
     private $renderer;
 
     /**
-     * @param \PaymentModule & WidgetInterface $paymentModule
+     * @param \PaymentModule&WidgetInterface $paymentModule
      */
     public function __construct(\PaymentModule $paymentModule, PaymentCurrencyChecker $currencyChecker, GuiConfigurationInterface $configuration, RendererInterface $renderer)
     {

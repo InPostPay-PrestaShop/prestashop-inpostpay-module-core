@@ -282,7 +282,7 @@ class PrestashopOrder
     /**
      * @return false|string
      */
-    private function getConfiguration(string $key, int $languageId = null)
+    private function getConfiguration(string $key, ?int $languageId = null)
     {
         return \Configuration::get($key, $languageId, null, $this->order->id_shop);
     }

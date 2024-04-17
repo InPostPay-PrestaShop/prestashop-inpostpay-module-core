@@ -36,14 +36,14 @@ final class AuthorizationProviderFactory implements AuthorizationProviderFactory
      */
     private $clientFactory;
 
-    public function __construct(RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, ClientFactoryInterface $clientFactory = null)
+    public function __construct(RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, ?ClientFactoryInterface $clientFactory = null)
     {
         $this->requestFactory = $requestFactory;
         $this->streamFactory = $streamFactory;
         $this->clientFactory = $clientFactory ?? new GuzzleClientFactory();
     }
 
-    public function create(UriCollectionInterface $uriCollection, ClientCredentialsInterface $credentials, AccessTokenRepositoryInterface $tokenRepository = null): AuthorizationProviderInterface
+    public function create(UriCollectionInterface $uriCollection, ClientCredentialsInterface $credentials, ?AccessTokenRepositoryInterface $tokenRepository = null): AuthorizationProviderInterface
     {
         $authSeverClient = $this->createAuthServerClient($uriCollection);
 

@@ -29,7 +29,7 @@ final class OrderEvent implements \JsonSerializable
      */
     private $event_data;
 
-    public function __construct(string $event_id, \DateTimeImmutable $event_data_time, MerchantOrderStatusData $event_data, PhoneNumber $phone_number = null)
+    public function __construct(string $event_id, \DateTimeImmutable $event_data_time, MerchantOrderStatusData $event_data, ?PhoneNumber $phone_number = null)
     {
         $this->event_id = $event_id;
         $this->event_data_time = $event_data_time;

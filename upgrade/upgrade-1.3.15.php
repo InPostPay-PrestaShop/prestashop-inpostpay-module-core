@@ -5,20 +5,20 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * @param \InPostIzi $module
+ * @param InPostIzi $module
  *
  * @return bool
  */
-function upgrade_module_1_3_15(\Module $module)
+function upgrade_module_1_3_15(Module $module)
 {
     foreach (['INPOST_PAY_payment_courier', 'INPOST_PAY_payment_courier_cod'] as $key) {
-        if (!$carrierId = \Configuration::get($key)) {
+        if (!$carrierId = Configuration::get($key)) {
             continue;
         }
 
-        $carrier = new \Carrier($carrierId);
+        $carrier = new Carrier($carrierId);
 
-        if (!\Configuration::updateValue($key, $carrier->id_reference)) {
+        if (!Configuration::updateValue($key, $carrier->id_reference)) {
             return false;
         }
     }

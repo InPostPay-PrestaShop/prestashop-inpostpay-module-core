@@ -6,5 +6,5 @@ namespace izi\prestashop\Hook;
 
 interface HookDispatcherInterface
 {
-    public function dispatch(string $name, array $parameters, int $shopId = null);
+    public function dispatch(string $name, array $parameters, ?int $shopId = null);
 }

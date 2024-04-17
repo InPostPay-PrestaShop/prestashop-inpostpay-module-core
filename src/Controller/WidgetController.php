@@ -18,8 +18,8 @@ use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\Entities\Cart;
 use izi\prestashop\Handler\Result\BasketBindingResult;
-use izi\prestashop\Handler\Result\DeepLink;
 use izi\prestashop\Handler\Result\BindingConfirmationStream;
+use izi\prestashop\Handler\Result\DeepLink;
 use izi\prestashop\Handler\Result\OrderEventStream;
 use izi\prestashop\Http\Exception\HttpExceptionInterface as BasketAppHttpException;
 use izi\prestashop\Http\Response\EventStreamResponse;
@@ -85,7 +85,7 @@ final class WidgetController
         }
     }
 
-    public function getPayData(Request $request, string $prefix = null, string $number = null): Response
+    public function getPayData(Request $request, ?string $prefix = null, ?string $number = null): Response
     {
         try {
             $command = $this->createBindingCommand($request, $prefix, $number);

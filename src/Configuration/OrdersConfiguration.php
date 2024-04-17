@@ -25,12 +25,12 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         $this->configuration = $configuration;
     }
 
-    public function getInitialStatusId(int $shopId = null): ?int
+    public function getInitialStatusId(?int $shopId = null): ?int
     {
         return (int) $this->configuration->get(self::INITIAL_OS_ID, $shopId);
     }
 
-    public function getPaidStatusId(int $shopId = null): ?int
+    public function getPaidStatusId(?int $shopId = null): ?int
     {
         return (int) $this->configuration->get(self::PAID_OS_ID, $shopId);
     }
@@ -47,17 +47,17 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         return $map[$statusId] ?? null;
     }
 
-    public function isCarrierPaymentEnabled(int $shopId = null): bool
+    public function isCarrierPaymentEnabled(?int $shopId = null): bool
     {
         return (bool) $this->configuration->get(self::ENABLE_CARRIER_PAYMENT, $shopId);
     }
 
-    public function isBankPaymentEnabled(int $shopId = null): bool
+    public function isBankPaymentEnabled(?int $shopId = null): bool
     {
         return (bool) $this->configuration->get(self::ENABLE_BANK_PAYMENT, $shopId);
     }
 
-    public function getPointOfSaleId(int $shopId = null): ?string
+    public function getPointOfSaleId(?int $shopId = null): ?string
     {
         return $this->configuration->get(self::POS_ID, $shopId);
     }
@@ -102,7 +102,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         return is_array($map) ? $map : [];
     }
 
-    private function getStatusDescriptionMapping(int $languageId, int $shopId = null): array
+    private function getStatusDescriptionMapping(int $languageId, ?int $shopId = null): array
     {
         if (!isset($this->descriptionMappings[$languageId][(int) $shopId])) {
             $this->descriptionMappings[$languageId][(int) $shopId] = $this->loadStatusDescriptionMap($languageId, $shopId);

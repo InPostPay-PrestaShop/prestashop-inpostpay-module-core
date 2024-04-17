@@ -22,7 +22,7 @@ final class ClientCredentials implements ClientCredentialsInterface
      */
     private $clientSecret;
 
-    public function __construct(string $clientId, string $clientSecret = null)
+    public function __construct(string $clientId, ?string $clientSecret = null)
     {
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;

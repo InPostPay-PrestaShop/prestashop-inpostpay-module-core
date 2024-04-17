@@ -18,7 +18,7 @@ final class TimeOfWeek implements \JsonSerializable
      */
     private $time;
 
-    public function __construct(WeekDay $weekDay = null, \DateTimeImmutable $time = null)
+    public function __construct(?WeekDay $weekDay = null, ?\DateTimeImmutable $time = null)
     {
         $this->weekDay = $weekDay ?? WeekDay::Monday();
         $this->time = $time ?? new \DateTimeImmutable('00:00');

@@ -48,7 +48,7 @@ final class AuthorizationProvider implements AuthorizationProviderInterface
      */
     private $clock;
 
-    public function __construct(AuthorizationServerClientInterface $authServerClient, GrantTypeInterface $grantType, ClientCredentialsInterface $credentials, AccessTokenRepositoryInterface $tokenRepository = null, AccessTokenFactoryInterface $tokenFactory = null, ClockInterface $clock = null)
+    public function __construct(AuthorizationServerClientInterface $authServerClient, GrantTypeInterface $grantType, ClientCredentialsInterface $credentials, ?AccessTokenRepositoryInterface $tokenRepository = null, ?AccessTokenFactoryInterface $tokenFactory = null, ?ClockInterface $clock = null)
     {
         $this->authServerClient = $authServerClient;
         $this->grantType = $grantType;

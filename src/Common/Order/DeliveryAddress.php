@@ -38,7 +38,7 @@ final class DeliveryAddress implements \JsonSerializable
      */
     private $address_details;
 
-    public function __construct(string $name, string $country_code, string $address, string $city, string $postal_code, AddressDetails $address_details = null)
+    public function __construct(string $name, string $country_code, string $address, string $city, string $postal_code, ?AddressDetails $address_details = null)
     {
         $this->name = $name;
         $this->country_code = $country_code;

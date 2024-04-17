@@ -10,7 +10,7 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
 {
     protected $db;
 
-    public function __construct(\Db $db = null)
+    public function __construct(?\Db $db = null)
     {
         $this->db = $db ?? \Db::getInstance();
     }
@@ -59,7 +59,7 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
         );
     }
 
-    public function changeColumn(string $table, string $column, string $definition, string $newName = null): bool
+    public function changeColumn(string $table, string $column, string $definition, ?string $newName = null): bool
     {
         $column = pSQL($column);
         $newName = null !== $newName ? pSQL($newName) : $column;

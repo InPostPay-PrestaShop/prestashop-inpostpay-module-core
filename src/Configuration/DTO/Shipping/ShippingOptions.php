@@ -13,7 +13,9 @@ final class ShippingOptions implements \JsonSerializable
      * @var CarrierMapping[]
      *
      * @Assert\Valid()
+     *
      * @Assert\All(
+     *
      *     @Assert\Type(CarrierMapping::class),
      * )
      */
@@ -23,7 +25,9 @@ final class ShippingOptions implements \JsonSerializable
      * @var ServiceOptions[]
      *
      * @Assert\Valid()
+     *
      * @Assert\All(
+     *
      *      @Assert\Type(ServiceOptions::class),
      *  )
      */

@@ -24,12 +24,8 @@ final class DisplayOrderConfirmation implements HookInterface
      */
     private $context;
 
-    public function __construct(
-        BasketSessionRepositoryInterface $repository,
-        \Context $context,
-        \PaymentModule $paymentModule,
-        GeneralConfigurationInterface $configuration
-    ) {
+    public function __construct(BasketSessionRepositoryInterface $repository, \Context $context, \PaymentModule $paymentModule, GeneralConfigurationInterface $configuration)
+    {
         $this->repository = $repository;
         $this->context = $context;
         $this->paymentModule = $paymentModule;
@@ -43,6 +39,7 @@ final class DisplayOrderConfirmation implements HookInterface
 
     /**
      * @param \Order $order
+     *
      * @return void
      */
     private function removeSavedBasketId(\Order $order): void

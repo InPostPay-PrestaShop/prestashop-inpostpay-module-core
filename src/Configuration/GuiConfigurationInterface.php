@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
-use izi\prestashop\Configuration\DTO\HtmlStyles;
 use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
-use izi\prestashop\View\Widget\Configuration;
 
 interface GuiConfigurationInterface
 {

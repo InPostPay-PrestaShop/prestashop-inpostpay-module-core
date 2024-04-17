@@ -26,7 +26,7 @@ final class BasketBindingResponse implements \JsonSerializable
      */
     private $client_details;
 
-    public function __construct(bool $basket_linked, bool $browser_trusted, string $inpost_basket_id = null, ClientDetails $client_details = null)
+    public function __construct(bool $basket_linked, bool $browser_trusted, ?string $inpost_basket_id = null, ?ClientDetails $client_details = null)
     {
         $this->basket_linked = $basket_linked;
         $this->browser_trusted = $browser_trusted;

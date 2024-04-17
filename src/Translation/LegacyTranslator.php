@@ -16,7 +16,7 @@ final class LegacyTranslator
         $this->moduleName = $moduleName;
     }
 
-    public function l(string $source, string $domain = null): string
+    public function l(string $source, ?string $domain = null): string
     {
         return \Translate::getModuleTranslation(
             $this->moduleName,

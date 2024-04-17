@@ -15,6 +15,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  * @internal
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
+ *
  * @see \Symfony\Component\Serializer\Normalizer\DateTimeNormalizer
  */
 class DateTimeNormalizer implements NormalizerInterface, DenormalizerInterface

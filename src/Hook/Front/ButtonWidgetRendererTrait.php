@@ -21,7 +21,7 @@ trait ButtonWidgetRendererTrait
      */
     private $module;
 
-    private function renderWidget(BindingPlace $bindingPlace, array $parameters, string $hookName = null): string
+    private function renderWidget(BindingPlace $bindingPlace, array $parameters, ?string $hookName = null): string
     {
         $configuration = $this->getConfigurationForBinding($bindingPlace);
 

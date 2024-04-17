@@ -31,19 +31,19 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
         return (bool) $this->configuration->get(self::ENABLE_FOR_EVERYONE);
     }
 
-    public function getMaxSuggestedProducts(int $shopId = null): ?int
+    public function getMaxSuggestedProducts(?int $shopId = null): ?int
     {
         $value = $this->configuration->get(self::MAX_SUGGESTED_PRODUCTS, $shopId);
 
         return null === $value ? $value : (int) $value;
     }
 
-    public function getThankYouDisplayHook(int $shopId = null): ?string
+    public function getThankYouDisplayHook(?int $shopId = null): ?string
     {
         return $this->configuration->get(self::THANK_YOU_DISPLAY_HOOK, $shopId);
     }
 
-    public function getProductCardDisplayHook(int $shopId = null): ?string
+    public function getProductCardDisplayHook(?int $shopId = null): ?string
     {
         $hook = $this->configuration->get(self::PRODUCT_CARD_DISPLAY_HOOK, $shopId);
 
@@ -53,13 +53,12 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
             } else {
                 $hook = DisplayProductActions::HOOK_NAME;
             }
-
         }
 
         return $hook;
     }
 
-    public function getCheckoutButtonDisplayHook(int $shopId = null): ?string
+    public function getCheckoutButtonDisplayHook(?int $shopId = null): ?string
     {
         $hook = $this->configuration->get(self::CHECKOUT_BUTTON_DISPLAY_HOOK, $shopId);
 

@@ -53,5 +53,5 @@ interface BasketsApiClientInterface
     /**
      * @throws BasketExpiredException
      */
-    public function getBasketBinding(string $basketId, string $browserId = null): BasketBindingResponse;
+    public function getBasketBinding(string $basketId, ?string $browserId = null): BasketBindingResponse;
 }

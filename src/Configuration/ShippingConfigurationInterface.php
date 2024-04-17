@@ -9,9 +9,9 @@ use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 
 interface ShippingConfigurationInterface
 {
-    public function getShippingOptions(DeliveryType $deliveryType, int $shopId = null): ShippingOptions;
+    public function getShippingOptions(DeliveryType $deliveryType, ?int $shopId = null): ShippingOptions;
 
-    public function getApmShippingOptions(int $shopId = null): ShippingOptions;
+    public function getApmShippingOptions(?int $shopId = null): ShippingOptions;
 
-    public function getCourierShippingOptions(int $shopId = null): ShippingOptions;
+    public function getCourierShippingOptions(?int $shopId = null): ShippingOptions;
 }

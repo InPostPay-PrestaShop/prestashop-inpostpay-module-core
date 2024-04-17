@@ -35,7 +35,7 @@ final class BindingRequest implements \JsonSerializable
     /**
      * @param T|null $binding_method
      */
-    private function __construct(Browser $browser, BindingMethod $binding_method = null, BindingPlace $binding_place = null, PhoneNumber $phone_number = null)
+    private function __construct(Browser $browser, ?BindingMethod $binding_method = null, ?BindingPlace $binding_place = null, ?PhoneNumber $phone_number = null)
     {
         $this->browser = $browser;
         $this->binding_method = $binding_method;
@@ -46,7 +46,7 @@ final class BindingRequest implements \JsonSerializable
     /**
      * @return self<BindingMethod::Phone>
      */
-    public static function byPhoneNumber(Browser $browser, PhoneNumber $phone_number, BindingPlace $binding_place = null): self
+    public static function byPhoneNumber(Browser $browser, PhoneNumber $phone_number, ?BindingPlace $binding_place = null): self
     {
         return new self($browser, BindingMethod::Phone(), $binding_place, $phone_number);
     }
@@ -54,7 +54,7 @@ final class BindingRequest implements \JsonSerializable
     /**
      * @return self<BindingMethod::DeepLink>
      */
-    public static function byDeepLink(Browser $browser, BindingPlace $binding_place = null): self
+    public static function byDeepLink(Browser $browser, ?BindingPlace $binding_place = null): self
     {
         return new self($browser, BindingMethod::DeepLink(), $binding_place);
     }

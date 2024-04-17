@@ -6,8 +6,8 @@ namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
-use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderLazyArray;
 use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderDetailLazyArray;
+use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderLazyArray;
 
 final class DisplayIziThankYou implements HookInterface
 {
@@ -20,10 +20,7 @@ final class DisplayIziThankYou implements HookInterface
      */
     private $paymentModule;
 
-    public function __construct(
-        \PaymentModule $paymentModule,
-        GeneralConfigurationInterface $configuration
-    )
+    public function __construct(\PaymentModule $paymentModule, GeneralConfigurationInterface $configuration)
     {
         $this->paymentModule = $paymentModule;
         $this->configuration = $configuration;
@@ -36,6 +33,7 @@ final class DisplayIziThankYou implements HookInterface
 
     /**
      * @param array{order: \OrderLazyArray} $parameters
+     *
      * @return string
      */
     public function execute(array $parameters): string

@@ -53,11 +53,11 @@ class InPostIziUpdater_1_5_5
     private $db;
 
     /**
-     * @var \Module
+     * @var Module
      */
     private $module;
 
-    public function __construct(\Db $db, \Module $module)
+    public function __construct(Db $db, Module $module)
     {
         $this->db = $db;
         $this->module = $module;
@@ -71,8 +71,8 @@ class InPostIziUpdater_1_5_5
 
         $this->module->unregisterHook(ActionGetPaymentOptions::HOOK_NAME);
 
-        \Tools::clearSf2Cache('prod');
-        \Tools::clearSf2Cache('dev');
+        Tools::clearSf2Cache('prod');
+        Tools::clearSf2Cache('dev');
 
         return true;
     }
@@ -167,7 +167,7 @@ class InPostIziUpdater_1_5_5
     {
         $weekDay = isset($config['day']) ? WeekDay::tryFrom($config['day'] + 1) : null;
         $time = isset($config['time'])
-            ? \DateTimeImmutable::createFromFormat('G', (int) $config['time'])
+            ? DateTimeImmutable::createFromFormat('G', (int) $config['time'])
             : null;
 
         return new TimeOfWeek($weekDay, $time);
@@ -196,7 +196,7 @@ class InPostIziUpdater_1_5_5
 
     private function getConfigDataByKeys(array $keys): array
     {
-        $sql = (new \DbQuery())
+        $sql = (new DbQuery())
             ->select('c.*')
             ->from('configuration', 'c')
             ->where(sprintf('c.name IN ("%s")', implode('","', $keys)));
@@ -224,7 +224,7 @@ class InPostIziUpdater_1_5_5
         foreach ($dataByShopGroup as $shopGroupId => $dataByShop) {
             foreach ($dataByShop as $shopId => $data) {
                 $value = json_encode($data);
-                if (!\Configuration::updateValue($key, $value, false, $shopGroupId, $shopId)) {
+                if (!Configuration::updateValue($key, $value, false, $shopGroupId, $shopId)) {
                     return false;
                 }
             }
@@ -240,11 +240,11 @@ class InPostIziUpdater_1_5_5
 }
 
 /**
- * @param \InPostIzi $module
+ * @param InPostIzi $module
  *
  * @return bool
  */
-function upgrade_module_1_5_5(\Module $module)
+function upgrade_module_1_5_5(Module $module)
 {
-    return (new InPostIziUpdater_1_5_5(\Db::getInstance(), $module))->upgrade();
+    return (new InPostIziUpdater_1_5_5(Db::getInstance(), $module))->upgrade();
 }

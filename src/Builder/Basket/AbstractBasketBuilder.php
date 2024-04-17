@@ -555,11 +555,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function calculateProductPrice(
         int $productId,
-        int $combinationId = null,
+        ?int $combinationId = null,
         bool $withTax = true,
         bool $withReduction = true,
         int $quantity = 1,
-        int $customizationId = null
+        ?int $customizationId = null
     ): ?float {
         return \Product::getPriceStatic(
             $productId,

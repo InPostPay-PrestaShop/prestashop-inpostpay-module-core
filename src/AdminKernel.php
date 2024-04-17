@@ -138,7 +138,7 @@ final class AdminKernel extends Kernel
             'class' => $class,
             'base_class' => $baseClass,
             'file' => $cache->getPath(),
-            'debug' => $this->debug
+            'debug' => $this->debug,
         ]);
 
         $cache->write($content, $container->getResources());

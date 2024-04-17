@@ -58,7 +58,7 @@ class TranslatableType extends AbstractType
      */
     private $defaultFormLanguageId;
 
-    public function __construct(\Context $context = null, array $availableLocales = null)
+    public function __construct(?\Context $context = null, ?array $availableLocales = null)
     {
         $context = $context ?? \Context::getContext();
 

@@ -16,7 +16,7 @@ final class TimeOfWeekRange implements \JsonSerializable
      */
     private $end;
 
-    public function __construct(TimeOfWeek $start = null, TimeOfWeek $end = null)
+    public function __construct(?TimeOfWeek $start = null, ?TimeOfWeek $end = null)
     {
         $this->start = $start ?? new TimeOfWeek();
         $this->end = $end ?? new TimeOfWeek();

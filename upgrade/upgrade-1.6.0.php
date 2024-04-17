@@ -13,14 +13,14 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * @param \InPostIzi $module
+ * @param InPostIzi $module
  *
  * @return bool
  */
-function upgrade_module_1_6_0(\Module $module)
+function upgrade_module_1_6_0(Module $module)
 {
-    \Tools::clearSf2Cache('prod');
-    \Tools::clearSf2Cache('dev');
+    Tools::clearSf2Cache('prod');
+    Tools::clearSf2Cache('dev');
 
     $module->registerHook(DisplayProductActions::HOOK_NAME);
     $module->registerHook(DisplayProductAdditionalInfo::HOOK_NAME);

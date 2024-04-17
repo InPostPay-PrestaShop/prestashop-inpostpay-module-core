@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook;
 
+use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Psr\Container\ContainerInterface;
-use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 
 final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInterface
 {
@@ -20,7 +20,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
      */
     private $widget;
 
-    public function __construct(ContainerInterface $locator, WidgetInterface $widget = null)
+    public function __construct(ContainerInterface $locator, ?WidgetInterface $widget = null)
     {
         $this->locator = $locator;
         $this->widget = $widget;

@@ -45,7 +45,7 @@ final class BindingConfirmation implements \JsonSerializable
      */
     private $surname;
 
-    public function __construct(BindingStatus $status, string $inpost_basket_id = null, PhoneNumber $phone_number = null, Browser $browser = null, string $masked_phone_number = null, string $name = null, string $surname = null)
+    public function __construct(BindingStatus $status, ?string $inpost_basket_id = null, ?PhoneNumber $phone_number = null, ?Browser $browser = null, ?string $masked_phone_number = null, ?string $name = null, ?string $surname = null)
     {
         $this->status = $status;
         $this->inpost_basket_id = $inpost_basket_id;
@@ -56,7 +56,7 @@ final class BindingConfirmation implements \JsonSerializable
         $this->surname = $surname;
     }
 
-    public static function fromLinkedBasketBindingResponse(BasketBindingResponse $binding, string $browserId = null): self
+    public static function fromLinkedBasketBindingResponse(BasketBindingResponse $binding, ?string $browserId = null): self
     {
         if (!$binding->isBasketLinked()) {
             throw new \DomainException('Basket is not linked.');
@@ -119,7 +119,7 @@ final class BindingConfirmation implements \JsonSerializable
         return json_encode($this);
     }
 
-    private static function success(BasketBindingResponse $binding, string $browserId = null, string $inPostBasketId = null): self
+    private static function success(BasketBindingResponse $binding, ?string $browserId = null, ?string $inPostBasketId = null): self
     {
         if (null === $clientDetails = $binding->getClientDetails()) {
             throw new \UnexpectedValueException('Client details are missing in the binding data.');

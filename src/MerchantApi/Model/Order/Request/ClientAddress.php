@@ -31,7 +31,7 @@ final class ClientAddress implements \JsonSerializable
      */
     private $address_details;
 
-    public function __construct(string $country_code, string $address, string $city, string $postal_code, AddressDetails $address_details = null)
+    public function __construct(string $country_code, string $address, string $city, string $postal_code, ?AddressDetails $address_details = null)
     {
         $this->country_code = $country_code;
         $this->address = $address;

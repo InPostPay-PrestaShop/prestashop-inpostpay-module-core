@@ -8,7 +8,7 @@ class Connection
 {
     protected $db;
 
-    public function __construct(\Db $db = null)
+    public function __construct(?\Db $db = null)
     {
         $this->db = $db ?? \Db::getInstance();
     }

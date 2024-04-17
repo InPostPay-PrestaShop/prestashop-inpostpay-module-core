@@ -37,7 +37,7 @@ class Query
     /**
      * @return T[]
      */
-    public function getResult(int $languageId = null): array
+    public function getResult(?int $languageId = null): array
     {
         $data = $this->getArrayResult();
 
@@ -52,7 +52,7 @@ class Query
     /**
      * @return T|null
      */
-    public function getOneOrNullResult(int $languageId = null): ?\ObjectModel
+    public function getOneOrNullResult(?int $languageId = null): ?\ObjectModel
     {
         $data = $this->getArrayResult();
 

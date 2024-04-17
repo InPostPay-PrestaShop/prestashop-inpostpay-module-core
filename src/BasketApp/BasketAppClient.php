@@ -55,7 +55,7 @@ final class BasketAppClient implements BasketAppClientInterface
      */
     private $baseUri;
 
-    public function __construct(ClientInterface $client, RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, SerializerInterface $serializer, string $baseUri = null)
+    public function __construct(ClientInterface $client, RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, SerializerInterface $serializer, ?string $baseUri = null)
     {
         $this->client = $client;
         $this->requestFactory = $requestFactory;
@@ -111,7 +111,7 @@ final class BasketAppClient implements BasketAppClientInterface
         return $this->deserialize($response, QrCode::class);
     }
 
-    public function getBasketBinding(string $basketId, string $browserId = null): BasketBindingResponse
+    public function getBasketBinding(string $basketId, ?string $browserId = null): BasketBindingResponse
     {
         $uri = sprintf('/v1/izi/basket/%s/binding', $basketId);
         if (null !== $browserId) {

@@ -25,6 +25,7 @@ final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInte
      * @var Configuration|null
      *
      * @Assert\NotNull()
+     *
      * @Assert\Valid()
      */
     private $widgetConfiguration;
@@ -33,16 +34,13 @@ final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInte
      * @var HtmlStyles|null
      *
      * @Assert\NotNull()
+     *
      * @Assert\Valid()
      */
     private $htmlStyles;
 
-    public function __construct(
-        BindingPlace $bindingPlace,
-        bool $displayed = false,
-        Configuration $widgetConfiguration = null,
-        HtmlStyles $htmlStyles = null
-    ) {
+    public function __construct(BindingPlace $bindingPlace, bool $displayed = false, ?Configuration $widgetConfiguration = null, ?HtmlStyles $htmlStyles = null)
+    {
         $this->bindingPlace = $bindingPlace;
         $this->displayed = $displayed;
         $this->widgetConfiguration = $widgetConfiguration;

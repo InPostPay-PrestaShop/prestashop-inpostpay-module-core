@@ -25,7 +25,7 @@ trait ProductWidgetRendererTrait
      */
     private $module;
 
-    private function renderWidget(int $productId, array $parameters, string $hookName = null): string
+    private function renderWidget(int $productId, array $parameters, ?string $hookName = null): string
     {
         if (0 >= $productId) {
             return '';

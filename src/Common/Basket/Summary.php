@@ -53,7 +53,7 @@ final class Summary implements \JsonSerializable
     /**
      * @param PaymentType[] $payment_type
      */
-    public function __construct(Price $basket_base_price, Currency $currency, array $payment_type, Price $basket_final_price = null, Price $basket_promo_price = null, \DateTimeImmutable $basket_expiration_date = null, string $basket_additional_information = null, Notice $basket_notice = null)
+    public function __construct(Price $basket_base_price, Currency $currency, array $payment_type, ?Price $basket_final_price = null, ?Price $basket_promo_price = null, ?\DateTimeImmutable $basket_expiration_date = null, ?string $basket_additional_information = null, ?Notice $basket_notice = null)
     {
         $this->basket_base_price = $basket_base_price;
         $this->basket_final_price = $basket_final_price;

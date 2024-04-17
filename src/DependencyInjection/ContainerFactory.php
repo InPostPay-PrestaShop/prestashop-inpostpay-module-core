@@ -27,7 +27,7 @@ final class ContainerFactory
     private $cacheDir;
     private $hookDispatcher;
 
-    public function __construct(string $cacheDir, HookDispatcherInterface $hookDispatcher = null)
+    public function __construct(string $cacheDir, ?HookDispatcherInterface $hookDispatcher = null)
     {
         $this->cacheDir = rtrim($cacheDir, '/') . '/';
         $this->hookDispatcher = $hookDispatcher ?? new HookDispatcher();

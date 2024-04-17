@@ -25,7 +25,7 @@ final class DatabaseInstaller
     /**
      * @param iterable<DatabaseMigrationInterface>|null $migrations
      */
-    public function __construct(ShopAwareConfigurationInterface $configuration = null, iterable $migrations = null)
+    public function __construct(?ShopAwareConfigurationInterface $configuration = null, ?iterable $migrations = null)
     {
         $this->configuration = $configuration ?? new Configuration();
         $this->migrations = $migrations ?? $this->getDefaultMigrations();

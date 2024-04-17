@@ -33,12 +33,7 @@ final class ActionFrontControllerSetMedia implements HookInterface
      */
     private $assetManager;
 
-    public function __construct(
-        \Module $module,
-        \Context $context,
-        EnvironmentInterface $environment,
-        AssetManagerInterface $assetManager
-    )
+    public function __construct(\Module $module, \Context $context, EnvironmentInterface $environment, AssetManagerInterface $assetManager)
     {
         $this->module = $module;
         $this->context = $context;

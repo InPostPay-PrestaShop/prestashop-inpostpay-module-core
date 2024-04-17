@@ -81,7 +81,7 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
      */
     private $frameStyle;
 
-    public function __construct(BindingPlace $bindingPlace = null, bool $basket = false)
+    public function __construct(?BindingPlace $bindingPlace = null, bool $basket = false)
     {
         $this->bindingPlace = $bindingPlace;
         $this->basket = $basket;
@@ -198,7 +198,6 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
 
         return $this;
     }
-
 
     public function getAlignment(): ?Alignment
     {

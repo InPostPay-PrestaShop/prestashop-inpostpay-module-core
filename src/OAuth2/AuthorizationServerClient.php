@@ -44,7 +44,7 @@ final class AuthorizationServerClient implements AuthorizationServerClientInterf
      */
     private $authenticationMethod;
 
-    public function __construct(ClientInterface $client, RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, UriCollectionInterface $uriCollection, AuthenticationMethodInterface $authenticationMethod = null)
+    public function __construct(ClientInterface $client, RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, UriCollectionInterface $uriCollection, ?AuthenticationMethodInterface $authenticationMethod = null)
     {
         $this->client = $client;
         $this->requestFactory = $requestFactory;

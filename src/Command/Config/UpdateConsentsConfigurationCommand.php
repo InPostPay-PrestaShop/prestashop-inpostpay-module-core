@@ -28,7 +28,7 @@ final class UpdateConsentsConfigurationCommand implements ConsentsConfigurationI
         $this->consents = new ArrayCollection($consents);
     }
 
-    public function getConsents(int $shopId = null): array
+    public function getConsents(?int $shopId = null): array
     {
         return $this->consents->toArray();
     }

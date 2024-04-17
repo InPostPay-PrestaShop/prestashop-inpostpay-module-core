@@ -8,7 +8,7 @@ abstract class Uuid implements \JsonSerializable
 {
     private $uuid;
 
-    public function __construct(string $uuid = null)
+    public function __construct(?string $uuid = null)
     {
         if (null === $uuid) {
             $this->uuid = static::generate();

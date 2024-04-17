@@ -9,10 +9,9 @@ use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 final class WidgetDisplayConfigurationType extends AbstractType
@@ -57,7 +56,7 @@ final class WidgetDisplayConfigurationType extends AbstractType
             'data_class' => WidgetDisplayConfiguration::class,
             'description' => '',
         ]);
-        
+
         $resolver->setAllowedTypes('description', 'string');
     }
 }

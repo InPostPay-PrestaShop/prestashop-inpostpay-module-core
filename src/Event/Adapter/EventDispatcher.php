@@ -30,7 +30,7 @@ final class EventDispatcher implements ModuleEventDispatcher
     /**
      * {@inheritDoc}
      */
-    public function dispatch(Event $event, string $eventName = null): Event
+    public function dispatch(Event $event, ?string $eventName = null): Event
     {
         $eventName = $eventName ?? get_class($event);
 

@@ -37,7 +37,7 @@ class Create
      */
     private $shippingConfiguration;
 
-    public function __construct(\Context $context = null, Hashing $crypto = null, \PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null)
+    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ?ShippingConfigurationInterface $shippingConfiguration = null)
     {
         $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
@@ -362,9 +362,7 @@ class Create
         }
 
         if (!$customer->save()) {
-            throw $newCustomer
-                ? new InternalServerErrorException('Could not create customer account.')
-                : new InternalServerErrorException('Could not update customer account.');
+            throw $newCustomer ? new InternalServerErrorException('Could not create customer account.') : new InternalServerErrorException('Could not update customer account.');
         }
 
         $cart->id_customer = $customer->id;
@@ -483,10 +481,7 @@ class Create
 
         foreach ($products as $product) {
             if ($product['minimal_quantity'] > $product['cart_quantity']) {
-                throw new CannotCreateOrderException($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
-                    '%product%' => $product['name'],
-                    '%quantity%' => $product['minimal_quantity'],
-                ], 'Shop.Notifications.Error'));
+                throw new CannotCreateOrderException($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', ['%product%' => $product['name'], '%quantity%' => $product['minimal_quantity']], 'Shop.Notifications.Error'));
             }
         }
 
@@ -495,14 +490,10 @@ class Create
         }
 
         if ($product['active']) {
-            throw new CannotCreateOrderException($this->context->getTranslator()->trans('%product% is no longer available in this quantity. You cannot proceed with your order until the quantity is adjusted.', [
-                '%product%' => $product['name'],
-            ], 'Shop.Notifications.Error'));
+            throw new CannotCreateOrderException($this->context->getTranslator()->trans('%product% is no longer available in this quantity. You cannot proceed with your order until the quantity is adjusted.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
         }
 
-        throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', [
-            '%product%' => $product['name'],
-        ], 'Shop.Notifications.Error'));
+        throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
     }
 
     private function checkMinimalPurchaseAmount(\Cart $cart): void
@@ -516,10 +507,7 @@ class Create
             return;
         }
 
-        throw new CannotCreateOrderException($this->context->getTranslator()->trans('A minimum shopping cart total of %amount% (tax excl.) is required to validate your order. Current cart total is %total% (tax excl.).', [
-            '%amount%' => $this->formatPrice($minimalPurchase),
-            '%total%' => $this->formatPrice($productsTotalExcludingTax),
-        ], 'Shop.Theme.Checkout'));
+        throw new CannotCreateOrderException($this->context->getTranslator()->trans('A minimum shopping cart total of %amount% (tax excl.) is required to validate your order. Current cart total is %total% (tax excl.).', ['%amount%' => $this->formatPrice($minimalPurchase), '%total%' => $this->formatPrice($productsTotalExcludingTax)], 'Shop.Theme.Checkout'));
     }
 
     private function getMinimalPurchaseAmount(): float

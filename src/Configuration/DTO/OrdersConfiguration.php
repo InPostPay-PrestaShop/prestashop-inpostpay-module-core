@@ -49,7 +49,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      */
     private $posId;
 
-    public function __construct(int $initialStatusId = null, int $paidStatusId = null, bool $bankPaymentEnabled = null, bool $carrierPaymentEnabled = null, string $posId = null, array $statusDescriptionMap = [])
+    public function __construct(?int $initialStatusId = null, ?int $paidStatusId = null, ?bool $bankPaymentEnabled = null, ?bool $carrierPaymentEnabled = null, ?string $posId = null, array $statusDescriptionMap = [])
     {
         $this->initialStatusId = $initialStatusId;
         $this->paidStatusId = $paidStatusId;
@@ -59,7 +59,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         $this->statusDescriptionMap = $statusDescriptionMap;
     }
 
-    public function getInitialStatusId(int $shopId = null): ?int
+    public function getInitialStatusId(?int $shopId = null): ?int
     {
         return $this->initialStatusId;
     }
@@ -71,7 +71,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this;
     }
 
-    public function getPaidStatusId(int $shopId = null): ?int
+    public function getPaidStatusId(?int $shopId = null): ?int
     {
         return $this->paidStatusId;
     }
@@ -83,7 +83,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this;
     }
 
-    public function getStatusDescription(int $statusId, int $languageId, int $shopId = null): ?string
+    public function getStatusDescription(int $statusId, int $languageId, ?int $shopId = null): ?string
     {
         return $this->statusDescriptionMap[$languageId][$statusId] ?? null;
     }
@@ -100,7 +100,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this;
     }
 
-    public function isBankPaymentEnabled(int $shopId = null): bool
+    public function isBankPaymentEnabled(?int $shopId = null): bool
     {
         return true === $this->bankPaymentEnabled;
     }
@@ -112,7 +112,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this;
     }
 
-    public function isCarrierPaymentEnabled(int $shopId = null): bool
+    public function isCarrierPaymentEnabled(?int $shopId = null): bool
     {
         return true === $this->carrierPaymentEnabled;
     }
@@ -124,7 +124,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this;
     }
 
-    public function getPointOfSaleId(int $shopId = null): ?string
+    public function getPointOfSaleId(?int $shopId = null): ?string
     {
         return $this->posId;
     }

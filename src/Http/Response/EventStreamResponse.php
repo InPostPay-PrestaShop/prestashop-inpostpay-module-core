@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class EventStreamResponse extends StreamedResponse
 {
-    public function __construct(callable $callback = null, int $status = 200, array $headers = [])
+    public function __construct(?callable $callback = null, int $status = 200, array $headers = [])
     {
         $headers = array_merge($headers, [
             'X-Accel-Buffering' => 'no',

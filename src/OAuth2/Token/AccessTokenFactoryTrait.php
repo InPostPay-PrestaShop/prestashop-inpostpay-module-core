@@ -23,7 +23,7 @@ trait AccessTokenFactoryTrait
      */
     private $defaultExpirationTime;
 
-    public function __construct(ClockInterface $clock = null, int $defaultExpirationTime = null)
+    public function __construct(?ClockInterface $clock = null, ?int $defaultExpirationTime = null)
     {
         $this->clock = $clock ?? SystemClock::fromSystemTimezone();
         $this->defaultExpirationTime = $defaultExpirationTime;

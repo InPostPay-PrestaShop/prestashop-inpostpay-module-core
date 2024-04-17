@@ -20,6 +20,7 @@ final class UpdateGeneralConfigurationCommand
      * @var ApiConfigurationInterface
      *
      * @Assert\Valid()
+     *
      * @InPostApiCredentials(groups={"API"})
      */
     private $apiConfiguration;

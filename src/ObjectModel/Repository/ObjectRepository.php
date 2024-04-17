@@ -48,7 +48,7 @@ class ObjectRepository implements ObjectRepositoryInterface
     /**
      * @return T|null
      */
-    public function find(int $id, int $languageId = null): ?\ObjectModel
+    public function find(int $id, ?int $languageId = null): ?\ObjectModel
     {
         return $this->manager->find($this->class, $id, $languageId);
     }
@@ -56,7 +56,7 @@ class ObjectRepository implements ObjectRepositoryInterface
     /**
      * @return T[]
      */
-    public function findAll(int $languageId = null): array
+    public function findAll(?int $languageId = null): array
     {
         $criteria = null === $languageId
             ? []
@@ -68,7 +68,7 @@ class ObjectRepository implements ObjectRepositoryInterface
     /**
      * @return T|null
      */
-    public function findOneBy(array $criteria, array $orderBy = null): ?\ObjectModel
+    public function findOneBy(array $criteria, ?array $orderBy = null): ?\ObjectModel
     {
         $collection = $this->findBy($criteria, $orderBy, 1);
 
@@ -78,7 +78,7 @@ class ObjectRepository implements ObjectRepositoryInterface
     /**
      * @return T[]
      */
-    public function findBy(array $criteria, array $orderBy = null, int $limit = null, int $offset = null): array
+    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
     {
         $languageId = isset($criteria['id_lang']) ? (int) $criteria['id_lang'] : null;
 
@@ -108,7 +108,7 @@ class ObjectRepository implements ObjectRepositoryInterface
             ->innerJoin($langTable, $langAlias, sprintf('%s.%s = %s.%s', $langAlias, $identifier, $alias, $identifier));
     }
 
-    protected function createFindByQueryBuilder(array $criteria, array $orderBy = null, int $limit = null, int $offset = null): QueryBuilder
+    protected function createFindByQueryBuilder(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): QueryBuilder
     {
         $qb = $this->createQueryBuilder('a');
 

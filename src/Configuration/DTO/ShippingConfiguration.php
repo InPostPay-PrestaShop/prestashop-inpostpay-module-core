@@ -25,14 +25,13 @@ final class ShippingConfiguration implements ShippingConfigurationInterface
      */
     private $courierShippingOptions;
 
-
     public function __construct(ShippingOptions $apmOptions, ShippingOptions $courierOptions)
     {
         $this->apmShippingOptions = $apmOptions;
         $this->courierShippingOptions = $courierOptions;
     }
 
-    public function getShippingOptions(DeliveryType $deliveryType, int $shopId = null): ShippingOptions
+    public function getShippingOptions(DeliveryType $deliveryType, ?int $shopId = null): ShippingOptions
     {
         switch ($deliveryType) {
             case DeliveryType::Courier():
@@ -44,7 +43,7 @@ final class ShippingConfiguration implements ShippingConfigurationInterface
         }
     }
 
-    public function getApmShippingOptions(int $shopId = null): ShippingOptions
+    public function getApmShippingOptions(?int $shopId = null): ShippingOptions
     {
         return $this->apmShippingOptions;
     }
@@ -56,7 +55,7 @@ final class ShippingConfiguration implements ShippingConfigurationInterface
         return $this;
     }
 
-    public function getCourierShippingOptions(int $shopId = null): ShippingOptions
+    public function getCourierShippingOptions(?int $shopId = null): ShippingOptions
     {
         return $this->courierShippingOptions;
     }

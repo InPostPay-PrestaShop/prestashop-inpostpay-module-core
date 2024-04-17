@@ -19,7 +19,7 @@ final class Guzzle5Adapter implements ClientInterface
 {
     private $client;
 
-    public function __construct(GuzzleClientInterface $client = null)
+    public function __construct(?GuzzleClientInterface $client = null)
     {
         $this->client = $client ?: new GuzzleClient();
     }

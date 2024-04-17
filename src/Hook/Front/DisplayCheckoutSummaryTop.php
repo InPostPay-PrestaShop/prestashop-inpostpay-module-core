@@ -28,12 +28,8 @@ final class DisplayCheckoutSummaryTop implements HookInterface
      */
     private $generalConfiguration;
 
-    public function __construct(
-        GuiConfigurationInterface $configuration,
-        GeneralConfigurationInterface $generalConfiguration,
-        WidgetInterface $module,
-        RendererInterface $renderer
-    ) {
+    public function __construct(GuiConfigurationInterface $configuration, GeneralConfigurationInterface $generalConfiguration, WidgetInterface $module, RendererInterface $renderer)
+    {
         $this->generalConfiguration = $generalConfiguration;
         $this->configuration = $configuration;
         $this->module = $module;
@@ -52,8 +48,8 @@ final class DisplayCheckoutSummaryTop implements HookInterface
     {
         $binding = BindingPlace::CheckoutPage();
 
-        if ($this->generalConfiguration->getCheckoutButtonDisplayHook() !== self::HOOK_NAME ||
-            '' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)
+        if ($this->generalConfiguration->getCheckoutButtonDisplayHook() !== self::HOOK_NAME
+            || '' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)
         ) {
             return '';
         }

@@ -11,13 +11,13 @@ interface ShopAwareConfigurationInterface extends ConfigurationInterface
      *
      * @return mixed|null
      */
-    public function get(string $key, int $shopId = null);
+    public function get(string $key, ?int $shopId = null);
 
     /**
      * @param int|null $shopId if null, the current context shop's configuration will be updated
      * @param mixed $value
      */
-    public function set(string $key, $value, int $shopId = null);
+    public function set(string $key, $value, ?int $shopId = null);
 
     /**
      * @return mixed|null

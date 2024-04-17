@@ -47,7 +47,7 @@ final class Consent implements \JsonSerializable
     /**
      * @param string[] $descriptions consent text by language ID
      */
-    public function __construct(string $id = null, int $cmsPageId = null, array $descriptions = [], ConsentRequirementType $requirementType = null, \DateTimeImmutable $dateUpdated = null)
+    public function __construct(?string $id = null, ?int $cmsPageId = null, array $descriptions = [], ?ConsentRequirementType $requirementType = null, ?\DateTimeImmutable $dateUpdated = null)
     {
         $this->id = $id ?? (string) Uuid::v4();
         $this->cmsPageId = $cmsPageId;

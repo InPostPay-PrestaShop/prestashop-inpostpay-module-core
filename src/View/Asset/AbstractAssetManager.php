@@ -16,7 +16,7 @@ abstract class AbstractAssetManager implements AssetManagerInterface
 
     private $package;
 
-    public function __construct(\Module $module, ContextInterface $context = null)
+    public function __construct(\Module $module, ?ContextInterface $context = null)
     {
         $this->module = $module;
         $this->context = $context;

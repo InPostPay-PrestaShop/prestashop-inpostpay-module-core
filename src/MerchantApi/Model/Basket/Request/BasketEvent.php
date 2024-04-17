@@ -49,7 +49,7 @@ final class BasketEvent implements \JsonSerializable
      * @param PromoCode[] $promo_codes_event_data
      * @param RelatedProductData[] $related_products_event_data
      */
-    public function __construct(string $event_id, \DateTimeImmutable $event_data_time, EventType $event_type, PhoneNumber $phone_number = null, array $quantity_event_data = [], array $promo_codes_event_data = [], array $related_products_event_data = [])
+    public function __construct(string $event_id, \DateTimeImmutable $event_data_time, EventType $event_type, ?PhoneNumber $phone_number = null, array $quantity_event_data = [], array $promo_codes_event_data = [], array $related_products_event_data = [])
     {
         $this->event_id = $event_id;
         $this->event_data_time = $event_data_time;

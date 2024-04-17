@@ -36,7 +36,7 @@ final class Quantity implements \JsonSerializable
      */
     private $max_quantity;
 
-    private function __construct($quantity, QuantityType $quantity_type, string $quantity_unit = null, $available_quantity = null, $max_quantity = null)
+    private function __construct($quantity, QuantityType $quantity_type, ?string $quantity_unit = null, $available_quantity = null, $max_quantity = null)
     {
         $this->quantity = $quantity;
         $this->quantity_type = $quantity_type;
@@ -48,7 +48,7 @@ final class Quantity implements \JsonSerializable
     /**
      * @return self<int>
      */
-    public static function integer(int $quantity, int $available_quantity = null, int $max_quantity = null, string $quantity_unit = null): self
+    public static function integer(int $quantity, ?int $available_quantity = null, ?int $max_quantity = null, ?string $quantity_unit = null): self
     {
         return new self($quantity, QuantityType::Integer(), $quantity_unit, $available_quantity, $max_quantity);
     }
@@ -56,7 +56,7 @@ final class Quantity implements \JsonSerializable
     /**
      * @return self<float>
      */
-    public static function decimal(float $quantity, float $available_quantity = null, float $max_quantity = null, string $quantity_unit = null): self
+    public static function decimal(float $quantity, ?float $available_quantity = null, ?float $max_quantity = null, ?string $quantity_unit = null): self
     {
         return new self($quantity, QuantityType::Decimal(), $quantity_unit, $available_quantity, $max_quantity);
     }

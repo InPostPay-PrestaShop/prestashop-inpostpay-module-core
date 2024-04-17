@@ -13,12 +13,12 @@ final class Configuration implements LanguageAwareConfigurationInterface
      */
     private $db;
 
-    public function __construct(\Db $db = null)
+    public function __construct(?\Db $db = null)
     {
         $this->db = $db ?? \Db::getInstance();
     }
 
-    public function get(string $key, int $shopId = null, int $languageId = null)
+    public function get(string $key, ?int $shopId = null, ?int $languageId = null)
     {
         return $this->doGet($key, $languageId, $shopId);
     }
@@ -39,7 +39,7 @@ final class Configuration implements LanguageAwareConfigurationInterface
         return $configuration;
     }
 
-    public function set(string $key, $value, int $shopId = null): void
+    public function set(string $key, $value, ?int $shopId = null): void
     {
         $this->doSet($key, $value, $shopId);
     }
@@ -106,14 +106,14 @@ final class Configuration implements LanguageAwareConfigurationInterface
         return $parts;
     }
 
-    private function doGet(string $key, int $languageId = null, int $shopId = null, int $shopGroupId = null)
+    private function doGet(string $key, ?int $languageId = null, ?int $shopId = null, ?int $shopGroupId = null)
     {
         $value = \Configuration::get($key, $languageId, $shopGroupId, $shopId, null);
 
         return '' === $value ? null : $value;
     }
 
-    private function doSet(string $key, $value, int $shopId = null, int $shopGroupId = null): void
+    private function doSet(string $key, $value, ?int $shopId = null, ?int $shopGroupId = null): void
     {
         if (\Configuration::updateValue($key, $value, false, $shopGroupId, $shopId)) {
             return;

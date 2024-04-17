@@ -67,7 +67,7 @@ final class ObjectManager implements ObjectManagerInterface
      *
      * @return T|null
      */
-    public function find(string $class, int $id, int $languageId = null): ?\ObjectModel
+    public function find(string $class, int $id, ?int $languageId = null): ?\ObjectModel
     {
         if (0 >= $id) {
             return null;

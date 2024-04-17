@@ -37,7 +37,7 @@ final class DeliveryOption implements \JsonSerializable
     /**
      * @param OptionalService[] $delivery_options
      */
-    public function __construct(DeliveryType $delivery_type, \DateTimeImmutable $delivery_date, Price $delivery_price, array $delivery_options = [], float $free_delivery_minimum_gross_price = null)
+    public function __construct(DeliveryType $delivery_type, \DateTimeImmutable $delivery_date, Price $delivery_price, array $delivery_options = [], ?float $free_delivery_minimum_gross_price = null)
     {
         $this->delivery_type = $delivery_type;
         $this->delivery_date = $delivery_date;

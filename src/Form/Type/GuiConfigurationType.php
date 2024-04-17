@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\GuiConfiguration;
-use izi\prestashop\Form\Type\Widget\WidgetDisplayConfiguration;
 use izi\prestashop\Form\Type\Widget\WidgetDisplayConfigurationType;
 use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;

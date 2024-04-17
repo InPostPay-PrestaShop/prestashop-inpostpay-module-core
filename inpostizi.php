@@ -118,7 +118,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function addCheckboxCurrencyRestrictionsForModule(array $shops = [])
     {
         if ([] === $shops) {
-            $shops = \Shop::getShops(true, null, true);
+            $shops = Shop::getShops(true, null, true);
         }
 
         $data = [];
@@ -137,7 +137,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             }
         }
 
-        return \Db::getInstance()->insert('module_currency', $data);
+        return Db::getInstance()->insert('module_currency', $data);
     }
 
     public function getContent()
@@ -146,7 +146,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             /** @var UrlGeneratorInterface $router */
             $router = $this->get('router');
 
-            \Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
+            Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
         } catch (ServiceNotFoundException $e) {
             $this->handleConfigPageRequest();
         }
@@ -158,7 +158,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __call($methodName, array $arguments)
     {
         $hookName = 0 === strpos($methodName, 'hook')
-            ? lcfirst(\Tools::substr($methodName, 4))
+            ? lcfirst(Tools::substr($methodName, 4))
             : $methodName;
 
         try {
@@ -170,7 +170,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this
                 ->get(HookExecutorInterface::class)
                 ->execute($hookName, $parameters);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->getLogger()->critical('Error executing hook "{hookName}": {error}', [
                 'hookName' => $hookName,
                 'error' => $e,
@@ -193,7 +193,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     public function get($serviceName)
     {
-        if (\Tools::version_compare(_PS_VERSION_, '1.7.6')) {
+        if (Tools::version_compare(_PS_VERSION_, '1.7.6')) {
             return $this->getLegacyContainer()->get($serviceName);
         }
 
@@ -211,13 +211,13 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $service;
         }
 
-        if (!$this->context->controller instanceof \FrontController || !class_exists(PrestaShopContainerBuilder::class)) {
+        if (!$this->context->controller instanceof FrontController || !class_exists(PrestaShopContainerBuilder::class)) {
             throw ContainerNotFoundException::create();
         }
 
         try {
             $container = PrestaShopContainerBuilder::getContainer('front', _PS_MODE_DEV_);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw ContainerNotFoundException::create($e);
         }
 
@@ -231,11 +231,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     public function renderWidget($hookName, array $configuration)
     {
-        if (isset($configuration['request'])) {
-            $request = $configuration['request'];
-        } else {
-            $request = $this->getCurrentRequest();
-        }
+        $request = isset($configuration['request'])
+            ? $configuration['request']
+            : $this->getCurrentRequest();
 
         if ([] === $parameters = $this->getWidgetVariables($hookName, $configuration)) {
             return '';
@@ -329,7 +327,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     {
         $cacheDir = sprintf('%s/inpost/izi/', rtrim(_PS_CACHE_DIR_, '/'));
 
-        if (\Tools::version_compare(_PS_VERSION_, '1.7.4')) {
+        if (Tools::version_compare(_PS_VERSION_, '1.7.4')) {
             $className = sprintf('InPost\\Izi\\Container_%s', str_replace('.', '_', $this->version));
             $resources = $this->getSf28ConfigResources();
         } else {
@@ -366,13 +364,13 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     private function setUpRoutingLoaderResolver()
     {
-        if (\Tools::version_compare(_PS_VERSION_, '1.7.7')) {
+        if (Tools::version_compare(_PS_VERSION_, '1.7.7')) {
             return;
         }
 
         try {
             $this->get('routing.loader');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // ignore silently
         }
     }
@@ -402,7 +400,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         global $kernel;
 
         if (!$kernel instanceof KernelInterface) {
-            throw new \RuntimeException('PS application kernel instance was not found.');
+            throw new RuntimeException('PS application kernel instance was not found.');
         }
 
         // In case of some very early 1.7 versions, session may not have already been started by PS application.

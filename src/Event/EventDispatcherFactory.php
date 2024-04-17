@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Event;
 
+use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\EventListener\CartListener;
 use izi\prestashop\EventListener\ShipmentListener;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 
 /**
  * @internal

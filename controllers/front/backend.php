@@ -108,7 +108,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
     ];
 
     /**
-     * @var \InPostIzi
+     * @var InPostIzi
      */
     public $module;
 
@@ -142,7 +142,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             $this->context->cookie->write();
 
             return $response;
-        } catch (\Throwable $throwable) {
+        } catch (Throwable $throwable) {
             http_response_code(500);
             $this->logError($throwable);
 
@@ -182,7 +182,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             $response = null === $controller
                 ? $this->createNotFoundResponse($request, $path, true)
                 : $this->callController($controller, $request, $params);
-        } catch (\Throwable $throwable) {
+        } catch (Throwable $throwable) {
             $response = $this->handleApiError($throwable);
         }
 
@@ -201,7 +201,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         return $response;
     }
 
-    private function handleApiError(\Throwable $throwable): Response
+    private function handleApiError(Throwable $throwable): Response
     {
         $exception = $this->convertApiError($throwable);
 
@@ -215,7 +215,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         ], $exception->getStatusCode());
     }
 
-    private function convertApiError(\Throwable $throwable): ApiException
+    private function convertApiError(Throwable $throwable): ApiException
     {
         if ($throwable instanceof ApiException) {
             return $throwable;
@@ -263,7 +263,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         return rtrim($path, '/');
     }
 
-    private function logError(\Throwable $throwable): void
+    private function logError(Throwable $throwable): void
     {
         $this->module->getLogger()->error('Error processing request: {error}', ['error' => $throwable]);
     }
@@ -314,14 +314,14 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 
     private function resolveControllerArguments(array $controller, Request $request, array $pathParams): array
     {
-        $reflection = new \ReflectionMethod($controller[0], $controller[1]);
+        $reflection = new ReflectionMethod($controller[0], $controller[1]);
 
-        return array_map(function (\ReflectionParameter $param) use ($request, $pathParams) {
+        return array_map(function (ReflectionParameter $param) use ($request, $pathParams) {
             return $this->resolveControllerArgument($param, $request, $pathParams);
         }, $reflection->getParameters());
     }
 
-    private function resolveControllerArgument(\ReflectionParameter $param, Request $request, array $pathParams)
+    private function resolveControllerArgument(ReflectionParameter $param, Request $request, array $pathParams)
     {
         $type = $param->getType();
 
@@ -339,7 +339,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             return $param->getDefaultValue();
         }
 
-        throw new \LogicException(sprintf('Cannot determine controller parameter value for argument "%s".', $paramName));
+        throw new LogicException(sprintf('Cannot determine controller parameter value for argument "%s".', $paramName));
     }
 
     private function createNotFoundResponse(Request $request, string $path, bool $json = false): Response

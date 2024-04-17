@@ -45,7 +45,7 @@ class InPostIziUpdater_1_5_0
      */
     private $db;
 
-    public function __construct(\Db $db)
+    public function __construct(Db $db)
     {
         $this->db = $db;
     }
@@ -56,8 +56,8 @@ class InPostIziUpdater_1_5_0
             && $this->updateConsentStructure()
             && $this->updateWidgetConfigStructure();
 
-        \Tools::clearSf2Cache('prod');
-        \Tools::clearSf2Cache('dev');
+        Tools::clearSf2Cache('prod');
+        Tools::clearSf2Cache('dev');
 
         return $result;
     }
@@ -76,7 +76,7 @@ class InPostIziUpdater_1_5_0
         $consentsByShopGroup = [];
         $configIds = [];
 
-        $languageIds = \Language::getLanguages(false, false, true);
+        $languageIds = Language::getLanguages(false, false, true);
 
         $requirementTypes = [
             'additional' => ConsentRequirementType::Optional(),
@@ -88,7 +88,7 @@ class InPostIziUpdater_1_5_0
             $cmsIdsKey = sprintf('INPOST_PAY_terms_options_%s', $key);
             $textKey = sprintf('%s_text', $cmsIdsKey);
 
-            $sql = (new \DbQuery())
+            $sql = (new DbQuery())
                 ->select('c.*')
                 ->from('configuration', 'c')
                 ->where(sprintf('c.name IN ("%s", "%s")', $cmsIdsKey, $textKey));
@@ -114,7 +114,7 @@ class InPostIziUpdater_1_5_0
                         $descriptions[$languageId] = $text;
                     }
 
-                    $dateUpdated = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['date_upd']);
+                    $dateUpdated = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['date_upd']);
 
                     foreach ($cmsPageIds as $cmsPageId) {
                         if (0 >= $cmsPageId) {
@@ -231,7 +231,7 @@ class InPostIziUpdater_1_5_0
 
     private function getConfigDataByKeys(array $keys): array
     {
-        $sql = (new \DbQuery())
+        $sql = (new DbQuery())
             ->select('c.*')
             ->from('configuration', 'c')
             ->where(sprintf('c.name IN ("%s")', implode('","', $keys)));
@@ -258,11 +258,10 @@ class InPostIziUpdater_1_5_0
 
     private function setJsonConfigValues(string $key, array $dataByShopGroup): bool
     {
-
         foreach ($dataByShopGroup as $shopGroupId => $dataByShop) {
             foreach ($dataByShop as $shopId => $data) {
                 $value = json_encode($data);
-                if (!\Configuration::updateValue($key, $value, false, $shopGroupId, $shopId)) {
+                if (!Configuration::updateValue($key, $value, false, $shopGroupId, $shopId)) {
                     return false;
                 }
             }
@@ -283,11 +282,11 @@ class InPostIziUpdater_1_5_0
 }
 
 /**
- * @param \InPostIzi $module
+ * @param InPostIzi $module
  *
  * @return bool
  */
-function upgrade_module_1_5_0(\Module $module)
+function upgrade_module_1_5_0(Module $module)
 {
-    return (new InPostIziUpdater_1_5_0(\Db::getInstance()))->upgrade();
+    return (new InPostIziUpdater_1_5_0(Db::getInstance()))->upgrade();
 }

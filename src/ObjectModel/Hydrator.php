@@ -11,7 +11,7 @@ final class Hydrator implements HydratorInterface
      *
      * @throws \PrestaShopException
      */
-    public function hydrate(array $data, string $class, \ObjectModel $model = null, int $languageId = null): \ObjectModel
+    public function hydrate(array $data, string $class, ?\ObjectModel $model = null, ?int $languageId = null): \ObjectModel
     {
         if ([] === $data) {
             throw new \DomainException('Provided data is empty.');
@@ -42,12 +42,12 @@ final class Hydrator implements HydratorInterface
      *
      * @throws \PrestaShopException
      */
-    public function hydrateCollection(array $data, string $class, int $languageId = null): array
+    public function hydrateCollection(array $data, string $class, ?int $languageId = null): array
     {
         return $class::hydrateCollection($class, $data, $languageId);
     }
 
-    private function hydrateObject(\ObjectModel $model, array $data, int $languageId = null): \ObjectModel
+    private function hydrateObject(\ObjectModel $model, array $data, ?int $languageId = null): \ObjectModel
     {
         $metadata = $model::getDefinition(get_class($model));
         $data = $this->normalizeData($data, $metadata);

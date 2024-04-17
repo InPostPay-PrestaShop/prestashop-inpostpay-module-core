@@ -31,7 +31,7 @@ final class ConsentsConfiguration implements ConsentsConfigurationInterface, Per
         $this->serializer = $serializer;
     }
 
-    public function getConsents(int $shopId = null): array
+    public function getConsents(?int $shopId = null): array
     {
         if (!isset($this->consents[(int) $shopId])) {
             $this->consents[(int) $shopId] = $this->loadConsents($shopId);

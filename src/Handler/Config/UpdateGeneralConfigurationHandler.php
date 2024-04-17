@@ -50,13 +50,8 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
      * @param CacheInterface $cache
      * @param \Module $module
      */
-    public function __construct(
-        ApiConfigurationInterface $apiConfiguration,
-        OrdersConfigurationInterface $ordersConfiguration,
-        GeneralConfigurationInterface $generalConfiguration,
-        CacheInterface $cache,
-        $module
-    ) {
+    public function __construct(ApiConfigurationInterface $apiConfiguration, OrdersConfigurationInterface $ordersConfiguration, GeneralConfigurationInterface $generalConfiguration, CacheInterface $cache, $module)
+    {
         $this->apiConfiguration = $apiConfiguration;
         $this->ordersConfiguration = $ordersConfiguration;
         $this->generalConfiguration = $generalConfiguration;

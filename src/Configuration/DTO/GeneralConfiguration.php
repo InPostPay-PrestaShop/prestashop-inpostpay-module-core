@@ -42,13 +42,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
      */
     private $checkoutButtonDisplayHook;
 
-    public function __construct(
-        bool $enabledForEveryone = false,
-        int $maxSuggestedProducts = null,
-        string $thankYouDisplayHook = null,
-        string $productCardDisplayHook = null,
-        string $checkoutButtonDisplayHook = null
-    )
+    public function __construct(bool $enabledForEveryone = false, ?int $maxSuggestedProducts = null, ?string $thankYouDisplayHook = null, ?string $productCardDisplayHook = null, ?string $checkoutButtonDisplayHook = null)
     {
         $this->enabledForEveryone = $enabledForEveryone;
         $this->maxSuggestedProducts = $maxSuggestedProducts;
@@ -69,7 +63,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
         return $this;
     }
 
-    public function getMaxSuggestedProducts(int $shopId = null): ?int
+    public function getMaxSuggestedProducts(?int $shopId = null): ?int
     {
         return $this->maxSuggestedProducts;
     }
@@ -81,7 +75,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
         return $this;
     }
 
-    public function getThankYouDisplayHook(int $shopId = null): ?string
+    public function getThankYouDisplayHook(?int $shopId = null): ?string
     {
         return $this->thankYouDisplayHook;
     }
@@ -93,7 +87,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
         return $this;
     }
 
-    public function getProductCardDisplayHook(int $shopId = null): ?string
+    public function getProductCardDisplayHook(?int $shopId = null): ?string
     {
         return $this->productCardDisplayHook;
     }
@@ -105,7 +99,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
         return $this;
     }
 
-    public function getCheckoutButtonDisplayHook(int $shopId = null): ?string
+    public function getCheckoutButtonDisplayHook(?int $shopId = null): ?string
     {
         return $this->checkoutButtonDisplayHook;
     }

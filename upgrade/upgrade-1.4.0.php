@@ -10,13 +10,13 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * @param \InPostIzi $module
+ * @param InPostIzi $module
  *
  * @return bool
  */
-function upgrade_module_1_4_0(\Module $module)
+function upgrade_module_1_4_0(Module $module)
 {
-    $db = \Db::getInstance();
+    $db = Db::getInstance();
     $migration = new Version_1_4_0($db);
     $dbInstaller = new DatabaseInstaller(new Configuration(), [$migration]);
 

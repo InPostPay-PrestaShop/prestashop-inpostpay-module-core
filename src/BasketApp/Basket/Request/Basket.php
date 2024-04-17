@@ -54,7 +54,7 @@ final class Basket implements \JsonSerializable
      * @param Product[] $related_products
      * @param Consent[] $consents
      */
-    public function __construct(Summary $summary, array $delivery, array $products, array $consents, array $promo_codes = [], array $related_products = [], string $browser_id = null)
+    public function __construct(Summary $summary, array $delivery, array $products, array $consents, array $promo_codes = [], array $related_products = [], ?string $browser_id = null)
     {
         $this->browser_id = $browser_id;
         $this->summary = $summary;

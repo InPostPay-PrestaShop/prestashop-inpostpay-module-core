@@ -26,7 +26,7 @@ final class ApiConfiguration implements ApiConfigurationInterface
      */
     private $clientCredentials;
 
-    public function __construct(EnvironmentType $environmentType = null, ClientCredentialsInterface $clientCredentials = null)
+    public function __construct(?EnvironmentType $environmentType = null, ?ClientCredentialsInterface $clientCredentials = null)
     {
         $this->environmentType = $environmentType;
         $this->clientCredentials = $clientCredentials;

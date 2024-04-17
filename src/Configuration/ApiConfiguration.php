@@ -133,7 +133,7 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
         $this->environment = $type->createEnvironment();
     }
 
-    private function setClientCredentials(ClientCredentialsInterface $credentials = null): void
+    private function setClientCredentials(?ClientCredentialsInterface $credentials = null): void
     {
         $this->configuration->set(self::OAUTH2_CLIENT_ID, $credentials ? $credentials->getClientId() : null);
         $this->configuration->set(self::OAUTH2_CLIENT_SECRET, $credentials ? $credentials->getClientSecret() : null);

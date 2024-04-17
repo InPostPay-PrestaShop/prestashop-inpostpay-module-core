@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Common\BindingPlace;
-use Symfony\Component\Validator\Constraints as Assert;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class GuiConfiguration implements GuiConfigurationInterface
 {
@@ -52,14 +52,8 @@ final class GuiConfiguration implements GuiConfigurationInterface
      */
     private $miniCartPageWidgetDisplayConfiguration;
 
-    public function __construct(
-        WidgetDisplayConfiguration $cartWidgetDisplayConfiguration = null,
-        WidgetDisplayConfiguration $productWidgetDisplayConfiguration = null,
-        WidgetDisplayConfiguration $loginPageWidgetDisplayConfiguration = null,
-        WidgetDisplayConfiguration $registerFormPageWidgetDisplayConfiguration = null,
-        WidgetDisplayConfiguration $checkoutPageWidgetDisplayConfiguration = null,
-        WidgetDisplayConfiguration $miniCartPageWidgetDisplayConfiguration = null
-    ) {
+    public function __construct(?WidgetDisplayConfiguration $cartWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $productWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $loginPageWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $registerFormPageWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $checkoutPageWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $miniCartPageWidgetDisplayConfiguration = null)
+    {
         $this->cartWidgetDisplayConfiguration = $cartWidgetDisplayConfiguration;
         $this->productWidgetDisplayConfiguration = $productWidgetDisplayConfiguration;
         $this->loginPageWidgetDisplayConfiguration = $loginPageWidgetDisplayConfiguration;
