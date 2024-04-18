@@ -89,7 +89,7 @@ final class ServerSentEvent
             $lines[] = "retry: $this->retry";
         }
 
-        return $this->message = implode("\n", $lines) . "\n\n";
+        return $this->message = implode(PHP_EOL, $lines) . str_repeat(PHP_EOL, 2);
     }
 
     public function __toString(): string

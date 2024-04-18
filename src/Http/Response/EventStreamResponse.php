@@ -29,7 +29,7 @@ final class EventStreamResponse extends StreamedResponse
 
         @ini_set('zlib.output_compression', '0');
         @ini_set('implicit_flush', '1');
-        @ini_set('auto_detect_line_endings', '1');
+
         if (function_exists('apache_setenv')) {
             @apache_setenv('no-gzip', '1');
         }
