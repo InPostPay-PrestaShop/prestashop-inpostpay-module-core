@@ -2,6 +2,7 @@
 
 use izi\prestashop\AdminKernel;
 use izi\prestashop\Common\Currency;
+use izi\prestashop\Configuration\AdvancedConfigurationInterface;
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
@@ -177,7 +178,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
                 'error' => $e,
             ]);
 
-            if (!defined('_PS_MODE_DEV_') || _PS_MODE_DEV_) {
+            if ($this->isDebugEnabled()) {
                 throw $e;
             }
 
@@ -411,12 +412,24 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             throw new RuntimeException('PS application kernel instance was not found.');
         }
 
-        // In case of some very early 1.7 versions, session may not have already been started by PS application.
-        $kernel->getContainer()->get('session')->start();
-
         $this->adminKernel = new AdminKernel($kernel, _PS_VERSION_);
         $this->adminKernel->boot();
 
+        // In case of some very early 1.7 versions, session may not have already been started by PS application.
+        $kernel->getContainer()->get('session')->start();
+
         return $this->adminKernel;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isDebugEnabled()
+    {
+        try {
+            return !$this->get(AdvancedConfigurationInterface::class)->isDebugEnabled();
+        } catch (Exception $e) {
+            return false;
+        }
     }
 }

@@ -31,7 +31,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
         return [
             Admin\DisplayAdminOrderSide::HOOK_NAME => '?' . Admin\DisplayAdminOrderSide::class,
             Common\ActionCartDeleteBefore::HOOK_NAME => Common\ActionCartDeleteBefore::class,
-            Common\ActionCartSave::HOOK_NAME => Common\ActionCartSave::class,
+            Common\ActionCartUpdateAfter::HOOK_NAME => Common\ActionCartUpdateAfter::class,
             Common\ActionValidateOrder::HOOK_NAME => Common\ActionValidateOrder::class,
             Common\ActionShipmentAddAfter::HOOK_NAME => Common\ActionShipmentAddAfter::class,
             Common\ActionShipmentUpdateBefore::HOOK_NAME => Common\ActionShipmentUpdateBefore::class,
@@ -49,6 +49,9 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Front\DisplayCheckoutSummaryTop::HOOK_NAME => '?' . Front\DisplayCheckoutSummaryTop::class,
             Front\DisplayIziCartPreviewButton::HOOK_NAME => '?' . Front\DisplayIziCartPreviewButton::class,
             Front\DisplayIziCheckoutButton::HOOK_NAME => '?' . Front\DisplayIziCheckoutButton::class,
+
+            // no longer used
+            Common\ActionCartSave::HOOK_NAME => '?' . Common\ActionCartSave::class,
         ];
     }
 

@@ -12,6 +12,7 @@ services:
     tags: [ container.service_locator ]
     arguments:
       - actionObjectCartDeleteBefore: '@izi\prestashop\Hook\Common\ActionCartDeleteBefore'
+        actionObjectCartUpdateAfter: '@izi\prestashop\Hook\Common\ActionCartUpdateAfter'
         actionCartSave: '@izi\prestashop\Hook\Common\ActionCartSave'
         actionObjectInPostShipmentModelAddAfter: '@izi\prestashop\Hook\Common\ActionShipmentAddAfter'
         actionObjectInPostShipmentModelUpdateBefore: '@izi\prestashop\Hook\Common\ActionShipmentUpdateBefore'
