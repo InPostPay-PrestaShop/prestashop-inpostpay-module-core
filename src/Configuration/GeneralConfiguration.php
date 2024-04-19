@@ -17,7 +17,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
     private const MAX_SUGGESTED_PRODUCTS = 'INPOST_PAY_related_count';
     private const THANK_YOU_DISPLAY_HOOK = 'INPOST_PAY_THANK_YOU_DISPLAY';
     private const PRODUCT_CARD_DISPLAY_HOOK = 'INPOST_PAY_PRODUCT_CARD_DISPLAY_HOOK';
-    private const CHECKOUT_BUTTON_DISPLAY_HOOK = 'INPOST_PAY_PRODUCT_CARD_DISPLAY_HOOK';
+    private const CHECKOUT_BUTTON_DISPLAY_HOOK = 'INPOST_PAY_CHECKOUT_DISPLAY_HOOK';
 
     /**
      * @var ShopAwareConfigurationInterface
