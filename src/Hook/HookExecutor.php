@@ -30,12 +30,15 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
     {
         return [
             Admin\DisplayAdminOrderSide::HOOK_NAME => '?' . Admin\DisplayAdminOrderSide::class,
+
             Common\ActionCartDeleteBefore::HOOK_NAME => Common\ActionCartDeleteBefore::class,
             Common\ActionCartUpdateAfter::HOOK_NAME => Common\ActionCartUpdateAfter::class,
             Common\ActionValidateOrder::HOOK_NAME => Common\ActionValidateOrder::class,
+            Common\ActionOrderStatusPostUpdate::HOOK_NAME => Common\ActionOrderStatusPostUpdate::class,
             Common\ActionShipmentAddAfter::HOOK_NAME => Common\ActionShipmentAddAfter::class,
             Common\ActionShipmentUpdateBefore::HOOK_NAME => Common\ActionShipmentUpdateBefore::class,
             Common\ActionShipmentUpdateAfter::HOOK_NAME => Common\ActionShipmentUpdateAfter::class,
+
             Front\ActionCartControllerAjaxUpdateResponse::HOOK_NAME => '?' . Front\ActionCartControllerAjaxUpdateResponse::class,
             Front\ActionFrontControllerSetMedia::HOOK_NAME => '?' . Front\ActionFrontControllerSetMedia::class,
             Front\DisplayOrderConfirmation::HOOK_NAME => '?' . Front\DisplayOrderConfirmation::class,

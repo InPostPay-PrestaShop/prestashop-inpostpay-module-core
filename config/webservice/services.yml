@@ -12,6 +12,7 @@ services:
     tags: [ container.service_locator ]
     arguments:
       - izi\prestashop\Command\UpdateOrderTrackingNumbersCommand: '@izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface'
+        izi\prestashop\Command\UpdateOrderStatusCommand: '@izi\prestashop\Handler\UpdateOrderStatusHandlerInterface'
         izi\prestashop\Command\UpdateBasketCommand: '@izi\prestashop\Handler\UpdateBasketHandlerInterface'
         izi\prestashop\Command\UnbindBasketCommand: '@izi\prestashop\Handler\UnbindBasketHandlerInterface'
 
@@ -25,3 +26,4 @@ services:
         actionObjectInPostShipmentModelUpdateBefore: '@izi\prestashop\Hook\Common\ActionShipmentUpdateBefore'
         actionObjectInPostShipmentModelUpdateAfter: '@izi\prestashop\Hook\Common\ActionShipmentUpdateAfter'
         actionValidateOrder: '@izi\prestashop\Hook\Common\ActionValidateOrder'
+        actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'

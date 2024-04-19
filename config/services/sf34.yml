@@ -31,6 +31,7 @@ services:
     arguments:
       - izi\prestashop\EventListener\ShipmentListener: '@izi\prestashop\EventListener\ShipmentListener'
         izi\prestashop\EventListener\CartListener: '@izi\prestashop\EventListener\CartListener'
+        izi\prestashop\EventListener\OrderListener: '@izi\prestashop\EventListener\OrderListener'
 
   izi\prestashop\Event\EventDispatcherFactory:
     class: izi\prestashop\Event\EventDispatcherFactory
