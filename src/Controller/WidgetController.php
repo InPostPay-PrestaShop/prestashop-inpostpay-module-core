@@ -140,7 +140,7 @@ final class WidgetController
             $this->bus->handle($command);
             unset($this->context->cookie->inpostizi_basket_id);
 
-            return new JsonResponse(null, 204);
+            return JsonResponse::create(null, 204)->setContent(null);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }

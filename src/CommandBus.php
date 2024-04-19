@@ -97,6 +97,10 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
         $class = get_class($command);
         $handler = $this->locator->get($class);
 
+        if (!is_callable($handler)) {
+            throw new \LogicException(sprintf('Handler for command "%s" is not callable', $class));
+        }
+
         return $handler($command);
     }
 }
