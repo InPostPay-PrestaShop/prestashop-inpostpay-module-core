@@ -13,10 +13,9 @@ services:
     tags:
       - { name: inpost.izi.hook }
     arguments:
-      - '@inpost.izi.module'
-      - '@inpost.izi.context'
-      - '@inpost.izi.environment'
       - '@izi\prestashop\View\Asset\FrontAssetManager'
+      - '@inpost.izi.security.authorization_checker'
+      - !tagged inpost.izi.front_assets_provider
 
   izi\prestashop\Hook\Front\ActionGetPaymentOptions:
     class: izi\prestashop\Hook\Front\ActionGetPaymentOptions
@@ -346,3 +345,43 @@ services:
     arguments:
       - '@izi\prestashop\BasketApp\BasketAppClient'
       - '@izi\prestashop\Cache\ConfigurationCache'
+
+  inpost.izi.security.access.decision_manager:
+    class: Symfony\Component\Security\Core\Authorization\AccessDecisionManager
+    public: false
+    arguments:
+      - !tagged inpost.izi.security_voter
+
+  inpost.izi.security.authorization_checker:
+    class: izi\prestashop\Security\AuthorizationChecker
+    public: false
+    arguments:
+      - '@inpost.izi.security.access.decision_manager'
+
+  izi\prestashop\Security\Voter\BindingWidgetVoter:
+    class: izi\prestashop\Security\Voter\BindingWidgetVoter
+    public: false
+    tags:
+      - { name: inpost.izi.security_voter }
+    arguments:
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\View\Asset\Provider\Front\CommonAssetsProvider:
+    class: izi\prestashop\View\Asset\Provider\Front\CommonAssetsProvider
+    public: false
+    tags:
+      - { name: inpost.izi.front_assets_provider }
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@inpost.izi.environment'
+
+  izi\prestashop\View\Asset\Provider\Front\ProductPageAssetsProvider:
+    class: izi\prestashop\View\Asset\Provider\Front\ProductPageAssetsProvider
+    public: false
+    tags:
+      - { name: inpost.izi.front_assets_provider }
+    arguments:
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@inpost.izi.context'

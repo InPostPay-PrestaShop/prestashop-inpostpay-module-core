@@ -520,9 +520,8 @@ services:
     class: izi\prestashop\Hook\WidgetRenderer
     public: true
     arguments:
-      - '@inpost.izi.context'
-      - '@izi\prestashop\Configuration\GeneralConfiguration'
       - '@izi\prestashop\View\Templating\RendererInterface'
+      - '@?inpost.izi.security.authorization_checker'
 
   izi\prestashop\Builder\Basket\BasketBuilderFactory:
     class: izi\prestashop\Builder\Basket\BasketBuilderFactory
