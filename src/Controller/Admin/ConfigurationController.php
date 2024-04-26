@@ -17,6 +17,7 @@ use izi\prestashop\Configuration\AdvancedConfigurationInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Configuration\Initializer\ConfigurationInitializerInterface;
 use izi\prestashop\Configuration\ShippingConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Form\Type\AdvancedConfigurationType;
@@ -49,10 +50,17 @@ final class ConfigurationController extends AbstractController
      */
     private $context;
 
-    public function __construct(LegacyTranslator $translator, \Context $context)
+    /**
+     * @param iterable<ConfigurationInitializerInterface> $configInitializers
+     */
+    public function __construct(LegacyTranslator $translator, \Context $context, iterable $configInitializers = [])
     {
         $this->translator = $translator;
         $this->context = $context;
+
+        foreach ($configInitializers as $initializer) {
+            $initializer->init();
+        }
     }
 
     /**

@@ -42,7 +42,7 @@ final class CommonAssetsProvider implements AssetsProviderInterface
                 'position' => 'bottom',
                 'priority' => 100,
             ])
-            ->addJavaScript('js/prestashopizi.js', [
+            ->addJavaScript('prestashopizi.js', [
                 'position' => 'bottom',
                 'priority' => 101,
             ])

@@ -4,16 +4,25 @@ declare(strict_types=1);
 
 namespace izi\prestashop\View\Asset;
 
-use Symfony\Component\Asset\PathPackage;
+use izi\prestashop\View\Asset\VersionStrategy\JsonManifestVersionStrategy as VersionStrategyPolyfill;
+use Symfony\Component\Asset\VersionStrategy\JsonManifestVersionStrategy;
+use Symfony\Component\Asset\VersionStrategy\VersionStrategyInterface;
 
 final class FrontAssetManager extends AbstractAssetManager
 {
+    /**
+     * @var \Module
+     */
     private $module;
+
+    /**
+     * @var \Context
+     */
     private $context;
 
     public function __construct(\Module $module, \Context $context)
     {
-        parent::__construct($module);
+        parent::__construct($module, null, $this->createVersionStrategy($module));
 
         $this->module = $module;
         $this->context = $context;
@@ -41,11 +50,7 @@ final class FrontAssetManager extends AbstractAssetManager
         if ($this->isAbsoluteUrl($path)) {
             $options['server'] = $options['server'] ?? 'remote';
         } else {
-            $package = $this->getPackage();
-            $options['version'] = $options['version'] ?? $package->getVersion($path);
-            if ('/' !== $path[0] && $package instanceof PathPackage) {
-                $path = $package->getBasePath() . $path;
-            }
+            $path = $this->getPackage()->getUrl($path);
         }
 
         return $options;
@@ -64,5 +69,14 @@ final class FrontAssetManager extends AbstractAssetManager
     private function isAbsoluteUrl(string $url): bool
     {
         return false !== strpos($url, '://') || 0 === strpos($url, '//');
+    }
+
+    private function createVersionStrategy(\Module $module): VersionStrategyInterface
+    {
+        $manifestPath = sprintf('%s/views/manifest.json', rtrim($module->getLocalPath(), '/'));
+
+        return class_exists(JsonManifestVersionStrategy::class)
+            ? new JsonManifestVersionStrategy($manifestPath)
+            : new VersionStrategyPolyfill($manifestPath);
     }
 }

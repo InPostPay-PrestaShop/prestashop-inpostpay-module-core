@@ -8,18 +8,32 @@ use Symfony\Component\Asset\Context\ContextInterface;
 use Symfony\Component\Asset\PackageInterface;
 use Symfony\Component\Asset\PathPackage;
 use Symfony\Component\Asset\VersionStrategy\StaticVersionStrategy;
+use Symfony\Component\Asset\VersionStrategy\VersionStrategyInterface;
 
 abstract class AbstractAssetManager implements AssetManagerInterface
 {
+    /**
+     * @var \Module
+     */
     private $module;
+
+    /**
+     * @var ContextInterface|null
+     */
     private $context;
+
+    /**
+     * @var VersionStrategyInterface|null
+     */
+    private $versionStrategy;
 
     private $package;
 
-    public function __construct(\Module $module, ?ContextInterface $context = null)
+    public function __construct(\Module $module, ?ContextInterface $context = null, ?VersionStrategyInterface $versionStrategy = null)
     {
         $this->module = $module;
         $this->context = $context;
+        $this->versionStrategy = $versionStrategy;
     }
 
     public function registerJavaScriptVariables(array $variables): AssetManagerInterface
@@ -40,8 +54,13 @@ abstract class AbstractAssetManager implements AssetManagerInterface
     private function createPackage(): PathPackage
     {
         $basePath = sprintf('modules/%s/views', $this->module->name);
-        $versionStrategy = new StaticVersionStrategy($this->module->version, '%s?v=%s');
+        $versionStrategy = $this->getVersionStrategy();
 
         return new PathPackage($basePath, $versionStrategy, $this->context);
+    }
+
+    private function getVersionStrategy(): VersionStrategyInterface
+    {
+        return $this->versionStrategy ?? ($this->versionStrategy = new StaticVersionStrategy($this->module->version, '%s?v=%s'));
     }
 }
