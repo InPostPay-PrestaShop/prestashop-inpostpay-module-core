@@ -6,6 +6,7 @@ namespace izi\prestashop\Event;
 
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\EventListener\CartListener;
+use izi\prestashop\EventListener\OrderListener;
 use izi\prestashop\EventListener\ShipmentListener;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -31,6 +32,7 @@ final class EventDispatcherFactory implements ServiceSubscriberInterface
     {
         return [
             CartListener::class,
+            OrderListener::class,
             ShipmentListener::class,
         ];
     }
