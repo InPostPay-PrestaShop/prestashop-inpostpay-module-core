@@ -7,8 +7,12 @@ namespace izi\prestashop\BasketApp;
 use izi\prestashop\BasketApp\Basket\BasketsApiClientInterface;
 use izi\prestashop\BasketApp\Browser\BrowserApiClientInterface;
 use izi\prestashop\BasketApp\Order\OrdersApiClientInterface;
+use izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface;
 use izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface;
 
+/**
+ * @extends PaymentsApiClientInterface
+ */
 interface BasketAppClientInterface extends BasketsApiClientInterface, BrowserApiClientInterface, OrdersApiClientInterface, SigningKeysApiClientInterface
 {
     public const DATETIME_FORMAT = 'Y-m-d\TH:i:s.u\Z'; // format character "p" is not available before PHP 8.0

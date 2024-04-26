@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = [];
+$_MODULE = array();
 $_MODULE['<{inpostizi}prestashop>inpostizi_be39a2c31fd39417d193787b0745002d'] = 'InPost Pay';
 $_MODULE['<{inpostizi}prestashop>inpostizi_e92d43479cae605e1a18eb091520f704'] = 'Moduł wymaga PHP w wersji 7.1.3 lub późniejszej.';
 $_MODULE['<{inpostizi}prestashop>inpostizi_3f93d44654423ff8a5fcbbfe8d82f57f'] = 'Nie udało się zaktualizować struktury bazy danych.';
@@ -26,7 +26,8 @@ $_MODULE['<{inpostizi}prestashop>admin_template_translations_65d508ca1dd3c13922c
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_4cdb65c6277c5987c5a8b440224865ef'] = 'Kupujący szybko rozpoznają, że dokonując zakupu w Twoim sklepie mogą skorzystać z usługi szybkiego i bezpiecznego zakupu oraz dostawy przez firmę, której usługi znają i do której mają zaufanie, co bezpośrednio przyczynia się do decyzji zakupowych Klientów.';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_3194d0bc6d7b9e032ffa2d46ab7bf741'] = 'Przy prawidłowym umiejscowieniu widgetu pomagasz swoim Klientom zauważyć usługę InPost Pay, dzięki której będą mogli sfinalizować zakupy na Twojej stronie bez konieczności podawania swoich danych, co jest szczególnie istotne w przypadku Klientów, którzy preferują anonimowe zakupy bez logowania.';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_708b8fd7e8a0fd84d8ee5550b9543e10'] = 'Zapoznaj się z dedykowanym Przewodnikiem Merchanta, dotyczącym poprawnej implementacji usługi InPost Pay. Gromadzi on w jednym miejscu informacje w zakresie aktualnego brandingu InPost Pay, wytyczne odnośnie implementacji wizualnej widgetu oraz dobre praktyki, warte stosowania przy budowaniu pozytywnego user experience wśród Kupujących online. Przewodnik Merchanta znajdziesz w sekcji \"przydatne linki\".';
-$_MODULE['<{inpostizi}prestashop>admin_template_translations_6db0e5922026df9fc64ea03d8c76d945'] = "Konfiguracja tego widgetu nie jest prawidłowa, proszę poprawić\u{a0}wartości wpisane w formularzu.";
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_6db0e5922026df9fc64ea03d8c76d945'] = 'Konfiguracja tego widgetu nie jest prawidłowa, proszę poprawić wartości wpisane w formularzu.';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_7565f5b67d49eec396df536862f2752d'] = 'Zaznacz wszystkie opcje';
 $_MODULE['<{inpostizi}prestashop>deliveryoptionsstatuschecker_3194a4d8bc60ba3e66ddd94f10f32889'] = 'Nie jest dostępna żadna opcja dostawy.';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_341b3a9691b47feef924ec0e1db4856c'] = 'Konfiguracja nie jest kompletna - zweryfikuj i prześlij formularz w zakładce \"ustawienia\".';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_7cca0b355fe9f13f75ed5a2399a172be'] = 'Żadna metoda płatności nie jest włączona - konfigurację można zmienić w zakładce \"ustawienia\".';
@@ -43,7 +44,7 @@ $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_24facc1d99d4510804eb2474c3
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_30ae44c4afa98b529400daa23dfc0202'] = 'Strona zamówienia';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_9d7278cdb71e13934fa097ee3d470e26'] = 'Widget będzie wyświetlany na stronie realizacji zamówienia powyżej podsumowania zamówienia.';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_3a76dfe4d90c1f5622a12f85901fba21'] = 'Podgląd koszyka';
-$_MODULE['<{inpostizi}prestashop>guiconfigurationtype_47b43d98eac64ba3744f6a317beb332d'] = "Widget będzie wyświetlany w podglądzie koszyka. Aby wyświetlić\u{a0}ten hook trzeba użyć\u{a0}niestandardowego hooku i zaimplementować\u{a0}w szablonie \\\"{hook h='displayIziCartPreviewButton'}\\\"";
+$_MODULE['<{inpostizi}prestashop>guiconfigurationtype_47b43d98eac64ba3744f6a317beb332d'] = 'Widget będzie wyświetlany w podglądzie koszyka. Aby wyświetlić ten hook trzeba użyć niestandardowego hooku i zaimplementować w szablonie \"{hook h=\'displayIziCartPreviewButton\'}\"';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_8e906720a71264257a3cc58aa9015402'] = 'wszystkim';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_685686674acfe4bdb5fb224164555bd6'] = 'testerom';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_ac6329ea064b9212be7e442cb46bf68f'] = 'Wyświetla widget';
@@ -51,7 +52,7 @@ $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_917c439021cdab2b538264
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_4bef0602617f4fe6bd9e178ebe91d5c7'] = 'Hook do wyświetlania widgetu na stronie potwierdzenia zamówienia';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_935b322389e5f6b6419447b0879ca67b'] = 'Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku templates/checkout/order-confirmation.tpl \'{hook h=\"%s\" order=$order}\'.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_a166db0fa22cc43fd81255c6480f9bff'] = 'Hook do wyświetlania widgetu na karcie produktu';
-$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_e14e979d3bf9677c8f2f9d108297b95d'] = "Możesz wybrać\u{a0}inny hook jeśli masz problem z wyświetleniem widgetu InPost Pay w domyślnym hooku.";
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_e14e979d3bf9677c8f2f9d108297b95d'] = 'Możesz wybrać inny hook jeśli masz problem z wyświetleniem widgetu InPost Pay w domyślnym hooku.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_7a440309fc897f07a1d99a07af29d8db'] = 'Maksymalna liczba produktów sugerowanych';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_2d18889b4f14532c8f33c95a7af033c9'] = 'W celu pokazania produktów sugerowanych należy uzupełnić sekcję Produktów Powiązanych w konfiguracji produktu.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_958f470d0b1c8fb2b9e62b48e8903299'] = 'bez limitu';
@@ -71,7 +72,6 @@ $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_7f77e3d7178f0b1979d13
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_fd282be0a539046c5c22736ef41f4350'] = 'Status zamówienia utworzonego przez InPost Pay';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_05a5fcc9d88a553b80b2633aa4556d58'] = 'Status dla zamówienia opłaconego przez InPost Pay';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_33af8066d3c83110d4bd897f687cedd2'] = 'Statusy zamówień';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_69fca9ac67c830f1ff66e4643f948282'] = 'Włącz płatności zgodne z podpisaną umową z Aion';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_50b5c5b98ff1773e551421f082fed261'] = 'Metody płatności zostały określone na umowie o obsługę bramki płatniczej.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_304adc8d65de68c0bbae5f7774f03914'] = 'Włącz płatność przy odbiorze zgodnie z podpisaną umową z InPost';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e1bbdbf5c497c484c061c4c2a0359e58'] = 'Płatność przy odbiorze będzie dostępna tylko wtedy, kiedy posiadasz podpisaną umowę z InPost na świadczenie tej usługi w Twoim sklepie.';
@@ -98,7 +98,7 @@ $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_d3058eb8a80e6516dd3ab5e
 $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_2d2249b2cf3287be50493c62d0b7f8a1'] = 'Minimalna szerokość';
 $_MODULE['<{inpostizi}prestashop>widgetconfigurationtype_477964da3b7a710156efc82fc4bc72e2'] = 'Maksymalna szerokość';
 $_MODULE['<{inpostizi}prestashop>widgetdisplayconfigurationtype_86754577897acfb25deb69039d49d9a7'] = 'Wyświetlany';
-$_MODULE['<{inpostizi}prestashop>widgetdisplayconfigurationtype_27bc9eb9abc57172f8620ed18e376ea8'] = "Aby zwiększyć\u{a0}konwersje, zalecamy wyświetlać\u{a0}widget InPost Pay na stronie koszyka jak i karcie produktu";
+$_MODULE['<{inpostizi}prestashop>widgetdisplayconfigurationtype_27bc9eb9abc57172f8620ed18e376ea8'] = 'Aby zwiększyć konwersje, zalecamy wyświetlać widget InPost Pay na stronie koszyka jak i karcie produktu';
 $_MODULE['<{inpostizi}prestashop>widgetdisplayconfigurationtype_bb54cce5a0fb4e80d1b2dce5a28d6efb'] = 'Strona koszyka';
 $_MODULE['<{inpostizi}prestashop>htmlstylestype_9d768809cb57b85ec5e4e4693839692e'] = 'Margines górny';
 $_MODULE['<{inpostizi}prestashop>htmlstylestype_af1c33bd64cf61f9245b75131e2e06f1'] = 'Margines lewy';

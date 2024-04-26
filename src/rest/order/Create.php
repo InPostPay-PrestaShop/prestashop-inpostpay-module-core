@@ -6,7 +6,10 @@ use izi\item\order\InvoiceDetails;
 use izi\prestashop\CartSession;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
+use izi\prestashop\Common\PaymentType;
+use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
+use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
@@ -100,6 +103,8 @@ class Create
         if (null === $carrierReferenceId || null === $carrierId = $this->getCarrierId($carrierReferenceId, $shopId)) {
             throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $data->delivery->delivery_type));
         }
+
+        $this->checkPaymentType($data->order_details, $shopId);
 
         $customer = $this->getOrCreateCustomer($cart, $data->account_info);
 
@@ -575,5 +580,19 @@ class Create
         }
 
         return array_map([ServiceCode::class, 'from'], $deliveryData->delivery_codes);
+    }
+
+    private function checkPaymentType($orderDetails, int $shopId): void
+    {
+        $configuration = new Configuration();
+        $availablePaymentOptions = (new OrdersConfiguration($configuration))->getAvailablePaymentOptions($shopId);
+
+        $paymentType = PaymentType::tryFrom($orderDetails->payment_type);
+
+        if (in_array($paymentType, $availablePaymentOptions, true)) {
+            return;
+        }
+
+        throw new CannotCreateOrderException($this->module->l('The selected payment method is not available.', self::TRANSLATION_SOURCE));
     }
 }

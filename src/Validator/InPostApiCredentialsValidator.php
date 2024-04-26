@@ -20,6 +20,8 @@ final class InPostApiCredentialsValidator extends ConstraintValidator
     private const TRANSLATION_SOURCE = 'apiconfigurationvalidator';
     private const REQUIRED_SCOPES = [
         'izi:basket:write',
+        'izi:order:write',
+        'izi:payment-methods:read',
     ];
 
     /**

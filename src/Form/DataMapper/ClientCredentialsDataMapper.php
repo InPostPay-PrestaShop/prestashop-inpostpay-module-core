@@ -12,6 +12,9 @@ use Symfony\Component\Form\Exception\UnexpectedTypeException;
 
 final class ClientCredentialsDataMapper implements DataMapperInterface
 {
+    /**
+     * @param ClientCredentialsInterface|null $viewData
+     */
     public function mapDataToForms($viewData, $forms): void
     {
         if (null === $viewData) {
@@ -30,6 +33,9 @@ final class ClientCredentialsDataMapper implements DataMapperInterface
         $forms['clientSecret']->setData($viewData->getClientSecret());
     }
 
+    /**
+     * @param ClientCredentialsInterface|null $viewData
+     */
     public function mapFormsToData($forms, &$viewData): void
     {
         if ($forms instanceof \Traversable) {
@@ -39,7 +45,7 @@ final class ClientCredentialsDataMapper implements DataMapperInterface
         $clientId = $forms['clientId']->getData();
         $clientSecret = $forms['clientSecret']->getData();
 
-        if (MaskedPasswordType::MASKED_VALUE === $clientSecret) {
+        if ($this->areSameCredentials($viewData, $clientId, $clientSecret)) {
             return;
         }
 
@@ -48,5 +54,23 @@ final class ClientCredentialsDataMapper implements DataMapperInterface
         } else {
             $viewData = new ClientCredentials($clientId ?? '', $clientSecret ?? '');
         }
+    }
+
+    private function areSameCredentials($credentials, $clientId, $clientSecret): bool
+    {
+        if (null === $credentials) {
+            return false;
+        }
+
+        if (!$credentials instanceof ClientCredentialsInterface) {
+            throw new UnexpectedTypeException($credentials, ClientCredentialsInterface::class);
+        }
+
+        if ($clientId !== $credentials->getClientId()) {
+            return false;
+        }
+
+        return $clientSecret === $credentials->getClientSecret()
+            || MaskedPasswordType::MASKED_VALUE === $clientSecret;
     }
 }

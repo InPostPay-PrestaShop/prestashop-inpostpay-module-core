@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
+use izi\prestashop\Common\PaymentType;
+
+/**
+ * @method PaymentType[] getAvailablePaymentOptions(int $shopId = null)
+ */
 interface OrdersConfigurationInterface
 {
     public function getInitialStatusId(?int $shopId = null): ?int;
@@ -17,9 +22,15 @@ interface OrdersConfigurationInterface
 
     public function getStatusDescription(int $statusId, int $languageId, int $shopId): ?string;
 
-    public function isBankPaymentEnabled(?int $shopId = null): bool;
+    /**
+     * @deprecated use {@see self::getAvailablePaymentOptions()} instead
+     */
+    public function isBankPaymentEnabled(): bool;
 
-    public function isCarrierPaymentEnabled(?int $shopId = null): bool;
+    /**
+     * @deprecated use {@see self::getAvailablePaymentOptions()} instead
+     */
+    public function isCarrierPaymentEnabled(): bool;
 
     public function getPointOfSaleId(?int $shopId = null): ?string;
 }

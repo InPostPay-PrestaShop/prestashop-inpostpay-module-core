@@ -205,7 +205,7 @@ services:
       - { name: inpost.izi.command_handler }
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\BasketAppClient'
+      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
       - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
 
   izi\prestashop\Handler\GenerateDeepLinkHandlerInterface: '@izi\prestashop\Handler\GenerateDeepLinkHandler'
@@ -217,7 +217,7 @@ services:
     arguments:
       - '@inpost.izi.environment'
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\BasketAppClient'
+      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
 
   izi\prestashop\Handler\GetBindingConfirmationHandlerInterface: '@izi\prestashop\Handler\GetBindingConfirmationHandler'
   izi\prestashop\Handler\GetBindingConfirmationHandler:
@@ -343,7 +343,7 @@ services:
     class: izi\prestashop\MerchantApi\Firewall\SigningKeysService
     public: false
     arguments:
-      - '@izi\prestashop\BasketApp\BasketAppClient'
+      - '@izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface'
       - '@izi\prestashop\Cache\ConfigurationCache'
 
   inpost.izi.security.access.decision_manager:

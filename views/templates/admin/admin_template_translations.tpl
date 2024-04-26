@@ -27,3 +27,5 @@
 {l s='Check out Merchant\'s dedicated Guide to the correct implementation of the InPost Pay service. It gathers in one place information on the current branding of InPost Pay, guidelines for the visual implementation of the widget, and best practices worth following when building a positive user experience among online shoppers. You can find Merchant\'s guide in the "useful links" section.' mod='inpostizi'}
 
 {l s='This widget is not configured correctly, correct the values in the form.' mod='inpostizi'}
+
+{l s='Select all options' mod='inpostizi'}

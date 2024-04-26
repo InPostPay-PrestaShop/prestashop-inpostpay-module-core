@@ -29,9 +29,11 @@ services:
 
   izi\prestashop\Form\Type\GeneralConfigurationType:
     class: izi\prestashop\Form\Type\GeneralConfigurationType
-    autowire: true
     tags:
       - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
 
   izi\prestashop\Form\Type\ApiConfigurationType:
     class: izi\prestashop\Form\Type\ApiConfigurationType
@@ -69,6 +71,14 @@ services:
     arguments:
       - '@inpost.izi.context'
       - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
+
+  izi\prestashop\Form\Type\Order\AvailablePaymentOptionsChoiceType:
+    class: izi\prestashop\Form\Type\Order\AvailablePaymentOptionsChoiceType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader'
+      - '@izi\prestashop\Translation\PaymentTypeTranslator'
 
   izi\prestashop\Form\Type\ShippingConfigurationType:
     class: izi\prestashop\Form\Type\ShippingConfigurationType
@@ -148,6 +158,11 @@ services:
     arguments:
       - '@inpost.izi.object_model.order_state_repository'
 
+  izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader
+    public: false
+    autowire: true
+
   izi\prestashop\Form\ChoiceList\CarrierChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\CarrierChoiceLoader
     public: false
@@ -166,6 +181,25 @@ services:
       - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
       - '@izi\prestashop\Cache\ConfigurationCache'
       - '@inpost.izi.module'
+
+  izi\prestashop\BasketApp\BasketAppClientFactory:
+    class: izi\prestashop\BasketApp\BasketAppClientFactory
+    public: false
+    arguments:
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.serializer'
+      - '@izi\prestashop\Http\Client\Factory\GuzzleClientFactory'
+      - '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
+
+  izi\prestashop\Form\BasketAppClientProvider:
+    class: izi\prestashop\Form\BasketAppClientProvider
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - '@izi\prestashop\BasketApp\BasketAppClientFactory'
+      - '@izi\prestashop\BasketApp\BasketAppClient'
 
   izi\prestashop\Validator\InPostApiCredentialsValidator:
     class: izi\prestashop\Validator\InPostApiCredentialsValidator
@@ -355,5 +389,10 @@ services:
 
   izi\prestashop\Translation\ServiceNameTranslator:
     class: izi\prestashop\Translation\ServiceNameTranslator
+    public: false
+    autowire: true
+
+  izi\prestashop\Translation\PaymentTypeTranslator:
+    class: izi\prestashop\Translation\PaymentTypeTranslator
     public: false
     autowire: true

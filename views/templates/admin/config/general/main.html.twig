@@ -16,10 +16,13 @@
   </div>
 </div>
 
-<div class="row mt-n3 inpostizi-checkboxes">
-  <div class="col-xs-12 col-lg-auto mt-3">
-    {{ form_row(form.ordersConfiguration.bankPaymentEnabled) }}
+<div class="row mt-n3">
+  <div class="col-xs-12 col-md-6 col-lg-8 col-xl-4 mt-3">
+    {{ form_row(form.ordersConfiguration.availablePaymentOptions) }}
   </div>
+</div>
+
+<div class="row mt-n3 inpostizi-checkboxes">
   <div class="col-xs-12 col-lg-auto mt-3">
     {{ form_row(form.ordersConfiguration.carrierPaymentEnabled) }}
   </div>

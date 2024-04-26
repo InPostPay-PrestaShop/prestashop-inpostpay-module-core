@@ -1,5 +1,7 @@
 <?php
 
+use InPost\Izi\Upgrade\CacheClearer;
+use InPost\Izi\Upgrade\ConfigUpdaterTrait;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Configuration\DTO\Shipping\CarrierMapping;
@@ -14,8 +16,13 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once __DIR__ . '/ConfigUpdaterTrait.php';
+require_once __DIR__ . '/CacheClearer.php';
+
 class InPostIziUpdater_1_5_5
 {
+    use ConfigUpdaterTrait;
+
     private const APM_CONFIG_MAP = [
         'INPOST_PAY_payment_apm' => 'mappingId',
         'INPOST_PAY_payment_apm_cod' => 'services.COD.cost',
@@ -65,14 +72,13 @@ class InPostIziUpdater_1_5_5
 
     public function upgrade(): bool
     {
+        CacheClearer::getInstance()->clear();
+
         if (!$this->updateShippingConfigStructure()) {
             return false;
         }
 
         $this->module->unregisterHook(ActionGetPaymentOptions::HOOK_NAME);
-
-        Tools::clearSf2Cache('prod');
-        Tools::clearSf2Cache('dev');
 
         return true;
     }
@@ -192,50 +198,6 @@ class InPostIziUpdater_1_5_5
         }
 
         return $config;
-    }
-
-    private function getConfigDataByKeys(array $keys): array
-    {
-        $sql = (new DbQuery())
-            ->select('c.*')
-            ->from('configuration', 'c')
-            ->where(sprintf('c.name IN ("%s")', implode('","', $keys)));
-
-        return $this->db->executeS($sql) ?: [];
-    }
-
-    private function groupConfigValuesByShop(array $data): array
-    {
-        $dataByShopGroup = [];
-        foreach ($data as $row) {
-            $dateUpdated = $dataByShopGroup[(int) $row['id_shop_group']][(int) $row['id_shop']]['date_upd'] ?? null;
-
-            $dataByShopGroup[(int) $row['id_shop_group']][(int) $row['id_shop']][$row['name']] = $row['value'];
-            if (null === $dateUpdated || $row['date_upd'] < $dateUpdated) {
-                $dataByShopGroup[(int) $row['id_shop_group']][(int) $row['id_shop']]['date_upd'] = $row['date_upd'];
-            }
-        }
-
-        return $dataByShopGroup;
-    }
-
-    private function setJsonConfigValues(string $key, array $dataByShopGroup): bool
-    {
-        foreach ($dataByShopGroup as $shopGroupId => $dataByShop) {
-            foreach ($dataByShop as $shopId => $data) {
-                $value = json_encode($data);
-                if (!Configuration::updateValue($key, $value, false, $shopGroupId, $shopId)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private function deleteConfigurationByKeys(array $keys): bool
-    {
-        return $this->db->delete('configuration', 'name IN ("' . implode('","', $keys) . '")');
     }
 }
 

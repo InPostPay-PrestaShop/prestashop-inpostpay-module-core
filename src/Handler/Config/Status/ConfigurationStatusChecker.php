@@ -65,7 +65,7 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
             return;
         }
 
-        if (!$this->ordersConfiguration->isCarrierPaymentEnabled() && !$this->ordersConfiguration->isBankPaymentEnabled()) {
+        if (!$this->isAnyPaymentOptionAvailable()) {
             yield $this->translator->l('No payment option is enabled - update the configuration via the general settings tab.', self::TRANSLATION_SOURCE);
         }
 
@@ -79,5 +79,10 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
                 yield sprintf($this->translator->l('API access problem: %s', self::TRANSLATION_SOURCE), $violation->getMessage());
             }
         }
+    }
+
+    private function isAnyPaymentOptionAvailable(): bool
+    {
+        return [] !== OrdersConfiguration::normalizeAvailablePaymentOptions($this->ordersConfiguration);
     }
 }

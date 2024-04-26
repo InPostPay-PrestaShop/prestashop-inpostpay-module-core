@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration\DTO;
 
+use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
+use izi\prestashop\Enum\Enum;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class OrdersConfiguration implements OrdersConfigurationInterface
@@ -13,6 +15,8 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      * @var int|null
      *
      * @Assert\NotNull()
+     *
+     * @Assert\GreaterThan(0)
      */
     private $initialStatusId;
 
@@ -20,27 +24,22 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      * @var int|null
      *
      * @Assert\NotNull()
+     *
+     * @Assert\GreaterThan(0)
      */
     private $paidStatusId;
 
     /**
-     * @var array
+     * @var array<int, array<int, string>>
+     *
+     * @Assert\All(
+     *     @Assert\All(
+     *
+     *         @Assert\Type("string")
+     *     )
+     * )
      */
     private $statusDescriptionMap;
-
-    /**
-     * @var bool|null
-     *
-     * @Assert\NotNull()
-     */
-    private $bankPaymentEnabled;
-
-    /**
-     * @var bool|null
-     *
-     * @Assert\NotNull()
-     */
-    private $carrierPaymentEnabled;
 
     /**
      * @var string|null
@@ -49,14 +48,30 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      */
     private $posId;
 
-    public function __construct(?int $initialStatusId = null, ?int $paidStatusId = null, ?bool $bankPaymentEnabled = null, ?bool $carrierPaymentEnabled = null, ?string $posId = null, array $statusDescriptionMap = [])
+    /**
+     * @var PaymentType[]
+     *
+     * @Assert\All(
+     *
+     *     @Assert\Type(PaymentType::class)
+     * )
+     */
+    private $availablePaymentOptions;
+
+    /**
+     * @param string|null $posId
+     * @param array<int, array<int, string>> $statusDescriptionMap
+     * @param PaymentType[] $availablePaymentOptions
+     */
+    public function __construct(?int $initialStatusId = null, ?int $paidStatusId = null, /* ?bool $bankPaymentEnabled = null, ?bool $carrierPaymentEnabled = null, */ $posId = null, $statusDescriptionMap = [], $availablePaymentOptions = [])
     {
+        [$posId, $statusDescriptionMap, $availablePaymentOptions] = $this->normalizeConstructorArguments(func_get_args(), func_num_args());
+
         $this->initialStatusId = $initialStatusId;
         $this->paidStatusId = $paidStatusId;
-        $this->bankPaymentEnabled = $bankPaymentEnabled;
-        $this->carrierPaymentEnabled = $carrierPaymentEnabled;
-        $this->posId = $posId;
-        $this->statusDescriptionMap = $statusDescriptionMap;
+        $this->setPointOfSaleId($posId);
+        $this->setStatusDescriptionMap($statusDescriptionMap);
+        $this->setAvailablePaymentOptions($availablePaymentOptions);
     }
 
     public function getInitialStatusId(?int $shopId = null): ?int
@@ -64,7 +79,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->initialStatusId;
     }
 
-    public function setInitialStatusId(?\OrderState $initialStatus): OrdersConfiguration
+    public function setInitialStatusId(?\OrderState $initialStatus): self
     {
         $this->initialStatusId = null === $initialStatus ? null : (int) $initialStatus->id;
 
@@ -76,7 +91,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->paidStatusId;
     }
 
-    public function setPaidStatusId(?\OrderState $paidStatus): OrdersConfiguration
+    public function setPaidStatusId(?\OrderState $paidStatus): self
     {
         $this->paidStatusId = null === $paidStatus ? null : (int) $paidStatus->id;
 
@@ -93,33 +108,52 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->statusDescriptionMap;
     }
 
-    public function setStatusDescriptionMap(array $statusDescriptionMap): OrdersConfiguration
+    public function setStatusDescriptionMap(array $statusDescriptionMap): self
     {
         $this->statusDescriptionMap = $statusDescriptionMap;
 
         return $this;
     }
 
-    public function isBankPaymentEnabled(?int $shopId = null): bool
+    public function getAvailablePaymentOptions(?int $shopId = null): array
     {
-        return true === $this->bankPaymentEnabled;
+        return $this->availablePaymentOptions;
     }
 
-    public function setBankPaymentEnabled(?bool $bankPaymentEnabled): OrdersConfiguration
+    /**
+     * @param PaymentType[] $availablePaymentOptions
+     */
+    public function setAvailablePaymentOptions(array $availablePaymentOptions): self
     {
-        $this->bankPaymentEnabled = $bankPaymentEnabled;
+        $this->availablePaymentOptions = $availablePaymentOptions;
 
         return $this;
     }
 
-    public function isCarrierPaymentEnabled(?int $shopId = null): bool
+    /**
+     * @deprecated
+     */
+    public function isBankPaymentEnabled(): bool
     {
-        return true === $this->carrierPaymentEnabled;
+        return [] !== array_uintersect($this->availablePaymentOptions, PaymentType::getBankProvidedPaymentOptions(), [Enum::class, 'compareValues']);
     }
 
-    public function setCarrierPaymentEnabled(?bool $carrierPaymentEnabled): OrdersConfiguration
+    public function isCarrierPaymentEnabled(): bool
     {
-        $this->carrierPaymentEnabled = $carrierPaymentEnabled;
+        return [] !== array_uintersect($this->availablePaymentOptions, PaymentType::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
+    }
+
+    public function setCarrierPaymentEnabled(?bool $carrierPaymentEnabled): self
+    {
+        $paymentOptions = PaymentType::getCarrierProvidedPaymentOptions();
+
+        if ($carrierPaymentEnabled) {
+            $this->availablePaymentOptions = array_unique(array_merge($this->availablePaymentOptions, $paymentOptions), SORT_REGULAR);
+        } else {
+            $this->availablePaymentOptions = array_filter($this->availablePaymentOptions, static function (PaymentType $type) use ($paymentOptions): bool {
+                return !in_array($type, $paymentOptions, true);
+            });
+        }
 
         return $this;
     }
@@ -129,10 +163,61 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->posId;
     }
 
-    public function setPointOfSaleId(?string $posId): OrdersConfiguration
+    public function setPointOfSaleId(?string $posId): self
     {
         $this->posId = $posId;
 
         return $this;
+    }
+
+    private function normalizeConstructorArguments(array $arguments, int $numberOfArguments): array
+    {
+        if (2 >= $numberOfArguments) {
+            return [null, [], []];
+        }
+
+        if (4 <= $numberOfArguments && is_array($arguments[3])) {
+            return [$arguments[2], $arguments[3], $arguments[4] ?? []];
+        }
+
+        $posId = null;
+        $statusDescriptionMap = $arguments[5] ?? [];
+        $availablePaymentOptions = [];
+
+        $bankPaymentEnabled = null;
+
+        if (3 <= $numberOfArguments) {
+            if (!is_string($arguments[2] ?? '')) {
+                $bankPaymentEnabled = $arguments[2];
+                $posId = $arguments[4] ?? null;
+            } else {
+                $posId = $arguments[2];
+            }
+        }
+
+        if (null !== $bankPaymentEnabled || 4 <= $numberOfArguments) {
+            @trigger_error(sprintf('Passing the $bankPaymentEnabled as 3rd argument or the $carrierPaymentEnabled as 4th argument for "%s::__construct()" is deprecated.', self::class));
+
+            $availablePaymentOptions = $this->normalizeAvailablePaymentOptions($bankPaymentEnabled ?? false, $arguments[3] ?? false);
+        }
+
+        return [$posId, $statusDescriptionMap, $availablePaymentOptions];
+    }
+
+    private function normalizeAvailablePaymentOptions(bool $bankPaymentEnabled, bool $carrierPaymentEnabled): array
+    {
+        if ($bankPaymentEnabled && $carrierPaymentEnabled) {
+            return PaymentType::cases();
+        }
+
+        if ($bankPaymentEnabled) {
+            return PaymentType::getBankProvidedPaymentOptions();
+        }
+
+        if ($carrierPaymentEnabled) {
+            return PaymentType::getCarrierProvidedPaymentOptions();
+        }
+
+        return [];
     }
 }
