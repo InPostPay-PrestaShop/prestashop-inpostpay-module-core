@@ -2,6 +2,7 @@
 
 use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
+use izi\prestashop\Hook\Admin\DisplayAdminOrderLeft;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Hook\Common\ActionCartSave;
 use izi\prestashop\Hook\Common\ActionCartUpdateAfter;
@@ -53,15 +54,7 @@ class InPostIziUpdater_1_6_0
         }
 
         return $this->module->unregisterHook(ActionCartSave::HOOK_NAME)
-            && $this->module->registerHook([
-                DisplayCustomerLoginFormAfter::HOOK_NAME,
-                DisplayCustomerAccountFormTop::HOOK_NAME,
-                DisplayCheckoutSummaryTop::HOOK_NAME,
-                DisplayIziCartPreviewButton::HOOK_NAME,
-                DisplayIziCheckoutButton::HOOK_NAME,
-                ActionCartUpdateAfter::HOOK_NAME,
-                ActionOrderStatusPostUpdate::HOOK_NAME,
-            ]);
+            && $this->module->registerHook($this->getHooksToInstall());
     }
 
     private function getDefaultProductCardHook(): string
@@ -115,6 +108,25 @@ class InPostIziUpdater_1_6_0
         }
 
         return $paymentOptions;
+    }
+
+    private function getHooksToInstall(): array
+    {
+        $hooks = [
+            DisplayCustomerLoginFormAfter::HOOK_NAME,
+            DisplayCustomerAccountFormTop::HOOK_NAME,
+            DisplayCheckoutSummaryTop::HOOK_NAME,
+            DisplayIziCartPreviewButton::HOOK_NAME,
+            DisplayIziCheckoutButton::HOOK_NAME,
+            ActionCartUpdateAfter::HOOK_NAME,
+            ActionOrderStatusPostUpdate::HOOK_NAME,
+        ];
+
+        if (DisplayAdminOrderLeft::getVersionRange()->contains(_PS_VERSION_)) {
+            $hooks[] = DisplayAdminOrderLeft::HOOK_NAME;
+        }
+
+        return $hooks;
     }
 }
 

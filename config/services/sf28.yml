@@ -47,3 +47,10 @@ services:
     autowire: true
     tags:
       - { name: inpost.izi.service_locator, tag: inpost.izi.basket_event_handler, index_by: event_type, default_index_method: getHandledEventType }
+
+  izi\prestashop\Hook\Admin\DisplayAdminOrderLeft:
+    class: izi\prestashop\Hook\Admin\DisplayAdminOrderLeft
+    public: false
+    autowire: true
+    tags:
+      - { name: inpost.izi.hook }
