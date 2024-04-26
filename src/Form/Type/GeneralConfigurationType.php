@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
+use izi\prestashop\Event\EventDispatcherInterface;
+use izi\prestashop\Form\Event\ApiConfigurationValidatedEvent;
 use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
 use izi\prestashop\Hook\Front\DisplayIziCheckoutButton;
 use izi\prestashop\Hook\Front\DisplayIziThankYou;
@@ -17,6 +19,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GroupSequence;
 
@@ -24,11 +28,20 @@ final class GeneralConfigurationType extends AbstractType
 {
     private const TRANSLATION_SOURCE = 'generalconfigurationtype';
 
+    /**
+     * @var LegacyTranslator
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    /**
+     * @var EventDispatcherInterface|null
+     */
+    private $eventDispatcher;
+
+    public function __construct(LegacyTranslator $translator, ?EventDispatcherInterface $eventDispatcher = null)
     {
         $this->translator = $translator;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -90,6 +103,20 @@ final class GeneralConfigurationType extends AbstractType
                     'min' => 0,
                 ],
             ]);
+
+        if (null === $this->eventDispatcher) {
+            return;
+        }
+
+        $builder
+            ->get('apiConfiguration')
+            ->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
+                if (!$event->getForm()->isValid()) {
+                    return;
+                }
+
+                $this->eventDispatcher->dispatch(new ApiConfigurationValidatedEvent($event->getData()));
+            }, -100);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

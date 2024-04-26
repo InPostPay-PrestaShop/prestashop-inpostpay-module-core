@@ -83,26 +83,41 @@ final class Basket implements \JsonSerializable
         return $this->delivery;
     }
 
+    /**
+     * @return PromoCode[]
+     */
     public function getPromoCodes(): array
     {
         return $this->promo_codes;
     }
 
+    /**
+     * @return Product[]
+     */
     public function getProducts(): array
     {
         return $this->products;
     }
 
+    /**
+     * @return Product[]
+     */
     public function getRelatedProducts(): array
     {
         return $this->related_products;
     }
 
+    /**
+     * @return Consent[]
+     */
     public function getConsents(): array
     {
         return $this->consents;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return get_object_vars($this);

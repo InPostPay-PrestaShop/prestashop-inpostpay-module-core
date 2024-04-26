@@ -55,6 +55,11 @@ abstract class Enum implements \JsonSerializable
         return $cases[$name];
     }
 
+    final public static function compareValues(self $e1, self $e2): int
+    {
+        return $e1->_value <=> $e2->_value;
+    }
+
     /**
      * @return static[]
      */

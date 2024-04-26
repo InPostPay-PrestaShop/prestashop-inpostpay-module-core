@@ -296,6 +296,8 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this->get(self::$loggerServiceId);
         } catch (ContainerNotFoundException $e) {
             return $this->getLegacyContainer()->get(self::$loggerServiceId);
+        } catch (Exception $e) {
+            return new Psr\Log\NullLogger();
         }
     }
 

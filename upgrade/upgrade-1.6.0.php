@@ -1,5 +1,8 @@
 <?php
 
+use InPost\Izi\Upgrade\CacheClearer;
+use InPost\Izi\Upgrade\ConfigUpdaterTrait;
+use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Hook\Common\ActionCartSave;
 use izi\prestashop\Hook\Common\ActionCartUpdateAfter;
 use izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate;
@@ -15,34 +18,110 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-/**
- * @param InPostIzi $module
- *
- * @return bool
- */
-function upgrade_module_1_6_0(Module $module)
+require_once __DIR__ . '/ConfigUpdaterTrait.php';
+require_once __DIR__ . '/CacheClearer.php';
+
+class InPostIziUpdater_1_6_0
 {
-    Tools::clearSf2Cache('prod');
-    Tools::clearSf2Cache('dev');
+    use ConfigUpdaterTrait;
 
-    $module->registerHook(DisplayProductActions::HOOK_NAME);
-    $module->registerHook(DisplayProductAdditionalInfo::HOOK_NAME);
-    $module->registerHook(DisplayCustomerLoginFormAfter::HOOK_NAME);
-    $module->registerHook(DisplayCustomerAccountFormTop::HOOK_NAME);
-    $module->registerHook(DisplayCheckoutSummaryTop::HOOK_NAME);
-    $module->registerHook(DisplayIziCartPreviewButton::HOOK_NAME);
-    $module->registerHook(DisplayIziCheckoutButton::HOOK_NAME);
-    $module->registerHook(ActionCartUpdateAfter::HOOK_NAME);
-    $module->unregisterHook(ActionCartSave::HOOK_NAME);
-    $module->registerHook(ActionOrderStatusPostUpdate::HOOK_NAME);
+    /**
+     * @var Module
+     */
+    private $module;
 
-    $productCardHook = DisplayProductActions::HOOK_NAME;
-
-    if (version_compare(_PS_VERSION_, '1.7.6', '<')) {
-        $productCardHook = DisplayProductAdditionalInfo::HOOK_NAME;
+    public function __construct(Db $db, Module $module)
+    {
+        $this->db = $db;
+        $this->module = $module;
     }
 
-    Configuration::updateValue('INPOST_PAY_PRODUCT_CARD_DISPLAY_HOOK', $productCardHook, false, 0, 0);
+    public function upgrade(): bool
+    {
+        CacheClearer::getInstance()->clear();
 
-    return true;
+        return $this->registerHooks()
+            && $this->updateAvailablePaymentOptionsConfig();
+    }
+
+    private function registerHooks(): bool
+    {
+        $productCardHook = $this->getDefaultProductCardHook();
+
+        if (!Configuration::updateGlobalValue('INPOST_PAY_PRODUCT_CARD_DISPLAY_HOOK', $productCardHook)) {
+            return false;
+        }
+
+        return $this->module->unregisterHook(ActionCartSave::HOOK_NAME)
+            && $this->module->registerHook([
+                DisplayCustomerLoginFormAfter::HOOK_NAME,
+                DisplayCustomerAccountFormTop::HOOK_NAME,
+                DisplayCheckoutSummaryTop::HOOK_NAME,
+                DisplayIziCartPreviewButton::HOOK_NAME,
+                DisplayIziCheckoutButton::HOOK_NAME,
+                ActionCartUpdateAfter::HOOK_NAME,
+                ActionOrderStatusPostUpdate::HOOK_NAME,
+            ]);
+    }
+
+    private function getDefaultProductCardHook(): string
+    {
+        if (
+            DisplayProductActions::getVersionRange()->contains(_PS_VERSION_)
+            && !$this->module->isRegisteredInHook(DisplayProductAdditionalInfo::HOOK_NAME)
+        ) {
+            return DisplayProductActions::HOOK_NAME;
+        }
+
+        return DisplayProductAdditionalInfo::HOOK_NAME;
+    }
+
+    private function updateAvailablePaymentOptionsConfig(): bool
+    {
+        $map = [
+            'INPOST_PAY_payment_aion' => PaymentType::getAvailableByDefaultPaymentOptions(),
+            'INPOST_PAY_payment_inpost' => PaymentType::getCarrierProvidedPaymentOptions(),
+        ];
+
+        $configs = $this->getAvailablePaymentOptionsConfigs($map);
+
+        return $this->setJsonConfigValues('INPOST_PAY_AVAILABLE_PAYMENT_OPTIONS', $configs)
+            && $this->deleteConfigurationByKeys(array_keys($map));
+    }
+
+    private function getAvailablePaymentOptionsConfigs(array $map): array
+    {
+        if ([] === $data = $this->getConfigDataByKeys(array_keys($map))) {
+            return [];
+        }
+
+        $paymentOptions = [];
+        $dataByShopGroup = $this->groupConfigValuesByShop($data);
+
+        foreach ($dataByShopGroup as $shopGroupId => $dataByShop) {
+            foreach ($dataByShop as $shopId => $data) {
+                if ([] === $data = array_filter($data)) {
+                    continue;
+                }
+
+                $types = [];
+
+                foreach ($data as $key => $ignored) {
+                    $types[] = $map[$key];
+                }
+
+                $paymentOptions[$shopGroupId][$shopId] = array_merge(...$types);
+            }
+        }
+
+        return $paymentOptions;
+    }
+}
+
+/**
+ * @param InPostIzi $module
+ */
+function upgrade_module_1_6_0(Module $module): bool
+{
+    return (new InPostIziUpdater_1_6_0(Db::getInstance(), $module))->upgrade();
 }

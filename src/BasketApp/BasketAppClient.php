@@ -12,6 +12,8 @@ use izi\prestashop\BasketApp\Basket\Response\QrCode;
 use izi\prestashop\BasketApp\Basket\Response\UpsertBasketResponse;
 use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
+use izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface;
+use izi\prestashop\BasketApp\Payment\Response\AvailablePaymentOptions;
 use izi\prestashop\BasketApp\Signature\Response\SigningKey;
 use izi\prestashop\BasketApp\Signature\Response\SigningKeys;
 use izi\prestashop\Common\Error\Error;
@@ -28,7 +30,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-final class BasketAppClient implements BasketAppClientInterface
+final class BasketAppClient implements BasketAppClientInterface, PaymentsApiClientInterface
 {
     /**
      * @var ClientInterface
@@ -151,6 +153,14 @@ final class BasketAppClient implements BasketAppClientInterface
         $response = $this->sendRequest($request);
 
         return $this->deserialize($response, SigningKeys::class);
+    }
+
+    public function getAvailablePaymentOptions(): AvailablePaymentOptions
+    {
+        $request = $this->createRequest('GET', '/v1/izi/payment-methods');
+        $response = $this->sendRequest($request);
+
+        return $this->deserialize($response, AvailablePaymentOptions::class);
     }
 
     private function createRequest(string $method, string $uri, $payload = null): RequestInterface

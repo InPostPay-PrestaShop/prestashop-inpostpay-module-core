@@ -65,10 +65,11 @@ final class ConfigurationController extends AbstractController
         $command = $commandFactory->create();
 
         $form = $this->createForm(GeneralConfigurationType::class, $command);
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $bus->handle($command);
+                $bus->handle($form->getData());
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_inpost_izi_config_general', $request->query->all());
@@ -95,10 +96,11 @@ final class ConfigurationController extends AbstractController
         $command = new UpdateConsentsConfigurationCommand(...$configuration->getConsents());
 
         $form = $this->createForm(ConsentsConfigurationType::class, $command);
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $bus->handle($command);
+                $bus->handle($form->getData());
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
                 return $this->redirectToRoute('admin_inpost_izi_config_consents', $request->query->all());
@@ -125,8 +127,9 @@ final class ConfigurationController extends AbstractController
         $this->checkAccess();
 
         $form = $this->createForm(GuiConfigurationType::class, $configuration->copy());
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $command = new UpdateGuiConfigurationCommand($form->getData());
 
             try {
@@ -157,8 +160,9 @@ final class ConfigurationController extends AbstractController
         $this->checkAccess();
 
         $form = $this->createForm(ShippingConfigurationType::class, $configuration->copy());
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $command = new UpdateShippingConfigurationCommand($form->getData());
 
             try {
@@ -216,8 +220,9 @@ final class ConfigurationController extends AbstractController
         }
 
         $form = $this->createForm(AdvancedConfigurationType::class, $configuration->copy());
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $command = new UpdateAdvancedConfigurationCommand($form->getData());
 
             try {

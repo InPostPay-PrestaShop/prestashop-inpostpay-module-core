@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Common\BindingPlace;
-use izi\prestashop\Configuration\WidgetDisplayConfigurationInterface;
 use izi\prestashop\View\Widget\Configuration;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInterface
+final class WidgetDisplayConfiguration
 {
     /**
      * @var BindingPlace

@@ -7,6 +7,7 @@ namespace izi\prestashop\Form\Type\Shipping;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Configuration\DTO\Shipping\CarrierMapping;
+use izi\prestashop\Enum\Enum;
 use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Translation\ServiceNameTranslator;
 use Symfony\Component\Form\AbstractType;
@@ -120,9 +121,7 @@ final class CarrierMappingsType extends AbstractType implements DataMapperInterf
         foreach ($mappings as $mapping) {
             $mappingServiceCodes = $mapping->getServiceCodes();
 
-            $diff = array_udiff($serviceCodes, $mappingServiceCodes, static function (ServiceCode $code1, ServiceCode $code2): int {
-                return $code1->value <=> $code2->value;
-            });
+            $diff = array_udiff($serviceCodes, $mappingServiceCodes, [Enum::class, 'compareValues']);
 
             if ([] === $diff && count($mappingServiceCodes) === count($serviceCodes)) {
                 return $mapping;

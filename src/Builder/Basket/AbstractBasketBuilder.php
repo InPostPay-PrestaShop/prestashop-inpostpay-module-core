@@ -17,8 +17,10 @@ use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductVariant;
 use izi\prestashop\Common\PromoCode;
+use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
+use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\ContextManager;
 use PrestaShop\PrestaShop\Core\Cart\Calculator;
 
@@ -535,22 +537,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getPaymentOptions(): array
     {
-        $bankProvidedEnabled = (bool) $this->getConfiguration('INPOST_PAY_payment_aion');
-        $carrierProvidedEnabled = (bool) $this->getConfiguration('INPOST_PAY_payment_inpost');
+        $configuration = new Configuration();
 
-        if ($bankProvidedEnabled && $carrierProvidedEnabled) {
-            return PaymentType::cases();
-        }
-
-        if ($bankProvidedEnabled) {
-            return PaymentType::getBankProvidedPaymentOptions();
-        }
-
-        if ($carrierProvidedEnabled) {
-            return PaymentType::getCarrierProvidedPaymentOptions();
-        }
-
-        return [];
+        return (new OrdersConfiguration($configuration))->getAvailablePaymentOptions((int) $this->cart->id_shop);
     }
 
     private function calculateProductPrice(
