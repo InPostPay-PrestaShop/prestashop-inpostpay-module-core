@@ -9,6 +9,8 @@ use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Event\ShipmentEvent;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 final class ShipmentListener implements EventSubscriberInterface
@@ -31,13 +33,19 @@ final class ShipmentListener implements EventSubscriberInterface
     private $trackingNumberUpdated = [];
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param ObjectRepositoryInterface<\InPostShipmentModel> $repository
      */
-    public function __construct(ApiConfigurationInterface $configuration, ObjectRepositoryInterface $repository, CommandBusInterface $bus)
+    public function __construct(ApiConfigurationInterface $configuration, ObjectRepositoryInterface $repository, CommandBusInterface $bus, ?LoggerInterface $logger = null)
     {
         $this->configuration = $configuration;
         $this->repository = $repository;
         $this->bus = $bus;
+        $this->logger = $logger ?? new NullLogger();
     }
 
     public static function getSubscribedEvents(): array
@@ -57,7 +65,7 @@ final class ShipmentListener implements EventSubscriberInterface
 
         $shipment = $event->getShipment();
 
-        if (empty($shipment->tracking_number)) {
+        if ('' === $shipment->tracking_number || null === $shipment->tracking_number) {
             return;
         }
 
@@ -72,7 +80,7 @@ final class ShipmentListener implements EventSubscriberInterface
 
         $shipment = $event->getShipment();
 
-        if (empty($shipment->tracking_number) || 0 >= $shipmentId = (int) $shipment->id) {
+        if ('' === $shipment->tracking_number || null === $shipment->tracking_number || 0 >= $shipmentId = (int) $shipment->id) {
             return;
         }
 
@@ -106,6 +114,14 @@ final class ShipmentListener implements EventSubscriberInterface
         $eventTime = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $shipment->date_add);
         $command = new UpdateOrderTrackingNumbersCommand((string) $shipment->id_order, $eventTime);
 
-        $this->bus->handle($command);
+        try {
+            $this->bus->handle($command);
+        } catch (\Throwable $e) {
+            $this->logger->critical('Could not send order #{orderId} tracking numbers update event data: {error}', [
+                'orderId' => (int) $shipment->id_order,
+                'error' => $e,
+                'shipmentId' => (int) $shipment->id,
+            ]);
+        }
     }
 }

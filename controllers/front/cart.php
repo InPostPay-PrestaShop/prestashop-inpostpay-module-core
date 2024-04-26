@@ -20,6 +20,6 @@ class InpostIziCartModuleFrontController extends ModuleFrontController
             $nbTotalProducts += (int) $product['cart_quantity'];
         }
 
-        die(json_encode(['count' => $nbTotalProducts]));
+        exit(json_encode(['count' => $nbTotalProducts]));
     }
 }

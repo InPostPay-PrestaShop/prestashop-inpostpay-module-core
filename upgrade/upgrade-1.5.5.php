@@ -1,5 +1,7 @@
 <?php
 
+use InPost\Izi\Upgrade\CacheClearer;
+use InPost\Izi\Upgrade\ConfigUpdaterTrait;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Configuration\DTO\Shipping\CarrierMapping;
@@ -14,8 +16,13 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once __DIR__ . '/ConfigUpdaterTrait.php';
+require_once __DIR__ . '/CacheClearer.php';
+
 class InPostIziUpdater_1_5_5
 {
+    use ConfigUpdaterTrait;
+
     private const APM_CONFIG_MAP = [
         'INPOST_PAY_payment_apm' => 'mappingId',
         'INPOST_PAY_payment_apm_cod' => 'services.COD.cost',
@@ -53,11 +60,11 @@ class InPostIziUpdater_1_5_5
     private $db;
 
     /**
-     * @var \Module
+     * @var Module
      */
     private $module;
 
-    public function __construct(\Db $db, \Module $module)
+    public function __construct(Db $db, Module $module)
     {
         $this->db = $db;
         $this->module = $module;
@@ -65,14 +72,13 @@ class InPostIziUpdater_1_5_5
 
     public function upgrade(): bool
     {
+        CacheClearer::getInstance()->clear();
+
         if (!$this->updateShippingConfigStructure()) {
             return false;
         }
 
         $this->module->unregisterHook(ActionGetPaymentOptions::HOOK_NAME);
-
-        \Tools::clearSf2Cache('prod');
-        \Tools::clearSf2Cache('dev');
 
         return true;
     }
@@ -167,7 +173,7 @@ class InPostIziUpdater_1_5_5
     {
         $weekDay = isset($config['day']) ? WeekDay::tryFrom($config['day'] + 1) : null;
         $time = isset($config['time'])
-            ? \DateTimeImmutable::createFromFormat('G', (int) $config['time'])
+            ? DateTimeImmutable::createFromFormat('G', (int) $config['time'])
             : null;
 
         return new TimeOfWeek($weekDay, $time);
@@ -193,58 +199,14 @@ class InPostIziUpdater_1_5_5
 
         return $config;
     }
-
-    private function getConfigDataByKeys(array $keys): array
-    {
-        $sql = (new \DbQuery())
-            ->select('c.*')
-            ->from('configuration', 'c')
-            ->where(sprintf('c.name IN ("%s")', implode('","', $keys)));
-
-        return $this->db->executeS($sql) ?: [];
-    }
-
-    private function groupConfigValuesByShop(array $data): array
-    {
-        $dataByShopGroup = [];
-        foreach ($data as $row) {
-            $dateUpdated = $dataByShopGroup[(int) $row['id_shop_group']][(int) $row['id_shop']]['date_upd'] ?? null;
-
-            $dataByShopGroup[(int) $row['id_shop_group']][(int) $row['id_shop']][$row['name']] = $row['value'];
-            if (null === $dateUpdated || $row['date_upd'] < $dateUpdated) {
-                $dataByShopGroup[(int) $row['id_shop_group']][(int) $row['id_shop']]['date_upd'] = $row['date_upd'];
-            }
-        }
-
-        return $dataByShopGroup;
-    }
-
-    private function setJsonConfigValues(string $key, array $dataByShopGroup): bool
-    {
-        foreach ($dataByShopGroup as $shopGroupId => $dataByShop) {
-            foreach ($dataByShop as $shopId => $data) {
-                $value = json_encode($data);
-                if (!\Configuration::updateValue($key, $value, false, $shopGroupId, $shopId)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private function deleteConfigurationByKeys(array $keys): bool
-    {
-        return $this->db->delete('configuration', 'name IN ("' . implode('","', $keys) . '")');
-    }
 }
 
 /**
- * @param \InPostIzi $module
+ * @param InPostIzi $module
  *
  * @return bool
  */
-function upgrade_module_1_5_5(\Module $module)
+function upgrade_module_1_5_5(Module $module)
 {
-    return (new InPostIziUpdater_1_5_5(\Db::getInstance(), $module))->upgrade();
+    return (new InPostIziUpdater_1_5_5(Db::getInstance(), $module))->upgrade();
 }

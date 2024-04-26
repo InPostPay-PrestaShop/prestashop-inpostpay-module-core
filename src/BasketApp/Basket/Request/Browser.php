@@ -46,7 +46,7 @@ final class Browser implements \JsonSerializable
      */
     private $port;
 
-    public function __construct(string $user_agent, string $platform, string $architecture, \DateTimeImmutable $data_time, string $customer_ip, string $port, string $location = '-', string $description = null)
+    public function __construct(string $user_agent, string $platform, string $architecture, \DateTimeImmutable $data_time, string $customer_ip, string $port, string $location = '-', ?string $description = null)
     {
         $this->user_agent = $user_agent;
         $this->description = $description;

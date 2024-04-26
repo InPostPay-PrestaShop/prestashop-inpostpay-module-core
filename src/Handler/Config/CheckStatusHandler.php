@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace izi\prestashop\Handler\Config;
 
 use izi\prestashop\Command\Config\CheckStatusCommand;
+use izi\prestashop\Handler\CommandHandlerTrait;
 use izi\prestashop\Handler\Config\Status\StatusCheckerInterface;
 
 final class CheckStatusHandler implements CheckStatusHandlerInterface
 {
+    use CommandHandlerTrait;
+
     /**
      * @var iterable<StatusCheckerInterface>
      */

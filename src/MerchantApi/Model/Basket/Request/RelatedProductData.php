@@ -21,7 +21,7 @@ final class RelatedProductData implements \JsonSerializable
      */
     private $ean;
 
-    public function __construct(string $product_id, Quantity $quantity, string $ean = null)
+    public function __construct(string $product_id, Quantity $quantity, ?string $ean = null)
     {
         $this->product_id = $product_id;
         $this->quantity = $quantity;

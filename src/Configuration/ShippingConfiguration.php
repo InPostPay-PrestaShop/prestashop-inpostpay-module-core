@@ -9,6 +9,9 @@ use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * @implements PersistentConfigurationInterface<ShippingConfigurationInterface>
+ */
 final class ShippingConfiguration implements ShippingConfigurationInterface, PersistentConfigurationInterface
 {
     private const COURIER_SHIPPING_OPTIONS = 'INPOST_PAY_COURIER_SHIPPING_OPTIONS';
@@ -33,7 +36,7 @@ final class ShippingConfiguration implements ShippingConfigurationInterface, Per
         $this->serializer = $serializer;
     }
 
-    public function getShippingOptions(DeliveryType $deliveryType, int $shopId = null): ShippingOptions
+    public function getShippingOptions(DeliveryType $deliveryType, ?int $shopId = null): ShippingOptions
     {
         switch ($deliveryType) {
             case DeliveryType::Courier():
@@ -45,7 +48,7 @@ final class ShippingConfiguration implements ShippingConfigurationInterface, Per
         }
     }
 
-    public function getApmShippingOptions(int $shopId = null): ShippingOptions
+    public function getApmShippingOptions(?int $shopId = null): ShippingOptions
     {
         if (!isset($this->apmShippingOptions[(int) $shopId])) {
             $this->apmShippingOptions[(int) $shopId] = $this->loadApmShippingOptions($shopId);
@@ -54,7 +57,7 @@ final class ShippingConfiguration implements ShippingConfigurationInterface, Per
         return clone $this->apmShippingOptions[(int) $shopId];
     }
 
-    public function getCourierShippingOptions(int $shopId = null): ShippingOptions
+    public function getCourierShippingOptions(?int $shopId = null): ShippingOptions
     {
         if (!isset($this->courierShippingOptions[(int) $shopId])) {
             $this->courierShippingOptions[(int) $shopId] = $this->loadCourierShippingOptions($shopId);

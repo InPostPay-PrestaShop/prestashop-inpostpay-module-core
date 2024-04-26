@@ -2,16 +2,14 @@
 imports:
   - { resource: common.yml }
 
-parameters:
-  inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
-
 services:
   _defaults:
     public: false
 
   inpost.izi.repository_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
-    tags: [ container.service_locator ]
+    tags:
+      - { name: container.service_locator }
     arguments:
       - Cart: '@inpost.izi.object_model.cart_repository'
         Currency: '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
@@ -28,10 +26,13 @@ services:
 
   inpost.izi.event_subscriber_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
-    tags: [ container.service_locator ]
+    tags:
+      - { name: container.service_locator }
     arguments:
       - izi\prestashop\EventListener\ShipmentListener: '@izi\prestashop\EventListener\ShipmentListener'
         izi\prestashop\EventListener\CartListener: '@izi\prestashop\EventListener\CartListener'
+        izi\prestashop\EventListener\OrderListener: '@izi\prestashop\EventListener\OrderListener'
+        izi\prestashop\Form\BasketAppClientProvider: '@?izi\prestashop\Form\BasketAppClientProvider'
 
   izi\prestashop\Event\EventDispatcherFactory:
     class: izi\prestashop\Event\EventDispatcherFactory

@@ -40,7 +40,7 @@ final class BindBasketCommand
      */
     private $bindingPlace;
 
-    public function __construct(BasketInterface $basket, Browser $browser, PhoneNumber $phoneNumber = null, string $browserId = null, BindingPlace $bindingPlace = null)
+    public function __construct(BasketInterface $basket, Browser $browser, ?PhoneNumber $phoneNumber = null, ?string $browserId = null, ?BindingPlace $bindingPlace = null)
     {
         $this->basket = $basket;
         $this->browser = $browser;

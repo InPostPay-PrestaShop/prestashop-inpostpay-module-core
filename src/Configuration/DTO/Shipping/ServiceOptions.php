@@ -26,7 +26,7 @@ final class ServiceOptions implements \JsonSerializable
      */
     private $availabilityRange;
 
-    public function __construct(ServiceCode $serviceCode, float $additionalCost = null, TimeOfWeekRange $availabilityRange = null)
+    public function __construct(ServiceCode $serviceCode, ?float $additionalCost = null, ?TimeOfWeekRange $availabilityRange = null)
     {
         $this->serviceCode = $serviceCode;
         $this->additionalCost = $additionalCost;

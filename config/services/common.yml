@@ -1,5 +1,6 @@
 # common FO/BO configuration
 parameters:
+  inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.logger_config:
     type: rotating_file
     path: '%inpost.izi.logs_dir%/izi.log'
@@ -49,7 +50,7 @@ services:
   izi\prestashop\Hook\HookExecutor:
     class: izi\prestashop\Hook\HookExecutor
     arguments:
-      - '@inpost.izi.hook_locator'
+      - '@?inpost.izi.hook_locator'
       - '@inpost.izi.module'
 
   inpost.izi.psr17_factory:
@@ -92,6 +93,11 @@ services:
       - '@inpost.izi.psr17_factory'
       - '@inpost.izi.serializer'
       - '@=service("inpost.izi.environment").getBasketAppApiUri()'
+
+  izi\prestashop\BasketApp\Basket\BasketsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+  izi\prestashop\BasketApp\Order\OrdersApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+  izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+  izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
 
   izi\prestashop\Configuration\Adapter\Configuration:
     class: izi\prestashop\Configuration\Adapter\Configuration
@@ -232,8 +238,20 @@ services:
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@izi\prestashop\Builder\Order\OrderEventBuilderFactory'
-      - '@izi\prestashop\BasketApp\BasketAppClientInterface'
+      - '@izi\prestashop\BasketApp\Order\OrdersApiClientInterface'
       - !tagged inpost.izi.tracking_number_provider
+
+  izi\prestashop\Handler\UpdateOrderStatusHandlerInterface: '@izi\prestashop\Handler\UpdateOrderStatusHandler'
+  izi\prestashop\Handler\UpdateOrderStatusHandler:
+    class: izi\prestashop\Handler\UpdateOrderStatusHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\Builder\Order\OrderEventBuilderFactory'
+      - '@izi\prestashop\BasketApp\Order\OrdersApiClientInterface'
+      - '@inpost.izi.general_logger'
 
   izi\prestashop\Handler\GetClientDetailsHandlerInterface: '@izi\prestashop\Handler\GetClientDetailsHandler'
   izi\prestashop\Handler\GetClientDetailsHandler:
@@ -244,7 +262,7 @@ services:
     arguments:
       - '@inpost.izi.context'
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\BasketAppClientInterface'
+      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
 
   izi\prestashop\Handler\UpdateBasketHandlerInterface: '@izi\prestashop\Handler\UpdateBasketHandler'
   izi\prestashop\Handler\UpdateBasketHandler:
@@ -255,7 +273,7 @@ services:
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
-      - '@izi\prestashop\BasketApp\BasketAppClientInterface'
+      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
       - '@inpost.izi.general_logger'
 
   izi\prestashop\Handler\UnbindBasketHandlerInterface: '@izi\prestashop\Handler\UnbindBasketHandler'
@@ -266,7 +284,7 @@ services:
       - { name: inpost.izi.command_handler }
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\BasketAppClient'
+      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
 
   izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider:
     class: izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider
@@ -317,7 +335,7 @@ services:
     class: izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactory
     public: false
     arguments:
-      - '@inpost.izi.repository_locator'
+      - '@?inpost.izi.repository_locator'
 
   izi\prestashop\ObjectModel\Repository\CmsPageRepository:
     class: izi\prestashop\ObjectModel\Repository\CmsPageRepository
@@ -412,6 +430,13 @@ services:
     public: false
     tags:
       - { name: inpost.izi.hook }
+    deprecated: The "%service_id%" service is deprecated, use "izi\prestashop\Hook\Common\ActionCartUpdateAfter" instead.
+
+  izi\prestashop\Hook\Common\ActionCartUpdateAfter:
+    class: izi\prestashop\Hook\Common\ActionCartUpdateAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
     arguments:
       - '@inpost.izi.module'
       - '@inpost.izi.context'
@@ -460,14 +485,25 @@ services:
       - '@inpost.izi.module'
       - '@izi\prestashop\CommandBusInterface'
 
+  izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate:
+    class: izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
   izi\prestashop\EventListener\ShipmentListener:
     class: izi\prestashop\EventListener\ShipmentListener
     tags:
       - { name: kernel.event_subscriber }
     arguments:
-      - '@izi\prestashop\Configuration\ApiConfiguration'
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
       - '@izi\prestashop\ObjectModel\Repository\ShipmentRepository'
       - '@izi\prestashop\CommandBusInterface'
+      - '@inpost.izi.general_logger'
 
   izi\prestashop\Payment\PaymentCurrencyChecker:
     class: izi\prestashop\Payment\PaymentCurrencyChecker
@@ -478,9 +514,19 @@ services:
     tags:
       - { name: kernel.event_subscriber }
     arguments:
-      - '@izi\prestashop\Configuration\ApiConfiguration'
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
       - '@inpost.izi.context'
       - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\CommandBusInterface'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\EventListener\OrderListener:
+    class: izi\prestashop\EventListener\OrderListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - '@inpost.izi.object_model.order_repository'
       - '@izi\prestashop\CommandBusInterface'
       - '@inpost.izi.general_logger'
 
@@ -512,9 +558,8 @@ services:
     class: izi\prestashop\Hook\WidgetRenderer
     public: true
     arguments:
-      - '@inpost.izi.context'
-      - '@izi\prestashop\Configuration\GeneralConfiguration'
       - '@izi\prestashop\View\Templating\RendererInterface'
+      - '@?inpost.izi.security.authorization_checker'
 
   izi\prestashop\Builder\Basket\BasketBuilderFactory:
     class: izi\prestashop\Builder\Basket\BasketBuilderFactory
@@ -541,7 +586,7 @@ services:
     class: izi\prestashop\Event\Adapter\EventDispatcher
     public: false
     arguments:
-      - '@inpost.izi.event_dispatcher'
+      - '@?inpost.izi.event_dispatcher'
 
   izi\prestashop\Builder\Basket\DeliveryFactory:
     class: izi\prestashop\Builder\Basket\DeliveryFactory

@@ -10,21 +10,22 @@ use izi\prestashop\Configuration\GeneralConfiguration;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
+use izi\prestashop\Configuration\PersistentConfigurationInterface;
 
 final class UpdateGeneralConfigurationCommandFactory
 {
     /**
-     * @var ApiConfigurationInterface
+     * @var PersistentConfigurationInterface<ApiConfigurationInterface>
      */
     private $apiConfiguration;
 
     /**
-     * @var OrdersConfigurationInterface
+     * @var PersistentConfigurationInterface<OrdersConfigurationInterface>
      */
     private $ordersConfiguration;
 
     /**
-     * @var GeneralConfigurationInterface
+     * @var PersistentConfigurationInterface<GeneralConfigurationInterface>
      */
     private $generalConfiguration;
 

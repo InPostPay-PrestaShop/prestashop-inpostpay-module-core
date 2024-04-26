@@ -146,7 +146,7 @@ class CartSession implements ICartSession
         $db = \Db::getInstance();
         $table_name = '`' . _DB_PREFIX_ . 'inpostizi_basket_session`';
 
-        $request = "UPDATE {$table_name} SET coupons= ${data} WHERE cart_id = \"{$basketId}\"";
+        $request = "UPDATE {$table_name} SET coupons= {$data} WHERE cart_id = \"{$basketId}\"";
         $db->execute($request);
     }
 

@@ -7,12 +7,16 @@ namespace izi\prestashop\Handler\Config;
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Configuration\ConsentsConfiguration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
+use izi\prestashop\Configuration\PersistentConfigurationInterface;
+use izi\prestashop\Handler\CommandHandlerTrait;
 use Psr\Clock\ClockInterface;
 
 final class UpdateConsentsConfigurationHandler implements UpdateConsentsConfigurationHandlerInterface
 {
+    use CommandHandlerTrait;
+
     /**
-     * @var ConsentsConfigurationInterface
+     * @var PersistentConfigurationInterface<ConsentsConfigurationInterface>
      */
     private $configuration;
 

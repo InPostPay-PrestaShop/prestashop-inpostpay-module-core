@@ -24,12 +24,8 @@ final class DisplayOrderConfirmation implements HookInterface
      */
     private $context;
 
-    public function __construct(
-        BasketSessionRepositoryInterface $repository,
-        \Context $context,
-        \PaymentModule $paymentModule,
-        GeneralConfigurationInterface $configuration
-    ) {
+    public function __construct(BasketSessionRepositoryInterface $repository, \Context $context, \PaymentModule $paymentModule, GeneralConfigurationInterface $configuration)
+    {
         $this->repository = $repository;
         $this->context = $context;
         $this->paymentModule = $paymentModule;
@@ -43,6 +39,7 @@ final class DisplayOrderConfirmation implements HookInterface
 
     /**
      * @param \Order $order
+     *
      * @return void
      */
     private function removeSavedBasketId(\Order $order): void
@@ -57,14 +54,14 @@ final class DisplayOrderConfirmation implements HookInterface
     }
 
     /**
-     * @param array{order: \Order} $parameters
+     * @param array{order?: \Order} $parameters
      */
     public function execute(array $parameters): string
     {
         $order = $parameters['order'] ?? null;
 
         if (!$order instanceof \Order) {
-            throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', \Order::class, is_object($order) ? get_class($order) : gettype($order)));
+            throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($order)));
         }
 
         $this->removeSavedBasketId($order);

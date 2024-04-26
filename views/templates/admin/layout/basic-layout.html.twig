@@ -10,11 +10,15 @@
 
 {% block stylesheets %}
   {{ parent() }}
-  <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/admin.css') }}" />
+  <link rel="stylesheet" href="{{ asset('css/admin/admin.css', 'InPostIzi') }}" />
+
+  {% if is_legacy_admin_page %}
+    <link rel="stylesheet" href="{{ asset('css/admin/admin-legacy.css', 'InPostIzi') }}" />
+  {% endif %}
 {% endblock %}
 
 {% block javascripts %}
   {{ parent() }}
-  <script type="text/javascript" src="{{ asset('../modules/inpostizi/views/js/admin/admin.js') }}">
+  <script type="text/javascript" src="{{ asset('js/admin/admin.js', 'InPostIzi') }}">
   </script>
 {% endblock %}

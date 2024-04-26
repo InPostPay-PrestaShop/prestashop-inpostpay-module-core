@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook;
 
+use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Psr\Container\ContainerInterface;
-use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 
 final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInterface
 {
@@ -20,7 +20,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
      */
     private $widget;
 
-    public function __construct(ContainerInterface $locator, WidgetInterface $widget = null)
+    public function __construct(ContainerInterface $locator, ?WidgetInterface $widget = null)
     {
         $this->locator = $locator;
         $this->widget = $widget;
@@ -29,13 +29,17 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
     public static function getSubscribedServices(): array
     {
         return [
+            Admin\DisplayAdminOrderLeft::HOOK_NAME => '?' . Admin\DisplayAdminOrderLeft::class,
             Admin\DisplayAdminOrderSide::HOOK_NAME => '?' . Admin\DisplayAdminOrderSide::class,
+
             Common\ActionCartDeleteBefore::HOOK_NAME => Common\ActionCartDeleteBefore::class,
-            Common\ActionCartSave::HOOK_NAME => Common\ActionCartSave::class,
+            Common\ActionCartUpdateAfter::HOOK_NAME => Common\ActionCartUpdateAfter::class,
             Common\ActionValidateOrder::HOOK_NAME => Common\ActionValidateOrder::class,
+            Common\ActionOrderStatusPostUpdate::HOOK_NAME => Common\ActionOrderStatusPostUpdate::class,
             Common\ActionShipmentAddAfter::HOOK_NAME => Common\ActionShipmentAddAfter::class,
             Common\ActionShipmentUpdateBefore::HOOK_NAME => Common\ActionShipmentUpdateBefore::class,
             Common\ActionShipmentUpdateAfter::HOOK_NAME => Common\ActionShipmentUpdateAfter::class,
+
             Front\ActionCartControllerAjaxUpdateResponse::HOOK_NAME => '?' . Front\ActionCartControllerAjaxUpdateResponse::class,
             Front\ActionFrontControllerSetMedia::HOOK_NAME => '?' . Front\ActionFrontControllerSetMedia::class,
             Front\DisplayOrderConfirmation::HOOK_NAME => '?' . Front\DisplayOrderConfirmation::class,
@@ -44,6 +48,14 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Front\DisplayProductAdditionalInfo::HOOK_NAME => '?' . Front\DisplayProductAdditionalInfo::class,
             Front\DisplayProductActions::HOOK_NAME => '?' . Front\DisplayProductActions::class,
             Front\DisplayExpressCheckout::HOOK_NAME => '?' . Front\DisplayExpressCheckout::class,
+            Front\DisplayCustomerLoginFormAfter::HOOK_NAME => '?' . Front\DisplayCustomerLoginFormAfter::class,
+            Front\DisplayCustomerAccountFormTop::HOOK_NAME => '?' . Front\DisplayCustomerAccountFormTop::class,
+            Front\DisplayCheckoutSummaryTop::HOOK_NAME => '?' . Front\DisplayCheckoutSummaryTop::class,
+            Front\DisplayIziCartPreviewButton::HOOK_NAME => '?' . Front\DisplayIziCartPreviewButton::class,
+            Front\DisplayIziCheckoutButton::HOOK_NAME => '?' . Front\DisplayIziCheckoutButton::class,
+
+            // no longer used
+            Common\ActionCartSave::HOOK_NAME => '?' . Common\ActionCartSave::class,
         ];
     }
 

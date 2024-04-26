@@ -69,7 +69,7 @@ final class Product implements \JsonSerializable
      * @param ProductAttribute[] $product_attributes
      * @param ProductVariant[] $variants
      */
-    public function __construct(string $product_id, string $product_name, Price $base_price, Quantity $quantity, string $product_category = null, string $ean = null, string $product_description = null, string $product_link = null, string $product_image = null, array $product_attributes = [], array $variants = [])
+    public function __construct(string $product_id, string $product_name, Price $base_price, Quantity $quantity, ?string $product_category = null, ?string $ean = null, ?string $product_description = null, ?string $product_link = null, ?string $product_image = null, array $product_attributes = [], array $variants = [])
     {
         $this->product_id = $product_id;
         $this->product_category = $product_category;

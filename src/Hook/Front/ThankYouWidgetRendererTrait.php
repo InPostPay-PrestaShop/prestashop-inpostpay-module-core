@@ -21,6 +21,7 @@ trait ThankYouWidgetRendererTrait
     /**
      * @param string $hookName
      * @param \Order $order
+     *
      * @return bool
      */
     private function shouldBeRendered(string $hookName, \Order $order): bool

@@ -19,22 +19,25 @@ interface ObjectRepositoryInterface
     /**
      * @return T|null
      */
-    public function find(int $id, int $languageId = null): ?\ObjectModel;
+    public function find(int $id, ?int $languageId = null): ?\ObjectModel;
 
     /**
      * @return T[]
      */
-    public function findAll(int $languageId = null): array;
+    public function findAll(?int $languageId = null): array;
 
     /**
      * @return T|null
      */
-    public function findOneBy(array $criteria, array $orderBy = null): ?\ObjectModel;
+    public function findOneBy(array $criteria, ?array $orderBy = null): ?\ObjectModel;
 
     /**
      * @return T[]
      */
-    public function findBy(array $criteria, array $orderBy = null, int $limit = null, int $offset = null): array;
+    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array;
 
+    /**
+     * @return QueryBuilder<T>
+     */
     public function createQueryBuilder(string $alias): QueryBuilder;
 }

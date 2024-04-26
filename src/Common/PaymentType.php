@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Common;
 
+use izi\prestashop\Enum\Enum;
 use izi\prestashop\Enum\StringEnum;
 
 /**
@@ -44,8 +45,16 @@ final class PaymentType extends StringEnum
      */
     public static function getBankProvidedPaymentOptions(): array
     {
-        return array_udiff(self::cases(), self::getCarrierProvidedPaymentOptions(), static function (self $type1, self $type2): int {
-            return $type1->value <=> $type2->value;
+        return array_udiff(self::cases(), self::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
+    }
+
+    /**
+     * @return self[]
+     */
+    public static function getAvailableByDefaultPaymentOptions(): array
+    {
+        return array_filter(self::cases(), static function (self $type) {
+            return $type !== self::DeferredPayment();
         });
     }
 }

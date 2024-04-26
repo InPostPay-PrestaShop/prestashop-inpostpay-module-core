@@ -4,8 +4,12 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Command;
 
+use izi\prestashop\MerchantApi\Handler\UpdateOrderHandler;
 use izi\prestashop\MerchantApi\Model\Order\Request\OrderEvent;
 
+/**
+ * @see UpdateOrderHandler
+ */
 final class UpdateOrderCommand
 {
     /**

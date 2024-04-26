@@ -5,14 +5,22 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
+use izi\prestashop\Event\EventDispatcherInterface;
+use izi\prestashop\Form\Event\ApiConfigurationValidatedEvent;
+use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
+use izi\prestashop\Hook\Front\DisplayIziCheckoutButton;
 use izi\prestashop\Hook\Front\DisplayIziThankYou;
 use izi\prestashop\Hook\Front\DisplayOrderConfirmation;
 use izi\prestashop\Hook\Front\DisplayPaymentReturn;
+use izi\prestashop\Hook\Front\DisplayProductActions;
+use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
 use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GroupSequence;
 
@@ -20,11 +28,20 @@ final class GeneralConfigurationType extends AbstractType
 {
     private const TRANSLATION_SOURCE = 'generalconfigurationtype';
 
+    /**
+     * @var LegacyTranslator
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    /**
+     * @var EventDispatcherInterface|null
+     */
+    private $eventDispatcher;
+
+    public function __construct(LegacyTranslator $translator, ?EventDispatcherInterface $eventDispatcher = null)
     {
         $this->translator = $translator;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -49,6 +66,24 @@ final class GeneralConfigurationType extends AbstractType
                 'label' => $this->translator->l('Order confirmation page display hook', self::TRANSLATION_SOURCE),
                 'help' => sprintf($this->translator->l('If you choose the \'%s\' hook you have to manually implement it in the templates/checkout/order-confirmation.tpl file \'{hook h="%s" order=$order}\'.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
             ])
+            ->add('productCardDisplayHook', ChoiceType::class, [
+                'choices' => [
+                    DisplayProductAdditionalInfo::getHookName() => DisplayProductAdditionalInfo::getHookName(),
+                    DisplayProductActions::getHookName() => DisplayProductActions::getHookName(),
+                ],
+                'property_path' => 'generalConfiguration.productCardDisplayHook',
+                'label' => $this->translator->l('Product page hook used to display widget', self::TRANSLATION_SOURCE),
+                'help' => sprintf($this->translator->l('You can choose a different hook if you have problems displaying the InPost Pay widget on the product page.', self::TRANSLATION_SOURCE), DisplayIziThankYou::getHookName(), DisplayIziThankYou::getHookName()),
+            ])
+            ->add('checkoutButtonDisplayHook', ChoiceType::class, [
+                'choices' => [
+                    DisplayCheckoutSummaryTop::getHookName() => DisplayCheckoutSummaryTop::getHookName(),
+                    DisplayIziCheckoutButton::getHookName() => DisplayIziCheckoutButton::getHookName(),
+                ],
+                'property_path' => 'generalConfiguration.checkoutButtonDisplayHook',
+                'label' => $this->translator->l('Checkout process hook used to display widget', self::TRANSLATION_SOURCE),
+                'help' => sprintf($this->translator->l('If you choose the \'%s\' hook you have to manually implement it in the template \'{hook h="%s"}\'.', self::TRANSLATION_SOURCE), DisplayIziCheckoutButton::getHookName(), DisplayIziCheckoutButton::getHookName()),
+            ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,
                 'error_mapping' => [
@@ -68,9 +103,23 @@ final class GeneralConfigurationType extends AbstractType
                     'min' => 0,
                 ],
             ]);
+
+        if (null === $this->eventDispatcher) {
+            return;
+        }
+
+        $builder
+            ->get('apiConfiguration')
+            ->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
+                if (!$event->getForm()->isValid()) {
+                    return;
+                }
+
+                $this->eventDispatcher->dispatch(new ApiConfigurationValidatedEvent($event->getData()));
+            }, -100);
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => UpdateGeneralConfigurationCommand::class,

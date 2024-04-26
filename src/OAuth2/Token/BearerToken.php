@@ -15,7 +15,7 @@ final class BearerToken implements AccessTokenInterface
     /**
      * @param string[]|null $scopes
      */
-    public function __construct(string $accessToken, \DateTimeImmutable $expiresAt = null, string $refreshToken = null, array $scopes = null)
+    public function __construct(string $accessToken, ?\DateTimeImmutable $expiresAt = null, ?string $refreshToken = null, ?array $scopes = null)
     {
         $this->accessToken = $accessToken;
         $this->expiresAt = $expiresAt;

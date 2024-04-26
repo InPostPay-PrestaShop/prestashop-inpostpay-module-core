@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 final class EventStreamResponse extends StreamedResponse
 {
-    public function __construct(callable $callback = null, int $status = 200, array $headers = [])
+    public function __construct(?callable $callback = null, int $status = 200, array $headers = [])
     {
         $headers = array_merge($headers, [
             'X-Accel-Buffering' => 'no',
@@ -29,7 +29,7 @@ final class EventStreamResponse extends StreamedResponse
 
         @ini_set('zlib.output_compression', '0');
         @ini_set('implicit_flush', '1');
-        @ini_set('auto_detect_line_endings', '1');
+
         if (function_exists('apache_setenv')) {
             @apache_setenv('no-gzip', '1');
         }

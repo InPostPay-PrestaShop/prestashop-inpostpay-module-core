@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Model\Order\Request;
 
-use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\Currency;
+use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\Price;
 
 final class OrderDetails implements \JsonSerializable
@@ -35,7 +35,7 @@ final class OrderDetails implements \JsonSerializable
      */
     private $payment_type;
 
-    public function __construct(string $basket_id, Currency $currency, Price $basket_price, PaymentType $payment_type, string $order_comments = null)
+    public function __construct(string $basket_id, Currency $currency, Price $basket_price, PaymentType $payment_type, ?string $order_comments = null)
     {
         $this->order_comments = $order_comments;
         $this->basket_id = $basket_id;

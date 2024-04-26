@@ -1,0 +1,21 @@
+includes:
+  - '%currentWorkingDirectory%/vendor/prestashop/php-dev-tools/phpstan/ps-module-extension.neon'
+    
+parameters:
+  paths:
+    - ../../src
+    - ../../inpostizi.php
+    - Rules
+  universalObjectCratesClasses:
+    - Cookie
+  reportUnmatchedIgnoredErrors: false
+  phpVersion: 71300
+  level: 5
+  treatPhpDocTypesAsCertain: false
+  scanDirectories:
+    - ../../../inpostshipping/classes
+
+services:
+  -
+    class: InPost\Izi\PHPStan\Rules\EnumExtension
+    tags: [ phpstan.constants.alwaysUsedClassConstantsExtension ]

@@ -25,3 +25,7 @@
 {l s='Buyers quickly recognize that when they make a purchase from your store, they can benefit from a fast and secure purchase and delivery service by a company whose services they know and trust, which directly contributes to customers\' purchasing decisions.' mod='inpostizi'}
 {l s='With the correct placement of the widget, you help your customers notice the InPost Pay service, which will allow them to finalize their purchases on your site without having to enter their data, which is especially important for customers who prefer anonymous shopping without logging in.' mod='inpostizi'}
 {l s='Check out Merchant\'s dedicated Guide to the correct implementation of the InPost Pay service. It gathers in one place information on the current branding of InPost Pay, guidelines for the visual implementation of the widget, and best practices worth following when building a positive user experience among online shoppers. You can find Merchant\'s guide in the "useful links" section.' mod='inpostizi'}
+
+{l s='This widget is not configured correctly, correct the values in the form.' mod='inpostizi'}
+
+{l s='Select all options' mod='inpostizi'}

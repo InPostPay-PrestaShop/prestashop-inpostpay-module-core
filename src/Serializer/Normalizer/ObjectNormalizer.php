@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer as BaseNormalizer;
  *
  * @see \Symfony\Component\Serializer\Normalizer\AbstractNormalizer
  * @see \Symfony\Component\Serializer\Normalizer\AbstractObjectNormalizer
- * @see \Symfony\Component\Serializer\Normalizer\ObjectNormalizer
+ * @see BaseNormalizer
  */
 final class ObjectNormalizer extends BaseNormalizer
 {
@@ -36,7 +36,7 @@ final class ObjectNormalizer extends BaseNormalizer
 
     private $typesCache = [];
 
-    public function __construct(ClassMetadataFactoryInterface $classMetadataFactory = null, NameConverterInterface $nameConverter = null, PropertyAccessorInterface $propertyAccessor = null, PropertyTypeExtractorInterface $propertyTypeExtractor = null)
+    public function __construct(?ClassMetadataFactoryInterface $classMetadataFactory = null, ?NameConverterInterface $nameConverter = null, ?PropertyAccessorInterface $propertyAccessor = null, ?PropertyTypeExtractorInterface $propertyTypeExtractor = null)
     {
         parent::__construct($classMetadataFactory, $nameConverter, $propertyAccessor);
         $this->propertyTypeExtractor = $propertyTypeExtractor;
@@ -76,7 +76,7 @@ final class ObjectNormalizer extends BaseNormalizer
         return $object;
     }
 
-    protected function instantiateObject(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, string $format = null)
+    protected function instantiateObject(array &$data, $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, ?string $format = null)
     {
         if (!$constructor = $reflectionClass->getConstructor()) {
             return new $class();
@@ -164,7 +164,7 @@ final class ObjectNormalizer extends BaseNormalizer
         return $parameterData;
     }
 
-    protected function createChildContext(array $parentContext, $attribute, string $format = null): array
+    protected function createChildContext(array $parentContext, $attribute, ?string $format = null): array
     {
         $context = $parentContext;
         $context['cache_key'] = $this->getCacheKey($format, $context);

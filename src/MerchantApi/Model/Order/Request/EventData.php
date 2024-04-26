@@ -33,7 +33,7 @@ final class EventData implements \JsonSerializable
      */
     private $payment_type;
 
-    public function __construct(PaymentStatus $payment_status = null, OrderStatus $order_status = null, string $payment_id = null, string $payment_reference = null, PaymentType $payment_type = null)
+    public function __construct(?PaymentStatus $payment_status = null, ?OrderStatus $order_status = null, ?string $payment_id = null, ?string $payment_reference = null, ?PaymentType $payment_type = null)
     {
         $this->payment_status = $payment_status;
         $this->order_status = $order_status;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type\Consent;
 
 use izi\prestashop\Configuration\DTO\Consent;
+use izi\prestashop\Form\Type\TranslatableType as TranslatableTypePolyfill;
 use izi\prestashop\ObjectModel\Repository\CmsPageRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\Translation\LegacyTranslator;
@@ -33,7 +34,7 @@ final class ConsentType extends AbstractType implements ChoiceLoaderInterface
     private $context;
 
     /**
-     * @var ObjectRepositoryInterface
+     * @var CmsPageRepository
      */
     private $cmsPageRepository;
 
@@ -51,6 +52,10 @@ final class ConsentType extends AbstractType implements ChoiceLoaderInterface
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $translatableClass = class_exists(TranslatableType::class)
+            ? TranslatableType::class
+            : TranslatableTypePolyfill::class;
+
         $builder
             ->add('cmsPageId', ChoiceType::class, [
                 'choice_loader' => $this,
@@ -59,7 +64,7 @@ final class ConsentType extends AbstractType implements ChoiceLoaderInterface
                 'label' => $this->translator->l('Details page', self::TRANSLATION_SOURCE),
                 'help' => $this->translator->l('Specifies the page to which your customer will be redirected for a target who clicks on a given consent in the InPost mobile app.', self::TRANSLATION_SOURCE),
             ])
-            ->add('descriptions', TranslatableType::class, [
+            ->add('descriptions', $translatableClass, [
                 'label' => $this->translator->l('Consent text in the mobile app', self::TRANSLATION_SOURCE),
                 'type' => TextType::class,
                 'help' => sprintf(

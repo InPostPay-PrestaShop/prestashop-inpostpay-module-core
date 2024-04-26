@@ -43,7 +43,7 @@ function iziGetOrderComplete() {
       }
     }
 
-    const onError = () => {
+    const onError = (event) => {
       // We don't want to reject promise if connection is in progress
       if (event.target.readyState === EventSource.CONNECTING) {
         return;

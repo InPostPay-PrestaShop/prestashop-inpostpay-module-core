@@ -7,11 +7,11 @@ namespace izi\prestashop\MerchantApi\Handler\Basket;
 use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Common\Basket\NoticeType;
 use izi\prestashop\ContextManager;
+use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
 use Psr\Container\ContainerInterface;
-use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 
 final class BasketEventHandler implements BasketEventHandlerInterface, ServiceSubscriberInterface
 {

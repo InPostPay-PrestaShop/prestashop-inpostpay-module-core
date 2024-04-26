@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -12,7 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class DisplayShoppingCartFooter implements HookInterface
 {
-    use CartWidgetRendererTrait;
+    use ButtonWidgetRendererTrait;
 
     public const HOOK_NAME = 'displayShoppingCartFooter';
 
@@ -34,17 +35,19 @@ final class DisplayShoppingCartFooter implements HookInterface
     }
 
     /**
-     * @param array{request: Request} $parameters
+     * @param array{request?: Request} $parameters
      */
     public function execute(array $parameters): string
     {
-        if ('' === $widget = $this->renderWidget($parameters, self::HOOK_NAME)) {
+        $binding = BindingPlace::BasketSummary();
+
+        if ('' === $widget = $this->renderWidget($binding, $parameters, self::HOOK_NAME)) {
             return '';
         }
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/mymodule.tpl', [
+        return $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
             'widget' => $widget,
-            'styles' => $this->getHtmlStyles(),
+            'styles' => $this->getHtmlStyles($binding),
         ]);
     }
 }

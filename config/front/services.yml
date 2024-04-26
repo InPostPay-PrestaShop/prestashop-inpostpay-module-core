@@ -12,11 +12,13 @@ services:
     tags: [ container.service_locator ]
     arguments:
       - actionObjectCartDeleteBefore: '@izi\prestashop\Hook\Common\ActionCartDeleteBefore'
+        actionObjectCartUpdateAfter: '@izi\prestashop\Hook\Common\ActionCartUpdateAfter'
         actionCartSave: '@izi\prestashop\Hook\Common\ActionCartSave'
         actionObjectInPostShipmentModelAddAfter: '@izi\prestashop\Hook\Common\ActionShipmentAddAfter'
         actionObjectInPostShipmentModelUpdateBefore: '@izi\prestashop\Hook\Common\ActionShipmentUpdateBefore'
         actionObjectInPostShipmentModelUpdateAfter: '@izi\prestashop\Hook\Common\ActionShipmentUpdateAfter'
         actionValidateOrder: '@izi\prestashop\Hook\Common\ActionValidateOrder'
+        actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'
         actionAjaxDieCartControllerdisplayAjaxUpdateBefore: '@izi\prestashop\Hook\Front\ActionCartControllerAjaxUpdateResponse'
         actionFrontControllerSetMedia: '@izi\prestashop\Hook\Front\ActionFrontControllerSetMedia'
         paymentOptions: '@izi\prestashop\Hook\Front\ActionGetPaymentOptions'
@@ -29,6 +31,11 @@ services:
         displayExpressCheckout: '@izi\prestashop\Hook\Front\DisplayExpressCheckout'
         displayShoppingCart: '@izi\prestashop\Hook\Front\DisplayShoppingCart'
         displayShoppingCartFooter: '@izi\prestashop\Hook\Front\DisplayShoppingCartFooter'
+        displayCheckoutSummaryTop: '@izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop'
+        displayCustomerAccountFormTop: '@izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop'
+        displayCustomerLoginFormAfter: '@izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter'
+        displayIziCartPreviewButton: '@izi\prestashop\Hook\Front\DisplayIziCartPreviewButton'
+        displayIziCheckoutButton: '@izi\prestashop\Hook\Front\DisplayIziCheckoutButton'
 
   inpost.izi.basket_event_handler_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
@@ -51,6 +58,7 @@ services:
         izi\prestashop\Command\GenerateDeepLinkCommand: '@izi\prestashop\Handler\GenerateDeepLinkHandlerInterface'
         izi\prestashop\Command\UnbindBasketCommand: '@izi\prestashop\Handler\UnbindBasketHandlerInterface'
         izi\prestashop\Command\UpdateOrderTrackingNumbersCommand: '@izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface'
+        izi\prestashop\Command\UpdateOrderStatusCommand: '@izi\prestashop\Handler\UpdateOrderStatusHandlerInterface'
         izi\prestashop\Command\GetClientDetailsCommand: '@izi\prestashop\Handler\GetClientDetailsHandlerInterface'
         izi\prestashop\Command\UpdateBasketCommand: '@izi\prestashop\Handler\UpdateBasketHandlerInterface'
         izi\prestashop\Command\GetBindingConfirmationCommand: '@izi\prestashop\Handler\GetBindingConfirmationHandlerInterface'

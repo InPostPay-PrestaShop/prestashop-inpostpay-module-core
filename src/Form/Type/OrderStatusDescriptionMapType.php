@@ -36,7 +36,7 @@ final class OrderStatusDescriptionMapType extends AbstractType
         /** @var \OrderState $orderState */
         foreach ($this->choiceLoader->loadChoiceList()->getChoices() as $orderState) {
             $builder
-                ->add($orderState->id, TextType::class, [
+                ->add((string) $orderState->id, TextType::class, [
                     'required' => false,
                     'label' => $orderState->name[$this->context->language->id] ?? sprintf('Order state #%d', $orderState->id),
                     'attr' => [

@@ -7,6 +7,7 @@ namespace izi\prestashop\Handler\Config;
 use izi\prestashop\Cache\ConfigurationCache;
 use izi\prestashop\Command\Config\DownloadModuleDataCommand;
 use izi\prestashop\Configuration\ApiConfiguration;
+use izi\prestashop\Handler\CommandHandlerTrait;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\ObjectModel\Repository\ConfigurationRepository;
 use izi\prestashop\ObjectModel\Repository\HookRepository;
@@ -16,6 +17,8 @@ use ZipStream\ZipStream;
 
 final class DownloadModuleDataHandler implements DownloadModuleDataHandlerInterface
 {
+    use CommandHandlerTrait;
+
     /**
      * @var \Module
      */

@@ -1,0 +1,70 @@
+imports:
+  - { resource: packages/ }
+
+parameters:
+  container.autowiring.strict_mode: true
+  twig.ps_form_theme: bootstrap_4_horizontal_layout.html.twig
+
+services:
+  PrestaShopBundle\Twig\LayoutExtension:
+    class: PrestaShopBundle\Twig\LayoutExtension
+    public: false
+    arguments:
+      - '@PrestaShop\PrestaShop\Adapter\LegacyContext'
+      - '%kernel.environment%'
+    tags:
+      - { name: twig.extension }
+
+  PrestaShop\PrestaShop\Adapter\LegacyContext:
+    class: PrestaShop\PrestaShop\Adapter\LegacyContext
+    public: false
+
+  Twig\Extension\StringLoaderExtension:
+    class: Twig_Extension_StringLoader
+    public: false
+    tags:
+      - { name: twig.extension }
+
+  PrestaShopBundle\Twig\DataFormatterExtension:
+    class: PrestaShopBundle\Twig\DataFormatterExtension
+    public: false
+    tags:
+      - { name: twig.extension }
+
+  izi\prestashop\Routing\AdminUrlGenerator:
+    class: izi\prestashop\Routing\AdminUrlGenerator
+    public: false
+    decorates: Symfony\Component\Routing\Generator\UrlGeneratorInterface
+    arguments:
+      - '@izi\prestashop\Routing\AdminUrlGenerator.inner'
+
+  # overrides the default argument to use the decorated service
+  twig.extension.routing:
+    class: Symfony\Bridge\Twig\Extension\RoutingExtension
+    public: false
+    arguments:
+      - '@Symfony\Component\Routing\Generator\UrlGeneratorInterface'
+    tags:
+      - { name: twig.extension }
+
+  izi\prestashop\Routing\AnnotationDirectoryLoader:
+    class: izi\prestashop\Routing\AnnotationDirectoryLoader
+    public: false
+    decorates: sensio_framework_extra.routing.loader.annot_dir
+    decoration_on_invalid: ignore
+    arguments:
+      - '@izi\prestashop\Routing\AnnotationDirectoryLoader.inner'
+
+  PrestaShopBundle\EventListener\UserLocaleListener:
+    class: PrestaShopBundle\EventListener\UserLocaleListener
+    arguments:
+      - '@PrestaShop\PrestaShop\Adapter\LegacyContext'
+    tags:
+      - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 15 }
+
+  izi\prestashop\Translation\DomainNormalizingTranslator:
+    class: izi\prestashop\Translation\DomainNormalizingTranslator
+    public: false
+    decorates: translator
+    arguments:
+      - '@izi\prestashop\Translation\DomainNormalizingTranslator.inner'

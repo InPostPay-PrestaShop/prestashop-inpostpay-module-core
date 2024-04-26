@@ -12,7 +12,7 @@ final class NetworkException extends \RuntimeException implements NetworkExcepti
 {
     private $request;
 
-    public function __construct(RequestInterface $request, string $message = '', int $code = 0, \Throwable $previous = null)
+    public function __construct(RequestInterface $request, string $message = '', int $code = 0, ?\Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
 

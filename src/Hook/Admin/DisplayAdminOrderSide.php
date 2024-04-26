@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Admin;
 
 use izi\prestashop\CartSession;
-use izi\prestashop\Hook\HookInterface;
+use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
+use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\View\Templating\RendererInterface;
 
-final class DisplayAdminOrderSide implements HookInterface
+final class DisplayAdminOrderSide implements PrestaShopVersionAwareHookInterface
 {
     public const HOOK_NAME = 'displayAdminOrderSide';
 
@@ -25,6 +26,11 @@ final class DisplayAdminOrderSide implements HookInterface
     public static function getHookName(): string
     {
         return self::HOOK_NAME;
+    }
+
+    public static function getVersionRange(): VersionRange
+    {
+        return new VersionRange('1.7.7');
     }
 
     /**

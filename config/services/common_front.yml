@@ -13,10 +13,9 @@ services:
     tags:
       - { name: inpost.izi.hook }
     arguments:
-      - '@inpost.izi.module'
-      - '@inpost.izi.context'
-      - '@inpost.izi.environment'
       - '@izi\prestashop\View\Asset\FrontAssetManager'
+      - '@inpost.izi.security.authorization_checker'
+      - !tagged inpost.izi.front_assets_provider
 
   izi\prestashop\Hook\Front\ActionGetPaymentOptions:
     class: izi\prestashop\Hook\Front\ActionGetPaymentOptions
@@ -65,6 +64,7 @@ services:
       - { name: inpost.izi.hook }
     arguments:
       - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
@@ -76,6 +76,7 @@ services:
       - { name: inpost.izi.hook, hook_name: displayProductButtons }
     arguments:
       - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
@@ -86,6 +87,7 @@ services:
       - { name: inpost.izi.hook }
     arguments:
       - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
@@ -116,6 +118,58 @@ services:
       - { name: inpost.izi.hook }
     arguments:
       - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop:
+    class: izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop:
+    class: izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter:
+    class: izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayIziCartPreviewButton:
+    class: izi\prestashop\Hook\Front\DisplayIziCartPreviewButton
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayIziCheckoutButton:
+    class: izi\prestashop\Hook\Front\DisplayIziCheckoutButton
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
@@ -151,7 +205,7 @@ services:
       - { name: inpost.izi.command_handler }
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\BasketAppClient'
+      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
       - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
 
   izi\prestashop\Handler\GenerateDeepLinkHandlerInterface: '@izi\prestashop\Handler\GenerateDeepLinkHandler'
@@ -163,7 +217,7 @@ services:
     arguments:
       - '@inpost.izi.environment'
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\BasketAppClient'
+      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
 
   izi\prestashop\Handler\GetBindingConfirmationHandlerInterface: '@izi\prestashop\Handler\GetBindingConfirmationHandler'
   izi\prestashop\Handler\GetBindingConfirmationHandler:
@@ -289,5 +343,45 @@ services:
     class: izi\prestashop\MerchantApi\Firewall\SigningKeysService
     public: false
     arguments:
-      - '@izi\prestashop\BasketApp\BasketAppClient'
+      - '@izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface'
       - '@izi\prestashop\Cache\ConfigurationCache'
+
+  inpost.izi.security.access.decision_manager:
+    class: Symfony\Component\Security\Core\Authorization\AccessDecisionManager
+    public: false
+    arguments:
+      - !tagged inpost.izi.security_voter
+
+  inpost.izi.security.authorization_checker:
+    class: izi\prestashop\Security\AuthorizationChecker
+    public: false
+    arguments:
+      - '@inpost.izi.security.access.decision_manager'
+
+  izi\prestashop\Security\Voter\BindingWidgetVoter:
+    class: izi\prestashop\Security\Voter\BindingWidgetVoter
+    public: false
+    tags:
+      - { name: inpost.izi.security_voter }
+    arguments:
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\View\Asset\Provider\Front\CommonAssetsProvider:
+    class: izi\prestashop\View\Asset\Provider\Front\CommonAssetsProvider
+    public: false
+    tags:
+      - { name: inpost.izi.front_assets_provider }
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@inpost.izi.environment'
+
+  izi\prestashop\View\Asset\Provider\Front\ProductPageAssetsProvider:
+    class: izi\prestashop\View\Asset\Provider\Front\ProductPageAssetsProvider
+    public: false
+    tags:
+      - { name: inpost.izi.front_assets_provider }
+    arguments:
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@inpost.izi.context'

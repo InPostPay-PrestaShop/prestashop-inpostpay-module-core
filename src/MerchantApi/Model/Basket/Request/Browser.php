@@ -16,7 +16,7 @@ final class Browser implements \JsonSerializable
      */
     private $browser_id;
 
-    public function __construct(bool $browser_trusted, string $browser_id = null)
+    public function __construct(bool $browser_trusted, ?string $browser_id = null)
     {
         $this->browser_trusted = $browser_trusted;
         $this->browser_id = $browser_id;

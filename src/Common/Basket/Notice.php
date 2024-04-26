@@ -6,7 +6,6 @@ namespace izi\prestashop\Common\Basket;
 
 final class Notice implements \JsonSerializable
 {
-
     /**
      * @var NoticeType
      */

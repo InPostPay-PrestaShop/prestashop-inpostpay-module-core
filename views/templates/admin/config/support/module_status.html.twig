@@ -20,9 +20,9 @@
 {% block support_block_body_content %}
   <div class="row no-gutters">
     {% if not status.OK %}
-      <div class="col-12 border-bottom">
+      <div class="col-12 col-xs-12 border-bottom">
         <div class="p-3">
-          <ul class="mb-0">
+          <ul class="pl-3 mb-0">
             {% for error in status.errors %}
               <li>{{ error|raw }}</li>
             {% endfor %}
@@ -30,15 +30,15 @@
         </div>
       </div>
     {% endif %}
-    <div class="col-6 border-right">
+    <div class="col-6 col-xs-6 border-right">
       <div class="p-3">
-        <a href="{{ path('admin_inpost_izi_config_download_data') }}" class="btn btn-sm btn-block px-0 d-flex justify-content-center align-items-center btn-link">
+        <a href="{{ path('admin_inpost_izi_config_download_data', app.request.query.all) }}" class="btn btn-sm btn-block px-0 d-flex justify-content-center align-items-center btn-link">
           <span class="material-icons btn-icon">content_copy</span>
           {{ 'Download logs and module data'|legacy_trans }}
         </a>
       </div>
     </div>
-    <div class="col-6">
+    <div class="col-6 col-xs-6">
       {{ form_start(form) }}
 
         {{ form_errors(form) }}

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\AdvancedConfiguration;
+use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
@@ -24,8 +25,12 @@ final class AdvancedConfigurationType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $switchClass = class_exists(SwitchType::class)
+            ? SwitchType::class
+            : SwitchTypePolyfill::class;
+
         $builder
-            ->add('debugEnabled', SwitchType::class, [
+            ->add('debugEnabled', $switchClass, [
                 'required' => false,
                 'choices' => [
                     $this->translator->l('Disable debug mode', self::TRANSLATION_SOURCE) => false,

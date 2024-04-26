@@ -18,6 +18,7 @@ final class CarrierMapping implements \JsonSerializable
      * @var ServiceCode[]
      *
      * @Assert\All(
+     *
      *     @Assert\Type(ServiceCode::class),
      * )
      */
@@ -26,7 +27,7 @@ final class CarrierMapping implements \JsonSerializable
     /**
      * @param ServiceCode[] $serviceCodes
      */
-    public function __construct(int $referenceId = null, array $serviceCodes = [])
+    public function __construct(?int $referenceId = null, array $serviceCodes = [])
     {
         $this->referenceId = $referenceId;
         $this->serviceCodes = $serviceCodes;

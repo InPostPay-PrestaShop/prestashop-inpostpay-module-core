@@ -136,7 +136,7 @@ final class ConfigurationCache implements CacheInterface
     public function setMultiple($values, $ttl = null): bool
     {
         if (!is_iterable($values)) {
-            throw new InvalidArgumentException(sprintf('Cache values must be an array or a Traversable, "%s" given.', is_object($values) ? get_class($values) : gettype($values)));
+            throw new InvalidArgumentException(sprintf('Cache values must be an array or a Traversable, "%s" given.', get_debug_type($values)));
         }
 
         $success = true;
@@ -169,7 +169,7 @@ final class ConfigurationCache implements CacheInterface
     private function validateKey($key): string
     {
         if (!is_string($key)) {
-            throw new InvalidArgumentException(sprintf('Cache key must be a string, "%s" given.', is_object($key) ? get_class($key) : gettype($key)));
+            throw new InvalidArgumentException(sprintf('Cache key must be a string, "%s" given.', get_debug_type($key)));
         }
 
         if ('' === $key) {
@@ -191,7 +191,7 @@ final class ConfigurationCache implements CacheInterface
             return;
         }
 
-        throw new InvalidArgumentException(sprintf('Cache keys must be an array or a Traversable, "%s" given.', is_object($keys) ? get_class($keys) : gettype($keys)));
+        throw new InvalidArgumentException(sprintf('Cache keys must be an array or a Traversable, "%s" given.', get_debug_type($keys)));
     }
 
     private function createCacheItem($value, $ttl): array
@@ -223,15 +223,14 @@ final class ConfigurationCache implements CacheInterface
 
     private function getExpiry($ttl): ?\DateTimeImmutable
     {
-        if ($ttl === null) {
+        if (null === $ttl) {
             return null;
         }
 
         if (is_int($ttl)) {
-            $ttl = new \DateInterval(sprintf('PT%dS', abs($ttl)));
-            $ttl->invert = 0 > $ttl ? 1 : 0;
+            $ttl = new \DateInterval(sprintf('PT%dS', $ttl));
         } elseif (!$ttl instanceof \DateInterval) {
-            throw new InvalidArgumentException(sprintf('TTL must be an integer, a DateInterval or null, "%s" given.', is_object($ttl) ? get_class($ttl) : gettype($ttl)));
+            throw new InvalidArgumentException(sprintf('TTL must be an integer, a DateInterval or null, "%s" given.', get_debug_type($ttl)));
         }
 
         return $this->clock->now()->add($ttl);

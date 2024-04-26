@@ -1,12 +1,15 @@
 <?php
 
+use izi\prestashop\AdminKernel;
 use izi\prestashop\Common\Currency;
+use izi\prestashop\Configuration\AdvancedConfigurationInterface;
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
 use izi\prestashop\DependencyInjection\ContainerFactory;
 use izi\prestashop\DependencyInjection\Exception\ContainerNotFoundException;
 use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler;
+use izi\prestashop\Hook\Front\ActionFrontControllerSetMedia;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
 use izi\prestashop\Hook\WidgetConfigurationResolver;
@@ -24,38 +27,38 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\HttpKernel\TerminableInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/BackendForm.php';
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once __DIR__ . '/vendor/autoload.php';
+}
 
 class InPostIzi extends PaymentModule implements WidgetInterface
 {
-    use BackendForm;
-
     private static $loggerServiceId = 'inpost.izi.general_logger';
-
-    /**
-     * @var bool use bootstrap styles on the module configuration page
-     */
-    public $bootstrap;
 
     /**
      * @var ContainerInterface|null
      */
     private $legacyContainer;
 
+    /**
+     * @var KernelInterface|null
+     */
+    private $adminKernel;
+
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.5.8';
+        $this->version = '1.6.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
-        $this->bootstrap = true;
 
         $this->ps_versions_compliancy = [
             'min' => '1.7.0.0',
@@ -118,7 +121,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function addCheckboxCurrencyRestrictionsForModule(array $shops = [])
     {
         if ([] === $shops) {
-            $shops = \Shop::getShops(true, null, true);
+            $shops = Shop::getShops(true, null, true);
         }
 
         $data = [];
@@ -137,22 +140,19 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             }
         }
 
-        return \Db::getInstance()->insert('module_currency', $data);
+        return Db::getInstance()->insert('module_currency', $data);
     }
 
-    /**
-     * @return string
-     */
     public function getContent()
     {
         try {
             /** @var UrlGeneratorInterface $router */
             $router = $this->get('router');
-        } catch (ServiceNotFoundException $e) {
-            return $this->doGetContent();
-        }
 
-        \Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
+            Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
+        } catch (ServiceNotFoundException $e) {
+            $this->handleConfigPageRequest();
+        }
     }
 
     /**
@@ -161,7 +161,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __call($methodName, array $arguments)
     {
         $hookName = 0 === strpos($methodName, 'hook')
-            ? lcfirst(\Tools::substr($methodName, 4))
+            ? lcfirst(Tools::substr($methodName, 4))
             : $methodName;
 
         try {
@@ -173,13 +173,13 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this
                 ->get(HookExecutorInterface::class)
                 ->execute($hookName, $parameters);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->getLogger()->critical('Error executing hook "{hookName}": {error}', [
                 'hookName' => $hookName,
                 'error' => $e,
             ]);
 
-            if (!defined('_PS_MODE_DEV_') || _PS_MODE_DEV_) {
+            if ($this->isDebugEnabled()) {
                 throw $e;
             }
 
@@ -192,11 +192,13 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      *
      * @param string|class-string<T> $serviceName
      *
+     * @phpstan-return ($serviceName is class-string<T> ? T : object)
+     *
      * @return T|object
      */
     public function get($serviceName)
     {
-        if (\Tools::version_compare(_PS_VERSION_, '1.7.6')) {
+        if (Tools::version_compare(_PS_VERSION_, '1.7.6')) {
             return $this->getLegacyContainer()->get($serviceName);
         }
 
@@ -214,13 +216,13 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $service;
         }
 
-        if (!$this->context->controller instanceof \FrontController || !class_exists(PrestaShopContainerBuilder::class)) {
+        if (!$this->context->controller instanceof FrontController || !class_exists(PrestaShopContainerBuilder::class)) {
             throw ContainerNotFoundException::create();
         }
 
         try {
             $container = PrestaShopContainerBuilder::getContainer('front', _PS_MODE_DEV_);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw ContainerNotFoundException::create($e);
         }
 
@@ -234,11 +236,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     public function renderWidget($hookName, array $configuration)
     {
-        if (isset($configuration['request'])) {
-            $request = $configuration['request'];
-        } else {
-            $request = $this->getCurrentRequest();
-        }
+        $request = isset($configuration['request'])
+            ? $configuration['request']
+            : $this->getCurrentRequest();
 
         if ([] === $parameters = $this->getWidgetVariables($hookName, $configuration)) {
             return '';
@@ -296,6 +296,8 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this->get(self::$loggerServiceId);
         } catch (ContainerNotFoundException $e) {
             return $this->getLegacyContainer()->get(self::$loggerServiceId);
+        } catch (Exception $e) {
+            return new Psr\Log\NullLogger();
         }
     }
 
@@ -318,11 +320,11 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     private function getLegacyContainer()
     {
-        if (isset($this->legacyContainer)) {
-            return $this->legacyContainer;
+        if (!isset($this->legacyContainer)) {
+            $this->legacyContainer = $this->createContainer();
         }
 
-        return $this->legacyContainer = $this->createContainer();
+        return $this->legacyContainer;
     }
 
     /**
@@ -332,7 +334,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     {
         $cacheDir = sprintf('%s/inpost/izi/', rtrim(_PS_CACHE_DIR_, '/'));
 
-        if (\Tools::version_compare(_PS_VERSION_, '1.7.4')) {
+        if (Tools::version_compare(_PS_VERSION_, '1.7.4')) {
             $className = sprintf('InPost\\Izi\\Container_%s', str_replace('.', '_', $this->version));
             $resources = $this->getSf28ConfigResources();
         } else {
@@ -354,6 +356,8 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             $container->addCompilerPass(new RegisterListenersPass('inpost.izi.event_dispatcher'), PassConfig::TYPE_BEFORE_REMOVING);
             $container->addCompilerPass(new ProvideServiceLocatorFactoriesPass('inpost.izi.service_locator'));
             $container->addCompilerPass(new TaggedIteratorsCollectorPass(UpdateOrderTrackingNumbersHandler::class));
+            $container->addCompilerPass(new TaggedIteratorsCollectorPass(ActionFrontControllerSetMedia::class));
+            $container->addCompilerPass(new TaggedIteratorsCollectorPass('inpost.izi.security.access.decision_manager'));
             AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
         };
 
@@ -369,14 +373,68 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     private function setUpRoutingLoaderResolver()
     {
-        if (\Tools::version_compare(_PS_VERSION_, '1.7.7')) {
+        if (Tools::version_compare(_PS_VERSION_, '1.7.7')) {
             return;
         }
 
         try {
             $this->get('routing.loader');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // ignore silently
+        }
+    }
+
+    private function handleConfigPageRequest()
+    {
+        $request = $this->getCurrentRequest();
+        $request->query->remove('controllerUri');
+
+        $kernel = $this->getAdminKernel();
+        $response = $kernel->handle($request);
+
+        $this->context->cookie->write();
+        $response->send();
+
+        if ($kernel instanceof TerminableInterface) {
+            $kernel->terminate($request, $response);
+        }
+
+        exit;
+    }
+
+    /**
+     * @return KernelInterface
+     */
+    private function getAdminKernel()
+    {
+        if (isset($this->adminKernel)) {
+            return $this->adminKernel;
+        }
+
+        global $kernel;
+
+        if (!$kernel instanceof KernelInterface) {
+            throw new RuntimeException('PS application kernel instance was not found.');
+        }
+
+        $this->adminKernel = new AdminKernel($kernel, _PS_VERSION_);
+        $this->adminKernel->boot();
+
+        // In case of some very early 1.7 versions, session may not have already been started by PS application.
+        $kernel->getContainer()->get('session')->start();
+
+        return $this->adminKernel;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isDebugEnabled()
+    {
+        try {
+            return !$this->get(AdvancedConfigurationInterface::class)->isDebugEnabled();
+        } catch (Exception $e) {
+            return false;
         }
     }
 }

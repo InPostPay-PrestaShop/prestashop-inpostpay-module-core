@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -22,9 +23,10 @@ final class DisplayProductFooter implements HookInterface
      */
     private $renderer;
 
-    public function __construct(GuiConfigurationInterface $configuration, WidgetInterface $module, RendererInterface $renderer)
+    public function __construct(GuiConfigurationInterface $configuration, GeneralConfigurationInterface $generalConfiguration, WidgetInterface $module, RendererInterface $renderer)
     {
         $this->configuration = $configuration;
+        $this->generalConfiguration = $generalConfiguration;
         $this->module = $module;
         $this->renderer = $renderer;
     }
@@ -35,21 +37,21 @@ final class DisplayProductFooter implements HookInterface
     }
 
     /**
-     * @param array{product: ProductLazyArray, request: Request} $parameters
+     * @param array{product?: ProductLazyArray, request?: Request} $parameters
      */
     public function execute(array $parameters): string
     {
         $product = $parameters['product'] ?? null;
 
         if (!isset($product['id_product']) || !is_numeric($product['id_product'])) {
-            throw new \InvalidArgumentException(sprintf('Parameter "product" expected to be an array or an instance of "%s", "%s" given.', ProductLazyArray::class, is_object($product) ? get_class($product) : gettype($product)));
+            throw new \InvalidArgumentException(sprintf('Parameter "product" expected to be an array or an instance of "%s", "%s" given.', ProductLazyArray::class, get_debug_type($product)));
         }
 
         if ('' === $widget = $this->renderWidget((int) $product['id_product'], $parameters, self::HOOK_NAME)) {
             return '';
         }
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/mymodule.tpl', [
+        return $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
             'widget' => $widget,
             'styles' => [],
         ]);

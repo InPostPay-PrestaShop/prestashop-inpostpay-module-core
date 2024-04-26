@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Event;
 
+use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\EventListener\CartListener;
+use izi\prestashop\EventListener\OrderListener;
 use izi\prestashop\EventListener\ShipmentListener;
+use izi\prestashop\Form\BasketAppClientProvider;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 
 /**
  * @internal
@@ -31,7 +33,9 @@ final class EventDispatcherFactory implements ServiceSubscriberInterface
     {
         return [
             CartListener::class,
+            OrderListener::class,
             ShipmentListener::class,
+            '?' . BasketAppClientProvider::class,
         ];
     }
 
@@ -39,7 +43,9 @@ final class EventDispatcherFactory implements ServiceSubscriberInterface
     {
         $dispatcher = new EventDispatcher();
 
-        foreach (self::getSubscribedServices() as $className) {
+        foreach (self::getSubscribedServices() as $serviceId) {
+            $className = '?' === $serviceId[0] ? \Tools::substr($serviceId, 1) : $serviceId;
+
             $this->addListeners($dispatcher, $className);
         }
 

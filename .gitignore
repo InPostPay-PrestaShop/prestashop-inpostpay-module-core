@@ -3,5 +3,7 @@ node_modules
 inpostizi.zip
 config_*.xml
 *.js.map
+*.css.map
 .idea
 .DS_Store
+.php-cs-fixer.cache

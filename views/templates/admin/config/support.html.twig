@@ -6,14 +6,14 @@
   {% include '@Modules/inpostizi/views/templates/admin/config/support/description.html.twig' %}
 
   <div class="row mx-n2">
-    <div class="col-lg-4 col-sm-6 col-12 mt-3 px-2">
-      {% include '@Modules/inpostizi/views/templates/admin/config/support/module_status.html.twig' with form %}
+    <div class="col-lg-4 col-sm-6 col-12 col-xs-12 mt-3 px-2">
+      {% include '@Modules/inpostizi/views/templates/admin/config/support/module_status.html.twig'%}
       {% include '@Modules/inpostizi/views/templates/admin/config/support/updates.html.twig' %}
     </div>
-    <div class="col-lg-4 col-sm-6 col-12 mt-3 px-2">
+    <div class="col-lg-4 col-sm-6 col-12 col-xs-12 mt-3 px-2">
       {% include '@Modules/inpostizi/views/templates/admin/config/support/how_to.html.twig' %}
     </div>
-    <div class="col-lg-4 col-sm-6 col-12 mt-3 px-2">
+    <div class="col-lg-4 col-sm-6 col-12 col-xs-12 mt-3 px-2">
       {% include '@Modules/inpostizi/views/templates/admin/config/support/troubleshooting.html.twig' %}
     </div>
   </div>
@@ -21,11 +21,11 @@
 
 {% block stylesheets %}
   {{ parent() }}
-  <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/support.css') }}" />
+  <link rel="stylesheet" href="{{ asset('css/admin/support.css', 'InPostIzi') }}" />
 {% endblock %}
 
 {% block javascripts %}
   {{ parent() }}
-  <script type="text/javascript" src="{{ asset('../modules/inpostizi/views/js/admin/support.js') }}">
+  <script type="text/javascript" src="{{ asset('js/admin/support.js', 'InPostIzi') }}">
   </script>
 {% endblock %}

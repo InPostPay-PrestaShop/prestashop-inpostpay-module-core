@@ -14,6 +14,9 @@ use izi\prestashop\OAuth2\Token\BearerToken;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
+/**
+ * @implements PersistentConfigurationInterface<ApiConfigurationInterface>
+ */
 final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRepositoryInterface, PersistentConfigurationInterface
 {
     private const ENVIRONMENT_TYPE = 'INPOST_PAY_environment';
@@ -133,7 +136,7 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
         $this->environment = $type->createEnvironment();
     }
 
-    private function setClientCredentials(ClientCredentialsInterface $credentials = null): void
+    private function setClientCredentials(?ClientCredentialsInterface $credentials = null): void
     {
         $this->configuration->set(self::OAUTH2_CLIENT_ID, $credentials ? $credentials->getClientId() : null);
         $this->configuration->set(self::OAUTH2_CLIENT_SECRET, $credentials ? $credentials->getClientSecret() : null);

@@ -6,7 +6,10 @@ use izi\item\order\InvoiceDetails;
 use izi\prestashop\CartSession;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
+use izi\prestashop\Common\PaymentType;
+use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
+use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
@@ -37,7 +40,7 @@ class Create
      */
     private $shippingConfiguration;
 
-    public function __construct(\Context $context = null, Hashing $crypto = null, \PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null)
+    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ?ShippingConfigurationInterface $shippingConfiguration = null)
     {
         $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
@@ -100,6 +103,8 @@ class Create
         if (null === $carrierReferenceId || null === $carrierId = $this->getCarrierId($carrierReferenceId, $shopId)) {
             throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $data->delivery->delivery_type));
         }
+
+        $this->checkPaymentType($data->order_details, $shopId);
 
         $customer = $this->getOrCreateCustomer($cart, $data->account_info);
 
@@ -362,9 +367,7 @@ class Create
         }
 
         if (!$customer->save()) {
-            throw $newCustomer
-                ? new InternalServerErrorException('Could not create customer account.')
-                : new InternalServerErrorException('Could not update customer account.');
+            throw $newCustomer ? new InternalServerErrorException('Could not create customer account.') : new InternalServerErrorException('Could not update customer account.');
         }
 
         $cart->id_customer = $customer->id;
@@ -483,10 +486,7 @@ class Create
 
         foreach ($products as $product) {
             if ($product['minimal_quantity'] > $product['cart_quantity']) {
-                throw new CannotCreateOrderException($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
-                    '%product%' => $product['name'],
-                    '%quantity%' => $product['minimal_quantity'],
-                ], 'Shop.Notifications.Error'));
+                throw new CannotCreateOrderException($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', ['%product%' => $product['name'], '%quantity%' => $product['minimal_quantity']], 'Shop.Notifications.Error'));
             }
         }
 
@@ -495,14 +495,10 @@ class Create
         }
 
         if ($product['active']) {
-            throw new CannotCreateOrderException($this->context->getTranslator()->trans('%product% is no longer available in this quantity. You cannot proceed with your order until the quantity is adjusted.', [
-                '%product%' => $product['name'],
-            ], 'Shop.Notifications.Error'));
+            throw new CannotCreateOrderException($this->context->getTranslator()->trans('%product% is no longer available in this quantity. You cannot proceed with your order until the quantity is adjusted.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
         }
 
-        throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', [
-            '%product%' => $product['name'],
-        ], 'Shop.Notifications.Error'));
+        throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
     }
 
     private function checkMinimalPurchaseAmount(\Cart $cart): void
@@ -516,10 +512,7 @@ class Create
             return;
         }
 
-        throw new CannotCreateOrderException($this->context->getTranslator()->trans('A minimum shopping cart total of %amount% (tax excl.) is required to validate your order. Current cart total is %total% (tax excl.).', [
-            '%amount%' => $this->formatPrice($minimalPurchase),
-            '%total%' => $this->formatPrice($productsTotalExcludingTax),
-        ], 'Shop.Theme.Checkout'));
+        throw new CannotCreateOrderException($this->context->getTranslator()->trans('A minimum shopping cart total of %amount% (tax excl.) is required to validate your order. Current cart total is %total% (tax excl.).', ['%amount%' => $this->formatPrice($minimalPurchase), '%total%' => $this->formatPrice($productsTotalExcludingTax)], 'Shop.Theme.Checkout'));
     }
 
     private function getMinimalPurchaseAmount(): float
@@ -587,5 +580,19 @@ class Create
         }
 
         return array_map([ServiceCode::class, 'from'], $deliveryData->delivery_codes);
+    }
+
+    private function checkPaymentType($orderDetails, int $shopId): void
+    {
+        $configuration = new Configuration();
+        $availablePaymentOptions = (new OrdersConfiguration($configuration))->getAvailablePaymentOptions($shopId);
+
+        $paymentType = PaymentType::tryFrom($orderDetails->payment_type);
+
+        if (in_array($paymentType, $availablePaymentOptions, true)) {
+            return;
+        }
+
+        throw new CannotCreateOrderException($this->module->l('The selected payment method is not available.', self::TRANSLATION_SOURCE));
     }
 }

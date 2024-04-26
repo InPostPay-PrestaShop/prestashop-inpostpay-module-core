@@ -4,7 +4,7 @@
 
 {% block content %}
   <div class="row justify-content-center">
-    <div class="col">
+    <div class="col-xs-12 col-12">
 
       <div class="card">
         {{ form_start(form) }}
@@ -12,28 +12,76 @@
           <i class="material-icons">palette</i> {{ layoutTitle }}
         </h3>
 
-        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
-          {{ form_errors(form) }}
+        {{ form_errors(form) }}
 
-          {% include '@Modules/inpostizi/views/templates/admin/config/gui/form.html.twig' with {
-            widgetDisplay: form.widgetDisplayedOnCartPage,
-            widgetConfig: form.cartPageWidgetConfiguration,
-            widgetStyles: form.cartPageHtmlStyles,
-          } %}
-        </div>
+        {% set widgetForms = [
+          form.cartWidgetDisplayConfiguration,
+          form.productWidgetDisplayConfiguration,
+          form.loginPageWidgetDisplayConfiguration,
+          form.registerFormPageWidgetDisplayConfiguration,
+          form.checkoutPageWidgetDisplayConfiguration,
+          form.miniCartPageWidgetDisplayConfiguration
+        ] %}
 
-        <div class="card-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
-          {% include '@Modules/inpostizi/views/templates/admin/config/gui/form.html.twig' with {
-            widgetDisplay: form.widgetDisplayedOnProductCard,
-            widgetConfig: form.productCardWidgetConfiguration,
-            widgetStyles: form.productCardHtmlStyles,
-          } %}
+        {% set activeIndex = null %}
 
-          {{ form_rest(form) }}
+        {% for widgetForm in widgetForms %}
+          {% if widgetForm.vars.valid == false and activeIndex == null %}
+            {% set activeIndex = loop.index0 %}
+          {% endif %}
+        {% endfor %}
+
+        {% if activeIndex == null %}
+          {% set activeIndex = 0 %}
+        {% endif %}
+
+        <ul class="nav nav-pills border-top-0 bg-light" id="gui_tabs" role="tablist">
+          {% for widgetForm in widgetForms %}
+            <li class="nav-item" role="presentation">
+              <a
+                class="nav-link
+                {% if activeIndex == loop.index0 %}active{% endif %}
+                {% if widgetForm.vars.valid == false %}text-danger{% endif %}
+                "
+                id="{{ widgetForm.vars.id }}-tab"
+                data-toggle="tab"
+                data-target="#{{ widgetForm.vars.id }}"
+                href="#{{ widgetForm.vars.id }}"
+                role="tab"
+              >
+                {{ widgetForm.vars.label }}
+
+                {% if widgetForm.vars.valid == false %}
+                  <span
+                      class="material-icons"
+                      data-toggle="popover"
+                      data-trigger="hover"
+                      data-placement="top"
+                      data-content="{{ 'This widget is not configured correctly, correct the values in the form.'|legacy_trans }}"
+                  >error</span>
+                {% endif %}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+
+        <div class="tab-content p-0" id="gui_tabs_content">
+          {% for widgetForm in widgetForms %}
+            <div
+              class="
+                tab-pane fade
+                {% if activeIndex == loop.index0 %}show active in{% endif %}
+              "
+              id="{{ widgetForm.vars.id }}"
+              role="tabpanel"
+            >
+              {{ form_widget(widgetForm) }}
+            </div>
+          {% endfor %}
         </div>
 
         <div class="card-footer clearfix">
-          <a href="{{ path('admin_module_manage') }}" class="btn btn-outline-secondary">{{ 'Back'|trans({}, 'Admin.Global') }}</a>
+          <a href="{{ path('admin_module_manage') }}" class="btn btn-outline-secondary">{{ 'Back'|trans }}</a>
 
           <button class="btn btn-primary float-right">{{ 'Save'|trans({}, 'Admin.Actions') }}</button>
         </div>
@@ -46,13 +94,13 @@
 
 {% block stylesheets %}
   {{ parent() }}
-  <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/gui.css') }}" />
+  <link rel="stylesheet" href="{{ asset('css/admin/gui.css', 'InPostIzi') }}" />
 {% endblock %}
 
 {% block javascripts %}
   {{ parent() }}
   <script type="text/javascript" src="https://izi-sandbox.inpost.pl/inpostizi.js">
   </script>
-  <script type="text/javascript" src="{{ asset('../modules/inpostizi/views/js/admin/gui.js') }}">
+  <script type="text/javascript" src="{{ asset('js/admin/gui.js', 'InPostIzi') }}">
   </script>
 {% endblock %}

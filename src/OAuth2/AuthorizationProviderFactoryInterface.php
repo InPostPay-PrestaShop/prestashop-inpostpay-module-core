@@ -9,5 +9,5 @@ use izi\prestashop\OAuth2\Token\AccessTokenRepositoryInterface;
 
 interface AuthorizationProviderFactoryInterface
 {
-    public function create(UriCollectionInterface $uriCollection, ClientCredentialsInterface $credentials, AccessTokenRepositoryInterface $tokenRepository = null): AuthorizationProviderInterface;
+    public function create(UriCollectionInterface $uriCollection, ClientCredentialsInterface $credentials, ?AccessTokenRepositoryInterface $tokenRepository = null): AuthorizationProviderInterface;
 }

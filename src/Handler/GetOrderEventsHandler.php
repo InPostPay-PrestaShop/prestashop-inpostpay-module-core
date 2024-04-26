@@ -44,7 +44,7 @@ final class GetOrderEventsHandler implements GetOrderEventsHandlerInterface
     public function __invoke(GetOrderEventsCommand $command): OrderEventStream
     {
         if (null === $session = $this->repository->findByBasketId($command->getBasketId())) {
-            throw new \DomainException('Basket does not exist.');
+            throw new \DomainException(sprintf('Basket "%s" does not exist.', $command->getBasketId()));
         }
 
         if (null !== $orderId = $session->getOrderId()) {

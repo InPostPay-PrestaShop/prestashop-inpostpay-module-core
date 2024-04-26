@@ -1,5 +1,7 @@
 <?php
 
+use InPost\Izi\Upgrade\CacheClearer;
+use InPost\Izi\Upgrade\ConfigUpdaterTrait;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\Consent;
@@ -13,8 +15,13 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once __DIR__ . '/ConfigUpdaterTrait.php';
+require_once __DIR__ . '/CacheClearer.php';
+
 class InPostIziUpdater_1_5_0
 {
+    use ConfigUpdaterTrait;
+
     private const CART_WIDGET_CONFIG_MAP = [
         'INPOST_PAY_alignment_cart' => 'alignment',
         'INPOST_PAY_background_cart' => 'darkMode',
@@ -45,21 +52,18 @@ class InPostIziUpdater_1_5_0
      */
     private $db;
 
-    public function __construct(\Db $db)
+    public function __construct(Db $db)
     {
         $this->db = $db;
     }
 
     public function upgrade(): bool
     {
-        $result = $this->updateEnabledConfigValue()
+        CacheClearer::getInstance()->clear();
+
+        return $this->updateEnabledConfigValue()
             && $this->updateConsentStructure()
             && $this->updateWidgetConfigStructure();
-
-        \Tools::clearSf2Cache('prod');
-        \Tools::clearSf2Cache('dev');
-
-        return $result;
     }
 
     private function updateEnabledConfigValue(): bool
@@ -76,7 +80,7 @@ class InPostIziUpdater_1_5_0
         $consentsByShopGroup = [];
         $configIds = [];
 
-        $languageIds = \Language::getLanguages(false, false, true);
+        $languageIds = Language::getLanguages(false, false, true);
 
         $requirementTypes = [
             'additional' => ConsentRequirementType::Optional(),
@@ -88,7 +92,7 @@ class InPostIziUpdater_1_5_0
             $cmsIdsKey = sprintf('INPOST_PAY_terms_options_%s', $key);
             $textKey = sprintf('%s_text', $cmsIdsKey);
 
-            $sql = (new \DbQuery())
+            $sql = (new DbQuery())
                 ->select('c.*')
                 ->from('configuration', 'c')
                 ->where(sprintf('c.name IN ("%s", "%s")', $cmsIdsKey, $textKey));
@@ -114,7 +118,7 @@ class InPostIziUpdater_1_5_0
                         $descriptions[$languageId] = $text;
                     }
 
-                    $dateUpdated = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['date_upd']);
+                    $dateUpdated = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['date_upd']);
 
                     foreach ($cmsPageIds as $cmsPageId) {
                         if (0 >= $cmsPageId) {
@@ -229,19 +233,10 @@ class InPostIziUpdater_1_5_0
         return $styles;
     }
 
-    private function getConfigDataByKeys(array $keys): array
-    {
-        $sql = (new \DbQuery())
-            ->select('c.*')
-            ->from('configuration', 'c')
-            ->where(sprintf('c.name IN ("%s")', implode('","', $keys)));
-
-        return $this->db->executeS($sql) ?: [];
-    }
-
     private function groupConfigValuesByShop(array $data, array &$configIds = []): array
     {
         $dataByShopGroup = [];
+
         foreach ($data as $row) {
             $dateUpdated = $dataByShopGroup[(int) $row['id_shop_group']][(int) $row['id_shop']]['date_upd'] ?? null;
 
@@ -256,26 +251,6 @@ class InPostIziUpdater_1_5_0
         return $dataByShopGroup;
     }
 
-    private function setJsonConfigValues(string $key, array $dataByShopGroup): bool
-    {
-
-        foreach ($dataByShopGroup as $shopGroupId => $dataByShop) {
-            foreach ($dataByShop as $shopId => $data) {
-                $value = json_encode($data);
-                if (!\Configuration::updateValue($key, $value, false, $shopGroupId, $shopId)) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private function deleteConfigurationByKeys(array $keys): bool
-    {
-        return $this->db->delete('configuration', 'name IN ("' . implode('","', $keys) . '")');
-    }
-
     private function getWidgetWidth(int $width): ?int
     {
         return WidgetConfiguration::WIDTH_MIN_PX <= $width && WidgetConfiguration::WIDTH_MAX_PX >= $width ? $width : null;
@@ -283,11 +258,11 @@ class InPostIziUpdater_1_5_0
 }
 
 /**
- * @param \InPostIzi $module
+ * @param InPostIzi $module
  *
  * @return bool
  */
-function upgrade_module_1_5_0(\Module $module)
+function upgrade_module_1_5_0(Module $module)
 {
-    return (new InPostIziUpdater_1_5_0(\Db::getInstance()))->upgrade();
+    return (new InPostIziUpdater_1_5_0(Db::getInstance()))->upgrade();
 }

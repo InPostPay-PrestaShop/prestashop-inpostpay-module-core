@@ -26,7 +26,7 @@ class DeliveryFactory
     private $configuration;
 
     /**
-     * @var ObjectRepositoryInterface
+     * @var CarrierRepository
      */
     private $carrierRepository;
 

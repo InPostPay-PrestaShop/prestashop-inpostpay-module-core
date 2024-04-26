@@ -38,7 +38,7 @@ final class CreateOrderRequest implements \JsonSerializable
     /**
      * @param Consent[] $consents
      */
-    public function __construct(OrderDetails $order_details, AccountInfo $account_info, Delivery $delivery, array $consents, InvoiceDetails $invoice_details = null)
+    public function __construct(OrderDetails $order_details, AccountInfo $account_info, Delivery $delivery, array $consents, ?InvoiceDetails $invoice_details = null)
     {
         $this->order_details = $order_details;
         $this->account_info = $account_info;

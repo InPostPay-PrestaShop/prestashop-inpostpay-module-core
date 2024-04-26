@@ -18,7 +18,7 @@ final class ActionGetPaymentOptions implements HookInterface
     private const TRANSLATION_SOURCE = 'actiongetpaymentoptions';
 
     /**
-     * @var \PaymentModule & WidgetInterface
+     * @var \PaymentModule&WidgetInterface
      */
     private $paymentModule;
 
@@ -38,7 +38,7 @@ final class ActionGetPaymentOptions implements HookInterface
     private $renderer;
 
     /**
-     * @param \PaymentModule & WidgetInterface $paymentModule
+     * @param \PaymentModule&WidgetInterface $paymentModule
      */
     public function __construct(\PaymentModule $paymentModule, PaymentCurrencyChecker $currencyChecker, GuiConfigurationInterface $configuration, RendererInterface $renderer)
     {
@@ -54,7 +54,7 @@ final class ActionGetPaymentOptions implements HookInterface
     }
 
     /**
-     * @param array{cart: \Cart, request: Request} $parameters
+     * @param array{cart?: \Cart, request?: Request} $parameters
      *
      * @return PaymentOption[]
      */
@@ -63,7 +63,7 @@ final class ActionGetPaymentOptions implements HookInterface
         $cart = $parameters['cart'] ?? null;
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Cart::class, is_object($cart) ? get_class($cart) : gettype($cart)));
+            throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
         }
 
         if (0 >= (int) $cart->id || !$this->currencyChecker->check($this->paymentModule, (int) $cart->id_currency)) {
@@ -86,7 +86,7 @@ final class ActionGetPaymentOptions implements HookInterface
 
     private function createPaymentOption(string $widget): PaymentOption
     {
-        $additionalInfo = $this->renderer->render('module:inpostizi/views/templates/hook/mymodule.tpl', [
+        $additionalInfo = $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
             'widget' => $widget,
             'styles' => [],
         ]);

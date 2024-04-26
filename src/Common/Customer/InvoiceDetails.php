@@ -81,7 +81,7 @@ final class InvoiceDetails implements \JsonSerializable
      */
     private $additional_information;
 
-    public function __construct(LegalForm $legal_form, string $country_code, string $city, string $street, string $building, string $postal_code, string $tax_id_prefix = null, string $tax_id = null, string $company_name = null, string $name = null, string $surname = null, string $flat = null, string $mail = null, string $registration_data_edited = null, string $additional_information = null)
+    public function __construct(LegalForm $legal_form, string $country_code, string $city, string $street, string $building, string $postal_code, ?string $tax_id_prefix = null, ?string $tax_id = null, ?string $company_name = null, ?string $name = null, ?string $surname = null, ?string $flat = null, ?string $mail = null, ?string $registration_data_edited = null, ?string $additional_information = null)
     {
         $this->legal_form = $legal_form;
         $this->country_code = $country_code;

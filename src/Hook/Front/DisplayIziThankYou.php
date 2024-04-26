@@ -6,8 +6,8 @@ namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
-use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderLazyArray;
 use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderDetailLazyArray;
+use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderLazyArray;
 
 final class DisplayIziThankYou implements HookInterface
 {
@@ -20,10 +20,7 @@ final class DisplayIziThankYou implements HookInterface
      */
     private $paymentModule;
 
-    public function __construct(
-        \PaymentModule $paymentModule,
-        GeneralConfigurationInterface $configuration
-    )
+    public function __construct(\PaymentModule $paymentModule, GeneralConfigurationInterface $configuration)
     {
         $this->paymentModule = $paymentModule;
         $this->configuration = $configuration;
@@ -35,7 +32,8 @@ final class DisplayIziThankYou implements HookInterface
     }
 
     /**
-     * @param array{order: \OrderLazyArray} $parameters
+     * @param array{order?: OrderLazyArray} $parameters
+     *
      * @return string
      */
     public function execute(array $parameters): string
@@ -43,7 +41,7 @@ final class DisplayIziThankYou implements HookInterface
         $order = $parameters['order'] ?? null;
 
         if (!$order instanceof OrderLazyArray) {
-            throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', OrderLazyArray::class, is_object($order) ? get_class($order) : gettype($order)));
+            throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', OrderLazyArray::class, get_debug_type($order)));
         }
 
         /** @var OrderDetailLazyArray $orderDetails */

@@ -1,0 +1,77 @@
+
+.ps-switch {
+  position: relative;
+  display: inline-block;
+  min-width: 8.125rem;
+  margin-top: 3px;
+  font-size: .813rem;
+  background-color: #eff1f2;
+  border-radius: 1px;
+  text-align: center
+}
+
+.ps-switch input {
+  position: absolute;
+  opacity: 0
+}
+
+.ps-switch input:disabled+label {
+  cursor: not-allowed
+}
+
+.ps-switch input:disabled:checked+label {
+  background-color: #bbcdd2
+}
+
+.ps-switch label {
+  position: relative;
+  z-index: 2;
+  float: left;
+  width: 50%;
+  height: 100%;
+  padding: .231em .769em;
+  margin: 0;
+  vertical-align: middle;
+  text-align: center;
+  text-transform: uppercase;
+  color: #bbcdd2;
+  font-weight: 400;
+  cursor: pointer;
+  transition: color .2s ease-out;
+  font-size: 12px;
+}
+
+.content-div {
+
+  .ps-switch input:checked + label {
+    color: #fff
+  }
+
+  .ps-switch > .slide-button {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    z-index: 1;
+    width: 50%;
+    height: 100%;
+    color: #fff;
+    background-color: #c05c67;
+    transition: all .3s ease-out
+  }
+
+  .ps-switch input:last-of-type:checked ~ .slide-button {
+    background-color: #2eacce;
+    left: 50%
+  }
+
+  .ps-switch.ps-switch-sm {
+    min-width: 6.25rem;
+    font-size: .75rem
+  }
+
+  .ps-switch.ps-switch-lg {
+    font-size: 1rem
+  }
+
+}

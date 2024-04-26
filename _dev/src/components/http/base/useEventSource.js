@@ -45,13 +45,17 @@ const useEventSource = (endpoint, onMessage, onError = () => {}) => {
    * @return {void}
    */
   const open = () => {
-    close();
-
     const eventSource = new EventSource(getEventSourceURL());
+
+    const handleOpen = () => {
+      close();
+      setEvent(endpoint, eventSource);
+      eventSource.removeEventListener('open', handleOpen);
+    }
+
+    eventSource.addEventListener('open', handleOpen);
     eventSource.addEventListener('message', onMessage);
     eventSource.addEventListener('error', onError);
-
-    setEvent(endpoint, eventSource);
   }
 
   return {

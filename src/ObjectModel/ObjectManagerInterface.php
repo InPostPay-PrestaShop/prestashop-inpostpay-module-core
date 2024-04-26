@@ -21,7 +21,7 @@ interface ObjectManagerInterface
      *
      * @return T|null
      */
-    public function find(string $class, int $id, int $languageId = null): ?\ObjectModel;
+    public function find(string $class, int $id, ?int $languageId = null): ?\ObjectModel;
 
     public function refresh(\ObjectModel $model);
 

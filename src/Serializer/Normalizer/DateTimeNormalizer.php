@@ -15,6 +15,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
  * @internal
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
+ *
  * @see \Symfony\Component\Serializer\Normalizer\DateTimeNormalizer
  */
 class DateTimeNormalizer implements NormalizerInterface, DenormalizerInterface
@@ -39,7 +40,7 @@ class DateTimeNormalizer implements NormalizerInterface, DenormalizerInterface
         $dateTimeFormat = $context[self::FORMAT_KEY] ?? self::DEFAULT_FORMAT;
         $timezone = $this->getTimezone($context);
 
-        if (null !== $timezone) {
+        if (null !== $timezone && is_callable([$object, 'setTimezone'])) {
             $object = clone $object;
             $object = $object->setTimezone($timezone);
         }

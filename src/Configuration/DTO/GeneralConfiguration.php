@@ -28,11 +28,27 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
      */
     private $thankYouDisplayHook;
 
-    public function __construct(bool $enabledForEveryone = false, int $maxSuggestedProducts = null, string $thankYouDisplayHook = null)
+    /**
+     * @var string
+     *
+     * @Assert\NotBlank
+     */
+    private $productCardDisplayHook;
+
+    /**
+     * @var string
+     *
+     * @Assert\NotBlank
+     */
+    private $checkoutButtonDisplayHook;
+
+    public function __construct(bool $enabledForEveryone = false, ?int $maxSuggestedProducts = null, ?string $thankYouDisplayHook = null, ?string $productCardDisplayHook = null, ?string $checkoutButtonDisplayHook = null)
     {
         $this->enabledForEveryone = $enabledForEveryone;
         $this->maxSuggestedProducts = $maxSuggestedProducts;
         $this->thankYouDisplayHook = $thankYouDisplayHook;
+        $this->productCardDisplayHook = $productCardDisplayHook;
+        $this->checkoutButtonDisplayHook = $checkoutButtonDisplayHook;
     }
 
     public function isEnabledForEveryone(): bool
@@ -47,7 +63,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
         return $this;
     }
 
-    public function getMaxSuggestedProducts(int $shopId = null): ?int
+    public function getMaxSuggestedProducts(?int $shopId = null): ?int
     {
         return $this->maxSuggestedProducts;
     }
@@ -59,7 +75,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
         return $this;
     }
 
-    public function getThankYouDisplayHook(int $shopId = null): ?string
+    public function getThankYouDisplayHook(?int $shopId = null): ?string
     {
         return $this->thankYouDisplayHook;
     }
@@ -67,6 +83,30 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
     public function setThankYouDisplayHook(?string $thankYouDisplayHook): GeneralConfiguration
     {
         $this->thankYouDisplayHook = $thankYouDisplayHook;
+
+        return $this;
+    }
+
+    public function getProductCardDisplayHook(?int $shopId = null): ?string
+    {
+        return $this->productCardDisplayHook;
+    }
+
+    public function setProductCardDisplayHook(?string $productCardDisplayHook): GeneralConfiguration
+    {
+        $this->productCardDisplayHook = $productCardDisplayHook;
+
+        return $this;
+    }
+
+    public function getCheckoutButtonDisplayHook(?int $shopId = null): ?string
+    {
+        return $this->checkoutButtonDisplayHook;
+    }
+
+    public function setCheckoutButtonDisplayHook(?string $checkoutButtonDisplayHook): GeneralConfiguration
+    {
+        $this->checkoutButtonDisplayHook = $checkoutButtonDisplayHook;
 
         return $this;
     }

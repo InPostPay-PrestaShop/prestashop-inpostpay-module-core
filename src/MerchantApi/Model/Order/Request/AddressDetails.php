@@ -21,7 +21,7 @@ final class AddressDetails implements \JsonSerializable
      */
     private $flat;
 
-    public function __construct(string $street = null, string $building = null, string $flat = null)
+    public function __construct(?string $street = null, ?string $building = null, ?string $flat = null)
     {
         $this->street = $street;
         $this->building = $building;

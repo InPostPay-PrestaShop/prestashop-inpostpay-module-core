@@ -44,7 +44,7 @@ final class AuthorizationServerClient implements AuthorizationServerClientInterf
      */
     private $authenticationMethod;
 
-    public function __construct(ClientInterface $client, RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, UriCollectionInterface $uriCollection, AuthenticationMethodInterface $authenticationMethod = null)
+    public function __construct(ClientInterface $client, RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, UriCollectionInterface $uriCollection, ?AuthenticationMethodInterface $authenticationMethod = null)
     {
         $this->client = $client;
         $this->requestFactory = $requestFactory;
@@ -100,11 +100,11 @@ final class AuthorizationServerClient implements AuthorizationServerClientInterf
         $data = $this->decodeJsonResponse($response);
 
         if (!isset($data['token_type']) || !is_string($data['token_type'])) {
-            throw new UnexpectedValueException($response, 'Token type is missing in the response data.');
+            throw new UnexpectedValueException('Token type is missing in the response data.');
         }
 
         if (!isset($data['access_token']) || !is_string($data['access_token'])) {
-            throw new UnexpectedValueException($response, 'Access token is missing in the response data.');
+            throw new UnexpectedValueException('Access token is missing in the response data.');
         }
 
         return $data;

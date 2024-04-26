@@ -29,7 +29,7 @@ final class Quantity implements \JsonSerializable
     /**
      * @param T $quantity
      */
-    public function __construct($quantity, QuantityType $quantity_type, string $quantity_unit = null)
+    public function __construct($quantity, QuantityType $quantity_type, ?string $quantity_unit = null)
     {
         $this->quantity = $quantity;
         $this->quantity_type = $quantity_type;
@@ -39,7 +39,7 @@ final class Quantity implements \JsonSerializable
     /**
      * @return self<int>
      */
-    public static function integer(int $quantity, string $quantity_unit = null): self
+    public static function integer(int $quantity, ?string $quantity_unit = null): self
     {
         return new self($quantity, QuantityType::Integer(), $quantity_unit);
     }
@@ -47,7 +47,7 @@ final class Quantity implements \JsonSerializable
     /**
      * @return self<float>
      */
-    public static function decimal(float $quantity, string $quantity_unit = null): self
+    public static function decimal(float $quantity, ?string $quantity_unit = null): self
     {
         return new self($quantity, QuantityType::Decimal(), $quantity_unit);
     }

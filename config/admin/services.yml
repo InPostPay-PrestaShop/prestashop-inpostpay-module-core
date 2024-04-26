@@ -2,6 +2,9 @@
 imports:
   - { resource: ../services/sf34.yml }
 
+parameters:
+  container.autowiring.strict_mode: true
+
 services:
   _defaults:
     public: false
@@ -9,6 +12,9 @@ services:
 
   izi\prestashop\Hook\Admin\DisplayAdminOrderSide:
     class: izi\prestashop\Hook\Admin\DisplayAdminOrderSide
+
+  izi\prestashop\Hook\Admin\DisplayAdminOrderLeft:
+    class: izi\prestashop\Hook\Admin\DisplayAdminOrderLeft
 
   izi\prestashop\CommandBus:
     class: izi\prestashop\CommandBus

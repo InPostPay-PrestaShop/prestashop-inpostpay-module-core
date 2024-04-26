@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration\DTO\Shipping;
 
 use izi\prestashop\Common\Delivery\ServiceCode;
+use izi\prestashop\Enum\Enum;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class ShippingOptions implements \JsonSerializable
@@ -13,7 +14,9 @@ final class ShippingOptions implements \JsonSerializable
      * @var CarrierMapping[]
      *
      * @Assert\Valid()
+     *
      * @Assert\All(
+     *
      *     @Assert\Type(CarrierMapping::class),
      * )
      */
@@ -23,7 +26,9 @@ final class ShippingOptions implements \JsonSerializable
      * @var ServiceOptions[]
      *
      * @Assert\Valid()
+     *
      * @Assert\All(
+     *
      *      @Assert\Type(ServiceOptions::class),
      *  )
      */
@@ -52,9 +57,7 @@ final class ShippingOptions implements \JsonSerializable
         foreach ($this->carrierMappings as $carrierMapping) {
             $mappingServiceCodes = $carrierMapping->getServiceCodes();
 
-            $diff = array_udiff($serviceCodes, $mappingServiceCodes, static function (ServiceCode $code1, ServiceCode $code2): int {
-                return $code1->value <=> $code2->value;
-            });
+            $diff = array_udiff($serviceCodes, $mappingServiceCodes, [Enum::class, 'compareValues']);
 
             if ([] === $diff && count($mappingServiceCodes) === count($serviceCodes)) {
                 return $carrierMapping;

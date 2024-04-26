@@ -12,7 +12,7 @@ use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 final class CarrierChoiceLoader implements ChoiceLoaderInterface
 {
     /**
-     * @var ObjectRepositoryInterface
+     * @var ObjectRepositoryInterface<\Carrier>
      */
     private $repository;
 

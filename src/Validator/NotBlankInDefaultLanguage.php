@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Validator;
 
-use PrestaShop\PrestaShop\Core\ConstraintValidator\Constraints\DefaultLanguage;
+use Symfony\Component\Validator\Constraint;
 
 /**
  * @Annotation
  * @Target({"PROPERTY", "ANNOTATION"})
  */
-class NotBlankInDefaultLanguage extends DefaultLanguage
+final class NotBlankInDefaultLanguage extends Constraint
 {
+    public $message = 'The field %field_name% is required at least in your default language.';
+    public $fieldName = '';
+
+    public function getDefaultOption(): string
+    {
+        return 'fieldName';
+    }
 }

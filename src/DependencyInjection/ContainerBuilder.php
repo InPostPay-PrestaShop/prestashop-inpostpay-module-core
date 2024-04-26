@@ -24,7 +24,7 @@ final class ContainerBuilder extends BaseContainerBuilder
         return parent::resolveServices($value);
     }
 
-    public function compile(): void
+    public function compile(bool $resolveEnvPlaceholders = false): void
     {
         parent::compile(...func_get_args());
         $this->compiled = true;

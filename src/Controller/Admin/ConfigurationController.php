@@ -12,10 +12,12 @@ use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
 use izi\prestashop\CommandBusInterface;
+use izi\prestashop\Configuration\AdvancedConfiguration;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Configuration\Initializer\ConfigurationInitializerInterface;
 use izi\prestashop\Configuration\ShippingConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Form\Type\AdvancedConfigurationType;
@@ -32,7 +34,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * @Route(path="config", name="admin_inpost_izi_config_")
+ * @Route(path="config")
  */
 final class ConfigurationController extends AbstractController
 {
@@ -48,14 +50,21 @@ final class ConfigurationController extends AbstractController
      */
     private $context;
 
-    public function __construct(LegacyTranslator $translator, \Context $context)
+    /**
+     * @param iterable<ConfigurationInitializerInterface> $configInitializers
+     */
+    public function __construct(LegacyTranslator $translator, \Context $context, iterable $configInitializers = [])
     {
         $this->translator = $translator;
         $this->context = $context;
+
+        foreach ($configInitializers as $initializer) {
+            $initializer->init();
+        }
     }
 
     /**
-     * @Route(path="/general", name="general", methods={"GET", "POST"})
+     * @Route(path="/general", name="admin_inpost_izi_config_general", methods={"GET", "POST"})
      */
     public function generalConfig(Request $request, UpdateGeneralConfigurationCommandFactory $commandFactory, CommandBusInterface $bus): Response
     {
@@ -64,13 +73,14 @@ final class ConfigurationController extends AbstractController
         $command = $commandFactory->create();
 
         $form = $this->createForm(GeneralConfigurationType::class, $command);
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $bus->handle($command);
+                $bus->handle($form->getData());
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('admin_inpost_izi_config_general');
+                return $this->redirectToRoute('admin_inpost_izi_config_general', $request->query->all());
             } catch (\Exception $e) {
                 $this->handleException($e);
             }
@@ -80,11 +90,12 @@ final class ConfigurationController extends AbstractController
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('Configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
+            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
         ]);
     }
 
     /**
-     * @Route(path="/consents", name="consents", methods={"GET", "POST"})
+     * @Route(path="/consents", name="admin_inpost_izi_config_consents", methods={"GET", "POST"})
      */
     public function consentConfig(Request $request, ConsentsConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
@@ -93,13 +104,14 @@ final class ConfigurationController extends AbstractController
         $command = new UpdateConsentsConfigurationCommand(...$configuration->getConsents());
 
         $form = $this->createForm(ConsentsConfigurationType::class, $command);
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             try {
-                $bus->handle($command);
+                $bus->handle($form->getData());
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('admin_inpost_izi_config_consents');
+                return $this->redirectToRoute('admin_inpost_izi_config_consents', $request->query->all());
             } catch (\Exception $e) {
                 $this->handleException($e);
             }
@@ -109,28 +121,30 @@ final class ConfigurationController extends AbstractController
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('Consents', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
+            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
         ]);
     }
 
     /**
      * @param GuiConfiguration $configuration
      *
-     * @Route(path="/gui", name="gui", methods={"GET", "POST"})
+     * @Route(path="/gui", name="admin_inpost_izi_config_gui", methods={"GET", "POST"})
      */
     public function guiConfig(Request $request, GuiConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
         $this->checkAccess();
 
         $form = $this->createForm(GuiConfigurationType::class, $configuration->copy());
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $command = new UpdateGuiConfigurationCommand($form->getData());
 
             try {
                 $bus->handle($command);
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('admin_inpost_izi_config_gui');
+                return $this->redirectToRoute('admin_inpost_izi_config_gui', $request->query->all());
             } catch (\Exception $e) {
                 $this->handleException($e);
             }
@@ -140,28 +154,30 @@ final class ConfigurationController extends AbstractController
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('GUI configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
+            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
         ]);
     }
 
     /**
      * @param ShippingConfiguration $configuration
      *
-     * @Route(path="/shipping", name="shipping", methods={"GET", "POST"})
+     * @Route(path="/shipping", name="admin_inpost_izi_config_shipping", methods={"GET", "POST"})
      */
     public function shippingConfig(Request $request, ShippingConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
         $this->checkAccess();
 
         $form = $this->createForm(ShippingConfigurationType::class, $configuration->copy());
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $command = new UpdateShippingConfigurationCommand($form->getData());
 
             try {
                 $bus->handle($command);
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('admin_inpost_izi_config_shipping');
+                return $this->redirectToRoute('admin_inpost_izi_config_shipping', $request->query->all());
             } catch (\Exception $e) {
                 $this->handleException($e);
             }
@@ -171,18 +187,21 @@ final class ConfigurationController extends AbstractController
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('Shipping configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
+            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
         ]);
     }
 
     /**
-     * @Route(path="/support", name="support", methods={"GET"})
+     * @param AdvancedConfiguration $configuration
+     *
+     * @Route(path="/support", name="admin_inpost_izi_config_support", methods={"GET"})
      */
     public function support(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
         $this->checkAccess();
 
         $form = $this->createForm(AdvancedConfigurationType::class, $configuration->copy(), [
-            'action' => $this->generateUrl('admin_inpost_izi_config_support_save'),
+            'action' => $this->generateUrl('admin_inpost_izi_config_support_save', $request->query->all()),
         ]);
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/support.html.twig', [
@@ -190,11 +209,14 @@ final class ConfigurationController extends AbstractController
             'headerTabContent' => $this->renderNav($request),
             'form' => $form->createView(),
             'status' => $bus->handle(new CheckStatusCommand()),
+            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
         ]);
     }
 
     /**
-     * @Route(path="/support", name="support_save", methods={"POST"})
+     * @param AdvancedConfiguration $configuration
+     *
+     * @Route(path="/support", name="admin_inpost_izi_config_support_save", methods={"POST"})
      */
     public function supportSave(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
@@ -206,8 +228,9 @@ final class ConfigurationController extends AbstractController
         }
 
         $form = $this->createForm(AdvancedConfigurationType::class, $configuration->copy());
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request) && $form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $command = new UpdateAdvancedConfigurationCommand($form->getData());
 
             try {
@@ -232,7 +255,7 @@ final class ConfigurationController extends AbstractController
     }
 
     /**
-     * @Route(path="/download-data", name="download_data", methods={"GET"})
+     * @Route(path="/download-data", name="admin_inpost_izi_config_download_data", methods={"GET"})
      */
     public function downloadData(CommandBusInterface $bus): Response
     {
@@ -279,7 +302,7 @@ final class ConfigurationController extends AbstractController
         return $this->renderView('@Modules/inpostizi/views/templates/admin/config/nav.html.twig', [
             'nav_items' => array_map(function (array $page) use ($request): array {
                 return [
-                    'url' => $this->generateUrl($page['route']),
+                    'url' => $this->generateUrl($page['route'], $request->query->all()),
                     'label' => $page['title'],
                     'active' => $page['route'] === $request->attributes->get('_route'),
                 ];
@@ -287,7 +310,12 @@ final class ConfigurationController extends AbstractController
         ]);
     }
 
-    private function trans(string $id, array $parameters = [], string $domain = null, string $locale = null): string
+    private function isLegacyAdminPage(): bool
+    {
+        return version_compare(_PS_VERSION_, '1.7.4.0', '<');
+    }
+
+    private function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
     {
         return $this->context->getTranslator()->trans($id, $parameters, $domain, $locale);
     }

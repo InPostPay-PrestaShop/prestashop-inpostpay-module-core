@@ -31,7 +31,7 @@ final class ProductVariant implements \JsonSerializable
      */
     private $variant_values;
 
-    public function __construct(string $variant_id, string $variant_name, string $variant_description = null, string $variant_type = null, string $variant_values = null)
+    public function __construct(string $variant_id, string $variant_name, ?string $variant_description = null, ?string $variant_type = null, ?string $variant_values = null)
     {
         $this->variant_id = $variant_id;
         $this->variant_name = $variant_name;

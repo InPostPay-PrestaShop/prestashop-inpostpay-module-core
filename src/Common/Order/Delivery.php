@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Common\Order;
 
-use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\Delivery\DeliveryType;
+use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\PhoneNumber;
 
 final class Delivery implements \JsonSerializable
@@ -48,7 +48,7 @@ final class Delivery implements \JsonSerializable
     /**
      * @param ServiceCode[] $delivery_codes
      */
-    public function __construct(DeliveryType $delivery_type, array $delivery_codes = [], string $mail = null, PhoneNumber $phone_number = null, string $delivery_point = null, DeliveryAddress $delivery_address = null, string $courier_note = null)
+    public function __construct(DeliveryType $delivery_type, array $delivery_codes = [], ?string $mail = null, ?PhoneNumber $phone_number = null, ?string $delivery_point = null, ?DeliveryAddress $delivery_address = null, ?string $courier_note = null)
     {
         $this->delivery_type = $delivery_type;
         $this->delivery_codes = $delivery_codes;

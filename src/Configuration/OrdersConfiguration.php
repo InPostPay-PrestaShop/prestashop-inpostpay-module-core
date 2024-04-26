@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
+use izi\prestashop\Common\PaymentType;
+use izi\prestashop\Enum\Enum;
+
+/**
+ * @implements PersistentConfigurationInterface<OrdersConfigurationInterface>
+ */
 final class OrdersConfiguration implements OrdersConfigurationInterface, PersistentConfigurationInterface
 {
     private const INITIAL_OS_ID = 'INPOST_PAY_INITIAL_OS_ID';
     private const PAID_OS_ID = 'INPOST_PAY_authorized_payment';
     private const STATUS_DESCRIPTION_MAP = 'INPOST_PAY_OS_DESCRIPTION_MAP';
-    private const ENABLE_CARRIER_PAYMENT = 'INPOST_PAY_payment_inpost';
-    private const ENABLE_BANK_PAYMENT = 'INPOST_PAY_payment_aion';
+    private const AVAILABLE_PAYMENT_OPTIONS = 'INPOST_PAY_AVAILABLE_PAYMENT_OPTIONS';
     private const POS_ID = 'INPOST_PAY_pos_id';
 
     /**
@@ -20,17 +25,50 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
     private $descriptionMappings = [];
 
+    private $availablePaymentOptions = [];
+
     public function __construct(LanguageAwareConfigurationInterface $configuration)
     {
         $this->configuration = $configuration;
     }
 
-    public function getInitialStatusId(int $shopId = null): ?int
+    /**
+     * @interal
+     *
+     * @return PaymentType[]
+     */
+    public static function normalizeAvailablePaymentOptions(OrdersConfigurationInterface $configuration): array
+    {
+        if (method_exists($configuration, 'getAvailablePaymentOptions')) {
+            return $configuration->getAvailablePaymentOptions();
+        }
+
+        @trigger_error(sprintf('Not implementing the "getAvailablePaymentOptions()" method in "%s" is deprecated.', get_class($configuration)), \E_USER_DEPRECATED);
+
+        $bankPaymentEnabled = $configuration->isBankPaymentEnabled();
+        $carrierPaymentEnabled = $configuration->isCarrierPaymentEnabled();
+
+        if ($bankPaymentEnabled && $carrierPaymentEnabled) {
+            return PaymentType::cases();
+        }
+
+        if ($bankPaymentEnabled) {
+            return PaymentType::getBankProvidedPaymentOptions();
+        }
+
+        if ($carrierPaymentEnabled) {
+            return PaymentType::getCarrierProvidedPaymentOptions();
+        }
+
+        return [];
+    }
+
+    public function getInitialStatusId(?int $shopId = null): ?int
     {
         return (int) $this->configuration->get(self::INITIAL_OS_ID, $shopId);
     }
 
-    public function getPaidStatusId(int $shopId = null): ?int
+    public function getPaidStatusId(?int $shopId = null): ?int
     {
         return (int) $this->configuration->get(self::PAID_OS_ID, $shopId);
     }
@@ -47,17 +85,43 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         return $map[$statusId] ?? null;
     }
 
-    public function isCarrierPaymentEnabled(int $shopId = null): bool
+    /**
+     * @return PaymentType[]
+     */
+    public function getAvailablePaymentOptions(?int $shopId = null): array
     {
-        return (bool) $this->configuration->get(self::ENABLE_CARRIER_PAYMENT, $shopId);
+        if (!isset($this->availablePaymentOptions[(int) $shopId])) {
+            $this->availablePaymentOptions[(int) $shopId] = $this->loadAvailablePaymentOptions($shopId);
+        }
+
+        return $this->availablePaymentOptions[(int) $shopId];
     }
 
-    public function isBankPaymentEnabled(int $shopId = null): bool
+    /**
+     * {@inheritDoc}
+     */
+    public function isCarrierPaymentEnabled(?int $shopId = null): bool
     {
-        return (bool) $this->configuration->get(self::ENABLE_BANK_PAYMENT, $shopId);
+        @trigger_error(sprintf('"%s::%s()" is deprecated, use "%s::getAvailablePaymentOptions()" instead.', OrdersConfigurationInterface::class, __METHOD__, OrdersConfigurationInterface::class), \E_USER_DEPRECATED);
+
+        $availablePaymentOptions = $this->getAvailablePaymentOptions($shopId);
+
+        return [] !== array_uintersect($availablePaymentOptions, PaymentType::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
     }
 
-    public function getPointOfSaleId(int $shopId = null): ?string
+    /**
+     * {@inheritDoc}
+     */
+    public function isBankPaymentEnabled(?int $shopId = null): bool
+    {
+        @trigger_error(sprintf('"%s::%s()" is deprecated, use "%s::getAvailablePaymentOptions()" instead.', OrdersConfigurationInterface::class, __METHOD__, OrdersConfigurationInterface::class), \E_USER_DEPRECATED);
+
+        $availablePaymentOptions = $this->getAvailablePaymentOptions($shopId);
+
+        return [] !== array_uintersect($availablePaymentOptions, PaymentType::getBankProvidedPaymentOptions(), [Enum::class, 'compareValues']);
+    }
+
+    public function getPointOfSaleId(?int $shopId = null): ?string
     {
         return $this->configuration->get(self::POS_ID, $shopId);
     }
@@ -67,10 +131,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         return new DTO\OrdersConfiguration(
             $this->getInitialStatusId(),
             $this->getPaidStatusId(),
-            $this->isBankPaymentEnabled(),
-            $this->isCarrierPaymentEnabled(),
             $this->getPointOfSaleId(),
-            $this->getStatusDescriptionMap()
+            $this->getStatusDescriptionMap(),
+            $this->getAvailablePaymentOptions()
         );
     }
 
@@ -78,10 +141,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
     {
         $this->configuration->set(self::INITIAL_OS_ID, $configuration->getInitialStatusId());
         $this->configuration->set(self::PAID_OS_ID, $configuration->getPaidStatusId());
-        $this->configuration->set(self::ENABLE_BANK_PAYMENT, $configuration->isBankPaymentEnabled());
-        $this->configuration->set(self::ENABLE_CARRIER_PAYMENT, $configuration->isCarrierPaymentEnabled());
         $this->configuration->set(self::POS_ID, $configuration->getPointOfSaleId());
         $this->setOrderStatusDescriptionMapping($configuration->getStatusDescriptionMap());
+        $this->setAvailablePaymentOptions($configuration);
     }
 
     private function loadStatusDescriptionMap(int $languageId, ?int $shopId): array
@@ -102,7 +164,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         return is_array($map) ? $map : [];
     }
 
-    private function getStatusDescriptionMapping(int $languageId, int $shopId = null): array
+    private function getStatusDescriptionMapping(int $languageId, ?int $shopId = null): array
     {
         if (!isset($this->descriptionMappings[$languageId][(int) $shopId])) {
             $this->descriptionMappings[$languageId][(int) $shopId] = $this->loadStatusDescriptionMap($languageId, $shopId);
@@ -121,5 +183,35 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         foreach ($data as $languageId => $map) {
             $this->descriptionMappings[$languageId][0] = $map;
         }
+    }
+
+    private function loadAvailablePaymentOptions(?int $shopId): array
+    {
+        $config = $this->configuration->get(self::AVAILABLE_PAYMENT_OPTIONS, $shopId);
+
+        return $this->decodeAvailablePaymentOptions($config);
+    }
+
+    private function decodeAvailablePaymentOptions($value): array
+    {
+        if (null === $value) {
+            return PaymentType::getAvailableByDefaultPaymentOptions();
+        }
+
+        $data = json_decode($value, true);
+
+        if (!is_array($data)) {
+            return [];
+        }
+
+        return array_filter(array_map([PaymentType::class, 'tryFrom'], $data));
+    }
+
+    private function setAvailablePaymentOptions(OrdersConfigurationInterface $configuration): void
+    {
+        $availablePaymentOptions = self::normalizeAvailablePaymentOptions($configuration);
+
+        $this->configuration->set(self::AVAILABLE_PAYMENT_OPTIONS, json_encode($availablePaymentOptions));
+        $this->availablePaymentOptions = [0 => $availablePaymentOptions];
     }
 }
