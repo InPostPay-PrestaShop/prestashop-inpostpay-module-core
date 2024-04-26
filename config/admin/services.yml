@@ -13,6 +13,9 @@ services:
   izi\prestashop\Hook\Admin\DisplayAdminOrderSide:
     class: izi\prestashop\Hook\Admin\DisplayAdminOrderSide
 
+  izi\prestashop\Hook\Admin\DisplayAdminOrderLeft:
+    class: izi\prestashop\Hook\Admin\DisplayAdminOrderLeft
+
   izi\prestashop\CommandBus:
     class: izi\prestashop\CommandBus
     tags: [ container.service_subscriber ]

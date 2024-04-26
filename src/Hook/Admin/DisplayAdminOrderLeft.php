@@ -9,9 +9,9 @@ use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\View\Templating\RendererInterface;
 
-final class DisplayAdminOrderSide implements PrestaShopVersionAwareHookInterface
+final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
 {
-    public const HOOK_NAME = 'displayAdminOrderSide';
+    public const HOOK_NAME = 'displayAdminOrderLeft';
 
     /**
      * @var RendererInterface
@@ -30,21 +30,27 @@ final class DisplayAdminOrderSide implements PrestaShopVersionAwareHookInterface
 
     public static function getVersionRange(): VersionRange
     {
-        return new VersionRange('1.7.7');
+        return new VersionRange(null, '1.7.7');
     }
 
     /**
-     * @param array{id_order: int} $parameters
+     * @param array{id_order?: int} $parameters
      */
     public function execute(array $parameters): string
     {
-        if (!$orderData = CartSession::getOrderData($parameters['id_order'])) {
+        $orderId = $parameters['id_order'] ?? null;
+
+        if (!is_int($orderId)) {
+            throw new \InvalidArgumentException(sprintf('Parameter "id_order" expected to be an integer, "%s" given.', get_debug_type($orderId)));
+        }
+
+        if (!$orderData = CartSession::getOrderData($orderId)) {
             return '';
         }
 
         $orderData = json_decode($orderData, false);
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/backend.tpl', [
+        return $this->renderer->render('module:inpostizi/views/templates/hook/admin_order_left.tpl', [
             'delivery' => 'APM' === $orderData->delivery->delivery_type ? 'Paczkomat' : 'Kurier',
             'apm' => 'APM' === $orderData->delivery->delivery_type ? $orderData->delivery->delivery_point : '',
         ]);
