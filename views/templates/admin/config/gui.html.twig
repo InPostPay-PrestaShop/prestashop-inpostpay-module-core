@@ -94,13 +94,13 @@
 
 {% block stylesheets %}
   {{ parent() }}
-  <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/gui.css') }}" />
+  <link rel="stylesheet" href="{{ asset('css/admin/gui.css', 'InPostIzi') }}" />
 {% endblock %}
 
 {% block javascripts %}
   {{ parent() }}
   <script type="text/javascript" src="https://izi-sandbox.inpost.pl/inpostizi.js">
   </script>
-  <script type="text/javascript" src="{{ asset('../modules/inpostizi/views/js/admin/gui.js') }}">
+  <script type="text/javascript" src="{{ asset('js/admin/gui.js', 'InPostIzi') }}">
   </script>
 {% endblock %}

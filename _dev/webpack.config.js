@@ -2,6 +2,8 @@ const path = require('path');
 const { EsbuildPlugin } = require('esbuild-loader');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const FixStyleOnlyEntriesPlugin = require("webpack-fix-style-only-entries");
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 
 module.exports = (env, options) => ({
   entry: {
@@ -13,7 +15,7 @@ module.exports = (env, options) => ({
     ],
   },
   output: {
-    filename: 'js/[name].js',
+    filename: 'js/[name].[contenthash].js',
     path: path.resolve(__dirname, '../views/'),
   },
   module: {
@@ -50,13 +52,24 @@ module.exports = (env, options) => ({
   plugins: [
     new FixStyleOnlyEntriesPlugin(),
     new MiniCssExtractPlugin({
-      filename: 'css/[name].css',
+      filename: 'css/[name].[contenthash].css',
     }),
     new EsbuildPlugin({
       target: 'es2015',
       format: 'iife',
       minify: options.mode === 'production',
       sourcemap: options.mode !== 'production',
+    }),
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: [
+        'js/*.js',
+        'js/*.js.map',
+        'css/*.css',
+        'css/*.css.map',
+      ],
+    }),
+    new WebpackManifestPlugin({
+      publicPath: '',
     }),
   ],
 });

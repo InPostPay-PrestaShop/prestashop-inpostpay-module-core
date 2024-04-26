@@ -18,6 +18,7 @@ services:
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@inpost.izi.context'
+      - !tagged inpost.izi.config_initializer
 
   izi\prestashop\View\Asset\AssetManagerInterface: '@izi\prestashop\View\Asset\AdminAssetManager'
   izi\prestashop\View\Asset\AdminAssetManager:
@@ -396,3 +397,13 @@ services:
     class: izi\prestashop\Translation\PaymentTypeTranslator
     public: false
     autowire: true
+
+  izi\prestashop\Configuration\Initializer\AssetPackageInitializer:
+    class: izi\prestashop\Configuration\Initializer\AssetPackageInitializer
+    public: false
+    tags:
+      - { name: inpost.izi.config_initializer }
+    arguments:
+      - '@assets.packages'
+      - '@izi\prestashop\View\Asset\AssetManagerInterface'
+      - InPostIzi

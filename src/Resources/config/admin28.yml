@@ -24,6 +24,7 @@ services:
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@inpost.izi.context'
+      - !tagged inpost.izi.config_initializer
     calls:
       - { method: setContainer, arguments: [ '@service_container' ] }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use izi\prestashop\Controller\Admin\ConfigurationController;
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
@@ -121,6 +122,7 @@ final class AdminKernel extends Kernel
             $container->addCompilerPass(new ProvideServiceLocatorFactoriesPass('inpost.izi.service_locator'));
             AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
             $container->addCompilerPass(new TaggedIteratorsCollectorPass(CheckStatusHandler::class));
+            $container->addCompilerPass(new TaggedIteratorsCollectorPass(ConfigurationController::class));
         }
     }
 

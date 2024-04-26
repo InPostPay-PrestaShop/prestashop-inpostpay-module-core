@@ -14,6 +14,7 @@ use izi\prestashop\Hook\Front\DisplayIziCartPreviewButton;
 use izi\prestashop\Hook\Front\DisplayIziCheckoutButton;
 use izi\prestashop\Hook\Front\DisplayProductActions;
 use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
+use Symfony\Component\Filesystem\Filesystem;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -42,7 +43,8 @@ class InPostIziUpdater_1_6_0
         CacheClearer::getInstance()->clear();
 
         return $this->registerHooks()
-            && $this->updateAvailablePaymentOptionsConfig();
+            && $this->updateAvailablePaymentOptionsConfig()
+            && $this->removeStaleAssets();
     }
 
     private function registerHooks(): bool
@@ -127,6 +129,14 @@ class InPostIziUpdater_1_6_0
         }
 
         return $hooks;
+    }
+
+    private function removeStaleAssets(): bool
+    {
+        $path = sprintf('%s/views/js/prestashopizi.js', rtrim($this->module->getLocalPath(), '/'));
+        (new Filesystem())->remove([$path, sprintf('%s.map', $path)]);
+
+        return true;
     }
 }
 

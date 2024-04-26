@@ -21,11 +21,11 @@
 
 {% block stylesheets %}
   {{ parent() }}
-  <link rel="stylesheet" href="{{ asset('../modules/inpostizi/views/css/admin/support.css') }}" />
+  <link rel="stylesheet" href="{{ asset('css/admin/support.css', 'InPostIzi') }}" />
 {% endblock %}
 
 {% block javascripts %}
   {{ parent() }}
-  <script type="text/javascript" src="{{ asset('../modules/inpostizi/views/js/admin/support.js') }}">
+  <script type="text/javascript" src="{{ asset('js/admin/support.js', 'InPostIzi') }}">
   </script>
 {% endblock %}

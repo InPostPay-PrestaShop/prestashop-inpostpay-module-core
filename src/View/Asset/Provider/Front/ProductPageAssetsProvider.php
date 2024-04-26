@@ -36,7 +36,7 @@ final class ProductPageAssetsProvider implements AssetsProviderInterface
         $assets = new Assets();
 
         if (DisplayProductActions::HOOK_NAME === $this->configuration->getProductCardDisplayHook()) {
-            $assets->addStyleSheet('css/product.css');
+            $assets->addStyleSheet('product.css');
         }
 
         $product = $this->context->controller->getProduct();
