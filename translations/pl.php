@@ -87,7 +87,7 @@ $_MODULE['<{inpostizi}prestashop>htmlstylestype_af1c33bd64cf61f9245b75131e2e06f1
 $_MODULE['<{inpostizi}prestashop>htmlstylestype_08d4382960e54a51b0225995753fb95c'] = 'Margines prawy';
 $_MODULE['<{inpostizi}prestashop>htmlstylestype_c9254e027bb4bc070f417493b43f9dc1'] = 'Margines dolny';
 $_MODULE['<{inpostizi}prestashop>widgetdisplayconfigurationtype_86754577897acfb25deb69039d49d9a7'] = 'Wyświetlany';
-$_MODULE['<{inpostizi}prestashop>widgetdisplayconfigurationtype_27bc9eb9abc57172f8620ed18e376ea8'] = 'Aby zwiększyć konwersje, zalecamy wyświetlać widget InPost Pay na stronie koszyka jak i karcie produktu';
+$_MODULE['<{inpostizi}prestashop>widgetdisplayconfigurationtype_27bc9eb9abc57172f8620ed18e376ea8'] = 'Aby zwiększyć konwersje, zalecamy wyświetlać widget InPost Pay na stronie koszyka jak i karcie produktu';
 $_MODULE['<{inpostizi}prestashop>widgetdisplayconfigurationtype_bb54cce5a0fb4e80d1b2dce5a28d6efb'] = 'Strona koszyka';
 $_MODULE['<{inpostizi}prestashop>carriermappingstype_cbbd3439308c58e0773f34e9f9954a9b'] = 'Mapowanie przewoźnika';
 $_MODULE['<{inpostizi}prestashop>serviceoptionstype_a25eac9fbba5c5aace5aa74ac02fabae'] = 'Dodatkowy koszt';

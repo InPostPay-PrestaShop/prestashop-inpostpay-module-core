@@ -437,16 +437,16 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getRelatedProductBasePrice(array $product, int $quantity): Price
     {
         $gross = $product['price_without_reduction'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             true,
             false,
             $quantity
         );
 
         $net = $product['price_without_reduction_without_tax'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             false,
             false,
             $quantity
@@ -458,16 +458,16 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getRelatedProductPromoPrice(array $product, int $quantity): Price
     {
         $gross = $product['price'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             true,
             true,
             $quantity
         );
 
         $net = $product['price_tax_exc'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             false,
             true,
             $quantity
