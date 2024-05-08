@@ -27,7 +27,6 @@ services:
         displayPaymentReturn: '@izi\prestashop\Hook\Front\DisplayPaymentReturn'
         displayProductActions: '@izi\prestashop\Hook\Front\DisplayProductActions'
         displayProductAdditionalInfo: '@izi\prestashop\Hook\Front\DisplayProductAdditionalInfo'
-        displayFooterProduct: '@izi\prestashop\Hook\Front\DisplayProductFooter'
         displayExpressCheckout: '@izi\prestashop\Hook\Front\DisplayExpressCheckout'
         displayShoppingCart: '@izi\prestashop\Hook\Front\DisplayShoppingCart'
         displayShoppingCartFooter: '@izi\prestashop\Hook\Front\DisplayShoppingCartFooter'

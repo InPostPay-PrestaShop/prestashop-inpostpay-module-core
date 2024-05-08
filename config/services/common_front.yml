@@ -80,17 +80,6 @@ services:
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
-  izi\prestashop\Hook\Front\DisplayProductFooter:
-    class: izi\prestashop\Hook\Front\DisplayProductFooter
-    public: false
-    tags:
-      - { name: inpost.izi.hook }
-    arguments:
-      - '@izi\prestashop\Configuration\GuiConfiguration'
-      - '@izi\prestashop\Configuration\GeneralConfiguration'
-      - '@inpost.izi.module'
-      - '@izi\prestashop\View\Templating\RendererInterface'
-
   izi\prestashop\Hook\Front\DisplayShoppingCart:
     class: izi\prestashop\Hook\Front\DisplayShoppingCart
     public: false
