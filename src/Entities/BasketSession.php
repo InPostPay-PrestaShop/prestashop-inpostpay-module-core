@@ -47,10 +47,11 @@ final class BasketSession implements SwitchableBasketSessionInterface
 
     /**
      * @param BasketInterface<\Cart> $basket
+     * @param class-string<InPostIziBasketSession> $modelClass
      */
-    public static function new(BasketInterface $basket, Uuid $uuid): self
+    public static function new(BasketInterface $basket, Uuid $uuid, string $modelClass = InPostIziBasketSession::class): self
     {
-        $model = new InPostIziBasketSession();
+        $model = new $modelClass();
         $model->session_id = (int) $basket->getId();
         $model->cart_id = (string) $uuid;
 

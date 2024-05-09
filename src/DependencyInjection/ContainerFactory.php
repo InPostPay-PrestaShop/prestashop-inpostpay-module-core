@@ -37,11 +37,10 @@ final class ContainerFactory
      * @template T of ContainerInterface
      *
      * @param class-string<T> $className
-     * @param string[] $resources
      *
      * @return T|ContainerBuilder
      */
-    public function create(string $className, array $resources): ContainerInterface
+    public function create(string $className, iterable $resources): ContainerInterface
     {
         [$namespace, $shortName] = $this->resolveClassName($className);
         $cachePath = sprintf('%s%s.php', $this->cacheDir, $shortName);
@@ -71,7 +70,7 @@ final class ContainerFactory
         ];
     }
 
-    private function buildContainer(array $resources): ContainerBuilder
+    private function buildContainer(iterable $resources): ContainerBuilder
     {
         $container = new ContainerBuilder();
 
