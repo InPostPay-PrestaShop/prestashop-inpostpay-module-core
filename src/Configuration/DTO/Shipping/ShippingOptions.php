@@ -16,7 +16,6 @@ final class ShippingOptions implements \JsonSerializable
      * @Assert\Valid()
      *
      * @Assert\All(
-     *
      *     @Assert\Type(CarrierMapping::class),
      * )
      */
@@ -28,9 +27,8 @@ final class ShippingOptions implements \JsonSerializable
      * @Assert\Valid()
      *
      * @Assert\All(
-     *
-     *      @Assert\Type(ServiceOptions::class),
-     *  )
+     *     @Assert\Type(ServiceOptions::class),
+     * )
      */
     private $optionalServices;
 

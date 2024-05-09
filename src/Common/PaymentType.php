@@ -53,8 +53,8 @@ final class PaymentType extends StringEnum
      */
     public static function getAvailableByDefaultPaymentOptions(): array
     {
-        return array_filter(self::cases(), static function (self $type) {
+        return array_values(array_filter(self::cases(), static function (self $type) {
             return $type !== self::DeferredPayment();
-        });
+        }));
     }
 }

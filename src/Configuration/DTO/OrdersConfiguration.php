@@ -34,7 +34,6 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      *
      * @Assert\All(
      *     @Assert\All(
-     *
      *         @Assert\Type("string")
      *     )
      * )
@@ -52,7 +51,6 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      * @var PaymentType[]
      *
      * @Assert\All(
-     *
      *     @Assert\Type(PaymentType::class)
      * )
      */
@@ -150,9 +148,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         if ($carrierPaymentEnabled) {
             $this->availablePaymentOptions = array_unique(array_merge($this->availablePaymentOptions, $paymentOptions), SORT_REGULAR);
         } else {
-            $this->availablePaymentOptions = array_filter($this->availablePaymentOptions, static function (PaymentType $type) use ($paymentOptions): bool {
+            $this->availablePaymentOptions = array_values(array_filter($this->availablePaymentOptions, static function (PaymentType $type) use ($paymentOptions): bool {
                 return !in_array($type, $paymentOptions, true);
-            });
+            }));
         }
 
         return $this;
