@@ -27,8 +27,10 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpKernel\TerminableInterface;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 if (!defined('_PS_VERSION_')) {
@@ -152,6 +154,24 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
         } catch (ServiceNotFoundException $e) {
             $this->handleConfigPageRequest();
+        } catch (RouteNotFoundException $e) {
+            if (!$this->active && Tools::version_compare(_PS_VERSION_, '8.0.0', '>=') && !$this->hasShopAssociations()) {
+                /** @var Session $session */
+                $session = $this->get('session');
+                $session->getFlashBag()->add('error', $this->l('To access the configuration page, the module must be active.'));
+
+                Tools::redirectAdmin($router->generate('admin_module_manage'));
+            }
+
+            if (Tools::getValue('cache_cleared')) {
+                throw $e;
+            }
+
+            Tools::clearSf2Cache();
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, null, [
+                'configure' => $this->name,
+                'cache_cleared' => true,
+            ]));
         }
     }
 

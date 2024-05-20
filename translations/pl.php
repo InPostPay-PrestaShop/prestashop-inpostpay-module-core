@@ -5,6 +5,7 @@ $_MODULE = [];
 $_MODULE['<{inpostizi}prestashop>inpostizi_be39a2c31fd39417d193787b0745002d'] = 'InPost Pay';
 $_MODULE['<{inpostizi}prestashop>inpostizi_e92d43479cae605e1a18eb091520f704'] = 'Moduł wymaga PHP w wersji 7.1.3 lub późniejszej.';
 $_MODULE['<{inpostizi}prestashop>inpostizi_3f93d44654423ff8a5fcbbfe8d82f57f'] = 'Nie udało się zaktualizować struktury bazy danych.';
+$_MODULE['<{inpostizi}prestashop>inpostizi_3b838c5f28dad4dc154d5d1f0e279453'] = 'Moduł musi być włączony, aby wyświetlić stronę konfiguracji.';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_bb54cce5a0fb4e80d1b2dce5a28d6efb'] = 'Strona koszyka';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_0d3260fc94336a6987d9680788310b80'] = 'Widget będzie wyświetlany na stronie koszyka poniżej przycisku realizacji zamówienia.';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_e6f28601734051de0cef66878bac1c0e'] = 'Strona produktu';
