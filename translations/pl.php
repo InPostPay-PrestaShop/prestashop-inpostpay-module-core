@@ -44,7 +44,7 @@ $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_935b322389e5f6b6419447
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_a166db0fa22cc43fd81255c6480f9bff'] = 'Hook do wyświetlania widgetu na karcie produktu';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_e14e979d3bf9677c8f2f9d108297b95d'] = 'Możesz wybrać inny hook, jeśli masz problem z wyświetleniem widgetu InPost Pay w domyślnym hooku.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_dae272c53fe0f60237e1c5059ecdb4b8'] = 'Hook do wyświetlania widgetu w checkoucie';
-$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_07f0748f41ceeea585873d4cd84166e1'] = 'Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku szablonu: \'{hook h=\"%s\" order=$order}\'.';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_07f0748f41ceeea585873d4cd84166e1'] = 'Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku szablonu: \'{hook h=\"%s\"}\'.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_7a440309fc897f07a1d99a07af29d8db'] = 'Maksymalna liczba produktów sugerowanych';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_2d18889b4f14532c8f33c95a7af033c9'] = 'W celu pokazania produktów sugerowanych należy uzupełnić sekcję Produktów Powiązanych w konfiguracji produktu.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_958f470d0b1c8fb2b9e62b48e8903299'] = 'bez limitu';
@@ -92,6 +92,7 @@ $_MODULE['<{inpostizi}prestashop>widgetdisplayconfigurationtype_bb54cce5a0fb4e80
 $_MODULE['<{inpostizi}prestashop>carriermappingstype_cbbd3439308c58e0773f34e9f9954a9b'] = 'Mapowanie przewoźnika';
 $_MODULE['<{inpostizi}prestashop>serviceoptionstype_a25eac9fbba5c5aace5aa74ac02fabae'] = 'Dodatkowy koszt';
 $_MODULE['<{inpostizi}prestashop>serviceoptionstype_4927147ff7bc490186490bda85714ca4'] = 'Wartość netto kwoty do doliczenia do ceny przewoźnika w przypadku, gdy usługa zostanie wybrana.';
+$_MODULE['<{inpostizi}prestashop>serviceoptionstype_d488a56a2004d96fe1b69419ef7e2893'] = 'Koszt nie zostanie doliczony w przypadku, gdy opcja \"%s\" nie jest włączona dla przewoźnika.';
 $_MODULE['<{inpostizi}prestashop>weekdaychoicetype_6f8522e0610541f1ef215a22ffa66ff6'] = 'Poniedziałek';
 $_MODULE['<{inpostizi}prestashop>weekdaychoicetype_5792315f09a5d54fb7e3d066672b507f'] = 'Wtorek';
 $_MODULE['<{inpostizi}prestashop>weekdaychoicetype_796c163589f295373e171842f37265d5'] = 'Środa';

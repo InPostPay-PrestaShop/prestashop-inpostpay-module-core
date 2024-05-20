@@ -146,6 +146,10 @@ class DeliveryFactory
 
     private function getServiceAdditionalCost(ServiceOptions $options, \Cart $cart, \Carrier $carrier): Price
     {
+        if (!$carrier->shipping_handling) {
+            return PriceFactory::create(0., 0.);
+        }
+
         if (0. === $net = $options->getAdditionalCost() ?? 0.) {
             return PriceFactory::create(0., 0.);
         }
@@ -172,7 +176,7 @@ class DeliveryFactory
             $addressId = $cart->id_address_delivery;
         }
 
-        return new \Address($addressId);
+        return \Address::initialize($addressId);
     }
 
     private function checkServiceAvailability(ServiceCode $serviceCode, ServiceOptions $options): bool

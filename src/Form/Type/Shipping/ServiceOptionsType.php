@@ -23,9 +23,15 @@ final class ServiceOptionsType extends AbstractType
      */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    /**
+     * @var \Context
+     */
+    private $context;
+
+    public function __construct(LegacyTranslator $translator, \Context $context = null)
     {
         $this->translator = $translator;
+        $this->context = $context ?? \Context::getContext();
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -35,7 +41,10 @@ final class ServiceOptionsType extends AbstractType
             'currency' => Currency::Pln()->value,
             'scale' => 2,
             'label' => $this->translator->l('Additional cost', self::TRANSLATION_SOURCE),
-            'help' => $this->translator->l('Net value of the amount to be added to the carrier\'s price if the service is selected.', self::TRANSLATION_SOURCE),
+            'help' => nl2br(implode("\n", [
+                $this->translator->l('Net value of the amount to be added to the carrier\'s price if the service is selected.', self::TRANSLATION_SOURCE),
+                sprintf($this->translator->l('Cost will not be applied if the "%s" option is not enabled for the carrier.', self::TRANSLATION_SOURCE), $this->context->getTranslator()->trans('Add handling costs', [], 'Admin.Shipping.Feature')),
+            ])),
         ]);
 
         /** @var ServiceCode $serviceCode */
