@@ -60,7 +60,10 @@ final class UpdateOrderHandler implements UpdateOrderHandlerInterface
             throw OrderNotFoundException::create();
         }
 
-        $this->updateOrderStatus($order, $command->getEvent());
+        $event = $command->getEvent();
+
+        $this->updateOrderStatus($order, $event);
+        $this->saveTransactionId($order, $event);
 
         return new MerchantOrderStatusData(
             null,
@@ -84,6 +87,45 @@ final class UpdateOrderHandler implements UpdateOrderHandlerInterface
         $this->logger->info('Updated order #{orderId} status to #{statusId}.', [
             'orderId' => $order->id,
             'statusId' => $statusId,
+        ]);
+    }
+
+    private function saveTransactionId(\Order $order, OrderEvent $event): void
+    {
+        if (null === $transactionId = $event->getData()->getPaymentId()) {
+            return;
+        }
+
+        /**
+         * @var \OrderPayment[] $payments
+         */
+        if ([] === $payments = $order->getOrderPayments()) {
+            $this->createOrderPayment($order, $transactionId);
+
+            return;
+        }
+
+        foreach ($payments as $payment) {
+            if ($payment->transaction_id === $transactionId || '' !== (string) $payment->transaction_id) {
+                continue;
+            }
+
+            $payment->transaction_id = $transactionId;
+
+            if (!$payment->update()) {
+                throw new \RuntimeException('Could not update order payment.');
+            }
+        }
+    }
+
+    private function createOrderPayment(\Order $order, string $transactionId): void
+    {
+        if (!$order->addOrderPayment($order->total_paid, null, $transactionId)) {
+            throw new \RuntimeException('Could not create order payment.');
+        }
+
+        $this->logger->info('Created payment for order #{orderId}.', [
+            'orderId' => $order->id,
         ]);
     }
 }
