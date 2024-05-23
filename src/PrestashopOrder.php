@@ -5,6 +5,8 @@ namespace izi\prestashop;
 use izi\item\order\OrderProduct;
 use izi\prestashop\BasketApp\BasketAppClientInterface;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
+use izi\prestashop\ObjectModel\ObjectManagerInterface;
+use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
 
 class PrestashopOrder
 {
@@ -254,7 +256,7 @@ class PrestashopOrder
         $orderDetails->order_merchant_status_description = $this->getStatusDescription($this->order);
         $orderDetails->order_base_price = $this->readSummaryOrderBasePrice();
         $orderDetails->order_final_price = $this->readSummaryOrderFinalPrice();
-        $orderDetails->delivery_references_list = [];
+        $orderDetails->delivery_references_list = $this->getTrackingNumbers();
         $orderDetails->currency = 'PLN';
         $orderDetails->payment_type = $this->readPaymentType();
 
@@ -332,5 +334,14 @@ class PrestashopOrder
     private function formatPrice(float $price): string
     {
         return number_format($price, 2, '.', '');
+    }
+
+    private function getTrackingNumbers(): array
+    {
+        /** @var \InPostIzi $module */
+        $module = \Module::getInstanceByName('inpostizi');
+        $objectManager = $module->get(ObjectManagerInterface::class);
+
+        return (new CarrierModuleTrackingNumberProvider($objectManager))->getTrackingNumbers((int) $this->order->id);
     }
 }
