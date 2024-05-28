@@ -2,11 +2,14 @@
 const defaultMap = {
   productPageForm: '#add-to-cart-or-refresh',
   inpostIziButton: 'inpost-izi-button',
+  inpostIziProductButtonWrapper: '.js-inpost-izi-product-btn-wrapper'
 };
 
 /**
  * @return {{
  *   productPageForm: string,
+ *   inpostIziButton: string,
+ *   inpostIziProductButtonWrapper: string
  * }}
  */
 const selectorsMap = () => {

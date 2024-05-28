@@ -5,6 +5,8 @@ import updatedProductHandler from "../components/handler/updatedProductHandler";
 import iziModalClosedEventHandler from "../components/handler/iziModalClosedEventHandler";
 import bindIziButtonEvents from "../components/events/bindIziButtonEvents";
 import initGetOrderCompleteIfCartBound from "../components/handler/initGetOrderCompleteIfCartBound";
+import refreshProductButtonHandler from "../components/handler/refreshProductButtonHandler";
+import selectorsMap from "../components/map/selectorsMap";
 
 const mainController = () => {
   const attachEvents = () => {
@@ -15,6 +17,17 @@ const mainController = () => {
     bindIziButtonEvents();
   }
 
+  const refreshProductButtons = () => {
+    const buttons = document.querySelectorAll(selectorsMap().inpostIziProductButtonWrapper);
+
+    buttons.forEach((button) => {
+      const idProduct = parseInt(button.getAttribute('data-id-product'), 10);
+      const hookName = button.getAttribute('data-hook');
+
+      refreshProductButtonHandler(button, hookName, idProduct);
+    });
+  }
+
   const init = () => {
     if (prestashop?.cart?.products_count) {
       updateButtonCount(prestashop.cart.products_count);
@@ -22,6 +35,7 @@ const mainController = () => {
 
     initGetOrderCompleteIfCartBound();
     attachEvents();
+    refreshProductButtons();
   }
 
   return {

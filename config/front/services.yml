@@ -61,6 +61,7 @@ services:
         izi\prestashop\Command\GetClientDetailsCommand: '@izi\prestashop\Handler\GetClientDetailsHandlerInterface'
         izi\prestashop\Command\UpdateBasketCommand: '@izi\prestashop\Handler\UpdateBasketHandlerInterface'
         izi\prestashop\Command\GetBindingConfirmationCommand: '@izi\prestashop\Handler\GetBindingConfirmationHandlerInterface'
+        izi\prestashop\Command\GetProductWidgetCommand: '@izi\prestashop\Handler\GetProductWidgetHandlerInterface'
         izi\prestashop\Command\GetOrderEventsCommand: '@izi\prestashop\Handler\GetOrderEventsHandlerInterface'
         izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand: '@izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface'
         izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand: '@izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface'

@@ -359,6 +359,14 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  izi\prestashop\ObjectModel\Repository\ProductRepository:
+    class: izi\prestashop\ObjectModel\Repository\ProductRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Product }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   izi\prestashop\ObjectModel\Repository\ConfigurationRepository:
     class: izi\prestashop\ObjectModel\Repository\ConfigurationRepository
     public: false
