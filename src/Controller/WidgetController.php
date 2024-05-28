@@ -10,6 +10,7 @@ use izi\prestashop\Command\BindBasketCommand;
 use izi\prestashop\Command\GenerateDeepLinkCommand;
 use izi\prestashop\Command\GetBindingConfirmationCommand;
 use izi\prestashop\Command\GetOrderEventsCommand;
+use izi\prestashop\Command\GetProductWidgetCommand;
 use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Common\BindingPlace;
@@ -21,6 +22,7 @@ use izi\prestashop\Handler\Result\BasketBindingResult;
 use izi\prestashop\Handler\Result\BindingConfirmationStream;
 use izi\prestashop\Handler\Result\DeepLink;
 use izi\prestashop\Handler\Result\OrderEventStream;
+use izi\prestashop\Handler\Result\ProductWidgetResult;
 use izi\prestashop\Http\Exception\HttpExceptionInterface as BasketAppHttpException;
 use izi\prestashop\Http\Response\EventStreamResponse;
 use Psr\Clock\ClockInterface;
@@ -141,6 +143,26 @@ final class WidgetController
             unset($this->context->cookie->inpostizi_basket_id);
 
             return JsonResponse::create(null, 204)->setContent(null);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function getWidgetHook(string $hook, int $productId): JsonResponse
+    {
+        if ('' === $hook = trim($hook)) {
+            throw new BadRequestHttpException($this->module->l('Hook name is required.', self::TRANSLATION_SOURCE));
+        }
+
+        try {
+            $command = new GetProductWidgetCommand($hook, $productId);
+
+            /** @var ProductWidgetResult $result */
+            $result = $this->bus->handle($command);
+
+            return new JsonResponse([
+                'content' => $result->getContent()
+            ]);
         } catch (\Exception $e) {
             return $this->handleException($e);
         }

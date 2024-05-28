@@ -18,6 +18,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
     private const THANK_YOU_DISPLAY_HOOK = 'INPOST_PAY_THANK_YOU_DISPLAY';
     private const PRODUCT_CARD_DISPLAY_HOOK = 'INPOST_PAY_PRODUCT_CARD_DISPLAY_HOOK';
     private const CHECKOUT_BUTTON_DISPLAY_HOOK = 'INPOST_PAY_CHECKOUT_DISPLAY_HOOK';
+    private const FULL_PAGE_CACHE_MODULE_IN_USE = 'INPOST_PAY_FULL_PAGE_CACHE_MODULE_IN_USE';
 
     /**
      * @var ShopAwareConfigurationInterface
@@ -72,6 +73,11 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
         return $hook;
     }
 
+    public function isFullPageCacheModuleInUse(): bool
+    {
+        return (bool) $this->configuration->get(self::FULL_PAGE_CACHE_MODULE_IN_USE);
+    }
+
     public function copy(): GeneralConfigurationInterface
     {
         return new DTO\GeneralConfiguration(
@@ -79,7 +85,8 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
             $this->getMaxSuggestedProducts(),
             $this->getThankYouDisplayHook(),
             $this->getProductCardDisplayHook(),
-            $this->getCheckoutButtonDisplayHook()
+            $this->getCheckoutButtonDisplayHook(),
+            $this->isFullPageCacheModuleInUse()
         );
     }
 
@@ -90,5 +97,6 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
         $this->configuration->set(self::THANK_YOU_DISPLAY_HOOK, $configuration->getThankYouDisplayHook());
         $this->configuration->set(self::PRODUCT_CARD_DISPLAY_HOOK, $configuration->getProductCardDisplayHook());
         $this->configuration->set(self::CHECKOUT_BUTTON_DISPLAY_HOOK, $configuration->getCheckoutButtonDisplayHook());
+        $this->configuration->set(self::FULL_PAGE_CACHE_MODULE_IN_USE, $configuration->isFullPageCacheModuleInUse());
     }
 }

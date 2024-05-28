@@ -16,6 +16,7 @@ use izi\prestashop\Command\GenerateDeepLinkCommand;
 use izi\prestashop\Command\GetBindingConfirmationCommand;
 use izi\prestashop\Command\GetClientDetailsCommand;
 use izi\prestashop\Command\GetOrderEventsCommand;
+use izi\prestashop\Command\GetProductWidgetCommand;
 use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\Command\UpdateBasketCommand;
 use izi\prestashop\Command\UpdateOrderStatusCommand;
@@ -33,6 +34,7 @@ use izi\prestashop\Handler\GenerateDeepLinkHandlerInterface;
 use izi\prestashop\Handler\GetBindingConfirmationHandlerInterface;
 use izi\prestashop\Handler\GetClientDetailsHandlerInterface;
 use izi\prestashop\Handler\GetOrderEventsHandlerInterface;
+use izi\prestashop\Handler\GetProductWidgetHandlerInterface;
 use izi\prestashop\Handler\UnbindBasketHandlerInterface;
 use izi\prestashop\Handler\UpdateBasketHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderStatusHandlerInterface;
@@ -73,6 +75,7 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             GenerateDeepLinkCommand::class => '?' . GenerateDeepLinkHandlerInterface::class,
             GetBindingConfirmationCommand::class => '?' . GetBindingConfirmationHandlerInterface::class,
             GetOrderEventsCommand::class => '?' . GetOrderEventsHandlerInterface::class,
+            GetProductWidgetCommand::class => '?' . GetProductWidgetHandlerInterface::class,
 
             /* merchant API */
             ConfirmBasketBindingCommand::class => '?' . ConfirmBasketBindingHandlerInterface::class,

@@ -23,6 +23,8 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GroupSequence;
+use PrestaShopBundle\Form\Admin\Type\SwitchType;
+use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 
 final class GeneralConfigurationType extends AbstractType
 {
@@ -46,6 +48,10 @@ final class GeneralConfigurationType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $switchClass = class_exists(SwitchType::class)
+            ? SwitchType::class
+            : SwitchTypePolyfill::class;
+
         $builder
             ->add('enableForEveryone', ChoiceType::class, [
                 'choices' => [
@@ -83,6 +89,11 @@ final class GeneralConfigurationType extends AbstractType
                 'property_path' => 'generalConfiguration.checkoutButtonDisplayHook',
                 'label' => $this->translator->l('Checkout process hook used to display widget', self::TRANSLATION_SOURCE),
                 'help' => sprintf($this->translator->l('If you choose the \'%s\' hook you have to manually implement it in the template \'{hook h="%s"}\'.', self::TRANSLATION_SOURCE), DisplayIziCheckoutButton::getHookName(), DisplayIziCheckoutButton::getHookName()),
+            ])
+            ->add('fullPageCacheModuleInUse', $switchClass, [
+                'property_path' => 'generalConfiguration.fullPageCacheModuleInUse',
+                'label' => $this->translator->l('Full page cache in use', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('Use this option if you are using the full page cache module or a varnish, lightspeed cache.', self::TRANSLATION_SOURCE),
             ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,

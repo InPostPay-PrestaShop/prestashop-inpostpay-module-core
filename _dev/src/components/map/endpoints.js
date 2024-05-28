@@ -14,6 +14,7 @@ const endpoints = {
   basketConfirmation: 'inpost/v1/izi/merchant/basket/confirmation',
   orderComplete: 'inpost/v1/izi/merchant/order/confirmation/get',
   basketGetLink: 'inpost/v1/izi/merchant/basket/get/link',
+  widgetGet: 'inpost/v1/izi/merchant/widget/get',
 }
 
 export default endpoints;
