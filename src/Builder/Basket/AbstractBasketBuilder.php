@@ -306,7 +306,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         }
 
         if ($product['allow_oosp']) {
-            return max($product['quantity_available'] ?? 0, 9999);
+            $availableQuantity = isset($product['quantity_available']) ? (int) $product['quantity_available'] : 0;
+
+            return max(9999, $availableQuantity);
         }
 
         $availableQuantity = isset($product['quantity_available'])
