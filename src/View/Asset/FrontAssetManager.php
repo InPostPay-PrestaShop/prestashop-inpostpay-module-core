@@ -11,11 +11,6 @@ use Symfony\Component\Asset\VersionStrategy\VersionStrategyInterface;
 final class FrontAssetManager extends AbstractAssetManager
 {
     /**
-     * @var \Module
-     */
-    private $module;
-
-    /**
      * @var \Context
      */
     private $context;
@@ -24,7 +19,6 @@ final class FrontAssetManager extends AbstractAssetManager
     {
         parent::__construct($module, null, $this->createVersionStrategy($module));
 
-        $this->module = $module;
         $this->context = $context;
     }
 
@@ -42,6 +36,11 @@ final class FrontAssetManager extends AbstractAssetManager
         $this->getController()->registerStylesheet($options['id'], $path, $options);
 
         return $this;
+    }
+
+    protected function getBasePath(): string
+    {
+        return sprintf('modules/%s/views', $this->module->name);
     }
 
     private function resolveOptions(string &$path, array $options): array

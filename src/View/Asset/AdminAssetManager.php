@@ -6,6 +6,9 @@ namespace izi\prestashop\View\Asset;
 
 final class AdminAssetManager extends AbstractAssetManager
 {
+    /**
+     * @var \Context
+     */
     private $context;
 
     public function __construct(\Module $module, \Context $context)
@@ -29,6 +32,11 @@ final class AdminAssetManager extends AbstractAssetManager
         $this->getController()->addCSS($url, $options['media'] ?? 'all', null, false);
 
         return $this;
+    }
+
+    protected function getBasePath(): string
+    {
+        return sprintf('%s/views', rtrim($this->module->getPathUri(), '/'));
     }
 
     private function getController(): \AdminController

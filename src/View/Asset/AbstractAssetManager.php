@@ -15,7 +15,7 @@ abstract class AbstractAssetManager implements AssetManagerInterface
     /**
      * @var \Module
      */
-    private $module;
+    protected $module;
 
     /**
      * @var ContextInterface|null
@@ -27,6 +27,9 @@ abstract class AbstractAssetManager implements AssetManagerInterface
      */
     private $versionStrategy;
 
+    /**
+     * @var PathPackage|null
+     */
     private $package;
 
     public function __construct(\Module $module, ?ContextInterface $context = null, ?VersionStrategyInterface $versionStrategy = null)
@@ -51,9 +54,11 @@ abstract class AbstractAssetManager implements AssetManagerInterface
         return $this->package ?? ($this->package = $this->createPackage());
     }
 
+    abstract protected function getBasePath(): string;
+
     private function createPackage(): PathPackage
     {
-        $basePath = sprintf('modules/%s/views', $this->module->name);
+        $basePath = $this->getBasePath();
         $versionStrategy = $this->getVersionStrategy();
 
         return new PathPackage($basePath, $versionStrategy, $this->context);
