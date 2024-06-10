@@ -80,7 +80,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
         $hookNames = [];
 
         foreach (self::getSubscribedServices() as $hookName => $serviceName) {
-            $class = '?' === $serviceName[0] ? \Tools::substr($serviceName, 1) : $serviceName;
+            $class = '?' === $serviceName[0] ? substr($serviceName, 1) : $serviceName;
 
             if (is_subclass_of($class, AliasedHookInterface::class)) {
                 foreach (self::getAliases($class, $psVersion) as $alias) {
@@ -99,7 +99,30 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
 
     private function getHook(string $name): ?HookInterface
     {
-        return $this->locator->has($name) ? $this->locator->get($name) : null;
+        if ($this->locator->has($name)) {
+            return $this->locator->get($name);
+        }
+
+        static $canonicalNames;
+
+        if (!isset($canonicalNames)) {
+            $canonicalNames = [];
+
+            foreach (self::getSubscribedServices() as $canonicalName => $ignored) {
+                $normalizedName = strtolower($canonicalName);
+                $canonicalNames[$normalizedName] = $canonicalName;
+            }
+        }
+
+        $normalizedName = strtolower($name);
+
+        if (!isset($canonicalNames[$normalizedName])) {
+            return null;
+        }
+
+        $canonicalName = $canonicalNames[$normalizedName];
+
+        return $this->locator->has($canonicalName) ? $this->locator->get($canonicalName) : null;
     }
 
     /**
