@@ -42,7 +42,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
      */
     public function __construct(SerializerInterface $serializer, ObjectManagerInterface $manager, string $modelClass = InPostIziBasketSession::class)
     {
-        if (!is_subclass_of($modelClass, InPostIziBasketSession::class)) {
+        if (!is_a($modelClass, InPostIziBasketSession::class, true)) {
             throw new \DomainException(sprintf('%s is not a %s.', $modelClass, InPostIziBasketSession::class));
         }
 
