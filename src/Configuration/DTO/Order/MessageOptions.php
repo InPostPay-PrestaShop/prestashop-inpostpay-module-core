@@ -28,7 +28,7 @@ final class MessageOptions implements \JsonSerializable
      */
     private $customFormat;
 
-    public function __construct(string $message = '', bool $appendIfApmDelivery = false, bool $customFormat = false)
+    public function __construct(?string $message = '', bool $appendIfApmDelivery = false, bool $customFormat = false)
     {
         $this->message = $message;
         $this->appendIfApmDelivery = $appendIfApmDelivery;
