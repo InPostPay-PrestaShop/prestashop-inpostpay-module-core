@@ -127,9 +127,11 @@ services:
 
   izi\prestashop\Form\Type\Shipping\ServiceOptionsType:
     class: izi\prestashop\Form\Type\Shipping\ServiceOptionsType
-    autowire: true
     tags:
       - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'
 
   izi\prestashop\Form\Type\Shipping\ShippingOptionsType:
     class: izi\prestashop\Form\Type\Shipping\ShippingOptionsType
