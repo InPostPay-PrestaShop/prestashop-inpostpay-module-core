@@ -367,11 +367,12 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     }
 
     /**
-     * @return array
+     * @return iterable
      */
     private function getSf28ConfigResources()
     {
-        $configurator = static function (ContainerBuilder $container) {
+        yield sprintf('%s/config/services/sf28.yml', rtrim($this->getLocalPath(), '/'));
+        yield static function (ContainerBuilder $container) {
             $container->addResource(new FileResource(__FILE__));
             $container->addCompilerPass(new RegisterListenersPass('inpost.izi.event_dispatcher'), PassConfig::TYPE_BEFORE_REMOVING);
             $container->addCompilerPass(new ProvideServiceLocatorFactoriesPass('inpost.izi.service_locator'));
@@ -381,10 +382,11 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
         };
 
-        return [
-            sprintf('%s/config/services/sf28.yml', rtrim($this->getLocalPath(), '/')),
-            $configurator,
-        ];
+        if (Tools::version_compare(_PS_VERSION_, '1.7.1')) {
+            yield static function (ContainerBuilder $container) {
+                $container->setParameter('inpost.izi.basket_session_model_class', InPostIziBasketSession::class);
+            };
+        }
     }
 
     /**

@@ -1,5 +1,6 @@
 # common FO/BO configuration
 parameters:
+  inpost.izi.basket_session_model_class: izi\prestashop\ObjectModel\Entity\InPostIziBasketSession
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.logger_config:
     type: rotating_file
@@ -424,6 +425,7 @@ services:
     arguments:
       - '@inpost.izi.serializer'
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '%inpost.izi.basket_session_model_class%'
 
   izi\prestashop\Hook\Common\ActionCartDeleteBefore:
     class: izi\prestashop\Hook\Common\ActionCartDeleteBefore
