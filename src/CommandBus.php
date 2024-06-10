@@ -42,10 +42,12 @@ use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface;
 use izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\GetBasketCommand;
+use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
 use izi\prestashop\MerchantApi\Command\UpdateOrderCommand;
 use izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\GetBasketHandlerInterface;
+use izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface;
 use Psr\Container\ContainerInterface;
 
@@ -83,6 +85,7 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             GetBasketCommand::class => '?' . GetBasketHandlerInterface::class,
             MerchantApi\Command\UpdateBasketCommand::class => '?' . MerchantApi\Handler\UpdateBasketHandlerInterface::class,
             UpdateOrderCommand::class => '?' . UpdateOrderHandlerInterface::class,
+            UpdateCartMessageCommand::class => '?' . UpdateCartMessageHandlerInterface::class,
 
             /* configuration */
             UpdateGeneralConfigurationCommand::class => '?' . UpdateGeneralConfigurationHandlerInterface::class,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\ObjectModel;
 
+use izi\prestashop\ObjectModel\Exception\InvalidDataException;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactoryInterface;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 
@@ -47,16 +48,25 @@ final class ObjectManager implements ObjectManagerInterface
     {
         $id = (int) $model->id;
 
-        $result = $model->validateFields()
-            && $model->validateFieldsLang()
-            && $this->connection->save($model);
+        $this->validateModel($model);
 
-        if (false === $result) {
+        if (false === $this->connection->save($model)) {
             $message = 0 >= $id
                 ? sprintf('Failed to create a new %s.', get_class($model))
                 : sprintf('Failed to update %s ID %d.', get_class($model), $id);
 
             throw new \RuntimeException($message);
+        }
+    }
+
+    public function remove(\ObjectModel $model): void
+    {
+        if (0 >= $id = (int) $model->id) {
+            return;
+        }
+
+        if (false === $this->connection->delete($model)) {
+            throw new \RuntimeException(sprintf('Failed to delete %s ID %d.', get_class($model), $id));
         }
     }
 
@@ -123,5 +133,15 @@ final class ObjectManager implements ObjectManagerInterface
     public function createQueryBuilder(string $class): QueryBuilder
     {
         return new QueryBuilder($this, $class);
+    }
+
+    private function validateModel(\ObjectModel $model): void
+    {
+        try {
+            $model->validateFields();
+            $model->validateFieldsLang();
+        } catch (\PrestaShopException $e) {
+            throw new InvalidDataException($e->getMessage(), 0, $e);
+        }
     }
 }

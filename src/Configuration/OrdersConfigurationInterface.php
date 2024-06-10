@@ -8,6 +8,7 @@ use izi\prestashop\Common\PaymentType;
 
 /**
  * @method PaymentType[] getAvailablePaymentOptions(int $shopId = null)
+ * @method string getMessageFormat(int $shopId = null)
  */
 interface OrdersConfigurationInterface
 {

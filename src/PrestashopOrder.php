@@ -240,6 +240,10 @@ class PrestashopOrder
 
     private function readComments()
     {
+        if ($data = $this->getOrderData()) {
+            return $data->order_details->order_comments ?? null;
+        }
+
         return $this->order->getFirstMessage() ?: null;
     }
 

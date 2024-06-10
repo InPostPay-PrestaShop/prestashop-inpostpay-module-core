@@ -8,8 +8,6 @@ use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPa
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
 use izi\prestashop\DependencyInjection\ContainerFactory;
 use izi\prestashop\DependencyInjection\Exception\ContainerNotFoundException;
-use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler;
-use izi\prestashop\Hook\Front\ActionFrontControllerSetMedia;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
 use izi\prestashop\Hook\WidgetConfigurationResolver;
@@ -376,9 +374,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             $container->addResource(new FileResource(__FILE__));
             $container->addCompilerPass(new RegisterListenersPass('inpost.izi.event_dispatcher'), PassConfig::TYPE_BEFORE_REMOVING);
             $container->addCompilerPass(new ProvideServiceLocatorFactoriesPass('inpost.izi.service_locator'));
-            $container->addCompilerPass(new TaggedIteratorsCollectorPass(UpdateOrderTrackingNumbersHandler::class));
-            $container->addCompilerPass(new TaggedIteratorsCollectorPass(ActionFrontControllerSetMedia::class));
-            $container->addCompilerPass(new TaggedIteratorsCollectorPass('inpost.izi.security.access.decision_manager'));
+            $container->addCompilerPass(new TaggedIteratorsCollectorPass());
             AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
         };
 

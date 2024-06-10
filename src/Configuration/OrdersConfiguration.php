@@ -5,18 +5,25 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration;
 
 use izi\prestashop\Common\PaymentType;
+use izi\prestashop\Configuration\DTO\Order\MessageOptions;
 use izi\prestashop\Enum\Enum;
+use izi\prestashop\Serializer\SafeDeserializerTrait;
+use izi\prestashop\Serializer\SerializerFactory;
+use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @implements PersistentConfigurationInterface<OrdersConfigurationInterface>
  */
 final class OrdersConfiguration implements OrdersConfigurationInterface, PersistentConfigurationInterface
 {
+    use SafeDeserializerTrait;
+
     private const INITIAL_OS_ID = 'INPOST_PAY_INITIAL_OS_ID';
     private const PAID_OS_ID = 'INPOST_PAY_authorized_payment';
     private const STATUS_DESCRIPTION_MAP = 'INPOST_PAY_OS_DESCRIPTION_MAP';
     private const AVAILABLE_PAYMENT_OPTIONS = 'INPOST_PAY_AVAILABLE_PAYMENT_OPTIONS';
     private const POS_ID = 'INPOST_PAY_pos_id';
+    private const MESSAGE_FORMAT = 'INPOST_PAY_ORDER_MESSAGE_FORMAT';
 
     /**
      * @var LanguageAwareConfigurationInterface
@@ -27,9 +34,15 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
     private $availablePaymentOptions = [];
 
-    public function __construct(LanguageAwareConfigurationInterface $configuration)
+    /**
+     * @var array<int, MessageOptions>
+     */
+    private $messageOptions = [];
+
+    public function __construct(LanguageAwareConfigurationInterface $configuration, SerializerInterface $serializer = null)
     {
         $this->configuration = $configuration;
+        $this->serializer = $serializer ?? SerializerFactory::create();
     }
 
     /**
@@ -126,15 +139,22 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         return $this->configuration->get(self::POS_ID, $shopId);
     }
 
+    public function getMessageFormat(?int $shopId = null): string
+    {
+        return $this->getMessageOptions($shopId)->getFormat();
+    }
+
     public function copy(): OrdersConfigurationInterface
     {
-        return new DTO\OrdersConfiguration(
+        $configuration = new DTO\OrdersConfiguration(
             $this->getInitialStatusId(),
             $this->getPaidStatusId(),
             $this->getPointOfSaleId(),
             $this->getStatusDescriptionMap(),
             $this->getAvailablePaymentOptions()
         );
+
+        return $configuration->setMessageOptions($this->getMessageOptions());
     }
 
     public function persist(OrdersConfigurationInterface $configuration): void
@@ -144,6 +164,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         $this->configuration->set(self::POS_ID, $configuration->getPointOfSaleId());
         $this->setOrderStatusDescriptionMapping($configuration->getStatusDescriptionMap());
         $this->setAvailablePaymentOptions($configuration);
+        $this->setMessageOptions($configuration);
     }
 
     private function loadStatusDescriptionMap(int $languageId, ?int $shopId): array
@@ -213,5 +234,41 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
         $this->configuration->set(self::AVAILABLE_PAYMENT_OPTIONS, json_encode($availablePaymentOptions));
         $this->availablePaymentOptions = [0 => $availablePaymentOptions];
+    }
+
+    private function getMessageOptions(?int $shopId = null): MessageOptions
+    {
+        if (!isset($this->messageOptions[(int) $shopId])) {
+            $this->messageOptions[(int) $shopId] = $this->loadMessageOptions($shopId);
+        }
+
+        return $this->messageOptions[(int) $shopId];
+    }
+
+    private function loadMessageOptions(?int $shopId): MessageOptions
+    {
+        $config = $this->configuration->get(self::MESSAGE_FORMAT, $shopId);
+
+        if (null !== $config && $options = $this->deserialize($config, MessageOptions::class)) {
+            return $options;
+        }
+
+        return new MessageOptions();
+    }
+
+    private function setMessageOptions(OrdersConfigurationInterface $configuration): void
+    {
+        if ($configuration instanceof DTO\OrdersConfiguration) {
+            $options = $configuration->getMessageOptions();
+        } elseif (is_callable([$configuration, 'getMessageFormat'])) {
+            $options = new MessageOptions($configuration->getMessageFormat(), false, true);
+        } else {
+            @trigger_error(sprintf('Not implementing the "getMessageFormat()" method in "%s" is deprecated.', get_class($configuration)), \E_USER_DEPRECATED);
+            $options = new MessageOptions();
+        }
+
+        $value = $this->serializer->serialize($options, 'json');
+        $this->configuration->set(self::MESSAGE_FORMAT, $value);
+        $this->messageOptions[0] = $options;
     }
 }

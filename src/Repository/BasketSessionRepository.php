@@ -132,7 +132,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
         $this->sessionsByBasketId[$model->cart_id] = $session;
         $this->sessionsByCartId[$model->session_id] = $session;
         if ($model->order_id) {
-            $this->sessionsByCartId[$model->order_id] = $session;
+            $this->sessionsByOrderId[$model->order_id] = $session;
         }
     }
 
@@ -168,7 +168,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
         $this->sessionsByBasketId[$model->cart_id] = $session;
         $this->sessionsByCartId[$model->session_id] = $session;
         if ($model->order_id) {
-            $this->sessionsByCartId[$model->order_id] = $session;
+            $this->sessionsByOrderId[$model->order_id] = $session;
         }
 
         return $session;
