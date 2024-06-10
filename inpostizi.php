@@ -8,8 +8,6 @@ use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPa
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
 use izi\prestashop\DependencyInjection\ContainerFactory;
 use izi\prestashop\DependencyInjection\Exception\ContainerNotFoundException;
-use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler;
-use izi\prestashop\Hook\Front\ActionFrontControllerSetMedia;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
 use izi\prestashop\Hook\WidgetConfigurationResolver;
@@ -27,8 +25,10 @@ use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpKernel\TerminableInterface;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 if (!defined('_PS_VERSION_')) {
@@ -56,7 +56,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.6.0';
+        $this->version = '1.7.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -152,6 +152,24 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
         } catch (ServiceNotFoundException $e) {
             $this->handleConfigPageRequest();
+        } catch (RouteNotFoundException $e) {
+            if (!$this->active && Tools::version_compare(_PS_VERSION_, '8.0.0', '>=') && !$this->hasShopAssociations()) {
+                /** @var Session $session */
+                $session = $this->get('session');
+                $session->getFlashBag()->add('error', $this->l('To access the configuration page, the module must be active.'));
+
+                Tools::redirectAdmin($router->generate('admin_module_manage'));
+            }
+
+            if (Tools::getValue('cache_cleared')) {
+                throw $e;
+            }
+
+            Tools::clearSf2Cache();
+            Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, null, [
+                'configure' => $this->name,
+                'cache_cleared' => true,
+            ]));
         }
     }
 
@@ -347,24 +365,24 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     }
 
     /**
-     * @return array
+     * @return iterable
      */
     private function getSf28ConfigResources()
     {
-        $configurator = static function (ContainerBuilder $container) {
+        yield sprintf('%s/config/services/sf28.yml', rtrim($this->getLocalPath(), '/'));
+        yield static function (ContainerBuilder $container) {
             $container->addResource(new FileResource(__FILE__));
             $container->addCompilerPass(new RegisterListenersPass('inpost.izi.event_dispatcher'), PassConfig::TYPE_BEFORE_REMOVING);
             $container->addCompilerPass(new ProvideServiceLocatorFactoriesPass('inpost.izi.service_locator'));
-            $container->addCompilerPass(new TaggedIteratorsCollectorPass(UpdateOrderTrackingNumbersHandler::class));
-            $container->addCompilerPass(new TaggedIteratorsCollectorPass(ActionFrontControllerSetMedia::class));
-            $container->addCompilerPass(new TaggedIteratorsCollectorPass('inpost.izi.security.access.decision_manager'));
+            $container->addCompilerPass(new TaggedIteratorsCollectorPass());
             AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
         };
 
-        return [
-            sprintf('%s/config/services/sf28.yml', rtrim($this->getLocalPath(), '/')),
-            $configurator,
-        ];
+        if (Tools::version_compare(_PS_VERSION_, '1.7.1')) {
+            yield static function (ContainerBuilder $container) {
+                $container->setParameter('inpost.izi.basket_session_model_class', InPostIziBasketSession::class);
+            };
+        }
     }
 
     /**

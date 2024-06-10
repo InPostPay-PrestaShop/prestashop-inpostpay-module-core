@@ -43,6 +43,12 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             'controller' => [WidgetController::class, 'getOrderComplete'],
         ],
         [
+            'path' => '/inpost/v1/izi/merchant/widget/get/{hook}/{productId}',
+            'prefix' => '/inpost/v1/izi/merchant/widget/get',
+            'regex' => '#^/inpost/v1/izi/merchant/widget/get/(?<hook>.+)/(?<productId>\d+)$#',
+            'controller' => [WidgetController::class, 'getWidgetHook'],
+        ],
+        [
             'path' => '/inpost/v1/izi/merchant/basket/post/binding/{prefix}/{number}',
             'prefix' => '/inpost/v1/izi/merchant/basket/post/binding',
             'regex' => '#^/inpost/v1/izi/merchant/basket/post/binding(?:/(?<prefix>.+?)(?:/(?<number>.+?))?)?$#',
@@ -124,6 +130,18 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         $response->send();
 
         exit;
+    }
+
+    /**
+     * @param Country $defaultCountry
+     */
+    protected function geolocationManagement($defaultCountry): bool
+    {
+        return false;
+    }
+
+    protected function displayRestrictedCountryPage(): void
+    {
     }
 
     // TODO use own Sf Kernel?

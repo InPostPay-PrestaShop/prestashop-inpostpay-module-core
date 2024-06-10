@@ -306,7 +306,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         }
 
         if ($product['allow_oosp']) {
-            return max($product['quantity_available'] ?? 0, 9999);
+            $availableQuantity = isset($product['quantity_available']) ? (int) $product['quantity_available'] : 0;
+
+            return max(9999, $availableQuantity);
         }
 
         $availableQuantity = isset($product['quantity_available'])
@@ -437,16 +439,16 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getRelatedProductBasePrice(array $product, int $quantity): Price
     {
         $gross = $product['price_without_reduction'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             true,
             false,
             $quantity
         );
 
         $net = $product['price_without_reduction_without_tax'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             false,
             false,
             $quantity
@@ -458,16 +460,16 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getRelatedProductPromoPrice(array $product, int $quantity): Price
     {
         $gross = $product['price'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             true,
             true,
             $quantity
         );
 
         $net = $product['price_tax_exc'] ?? $this->calculateProductPrice(
-            $product['id_product'],
-            $product['id_product_attribute'],
+            (int) $product['id_product'],
+            (int) $product['id_product_attribute'],
             false,
             true,
             $quantity
@@ -537,9 +539,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getPaymentOptions(): array
     {
-        $configuration = new Configuration();
+        $configuration = new OrdersConfiguration(new Configuration());
 
-        return (new OrdersConfiguration($configuration))->getAvailablePaymentOptions((int) $this->cart->id_shop);
+        return OrdersConfiguration::normalizeAvailablePaymentOptions($configuration, (int) $this->cart->id_shop);
     }
 
     private function calculateProductPrice(

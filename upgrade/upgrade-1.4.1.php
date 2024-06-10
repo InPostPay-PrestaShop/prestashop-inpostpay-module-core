@@ -1,7 +1,6 @@
 <?php
 
 use izi\prestashop\Hook\Front\DisplayPaymentReturn;
-use izi\prestashop\Hook\Front\DisplayProductFooter;
 use izi\prestashop\Hook\Front\DisplayShoppingCart;
 use izi\prestashop\Hook\Front\DisplayShoppingCartFooter;
 use izi\prestashop\Hook\HookExecutor;
@@ -53,7 +52,7 @@ function upgrade_module_1_4_1(Module $module)
 
     Configuration::updateGlobalValue('INPOST_PAY_THANK_YOU_DISPLAY', DisplayPaymentReturn::getHookName());
 
-    return $module->unregisterHook(DisplayProductFooter::HOOK_NAME)
+    return $module->unregisterHook('displayFooterProduct')
         && $module->unregisterHook(DisplayShoppingCart::HOOK_NAME)
         && $module->unregisterHook(DisplayShoppingCartFooter::HOOK_NAME)
         && $module->registerHook(HookExecutor::getHooksToInstall(_PS_VERSION_));

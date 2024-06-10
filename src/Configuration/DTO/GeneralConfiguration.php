@@ -42,13 +42,25 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
      */
     private $checkoutButtonDisplayHook;
 
-    public function __construct(bool $enabledForEveryone = false, ?int $maxSuggestedProducts = null, ?string $thankYouDisplayHook = null, ?string $productCardDisplayHook = null, ?string $checkoutButtonDisplayHook = null)
-    {
+    /**
+     * @var bool
+     */
+    private $fullPageCacheModuleInUse;
+
+    public function __construct(
+        bool $enabledForEveryone = false,
+        ?int $maxSuggestedProducts = null,
+        ?string $thankYouDisplayHook = null,
+        ?string $productCardDisplayHook = null,
+        ?string $checkoutButtonDisplayHook = null,
+        bool $fullPageCacheModuleInUse = false
+    ) {
         $this->enabledForEveryone = $enabledForEveryone;
         $this->maxSuggestedProducts = $maxSuggestedProducts;
         $this->thankYouDisplayHook = $thankYouDisplayHook;
         $this->productCardDisplayHook = $productCardDisplayHook;
         $this->checkoutButtonDisplayHook = $checkoutButtonDisplayHook;
+        $this->fullPageCacheModuleInUse = $fullPageCacheModuleInUse;
     }
 
     public function isEnabledForEveryone(): bool
@@ -107,6 +119,18 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
     public function setCheckoutButtonDisplayHook(?string $checkoutButtonDisplayHook): GeneralConfiguration
     {
         $this->checkoutButtonDisplayHook = $checkoutButtonDisplayHook;
+
+        return $this;
+    }
+
+    public function isFullPageCacheModuleInUse(): bool
+    {
+        return $this->fullPageCacheModuleInUse;
+    }
+
+    public function setFullPageCacheModuleInUse(bool $fullPageCacheModuleInUse): GeneralConfiguration
+    {
+        $this->fullPageCacheModuleInUse = $fullPageCacheModuleInUse;
 
         return $this;
     }

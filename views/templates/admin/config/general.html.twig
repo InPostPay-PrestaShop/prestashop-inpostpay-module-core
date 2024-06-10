@@ -23,6 +23,10 @@
         </div>
 
         <div class="card-body panel-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
+          {% include '@Modules/inpostizi/views/templates/admin/config/general/order_message.html.twig' %}
+        </div>
+
+        <div class="card-body panel-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
           {% include '@Modules/inpostizi/views/templates/admin/config/general/products.html.twig' %}
 
           {{ form_rest(form) }}

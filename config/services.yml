@@ -81,6 +81,14 @@ services:
       - '@izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader'
       - '@izi\prestashop\Translation\PaymentTypeTranslator'
 
+  izi\prestashop\Form\Type\Order\MessageOptionsType:
+    class: izi\prestashop\Form\Type\Order\MessageOptionsType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@izi\prestashop\Order\Message\ParameterDescriptorInterface'
+
   izi\prestashop\Form\Type\ShippingConfigurationType:
     class: izi\prestashop\Form\Type\ShippingConfigurationType
     autowire: true
@@ -119,9 +127,11 @@ services:
 
   izi\prestashop\Form\Type\Shipping\ServiceOptionsType:
     class: izi\prestashop\Form\Type\Shipping\ServiceOptionsType
-    autowire: true
     tags:
       - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'
 
   izi\prestashop\Form\Type\Shipping\ShippingOptionsType:
     class: izi\prestashop\Form\Type\Shipping\ShippingOptionsType
@@ -216,6 +226,14 @@ services:
       - { name: validator.constraint_validator }
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  izi\prestashop\Validator\ProcessableMessageFormatValidator:
+    class: izi\prestashop\Validator\ProcessableMessageFormatValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Order\Message\MessageFormatterInterface'
+      - '@izi\prestashop\Translation\LegacyTranslator'
 
   izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory:
     class: izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory
@@ -407,3 +425,5 @@ services:
       - '@assets.packages'
       - '@izi\prestashop\View\Asset\AssetManagerInterface'
       - InPostIzi
+
+  izi\prestashop\Order\Message\ParameterDescriptorInterface: '@izi\prestashop\Order\Message\ParametersExtractor'

@@ -1,5 +1,6 @@
 # common FO/BO configuration
 parameters:
+  inpost.izi.basket_session_model_class: izi\prestashop\ObjectModel\Entity\InPostIziBasketSession
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.logger_config:
     type: rotating_file
@@ -359,6 +360,14 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  izi\prestashop\ObjectModel\Repository\ProductRepository:
+    class: izi\prestashop\ObjectModel\Repository\ProductRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Product }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   izi\prestashop\ObjectModel\Repository\ConfigurationRepository:
     class: izi\prestashop\ObjectModel\Repository\ConfigurationRepository
     public: false
@@ -416,6 +425,7 @@ services:
     arguments:
       - '@inpost.izi.serializer'
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '%inpost.izi.basket_session_model_class%'
 
   izi\prestashop\Hook\Common\ActionCartDeleteBefore:
     class: izi\prestashop\Hook\Common\ActionCartDeleteBefore
@@ -543,6 +553,7 @@ services:
     arguments:
       - '@inpost.izi.context'
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
 
   izi\prestashop\Hook\WidgetConfigurationResolver:
     class: izi\prestashop\Hook\WidgetConfigurationResolver
@@ -606,3 +617,50 @@ services:
     class: izi\prestashop\Translation\ServiceNameTranslator
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
+
+  izi\prestashop\Order\Message\MessageFormatterInterface: '@izi\prestashop\Order\Message\MessageFormatter'
+  izi\prestashop\Order\Message\MessageFormatter:
+    class: izi\prestashop\Order\Message\MessageFormatter
+    public: false
+    arguments:
+      - '@izi\prestashop\Order\Message\ParametersExtractorInterface'
+      - !tagged inpost.izi.order_message_processor
+
+  izi\prestashop\Order\Message\ExpressionLanguage:
+    class: izi\prestashop\Order\Message\ExpressionLanguage
+    public: false
+
+  izi\prestashop\Order\Message\ParametersExtractorInterface: '@izi\prestashop\Order\Message\ParametersExtractor'
+  izi\prestashop\Order\Message\ParametersExtractor:
+    class: izi\prestashop\Order\Message\ParametersExtractor
+    public: false
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+
+  izi\prestashop\Order\Message\Processor\ConditionalBlockProcessor:
+    class: izi\prestashop\Order\Message\Processor\ConditionalBlockProcessor
+    public: false
+    tags:
+      - { name: inpost.izi.order_message_processor, priority: 100 }
+    arguments:
+      - '@izi\prestashop\Order\Message\ExpressionLanguage'
+
+  izi\prestashop\Order\Message\Processor\ExpressionLanguageProcessor:
+    class: izi\prestashop\Order\Message\Processor\ExpressionLanguageProcessor
+    public: false
+    tags:
+      - { name: inpost.izi.order_message_processor, priority: 50 }
+    arguments:
+      - '@izi\prestashop\Order\Message\ExpressionLanguage'
+
+  izi\prestashop\Order\Message\Processor\ParameterReplacementProcessor:
+    class: izi\prestashop\Order\Message\Processor\ParameterReplacementProcessor
+    public: false
+    tags:
+      - { name: inpost.izi.order_message_processor }
+
+  izi\prestashop\Configuration\PrestaShopConfiguration:
+    class: izi\prestashop\Configuration\PrestaShopConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'

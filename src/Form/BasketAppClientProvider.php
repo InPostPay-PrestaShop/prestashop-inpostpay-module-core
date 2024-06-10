@@ -24,12 +24,12 @@ final class BasketAppClientProvider implements EventSubscriberInterface
     private $clientFactory;
 
     /**
-     * @var PaymentsApiClientInterface&BasketAppClientInterface&null
+     * @var (PaymentsApiClientInterface&BasketAppClientInterface)|null
      */
     private $client;
 
     /**
-     * @param BasketAppClientInterface&PaymentsApiClientInterface&null $client
+     * @param (PaymentsApiClientInterface&BasketAppClientInterface)|null $client
      */
     public function __construct(ApiConfigurationInterface $configuration, BasketAppClientFactory $clientFactory, ?BasketAppClientInterface $client = null)
     {
@@ -46,7 +46,7 @@ final class BasketAppClientProvider implements EventSubscriberInterface
     }
 
     /**
-     * @return BasketAppClientInterface&PaymentsApiClientInterface|null
+     * @return (PaymentsApiClientInterface&BasketAppClientInterface)|null
      */
     public function getClient(): ?BasketAppClientInterface
     {

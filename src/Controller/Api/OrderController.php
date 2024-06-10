@@ -7,25 +7,28 @@ namespace izi\prestashop\Controller\Api;
 use izi\prestashop\CartSession;
 use izi\prestashop\Common\Order\MerchantOrderStatusData;
 use izi\prestashop\MerchantApi\Command\UpdateOrderCommand;
-use izi\prestashop\MerchantApi\Exception\MalformedRequestException;
 use izi\prestashop\MerchantApi\Exception\OrderNotFoundException;
+use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\MerchantApi\Model\Order\Request\OrderEvent;
 use izi\prestashop\PrestashopOrder;
 use izi\prestashop\rest\order\Create;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * @final
+ */
 class OrderController extends AbstractApiController
 {
     public function create(Request $request): JsonResponse
     {
-        $data = $this->_decodeRequest($request);
+        $data = $this->decodeRequest($request, CreateOrderRequest::class);
 
         $handler = new Create();
         $orderId = $handler->handleRequest($data);
         $order = $this->getOrderById($orderId);
 
-        $response = PrestashopOrder::getOrder($order, $data->order_details->basket_id);
+        $response = PrestashopOrder::getOrder($order, $data->getOrderDetails()->getBasketId());
 
         return new JsonResponse($response, 201);
     }
@@ -60,16 +63,5 @@ class OrderController extends AbstractApiController
         }
 
         return $order;
-    }
-
-    private function _decodeRequest(Request $request)
-    {
-        $data = json_decode($request->getContent(), false);
-
-        if (JSON_ERROR_NONE !== json_last_error()) {
-            throw MalformedRequestException::create();
-        }
-
-        return $data;
     }
 }

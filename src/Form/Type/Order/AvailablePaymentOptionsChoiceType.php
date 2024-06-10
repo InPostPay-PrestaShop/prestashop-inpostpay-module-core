@@ -52,7 +52,11 @@ final class AvailablePaymentOptionsChoiceType extends AbstractType
         $choiceLoader = $options['choice_loader'];
 
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use ($choiceLoader) {
-            if (!is_array($data = $event->getData())) {
+            if (null === $data = $event->getData()) {
+                return;
+            }
+
+            if (!is_array($data)) {
                 throw new TransformationFailedException('Expected an array.');
             }
 

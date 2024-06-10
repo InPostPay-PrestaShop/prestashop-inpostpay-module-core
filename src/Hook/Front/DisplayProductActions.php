@@ -53,13 +53,16 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
             throw new \InvalidArgumentException(sprintf('Parameter "product" expected to be an instance of "%s", "%s" given.', ProductLazyArray::class, get_debug_type($product)));
         }
 
-        if ('' === $widget = $this->renderWidget((int) $product['id_product'], $parameters, self::HOOK_NAME)) {
+        if ('' === $widget = $this->renderWidget($product, $parameters, self::HOOK_NAME)) {
             return '';
         }
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
+        return $this->renderer->render('module:inpostizi/views/templates/hook/productButtonWidget.tpl', [
             'widget' => $widget,
+            'refresh' => $this->generalConfiguration->isFullPageCacheModuleInUse(),
             'styles' => $this->getHtmlStyles(),
+            'hookName' => self::HOOK_NAME,
+            'idProduct' => $product['id_product'],
         ]);
     }
 }

@@ -40,18 +40,14 @@ final class DisplayIziThankYou implements HookInterface
     {
         $order = $parameters['order'] ?? null;
 
-        if (!$order instanceof OrderLazyArray) {
-            throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', OrderLazyArray::class, get_debug_type($order)));
+        $orderObj = $this->getOrderObject($order);
+
+        if (null === $orderObj) {
+            throw new \InvalidArgumentException('Order object is required.');
         }
 
-        /** @var OrderDetailLazyArray $orderDetails */
-        $orderDetails = $order->getDetails();
-
-        $orderId = $orderDetails->getId();
-        $orderObj = new \Order($orderId);
-
         if (!\Validate::isLoadedObject($orderObj)) {
-            throw new \InvalidArgumentException(sprintf('Order with id "%s" not found.', $orderId));
+            throw new \InvalidArgumentException(sprintf('Order with id "%s" not found.', $orderObj->id));
         }
 
         if ($this->shouldBeRendered(self::HOOK_NAME, $orderObj)) {
@@ -59,5 +55,29 @@ final class DisplayIziThankYou implements HookInterface
         }
 
         return '';
+    }
+
+    /**
+     * @param $presentedOrder OrderLazyArray|array
+     * @return \Order|null
+     */
+    private function getOrderObject($presentedOrder): ?\Order
+    {
+        $orderId = null;
+
+        if ($presentedOrder instanceof OrderLazyArray) {
+            /** @var OrderDetailLazyArray $orderDetails */
+            $orderDetails = $presentedOrder->getDetails();
+
+            $orderId = $orderDetails->getId();
+        } elseif (!empty($presentedOrder['details']['id'])) {
+            $orderId = $presentedOrder['details']['id'];
+        }
+
+        if (null === $orderId) {
+            return null;
+        }
+
+        return new \Order($orderId);
     }
 }

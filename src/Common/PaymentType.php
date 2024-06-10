@@ -45,7 +45,9 @@ final class PaymentType extends StringEnum
      */
     public static function getBankProvidedPaymentOptions(): array
     {
-        return array_udiff(self::cases(), self::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
+        $diff = array_udiff(self::cases(), self::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
+
+        return array_values($diff);
     }
 
     /**
@@ -53,8 +55,10 @@ final class PaymentType extends StringEnum
      */
     public static function getAvailableByDefaultPaymentOptions(): array
     {
-        return array_filter(self::cases(), static function (self $type) {
+        $filtered = array_filter(self::cases(), static function (self $type) {
             return $type !== self::DeferredPayment();
         });
+
+        return array_values($filtered);
     }
 }

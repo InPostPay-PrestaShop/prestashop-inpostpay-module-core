@@ -2,18 +2,29 @@
 
 namespace izi\prestashop\rest\order;
 
-use izi\item\order\InvoiceDetails;
 use izi\prestashop\CartSession;
+use izi\prestashop\CommandBusInterface;
+use izi\prestashop\Common\Customer\InvoiceDetails;
+use izi\prestashop\Common\Customer\LegalForm;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
+use izi\prestashop\Common\Order\Delivery;
+use izi\prestashop\Common\Order\DeliveryAddress;
 use izi\prestashop\Common\PaymentType;
+use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use izi\prestashop\Configuration\OrdersConfiguration;
+use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
+use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
 use izi\prestashop\MerchantApi\Exception\InternalServerErrorException;
+use izi\prestashop\MerchantApi\Model\Order\Request\AccountInfo;
+use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
+use izi\prestashop\ObjectModel\Exception\InvalidDataException;
+use izi\prestashop\Serializer\SerializerFactory;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
 
 class Create
@@ -40,12 +51,18 @@ class Create
      */
     private $shippingConfiguration;
 
-    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ?ShippingConfigurationInterface $shippingConfiguration = null)
+    /**
+     * @var CommandBusInterface
+     */
+    private $bus;
+
+    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null)
     {
         $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
         $this->module = $module ?? \Module::getInstanceByName('inpostizi');
         $this->shippingConfiguration = $shippingConfiguration ?? $this->module->get(ShippingConfigurationInterface::class);
+        $this->bus = $bus ?? $this->module->get(CommandBusInterface::class);
     }
 
     /**
@@ -55,7 +72,9 @@ class Create
      */
     public function handleRequest($data): int
     {
-        $cart = $this->getCart($data->order_details->basket_id);
+        $request = $this->normalizeRequest($data);
+
+        $cart = $this->getCart($request->getOrderDetails()->getBasketId());
 
         if ($order = $this->getOrderByCart($cart)) {
             if ('inpostizi' !== $order->module) {
@@ -65,7 +84,7 @@ class Create
             return $order->id;
         }
 
-        return $this->createOrder($cart, $data);
+        return $this->createOrder($cart, $request);
     }
 
     private function getCart(string $basketId): \Cart
@@ -90,10 +109,10 @@ class Create
         return $orderId ? new \Order($orderId) : null;
     }
 
-    private function createOrder(\Cart $cart, $data): int
+    private function createOrder(\Cart $cart, CreateOrderRequest $request): int
     {
-        $deliveryType = DeliveryType::from($data->delivery->delivery_type);
-        $serviceCodes = $this->getServiceCodes($data->delivery);
+        $deliveryType = $request->getDelivery()->getType();
+        $serviceCodes = $request->getDelivery()->getOptionalServiceCodes();
 
         $shopId = (int) $cart->id_shop;
 
@@ -101,15 +120,17 @@ class Create
         $carrierReferenceId = $shippingOptions->getCarrierMapping(...$serviceCodes)->getReferenceId();
 
         if (null === $carrierReferenceId || null === $carrierId = $this->getCarrierId($carrierReferenceId, $shopId)) {
-            throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $data->delivery->delivery_type));
+            throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $deliveryType->value));
         }
 
-        $this->checkPaymentType($data->order_details, $shopId);
+        $this->checkPaymentType($request->getOrderDetails()->getPaymentType(), $shopId);
 
-        $customer = $this->getOrCreateCustomer($cart, $data->account_info);
+        $customer = $this->findOrCreateCustomer($cart, $request->getAccountInfo());
+        $addresses = $this->findOrCreateAddresses($customer, $request);
 
-        $this->setUpContext($cart);
-        $this->updateCart($cart, $data, $customer, $carrierId);
+        $this->setUpContext($cart, $addresses);
+        $this->updateCart($cart, $carrierId, $addresses);
+        $this->updateCartMessage($cart, $request);
         $this->adjustHandlingCost($shippingOptions, $serviceCodes);
         $this->validateCart($cart);
 
@@ -132,32 +153,47 @@ class Create
             'key' => $cart->secure_key,
         ]);
 
-        CartSession::setRedirectUrl($data->order_details->basket_id, $link);
-        CartSession::setOrderData($data->order_details->basket_id, $this->module->currentOrder, json_encode($data));
+        $basketId = $request->getOrderDetails()->getBasketId();
 
-        $this->saveCarrierModuleData($cart->id, $data->delivery);
+        CartSession::setRedirectUrl($basketId, $link);
+        CartSession::setOrderData($basketId, $this->module->currentOrder, json_encode($request));
+
+        $this->saveCarrierModuleData($cart->id, $request->getDelivery());
 
         return $this->module->currentOrder;
     }
 
-    private function updateCart(\Cart $cart, $data, \Customer $customer, int $carrierId): void
+    private function findOrCreateAddresses(\Customer $customer, CreateOrderRequest $request): array
     {
-        $deliveryAddressId = $this->createDeliveryAddress($data->account_info, $customer, $data->delivery->delivery_address ?? null);
+        $accountInfo = $request->getAccountInfo();
+
+        $deliveryAddress = $this->findOrCreateDeliveryAddress($accountInfo, $customer, $request->getDelivery()->getAddress());
+        if (null !== $invoiceDetails = $request->getInvoiceDetails()) {
+            $invoiceAddress = $this->findOrCreateInvoiceAddress($invoiceDetails, $accountInfo, $customer);
+        } else {
+            $invoiceAddress = $deliveryAddress;
+        }
+
+        return [
+            'delivery' => $deliveryAddress,
+            'invoice' => $invoiceAddress,
+        ];
+    }
+
+    /**
+     * @param array{delivery: \AddressCore, invoice: \AddressCore} $addresses
+     */
+    private function updateCart(\Cart $cart, int $carrierId, array $addresses): void
+    {
+        $deliveryAddressId = (int) $addresses['delivery']->id;
 
         $cart->updateAddressId($cart->id_address_delivery, $deliveryAddressId);
         $this->setDeliveryOption($cart, [$deliveryAddressId => $carrierId . ',']);
-
-        if (isset($data->invoice_details)) {
-            $cart->id_address_invoice = $this->createInvoiceAddress($data->invoice_details, $data->account_info, $customer);
-        } else {
-            $cart->id_address_invoice = $deliveryAddressId;
-        }
+        $cart->id_address_invoice = (int) $addresses['invoice']->id;
 
         if (!$cart->update()) {
             throw new InternalServerErrorException('Could not update cart data.');
         }
-
-        $this->updateCartMessage($cart->id, $data);
     }
 
     private function setDeliveryOption(\Cart $cart, array $deliveryOption): void
@@ -171,35 +207,41 @@ class Create
         throw new CannotCreateOrderException($this->module->l('The selected delivery option is not available.', self::TRANSLATION_SOURCE));
     }
 
-    private function getCountryId(string $code): ?int
+    private function getCountryId(string $code): int
     {
-        return \Country::getByIso(strtoupper($code)) ?: null;
+        if (0 >= $countryId = (int) \Country::getByIso(strtoupper($code))) {
+            throw new CannotCreateOrderException(sprintf($this->module->l('Selected country (%s) is not available.', self::TRANSLATION_SOURCE), $code));
+        }
+
+        return $countryId;
     }
 
-    private function createDeliveryAddress($accountInfo, \Customer $customer, $deliveryAddress = null): int
+    private function findOrCreateDeliveryAddress(AccountInfo $accountInfo, \Customer $customer, ?DeliveryAddress $deliveryAddress = null): \AddressCore
     {
-        $address = $this->createNewAddress();
+        $address = $this->createAddress();
 
         $address->id_customer = $customer->id;
 
-        $this->setPhoneNumber($address, $accountInfo);
+        $this->setRequiredPhoneNumbers($address, $accountInfo);
         if (!$address->phone && !$address->phone_mobile) {
-            $address->phone = $this->formatPhoneNumber($accountInfo);
+            $address->phone = $this->formatPhoneNumber($accountInfo->getPhoneNumber());
         }
 
         if (null !== $deliveryAddress) {
             $this->fillWithDeliveryAddressData($address, $deliveryAddress);
         }
 
-        $address->firstname = $address->firstname ?? $accountInfo->name;
-        $address->lastname = $address->lastname ?? $accountInfo->surname;
-        $address->id_country = $address->id_country ?? $this->getCountryId($accountInfo->client_address->country_code);
-        $address->city = $address->city ?? $accountInfo->client_address->city;
-        $address->postcode = $address->postcode ?? $accountInfo->client_address->postal_code;
-        $address->address1 = $address->address1 ?? $accountInfo->client_address->address;
+        $clientAddress = $accountInfo->getAddress();
 
-        if ($addressId = $this->getExistingAddressId($customer, $address)) {
-            return $addressId;
+        $address->firstname = $address->firstname ?? $accountInfo->getName();
+        $address->lastname = $address->lastname ?? $accountInfo->getSurname();
+        $address->id_country = $address->id_country ?? $this->getCountryId($clientAddress->getCountryCode());
+        $address->city = $address->city ?? $clientAddress->getCity();
+        $address->postcode = $address->postcode ?? $clientAddress->getPostalCode();
+        $address->address1 = $address->address1 ?? $clientAddress->getAddress();
+
+        if ($existingAddress = $this->findExistingAddress($customer, $address)) {
+            return $existingAddress;
         }
 
         $address->alias = \Tools::substr($address->address1, 0, 32);
@@ -212,52 +254,51 @@ class Create
             throw new InternalServerErrorException('Could not create delivery address.');
         }
 
-        return $address->id;
+        return $address;
     }
 
-    private function fillWithDeliveryAddressData(\AddressCore $address, $deliveryAddress): void
+    private function fillWithDeliveryAddressData(\AddressCore $address, DeliveryAddress $deliveryAddress): void
     {
-        if (isset($deliveryAddress->name)) {
-            $name = preg_split('/\s+/', $deliveryAddress->name, 2, PREG_SPLIT_NO_EMPTY);
-            $address->firstname = $name[0];
-            $address->lastname = $name[1] ?? '-';
-        }
+        $name = preg_split('/\s+/', $deliveryAddress->getName(), 2, PREG_SPLIT_NO_EMPTY);
 
-        $address->id_country = $this->getCountryId($deliveryAddress->country_code);
-        $address->city = $deliveryAddress->city ?? null;
-        $address->postcode = $deliveryAddress->postcode ?? null;
-        $address->address1 = $deliveryAddress->address ?? null;
+        $address->firstname = $name[0];
+        $address->lastname = $name[1] ?? '-';
+
+        $address->id_country = $this->getCountryId($deliveryAddress->getCountryCode());
+        $address->city = $deliveryAddress->getCity();
+        $address->postcode = $deliveryAddress->getPostalCode();
+        $address->address1 = $deliveryAddress->getAddress();
     }
 
-    private function createInvoiceAddress($invoiceDetails, $accountInfo, \Customer $customer): int
+    private function findOrCreateInvoiceAddress(InvoiceDetails $invoiceDetails, AccountInfo $accountInfo, \Customer $customer): \AddressCore
     {
-        $address = $this->createNewAddress();
+        $address = $this->createAddress();
 
-        $this->setPhoneNumber($address, $accountInfo);
+        $this->setRequiredPhoneNumbers($address, $accountInfo);
 
         $address->id_customer = $customer->id;
-        $address->firstname = !empty($invoiceDetails->name) ? $invoiceDetails->name : $accountInfo->name;
-        $address->lastname = !empty($invoiceDetails->surname) ? $invoiceDetails->surname : $accountInfo->surname;
-        $address->id_country = $this->getCountryId($invoiceDetails->country_code);
-        $address->city = $invoiceDetails->city;
-        $address->postcode = $invoiceDetails->postal_code;
-        $address->address1 = $invoiceDetails->street;
-        $address->address2 = $invoiceDetails->building;
-        if (!empty($invoiceDetails->flat)) {
-            $address->address2 .= ' / ' . $invoiceDetails->flat;
+        $address->firstname = $invoiceDetails->getName() ?? $accountInfo->getName();
+        $address->lastname = $invoiceDetails->getSurname() ?? $accountInfo->getSurname();
+        $address->id_country = $this->getCountryId($invoiceDetails->getCountryCode());
+        $address->city = $invoiceDetails->getCity();
+        $address->postcode = $invoiceDetails->getPostalCode();
+        $address->address1 = $invoiceDetails->getStreet();
+        $address->address2 = $invoiceDetails->getBuilding();
+        if ($flat = $invoiceDetails->getFlat()) {
+            $address->address2 .= ' / ' . $flat;
         }
 
-        if (InvoiceDetails::LEGAL_FORM_COMPANY === $invoiceDetails->legal_form) {
-            $address->company = $invoiceDetails->company_name;
-            if (!empty($invoiceDetails->tax_id_prefix)) {
-                $address->vat_number = sprintf('%s %s', $invoiceDetails->tax_id_prefix, $invoiceDetails->tax_id);
+        if (LegalForm::Company() === $invoiceDetails->getLegalForm()) {
+            $address->company = $invoiceDetails->getCompanyName();
+            if ($prefix = $invoiceDetails->getTaxIdPrefix()) {
+                $address->vat_number = sprintf('%s %s', $prefix, $invoiceDetails->getTaxId());
             } else {
-                $address->vat_number = $invoiceDetails->tax_id;
+                $address->vat_number = $invoiceDetails->getTaxId();
             }
         }
 
-        if ($addressId = $this->getExistingAddressId($customer, $address, ['phone', 'phone_mobile'])) {
-            return $addressId;
+        if ($existingAddress = $this->findExistingAddress($customer, $address, ['phone', 'phone_mobile'])) {
+            return $existingAddress;
         }
 
         $address->alias = \Tools::substr($address->address1 . ' ' . $address->address2, 0, 32);
@@ -270,21 +311,21 @@ class Create
             throw new InternalServerErrorException('Could not create invoice address.');
         }
 
-        return $address->id;
+        return $address;
     }
 
-    private function createNewAddress(): \AddressCore
+    private function createAddress(): \AddressCore
     {
         return class_exists(\CustomerAddress::class) ? new \CustomerAddress() : new \Address();
     }
 
-    private function setPhoneNumber(\AddressCore $address, $accountInfo): void
+    private function setRequiredPhoneNumbers(\AddressCore $address, AccountInfo $accountInfo): void
     {
         if ([] === $requiredFields = $address->getFieldsRequiredDB()) {
             return;
         }
 
-        $phoneNumber = $this->formatPhoneNumber($accountInfo);
+        $phoneNumber = $this->formatPhoneNumber($accountInfo->getPhoneNumber());
 
         foreach (['phone', 'phone_mobile'] as $field) {
             if (in_array($field, $requiredFields, true)) {
@@ -293,12 +334,12 @@ class Create
         }
     }
 
-    private function formatPhoneNumber($accountInfo): string
+    private function formatPhoneNumber(PhoneNumber $phoneNumber): string
     {
-        return $accountInfo->phone_number->country_prefix . ' ' . $accountInfo->phone_number->phone;
+        return $phoneNumber->getCountryPrefix() . ' ' . $phoneNumber->getPhone();
     }
 
-    private function getExistingAddressId(\Customer $customer, \AddressCore $address, array $ignoreFields = []): ?int
+    private function findExistingAddress(\Customer $customer, \AddressCore $address, array $ignoreFields = []): ?\AddressCore
     {
         if ($customer->is_guest) {
             return null;
@@ -310,7 +351,10 @@ class Create
 
         foreach ($addresses as $data) {
             if ($this->isSameAddress($address, $data, $ignoreFields)) {
-                return (int) $data['id_address'];
+                $existingAddress = $this->createAddress();
+                $existingAddress->hydrate($data);
+
+                return $existingAddress;
             }
         }
 
@@ -342,7 +386,7 @@ class Create
         return true;
     }
 
-    private function getOrCreateCustomer(\Cart $cart, $accountInfo): \Customer
+    private function findOrCreateCustomer(\Cart $cart, AccountInfo $accountInfo): \Customer
     {
         $customer = new \Customer($cart->id_customer);
 
@@ -350,9 +394,9 @@ class Create
             return $customer;
         }
 
-        $customer->email = $accountInfo->mail;
-        $customer->firstname = $accountInfo->name;
-        $customer->lastname = $accountInfo->surname;
+        $customer->email = $accountInfo->getEmail();
+        $customer->firstname = $accountInfo->getName();
+        $customer->lastname = $accountInfo->getSurname();
 
         if ($newCustomer = !\Validate::isLoadedObject($customer)) {
             $password = \Tools::passwdGen(8, 'RANDOM');
@@ -367,7 +411,7 @@ class Create
         }
 
         if (!$customer->save()) {
-            throw $newCustomer ? new InternalServerErrorException('Could not create customer account.') : new InternalServerErrorException('Could not update customer account.');
+            throw new InternalServerErrorException($newCustomer ? 'Could not create customer account.' : 'Could not update customer account.');
         }
 
         $cart->id_customer = $customer->id;
@@ -420,33 +464,18 @@ class Create
         return \Tools::convertPriceFull($additionalCostsPln, $this->context->currency, $defaultCurrency);
     }
 
-    private function updateCartMessage(int $cartId, $data): void
+    private function updateCartMessage(\Cart $cart, CreateOrderRequest $request): void
     {
-        if (empty($data->order_details->order_comments)) {
-            return;
-        }
-
-        $old_message = \Message::getMessageByCartId((int) $cartId);
-
-        if ($old_message) {
-            $message = new \Message((int) $old_message['id_message']);
-        } else {
-            $message = new \Message();
-            $message->id_cart = $cartId;
-        }
-
-        $message->message = $data->order_details->order_comments;
-
-        if (!$message->validateFields(false)) {
+        try {
+            $this->bus->handle(new UpdateCartMessageCommand($cart, $request));
+        } catch (InvalidDataException $e) {
             throw new CannotCreateOrderException($this->module->l('Order comments are not valid.', self::TRANSLATION_SOURCE));
-        }
-
-        if (!$message->save()) {
-            throw new InternalServerErrorException('Could not save order comments.');
+        } catch (\Exception $e) {
+            throw new InternalServerErrorException('Could not save order comments.', 0, $e);
         }
     }
 
-    private function saveCarrierModuleData(int $cartId, $delivery): void
+    private function saveCarrierModuleData(int $cartId, Delivery $delivery): void
     {
         if (!class_exists(\InPostCartChoiceModel::class)) {
             return;
@@ -459,12 +488,17 @@ class Create
                 $model->id = $cartId;
             }
 
-            $model->service = 'APM' === $delivery->delivery_type ? 'inpost_locker_standard' : 'inpost_courier_standard';
-            if ('APM' === $delivery->delivery_type) {
-                $model->point = $delivery->delivery_point;
+            $deliveryType = $delivery->getType();
+            $phoneNumber = $delivery->getPhoneNumber();
+
+            if (DeliveryType::Apm() === $deliveryType) {
+                $model->service = 'inpost_locker_standard';
+                $model->point = $delivery->getPoint();
+            } else {
+                $model->service = 'inpost_courier_standard';
             }
-            $model->email = $delivery->mail;
-            $model->phone = $delivery->phone_number->phone;
+            $model->email = $delivery->getEmail();
+            $model->phone = null === $phoneNumber ? null : $phoneNumber->getPhone();
 
             $newModel ? $model->add() : $model->update();
         } catch (\Exception $e) {
@@ -535,7 +569,10 @@ class Create
         return \Tools::getContextLocale($this->context)->formatPrice($price, 'PLN');
     }
 
-    private function setUpContext(\Cart $cart): void
+    /**
+     * @param array{delivery: \AddressCore, invoice: \AddressCore} $addresses
+     */
+    private function setUpContext(\Cart $cart, array $addresses): void
     {
         if ($currencyId = \Currency::getIdByIsoCode('PLN')) {
             $cart->id_currency = $currencyId;
@@ -551,6 +588,16 @@ class Create
         $this->context->getTranslator()->setLocale($this->context->language->locale);
 
         \Shop::setContext(\Shop::CONTEXT_SHOP, $cart->id_shop);
+
+        $taxAddress = 'id_address_invoice' === \Configuration::get(PrestaShopConfiguration::TAX_ADDRESS_TYPE)
+            ? $addresses['invoice']
+            : $addresses['delivery'];
+
+        $this->context->country = new \Country($taxAddress->id_country, $cart->id_lang);
+
+        if (!$this->context->country->active) {
+            throw new CannotCreateOrderException(sprintf($this->module->l('Selected country (%s) is not available.', self::TRANSLATION_SOURCE), $this->context->country->name));
+        }
     }
 
     private function getCarrierId(int $referenceId, int $shopId): ?int
@@ -570,29 +617,24 @@ class Create
         return (int) $carrier->id;
     }
 
-    private function getServiceCodes($deliveryData): array
-    {
-        if (
-            !isset($deliveryData->delivery_codes)
-            || !is_array($deliveryData->delivery_codes)
-        ) {
-            return [];
-        }
-
-        return array_map([ServiceCode::class, 'from'], $deliveryData->delivery_codes);
-    }
-
-    private function checkPaymentType($orderDetails, int $shopId): void
+    private function checkPaymentType(PaymentType $paymentType, int $shopId): void
     {
         $configuration = new Configuration();
         $availablePaymentOptions = (new OrdersConfiguration($configuration))->getAvailablePaymentOptions($shopId);
-
-        $paymentType = PaymentType::tryFrom($orderDetails->payment_type);
 
         if (in_array($paymentType, $availablePaymentOptions, true)) {
             return;
         }
 
         throw new CannotCreateOrderException($this->module->l('The selected payment method is not available.', self::TRANSLATION_SOURCE));
+    }
+
+    private function normalizeRequest($request): CreateOrderRequest
+    {
+        if ($request instanceof CreateOrderRequest) {
+            return $request;
+        }
+
+        return SerializerFactory::create()->deserialize(json_encode($request), CreateOrderRequest::class, 'json');
     }
 }

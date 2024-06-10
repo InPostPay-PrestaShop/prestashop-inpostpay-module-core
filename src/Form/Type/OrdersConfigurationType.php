@@ -6,6 +6,7 @@ namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\OrdersConfiguration;
 use izi\prestashop\Form\Type\Order\AvailablePaymentOptionsChoiceType;
+use izi\prestashop\Form\Type\Order\MessageOptionsType;
 use izi\prestashop\Form\Type\TranslatableType as TranslatableTypePolyfill;
 use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\TranslatableType;
@@ -47,7 +48,7 @@ final class OrdersConfigurationType extends AbstractType
                 'required' => false,
                 'label' => $this->translator->l('Available payment options', self::TRANSLATION_SOURCE),
                 'multiple' => true,
-                'expanded' => true, // false => multiple select
+                'expanded' => true,
                 'help' => $this->translator->l('Payment methods are specified on the payment gateway contract', self::TRANSLATION_SOURCE),
             ])
             ->add('carrierPaymentEnabled', CheckboxType::class, [
@@ -58,6 +59,12 @@ final class OrdersConfigurationType extends AbstractType
             ->add('pointOfSaleId', TextType::class, [
                 'label' => $this->translator->l('POS ID', self::TRANSLATION_SOURCE),
                 'help' => $this->translator->l('For sandbox environment contact InPost. In the case of a production environment - log into InPost and get the POS ID', self::TRANSLATION_SOURCE),
+            ])
+            ->add('messageOptions', MessageOptionsType::class, [
+                'label' => $this->translator->l('Order message', self::TRANSLATION_SOURCE),
+                'error_mapping' => [
+                    '.' => 'message',
+                ],
             ]);
     }
 

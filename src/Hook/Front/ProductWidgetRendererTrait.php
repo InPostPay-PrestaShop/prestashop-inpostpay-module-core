@@ -6,6 +6,7 @@ namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 trait ProductWidgetRendererTrait
@@ -25,19 +26,27 @@ trait ProductWidgetRendererTrait
      */
     private $module;
 
-    private function renderWidget(int $productId, array $parameters, ?string $hookName = null): string
+    /**
+     * @param ProductLazyArray|array{id_product: int, add_to_cart_url: string|null} $product
+     */
+    private function renderWidget($product, array $parameters, string $hookName): string
     {
-        if (0 >= $productId) {
+        if (0 >= $productId = (int) $product['id_product']) {
+            return '';
+        }
+
+        if (!$this->shouldDisplayWidget($hookName, $product)) {
             return '';
         }
 
         $productWidget = $this->configuration->getProductWidgetDisplayConfiguration();
 
-        if (!$productWidget->isDisplayed() || !$this->shouldDisplayWidget($hookName)) {
+        if (!$productWidget->isDisplayed()) {
             return '';
         }
 
-        $configuration = $productWidget->getWidgetConfiguration()
+        $configuration = $productWidget
+            ->getWidgetConfiguration()
             ->setProductId((string) $productId);
 
         return $this->module->renderWidget($hookName, [
@@ -46,8 +55,16 @@ trait ProductWidgetRendererTrait
         ]);
     }
 
-    private function shouldDisplayWidget(string $hookName): bool
+    /**
+     * @param ProductLazyArray|array{add_to_cart_url: string|null} $product
+     */
+    private function shouldDisplayWidget(string $hookName, $product): bool
     {
+        // If add_to_cart_url is not set, the product is not available for sale.
+        if (null === $product['add_to_cart_url']) {
+            return false;
+        }
+
         return $hookName === $this->generalConfiguration->getProductCardDisplayHook();
     }
 

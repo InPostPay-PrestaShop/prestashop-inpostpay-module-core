@@ -18,7 +18,6 @@ final class CarrierMapping implements \JsonSerializable
      * @var ServiceCode[]
      *
      * @Assert\All(
-     *
      *     @Assert\Type(ServiceCode::class),
      * )
      */

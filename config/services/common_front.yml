@@ -80,17 +80,6 @@ services:
       - '@inpost.izi.module'
       - '@izi\prestashop\View\Templating\RendererInterface'
 
-  izi\prestashop\Hook\Front\DisplayProductFooter:
-    class: izi\prestashop\Hook\Front\DisplayProductFooter
-    public: false
-    tags:
-      - { name: inpost.izi.hook }
-    arguments:
-      - '@izi\prestashop\Configuration\GuiConfiguration'
-      - '@izi\prestashop\Configuration\GeneralConfiguration'
-      - '@inpost.izi.module'
-      - '@izi\prestashop\View\Templating\RendererInterface'
-
   izi\prestashop\Hook\Front\DisplayShoppingCart:
     class: izi\prestashop\Hook\Front\DisplayShoppingCart
     public: false
@@ -239,6 +228,19 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\ObjectModel\ObjectManager'
 
+  izi\prestashop\Handler\GetProductWidgetHandlerInterface: '@izi\prestashop\Handler\GetProductWidgetHandler'
+  izi\prestashop\Handler\GetProductWidgetHandler:
+    class: izi\prestashop\Handler\GetProductWidgetHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfigurationInterface'
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+
   izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface: '@izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandler'
   izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandler:
     class: izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandler
@@ -290,6 +292,17 @@ services:
       - '@izi\prestashop\Configuration\OrdersConfiguration'
       - '@izi\prestashop\Builder\Order\OrderStatusDescriptionProvider'
       - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface: '@izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandler'
+  izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandler:
+    class: izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@izi\prestashop\Configuration\OrdersConfiguration'
+      - '@izi\prestashop\Order\Message\MessageFormatterInterface'
 
   izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler:
     class: izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler
