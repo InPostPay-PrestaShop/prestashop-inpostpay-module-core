@@ -37,16 +37,16 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
      *
      * @return PaymentType[]
      */
-    public static function normalizeAvailablePaymentOptions(OrdersConfigurationInterface $configuration): array
+    public static function normalizeAvailablePaymentOptions(OrdersConfigurationInterface $configuration, ?int $shopId = null): array
     {
         if (method_exists($configuration, 'getAvailablePaymentOptions')) {
-            return $configuration->getAvailablePaymentOptions();
+            return array_values($configuration->getAvailablePaymentOptions($shopId));
         }
 
         @trigger_error(sprintf('Not implementing the "getAvailablePaymentOptions()" method in "%s" is deprecated.', get_class($configuration)), \E_USER_DEPRECATED);
 
-        $bankPaymentEnabled = $configuration->isBankPaymentEnabled();
-        $carrierPaymentEnabled = $configuration->isCarrierPaymentEnabled();
+        $bankPaymentEnabled = $configuration->isBankPaymentEnabled($shopId);
+        $carrierPaymentEnabled = $configuration->isCarrierPaymentEnabled($shopId);
 
         if ($bankPaymentEnabled && $carrierPaymentEnabled) {
             return PaymentType::cases();

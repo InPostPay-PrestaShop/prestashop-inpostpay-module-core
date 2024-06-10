@@ -47,7 +47,7 @@ final class OrdersConfigurationType extends AbstractType
                 'required' => false,
                 'label' => $this->translator->l('Available payment options', self::TRANSLATION_SOURCE),
                 'multiple' => true,
-                'expanded' => true, // false => multiple select
+                'expanded' => true,
                 'help' => $this->translator->l('Payment methods are specified on the payment gateway contract', self::TRANSLATION_SOURCE),
             ])
             ->add('carrierPaymentEnabled', CheckboxType::class, [

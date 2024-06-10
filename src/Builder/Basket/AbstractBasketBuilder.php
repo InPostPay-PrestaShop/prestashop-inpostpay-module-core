@@ -539,9 +539,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getPaymentOptions(): array
     {
-        $configuration = new Configuration();
+        $configuration = new OrdersConfiguration(new Configuration());
 
-        return (new OrdersConfiguration($configuration))->getAvailablePaymentOptions((int) $this->cart->id_shop);
+        return OrdersConfiguration::normalizeAvailablePaymentOptions($configuration, (int) $this->cart->id_shop);
     }
 
     private function calculateProductPrice(
