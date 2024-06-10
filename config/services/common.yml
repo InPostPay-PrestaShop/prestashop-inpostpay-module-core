@@ -553,6 +553,7 @@ services:
     arguments:
       - '@inpost.izi.context'
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
 
   izi\prestashop\Hook\WidgetConfigurationResolver:
     class: izi\prestashop\Hook\WidgetConfigurationResolver
@@ -657,3 +658,9 @@ services:
     public: false
     tags:
       - { name: inpost.izi.order_message_processor }
+
+  izi\prestashop\Configuration\PrestaShopConfiguration:
+    class: izi\prestashop\Configuration\PrestaShopConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'

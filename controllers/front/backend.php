@@ -132,6 +132,18 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         exit;
     }
 
+    /**
+     * @param Country $defaultCountry
+     */
+    protected function geolocationManagement($defaultCountry): bool
+    {
+        return false;
+    }
+
+    protected function displayRestrictedCountryPage(): void
+    {
+    }
+
     // TODO use own Sf Kernel?
     private function handle(Request $request): Response
     {

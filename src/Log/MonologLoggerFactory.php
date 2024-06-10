@@ -14,6 +14,9 @@ use Psr\Log\LoggerInterface;
 
 final class MonologLoggerFactory implements LoggerFactoryInterface
 {
+    /**
+     * @param iterable<HandlerFactoryInterface> $factories
+     */
     private $factories;
 
     /**
@@ -82,8 +85,6 @@ final class MonologLoggerFactory implements LoggerFactoryInterface
     private function getHandlerFactory(string $type): HandlerFactoryInterface
     {
         foreach ($this->factories as $factory) {
-            assert($factory instanceof HandlerFactoryInterface);
-
             if ($factory->supports($type)) {
                 return $factory;
             }
