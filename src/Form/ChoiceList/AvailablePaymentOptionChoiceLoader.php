@@ -60,9 +60,22 @@ final class AvailablePaymentOptionChoiceLoader implements ChoiceLoaderInterface
         }
 
         try {
-            return $this->choices = $this->client->getAvailablePaymentOptions();
+            $availableOptions = $this->client->getAvailablePaymentOptions();
         } catch (\Exception $e) {
             return $this->choices = PaymentType::getBankProvidedPaymentOptions();
         }
+
+        $choices = $availableOptions->getPaymentTypes();
+
+        usort($choices, static function (PaymentType $type1, PaymentType $type2): int {
+            $allTypes = PaymentType::cases();
+
+            $index1 = array_search($type1, $allTypes, true);
+            $index2 = array_search($type2, $allTypes, true);
+
+            return $index1 <=> $index2;
+        });
+
+        return $this->choices = $choices;
     }
 }

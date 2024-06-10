@@ -616,3 +616,44 @@ services:
     class: izi\prestashop\Translation\ServiceNameTranslator
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
+
+  izi\prestashop\Order\Message\MessageFormatterInterface: '@izi\prestashop\Order\Message\MessageFormatter'
+  izi\prestashop\Order\Message\MessageFormatter:
+    class: izi\prestashop\Order\Message\MessageFormatter
+    public: false
+    arguments:
+      - '@izi\prestashop\Order\Message\ParametersExtractorInterface'
+      - !tagged inpost.izi.order_message_processor
+
+  izi\prestashop\Order\Message\ExpressionLanguage:
+    class: izi\prestashop\Order\Message\ExpressionLanguage
+    public: false
+
+  izi\prestashop\Order\Message\ParametersExtractorInterface: '@izi\prestashop\Order\Message\ParametersExtractor'
+  izi\prestashop\Order\Message\ParametersExtractor:
+    class: izi\prestashop\Order\Message\ParametersExtractor
+    public: false
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+
+  izi\prestashop\Order\Message\Processor\ConditionalBlockProcessor:
+    class: izi\prestashop\Order\Message\Processor\ConditionalBlockProcessor
+    public: false
+    tags:
+      - { name: inpost.izi.order_message_processor, priority: 100 }
+    arguments:
+      - '@izi\prestashop\Order\Message\ExpressionLanguage'
+
+  izi\prestashop\Order\Message\Processor\ExpressionLanguageProcessor:
+    class: izi\prestashop\Order\Message\Processor\ExpressionLanguageProcessor
+    public: false
+    tags:
+      - { name: inpost.izi.order_message_processor, priority: 50 }
+    arguments:
+      - '@izi\prestashop\Order\Message\ExpressionLanguage'
+
+  izi\prestashop\Order\Message\Processor\ParameterReplacementProcessor:
+    class: izi\prestashop\Order\Message\Processor\ParameterReplacementProcessor
+    public: false
+    tags:
+      - { name: inpost.izi.order_message_processor }

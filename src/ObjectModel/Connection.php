@@ -25,6 +25,13 @@ class Connection
         });
     }
 
+    public function delete(\ObjectModel $model)
+    {
+        return $this->execute(function () use ($model) {
+            return $model->delete();
+        });
+    }
+
     public function fetchAllAssociative(string $sql): array
     {
         return $this->execute(function () use ($sql) {

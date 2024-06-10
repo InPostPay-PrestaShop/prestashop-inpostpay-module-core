@@ -6,6 +6,9 @@ namespace izi\prestashop\ObjectModel;
 
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 
+/**
+ * @method remove(\ObjectModel $model)
+ */
 interface ObjectManagerInterface
 {
     public function getConnection(): Connection;

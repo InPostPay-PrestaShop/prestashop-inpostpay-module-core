@@ -293,6 +293,17 @@ services:
       - '@izi\prestashop\Builder\Order\OrderStatusDescriptionProvider'
       - '@inpost.izi.general_logger'
 
+  izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface: '@izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandler'
+  izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandler:
+    class: izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@izi\prestashop\Configuration\OrdersConfiguration'
+      - '@izi\prestashop\Order\Message\MessageFormatterInterface'
+
   izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler:
     class: izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler
     public: false

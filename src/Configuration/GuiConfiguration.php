@@ -7,8 +7,8 @@ namespace izi\prestashop\Configuration;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\HtmlStyles;
 use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
+use izi\prestashop\Serializer\SafeDeserializerTrait;
 use izi\prestashop\View\Widget\Configuration;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -16,6 +16,8 @@ use Symfony\Component\Serializer\SerializerInterface;
  */
 final class GuiConfiguration implements GuiConfigurationInterface, PersistentConfigurationInterface
 {
+    use SafeDeserializerTrait;
+
     private const BASKET_SUMMARY_WIDGET_DISPLAY = 'INPOST_PAY_show_button_cart';
     private const BASKET_SUMMARY_WIDGET_CONFIG = 'INPOST_PAY_CART_WIDGET_CONFIG';
     private const BASKET_SUMMARY_HTML_STYLES = 'INPOST_PAY_CART_HTML_STYLES';
@@ -44,11 +46,6 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
      * @var ConfigurationInterface
      */
     private $configuration;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
 
     private $loadedConfiguration = [];
 
@@ -219,21 +216,5 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         }
 
         return constant($classNamespace . '::' . $constantName);
-    }
-
-    /**
-     * @template T
-     *
-     * @param class-string<T> $class
-     *
-     * @return T|null
-     */
-    private function deserialize(string $value, string $class)
-    {
-        try {
-            return $this->serializer->deserialize($value, $class, 'json');
-        } catch (ExceptionInterface $e) {
-            return null;
-        }
     }
 }

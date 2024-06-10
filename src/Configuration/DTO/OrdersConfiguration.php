@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Common\PaymentType;
+use izi\prestashop\Configuration\DTO\Order\MessageOptions;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Enum\Enum;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -55,6 +56,13 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      * )
      */
     private $availablePaymentOptions;
+
+    /**
+     * @var MessageOptions|null
+     *
+     * @Assert\Valid()
+     */
+    private $messageOptions;
 
     /**
      * @param string|null $posId
@@ -166,6 +174,25 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         $this->posId = $posId;
 
         return $this;
+    }
+
+    /* @interal */
+    public function getMessageOptions(): MessageOptions
+    {
+        return $this->messageOptions ?? ($this->messageOptions = new MessageOptions());
+    }
+
+    /* @internal */
+    public function setMessageOptions(MessageOptions $options): self
+    {
+        $this->messageOptions = $options;
+
+        return $this;
+    }
+
+    public function getMessageFormat(?int $shopId = null): string
+    {
+        return $this->getMessageOptions()->getFormat();
     }
 
     private function normalizeConstructorArguments(array $arguments, int $numberOfArguments): array

@@ -29,3 +29,7 @@
 {l s='This widget is not configured correctly, correct the values in the form.' mod='inpostizi'}
 
 {l s='Select all options' mod='inpostizi'}
+{l s='Select options from list' mod='inpostizi'}
+
+{l s='Click here' mod='inpostizi'}
+{l s='to go to module documentation and read full instructions on how to configure message format.' mod='inpostizi'}

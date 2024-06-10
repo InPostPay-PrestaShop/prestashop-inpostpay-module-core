@@ -34,6 +34,7 @@ $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_304adc8d65de68c0bbae5f7
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e1bbdbf5c497c484c061c4c2a0359e58'] = 'Płatność przy odbiorze będzie dostępna tylko wtedy, kiedy posiadasz podpisaną umowę z InPost na świadczenie tej usługi w Twoim sklepie.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e9adbbd1cd7eff7e1a588c31f79521d5'] = 'POS ID';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_d3188981fad68a05eec51ac57e69feca'] = 'W przypadku środowiska sandbox skontaktuj się z InPost. W przypadku środowiska produkcyjnego - zaloguj się do InPost i pobierz POS ID.';
+$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_f13673c7e261fd8d00915c9cb768ad95'] = 'Komentarz zamówienia';
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_b2270e0389d0e5acd30d865141272052'] = 'Wyłącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_7f77e3d7178f0b1979d13c101a456450'] = 'Włącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_8e906720a71264257a3cc58aa9015402'] = 'wszystkim';
@@ -105,6 +106,11 @@ $_MODULE['<{inpostizi}prestashop>timeofweekrangetype_1432596d084873bee8df589b0b0
 $_MODULE['<{inpostizi}prestashop>timeofweekrangetype_62628cfd1cdd77d02c32812f048bada3'] = 'włącznie';
 $_MODULE['<{inpostizi}prestashop>timeofweekrangetype_0a0b945c925ac8eb94a4ad328fc54840'] = 'Dostępna do';
 $_MODULE['<{inpostizi}prestashop>timeofweekrangetype_a4293995cfbfa9ce60ce71ade2ff75f7'] = 'wyłącznie';
+$_MODULE['<{inpostizi}prestashop>messageoptionstype_510e3417f3b9f45ab725ed761aba7cdd'] = 'Doklej dodatkową zawartość do komentarza klienta w przypadku dostawy do Paczkomatu';
+$_MODULE['<{inpostizi}prestashop>messageoptionstype_c59e73ddbd9accb6cceb84986bfb9633'] = 'Format wiadomości';
+$_MODULE['<{inpostizi}prestashop>messageoptionstype_5a584bae80c34e6ee9b177aa167eb865'] = 'Dostępne parametry';
+$_MODULE['<{inpostizi}prestashop>messageoptionstype_feba3b9ea8ec801f50840a9b309c7d03'] = 'Wartość wyrażeń zawartych w podwójnych nawiasach klamrowych jest obliczana (np. `{{ is_pww ? \"tak\" : \"nie\" }}` wypisze \"tak\" jeżeli klient wybrał usługę Paczka w Weekend lub \"nie\" w przeciwnym wypadku).';
+$_MODULE['<{inpostizi}prestashop>messageoptionstype_144e4eb4e0963dde914bedb08eebf335'] = 'Bardziej szczegółowe informacje można znaleźć w instrukcji modułu.';
 $_MODULE['<{inpostizi}prestashop>productsquantityeventhandler_6db1f42edb02275ddc7077ae731fa407'] = 'Tego produktu nie ma w Twoim koszyku.';
 $_MODULE['<{inpostizi}prestashop>productsquantityeventhandler_e241dce2751f423f20aa8a1dabda0ead'] = 'Nie można zaktualizować ilości produktu.';
 $_MODULE['<{inpostizi}prestashop>productsquantityeventhandler_b9980de9208115d9102e3ed27df896ec'] = 'Może usunąć produkt z koszyka.';
@@ -150,10 +156,16 @@ $_MODULE['<{inpostizi}prestashop>configurationcontroller_192bdd5b10a4a1f19a7594b
 $_MODULE['<{inpostizi}prestashop>configurationcontroller_f98053ea5c75db6df542ec23268c5895'] = 'Ustawienia GUI';
 $_MODULE['<{inpostizi}prestashop>configurationcontroller_43f65a2f8564bcc183502e2b35c9a560'] = 'Cena transportu';
 $_MODULE['<{inpostizi}prestashop>configurationcontroller_db5eb84117d06047c97c9a0191b5fffe'] = 'Support';
+$_MODULE['<{inpostizi}prestashop>parametersextractor_df605260012435cbbab42f0e5c64fcbd'] = 'kod użytej metody płatności';
+$_MODULE['<{inpostizi}prestashop>parametersextractor_c470ae3599816022017be07ddb38a878'] = 'numer Paczkomatu';
+$_MODULE['<{inpostizi}prestashop>parametersextractor_aa38035ab7c137762ca1191f50548cac'] = 'kody wybranych usług dodatkowych';
+$_MODULE['<{inpostizi}prestashop>parametersextractor_7b8cd96c630904984468818de476a6d1'] = 'jeżeli została wybrana Paczka w Weekend';
+$_MODULE['<{inpostizi}prestashop>parametersextractor_390053862349a908e1fb52ac06f22645'] = 'jeżeli została wybrana płatność za pobraniem';
 $_MODULE['<{inpostizi}prestashop>inpostapicredentialsvalidator_e221b0fd3e879543e6fd834e514505f7'] = 'Nieprawidłowe dane klienta.';
 $_MODULE['<{inpostizi}prestashop>inpostapicredentialsvalidator_235c2a9074a916290e7079c69bf197b5'] = 'Nie można połączyć się z serwerem autoryzacji.';
 $_MODULE['<{inpostizi}prestashop>inpostapicredentialsvalidator_b57a7d1ed0c1f93b304b8b8e7fc41898'] = 'Nie można zweryfikować danych klienta.';
 $_MODULE['<{inpostizi}prestashop>inpostapicredentialsvalidator_ca6b295039b53a17b2175aded3b6e0d2'] = 'Przyznany token dostępu nie posiada wszystkich wymaganych uprawnień. W celu rozwiązania tego problemu, skontaktuj się z pomocą techniczną.';
+$_MODULE['<{inpostizi}prestashop>processablemessageformatvalidator_845c2f5006926ea73bf2a45bfbb2fd65'] = 'Nieporawny format wiadomości. %s';
 $_MODULE['<{inpostizi}prestashop>deliveryoptionsstatuschecker_3194a4d8bc60ba3e66ddd94f10f32889'] = 'Nie jest dostępna żadna opcja dostawy.';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_341b3a9691b47feef924ec0e1db4856c'] = 'Konfiguracja nie jest kompletna - zweryfikuj i prześlij formularz w zakładce \"ustawienia\".';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_7cca0b355fe9f13f75ed5a2399a172be'] = 'Żadna metoda płatności nie jest włączona - konfigurację można zmienić w zakładce \"ustawienia\".';
@@ -182,3 +194,6 @@ $_MODULE['<{inpostizi}prestashop>admin_template_translations_3194d0bc6d7b9e032ff
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_708b8fd7e8a0fd84d8ee5550b9543e10'] = 'Zapoznaj się z dedykowanym Przewodnikiem Merchanta, dotyczącym poprawnej implementacji usługi InPost Pay. Gromadzi on w jednym miejscu informacje w zakresie aktualnego brandingu InPost Pay, wytyczne odnośnie implementacji wizualnej widgetu oraz dobre praktyki, warte stosowania przy budowaniu pozytywnego user experience wśród Kupujących online. Przewodnik Merchanta znajdziesz w sekcji \"przydatne linki\".';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_6db0e5922026df9fc64ea03d8c76d945'] = 'Konfiguracja tego widgetu nie jest prawidłowa, proszę poprawić wartości wpisane w formularzu.';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_7565f5b67d49eec396df536862f2752d'] = 'Zaznacz wszystkie opcje';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_d143a28bae5fa7d0f79a0c4eb86d68b7'] = 'Wybierz opcje z listy';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_936ccdb97115e9f35a11d35e3d5b5cad'] = 'Kliknij tutaj,';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_c73d2e0758341318a79deeb36a40a72c'] = 'aby przejść do naszej dokumentacji i zapoznać się z pełną instrukcją konfiguracji formatu wiadomości.';

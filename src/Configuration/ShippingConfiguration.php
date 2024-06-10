@@ -6,7 +6,7 @@ namespace izi\prestashop\Configuration;
 
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use izi\prestashop\Serializer\SafeDeserializerTrait;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -14,6 +14,8 @@ use Symfony\Component\Serializer\SerializerInterface;
  */
 final class ShippingConfiguration implements ShippingConfigurationInterface, PersistentConfigurationInterface
 {
+    use SafeDeserializerTrait;
+
     private const COURIER_SHIPPING_OPTIONS = 'INPOST_PAY_COURIER_SHIPPING_OPTIONS';
     private const APM_SHIPPING_OPTIONS = 'INPOST_PAY_APM_SHIPPING_OPTIONS';
 
@@ -21,11 +23,6 @@ final class ShippingConfiguration implements ShippingConfigurationInterface, Per
      * @var ShopAwareConfigurationInterface
      */
     private $configuration;
-
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
 
     private $apmShippingOptions = [];
     private $courierShippingOptions = [];
@@ -114,21 +111,5 @@ final class ShippingConfiguration implements ShippingConfigurationInterface, Per
         $value = $this->serializer->serialize($options, 'json');
         $this->configuration->set(self::COURIER_SHIPPING_OPTIONS, $value);
         $this->courierShippingOptions[0] = clone $options;
-    }
-
-    /**
-     * @template T
-     *
-     * @param class-string<T> $class
-     *
-     * @return T|null
-     */
-    private function deserialize(string $value, string $class)
-    {
-        try {
-            return $this->serializer->deserialize($value, $class, 'json');
-        } catch (ExceptionInterface $e) {
-            return null;
-        }
     }
 }

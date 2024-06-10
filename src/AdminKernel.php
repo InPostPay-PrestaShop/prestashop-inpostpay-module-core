@@ -121,8 +121,7 @@ final class AdminKernel extends Kernel
 
             $container->addCompilerPass(new ProvideServiceLocatorFactoriesPass('inpost.izi.service_locator'));
             AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
-            $container->addCompilerPass(new TaggedIteratorsCollectorPass(CheckStatusHandler::class));
-            $container->addCompilerPass(new TaggedIteratorsCollectorPass(ConfigurationController::class));
+            $container->addCompilerPass(new TaggedIteratorsCollectorPass());
         }
     }
 
