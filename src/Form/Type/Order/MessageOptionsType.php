@@ -50,6 +50,7 @@ final class MessageOptionsType extends AbstractType
                 'label' => $this->translator->l('Append custom content to customer message if APM delivery was selected', self::TRANSLATION_SOURCE),
             ])
             ->add('message', TextareaType::class, [
+                'required' => false,
                 'label' => $this->translator->l('Message format', self::TRANSLATION_SOURCE),
                 'help' => nl2br($this->getMessageFormatDescription()),
                 'attr' => [
