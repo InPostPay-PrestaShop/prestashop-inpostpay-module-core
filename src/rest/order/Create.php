@@ -15,6 +15,7 @@ use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use izi\prestashop\Configuration\OrdersConfiguration;
+use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
@@ -124,10 +125,12 @@ class Create
 
         $this->checkPaymentType($request->getOrderDetails()->getPaymentType(), $shopId);
 
-        $customer = $this->getOrCreateCustomer($cart, $request->getAccountInfo());
+        $customer = $this->findOrCreateCustomer($cart, $request->getAccountInfo());
+        $addresses = $this->findOrCreateAddresses($customer, $request);
 
-        $this->setUpContext($cart);
-        $this->updateCart($cart, $request, $customer, $carrierId);
+        $this->setUpContext($cart, $addresses);
+        $this->updateCart($cart, $carrierId, $addresses);
+        $this->updateCartMessage($cart, $request);
         $this->adjustHandlingCost($shippingOptions, $serviceCodes);
         $this->validateCart($cart);
 
@@ -160,26 +163,37 @@ class Create
         return $this->module->currentOrder;
     }
 
-    private function updateCart(\Cart $cart, CreateOrderRequest $request, \Customer $customer, int $carrierId): void
+    private function findOrCreateAddresses(\Customer $customer, CreateOrderRequest $request): array
     {
         $accountInfo = $request->getAccountInfo();
 
-        $deliveryAddressId = $this->createDeliveryAddress($accountInfo, $customer, $request->getDelivery()->getAddress());
+        $deliveryAddress = $this->findOrCreateDeliveryAddress($accountInfo, $customer, $request->getDelivery()->getAddress());
+        if (null !== $invoiceDetails = $request->getInvoiceDetails()) {
+            $invoiceAddress = $this->findOrCreateInvoiceAddress($invoiceDetails, $accountInfo, $customer);
+        } else {
+            $invoiceAddress = $deliveryAddress;
+        }
+
+        return [
+            'delivery' => $deliveryAddress,
+            'invoice' => $invoiceAddress,
+        ];
+    }
+
+    /**
+     * @param array{delivery: \AddressCore, invoice: \AddressCore} $addresses
+     */
+    private function updateCart(\Cart $cart, int $carrierId, array $addresses): void
+    {
+        $deliveryAddressId = (int) $addresses['delivery']->id;
 
         $cart->updateAddressId($cart->id_address_delivery, $deliveryAddressId);
         $this->setDeliveryOption($cart, [$deliveryAddressId => $carrierId . ',']);
-
-        if (null !== $invoiceDetails = $request->getInvoiceDetails()) {
-            $cart->id_address_invoice = $this->createInvoiceAddress($invoiceDetails, $accountInfo, $customer);
-        } else {
-            $cart->id_address_invoice = $deliveryAddressId;
-        }
+        $cart->id_address_invoice = (int) $addresses['invoice']->id;
 
         if (!$cart->update()) {
             throw new InternalServerErrorException('Could not update cart data.');
         }
-
-        $this->updateCartMessage($cart, $request);
     }
 
     private function setDeliveryOption(\Cart $cart, array $deliveryOption): void
@@ -193,18 +207,22 @@ class Create
         throw new CannotCreateOrderException($this->module->l('The selected delivery option is not available.', self::TRANSLATION_SOURCE));
     }
 
-    private function getCountryId(string $code): ?int
+    private function getCountryId(string $code): int
     {
-        return \Country::getByIso(strtoupper($code)) ?: null;
+        if (0 >= $countryId = (int) \Country::getByIso(strtoupper($code))) {
+            throw new CannotCreateOrderException(sprintf($this->module->l('Selected country (%s) is not available.', self::TRANSLATION_SOURCE), $code));
+        }
+
+        return $countryId;
     }
 
-    private function createDeliveryAddress(AccountInfo $accountInfo, \Customer $customer, ?DeliveryAddress $deliveryAddress = null): int
+    private function findOrCreateDeliveryAddress(AccountInfo $accountInfo, \Customer $customer, ?DeliveryAddress $deliveryAddress = null): \AddressCore
     {
-        $address = $this->createNewAddress();
+        $address = $this->createAddress();
 
         $address->id_customer = $customer->id;
 
-        $this->setPhoneNumber($address, $accountInfo);
+        $this->setRequiredPhoneNumbers($address, $accountInfo);
         if (!$address->phone && !$address->phone_mobile) {
             $address->phone = $this->formatPhoneNumber($accountInfo->getPhoneNumber());
         }
@@ -222,8 +240,8 @@ class Create
         $address->postcode = $address->postcode ?? $clientAddress->getPostalCode();
         $address->address1 = $address->address1 ?? $clientAddress->getAddress();
 
-        if ($addressId = $this->getExistingAddressId($customer, $address)) {
-            return $addressId;
+        if ($existingAddress = $this->findExistingAddress($customer, $address)) {
+            return $existingAddress;
         }
 
         $address->alias = \Tools::substr($address->address1, 0, 32);
@@ -236,7 +254,7 @@ class Create
             throw new InternalServerErrorException('Could not create delivery address.');
         }
 
-        return $address->id;
+        return $address;
     }
 
     private function fillWithDeliveryAddressData(\AddressCore $address, DeliveryAddress $deliveryAddress): void
@@ -252,11 +270,11 @@ class Create
         $address->address1 = $deliveryAddress->getAddress();
     }
 
-    private function createInvoiceAddress(InvoiceDetails $invoiceDetails, AccountInfo $accountInfo, \Customer $customer): int
+    private function findOrCreateInvoiceAddress(InvoiceDetails $invoiceDetails, AccountInfo $accountInfo, \Customer $customer): \AddressCore
     {
-        $address = $this->createNewAddress();
+        $address = $this->createAddress();
 
-        $this->setPhoneNumber($address, $accountInfo);
+        $this->setRequiredPhoneNumbers($address, $accountInfo);
 
         $address->id_customer = $customer->id;
         $address->firstname = $invoiceDetails->getName() ?? $accountInfo->getName();
@@ -279,8 +297,8 @@ class Create
             }
         }
 
-        if ($addressId = $this->getExistingAddressId($customer, $address, ['phone', 'phone_mobile'])) {
-            return $addressId;
+        if ($existingAddress = $this->findExistingAddress($customer, $address, ['phone', 'phone_mobile'])) {
+            return $existingAddress;
         }
 
         $address->alias = \Tools::substr($address->address1 . ' ' . $address->address2, 0, 32);
@@ -293,15 +311,15 @@ class Create
             throw new InternalServerErrorException('Could not create invoice address.');
         }
 
-        return $address->id;
+        return $address;
     }
 
-    private function createNewAddress(): \AddressCore
+    private function createAddress(): \AddressCore
     {
         return class_exists(\CustomerAddress::class) ? new \CustomerAddress() : new \Address();
     }
 
-    private function setPhoneNumber(\AddressCore $address, AccountInfo $accountInfo): void
+    private function setRequiredPhoneNumbers(\AddressCore $address, AccountInfo $accountInfo): void
     {
         if ([] === $requiredFields = $address->getFieldsRequiredDB()) {
             return;
@@ -321,7 +339,7 @@ class Create
         return $phoneNumber->getCountryPrefix() . ' ' . $phoneNumber->getPhone();
     }
 
-    private function getExistingAddressId(\Customer $customer, \AddressCore $address, array $ignoreFields = []): ?int
+    private function findExistingAddress(\Customer $customer, \AddressCore $address, array $ignoreFields = []): ?\AddressCore
     {
         if ($customer->is_guest) {
             return null;
@@ -333,7 +351,10 @@ class Create
 
         foreach ($addresses as $data) {
             if ($this->isSameAddress($address, $data, $ignoreFields)) {
-                return (int) $data['id_address'];
+                $existingAddress = $this->createAddress();
+                $existingAddress->hydrate($data);
+
+                return $existingAddress;
             }
         }
 
@@ -365,7 +386,7 @@ class Create
         return true;
     }
 
-    private function getOrCreateCustomer(\Cart $cart, AccountInfo $accountInfo): \Customer
+    private function findOrCreateCustomer(\Cart $cart, AccountInfo $accountInfo): \Customer
     {
         $customer = new \Customer($cart->id_customer);
 
@@ -390,7 +411,7 @@ class Create
         }
 
         if (!$customer->save()) {
-            throw $newCustomer ? new InternalServerErrorException('Could not create customer account.') : new InternalServerErrorException('Could not update customer account.');
+            throw new InternalServerErrorException($newCustomer ? 'Could not create customer account.' : 'Could not update customer account.');
         }
 
         $cart->id_customer = $customer->id;
@@ -548,7 +569,10 @@ class Create
         return \Tools::getContextLocale($this->context)->formatPrice($price, 'PLN');
     }
 
-    private function setUpContext(\Cart $cart): void
+    /**
+     * @param array{delivery: \AddressCore, invoice: \AddressCore} $addresses
+     */
+    private function setUpContext(\Cart $cart, array $addresses): void
     {
         if ($currencyId = \Currency::getIdByIsoCode('PLN')) {
             $cart->id_currency = $currencyId;
@@ -564,6 +588,16 @@ class Create
         $this->context->getTranslator()->setLocale($this->context->language->locale);
 
         \Shop::setContext(\Shop::CONTEXT_SHOP, $cart->id_shop);
+
+        $taxAddress = 'id_address_invoice' === \Configuration::get(PrestaShopConfiguration::TAX_ADDRESS_TYPE)
+            ? $addresses['invoice']
+            : $addresses['delivery'];
+
+        $this->context->country = new \Country($taxAddress->id_country, $cart->id_lang);
+
+        if (!$this->context->country->active) {
+            throw new CannotCreateOrderException(sprintf($this->module->l('Selected country (%s) is not available.', self::TRANSLATION_SOURCE), $this->context->country->name));
+        }
     }
 
     private function getCarrierId(int $referenceId, int $shopId): ?int

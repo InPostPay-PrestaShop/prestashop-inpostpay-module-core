@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop;
 
 use izi\prestashop\Common\Currency;
+use izi\prestashop\Configuration\Adapter\Configuration;
+use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\ObjectModel\Repository\CurrencyRepository;
 
@@ -20,22 +22,37 @@ final class ContextManager
      */
     private $manager;
 
+    /**
+     * @var PrestaShopConfiguration
+     */
+    private $configuration;
+
     private $stack = [];
 
-    public function __construct(\Context $context, ObjectManagerInterface $manager)
+    public function __construct(\Context $context, ObjectManagerInterface $manager, ?PrestaShopConfiguration $configuration = null)
     {
         $this->context = $context;
         $this->manager = $manager;
+        $this->configuration = $configuration ?? new PrestaShopConfiguration(new Configuration());
     }
 
-    public function changeContext(\Cart $cart): void
+    /**
+     * @param array{
+     *     currency?: Currency,
+     *     country?: array{
+     *         delivery: string,
+     *         invoice: string,
+     *     },
+     * } $options
+     */
+    public function changeContext(\Cart $cart, array $options = []): void
     {
         $restorationPoint = [];
 
         try {
             $this->isContextCart($cart)
-                ? $this->buildRestorationPointForContextCart($cart, $restorationPoint)
-                : $this->buildRestorationPoint($cart, $restorationPoint);
+                ? $this->buildRestorationPointForContextCart($cart, $options, $restorationPoint)
+                : $this->buildRestorationPoint($cart, $options, $restorationPoint);
         } finally {
             $this->stack[] = $restorationPoint;
         }
@@ -69,22 +86,24 @@ final class ContextManager
         return (int) $this->context->cart->id === (int) $cart->id;
     }
 
-    private function buildRestorationPointForContextCart(\Cart $cart, array &$restorationPoint): void
+    private function buildRestorationPointForContextCart(\Cart $cart, array $options, array &$restorationPoint): void
     {
-        if (null === $previousCurrency = $this->changeCurrency($cart)) {
+        if (null !== $country = $this->changeCountry($cart, $options['country'] ?? [])) {
+            $restorationPoint['country'] = $country;
+        }
+
+        if (null === $currency = $this->changeCurrency($cart, $options['currency'] ?? null)) {
             return;
         }
 
-        $contextCart = $this->context->cart;
-        $this->context->cart = $cart;
+        /* @see \Cart::$id_currency might have changed */
+        $restorationPoint['cart'] = $this->context->cart;
+        $restorationPoint['currency'] = $currency;
 
-        $restorationPoint = [
-            'cart' => $contextCart,
-            'currency' => $previousCurrency,
-        ];
+        $this->context->cart = $cart;
     }
 
-    private function buildRestorationPoint(\Cart $cart, array &$restorationPoint): void
+    private function buildRestorationPoint(\Cart $cart, array $options, array &$restorationPoint): void
     {
         $restorationPoint['cart'] = $this->context->cart;
         $this->context->cart = $cart;
@@ -93,12 +112,16 @@ final class ContextManager
             $restorationPoint['shop'] = $shop;
         }
 
-        if (null !== $currency = $this->changeCurrency($cart)) {
+        if (null !== $currency = $this->changeCurrency($cart, $options['currency'] ?? null)) {
             $restorationPoint['currency'] = $currency;
         }
 
         if (null !== $language = $this->changeLanguage($cart)) {
             $restorationPoint['language'] = $language;
+        }
+
+        if (null !== $country = $this->changeCountry($cart, $options['country'] ?? [])) {
+            $restorationPoint['country'] = $country;
         }
 
         $restorationPoint['customer'] = $this->changeCustomer($cart);
@@ -118,30 +141,35 @@ final class ContextManager
         }
     }
 
-    private function changeCurrency(\Cart $cart): ?\Currency
+    private function changeCurrency(\Cart $cart, ?Currency $targetCurrency): ?\Currency
     {
         /** @var CurrencyRepository $repository */
         $repository = $this->manager->getRepository(\Currency::class);
 
-        $cartCurrency = $repository->find((int) $cart->id_currency);
+        $currency = $repository->find((int) $cart->id_currency);
+        $currentCurrency = null === $currency ? null : Currency::tryFrom($currency->iso_code);
 
-        if (null === $cartCurrency || null === Currency::tryFrom($cartCurrency->iso_code)) {
-            $cartCurrency = $repository->findOneByIsoCode(Currency::getDefault()->value);
+        if (
+            null === $currentCurrency
+            || null !== $targetCurrency && $currentCurrency !== $targetCurrency
+        ) {
+            $targetCurrency = $targetCurrency ?? Currency::getDefault();
+            $currency = $repository->findOneByIsoCode($targetCurrency->value);
 
-            if (null === $cartCurrency) {
+            if (null === $currency) {
                 throw new \RuntimeException('Could not find suitable currency to switch to.');
             }
 
-            $cart->id_currency = $cartCurrency->id;
+            $cart->id_currency = $currency->id;
         }
 
         $contextCurrency = $this->context->currency;
 
-        if ($contextCurrency && (int) $contextCurrency->id === (int) $cartCurrency->id) {
+        if ($contextCurrency && (int) $contextCurrency->id === (int) $currency->id) {
             return null;
         }
 
-        $this->context->currency = $cartCurrency;
+        $this->context->currency = $currency;
         \Cache::clean('getPackageShippingCost_' . (int) $cart->id . '_*');
 
         return $contextCurrency;
@@ -199,5 +227,66 @@ final class ContextManager
         $this->context->getTranslator()->setLocale($this->context->language->locale);
 
         return $contextLanguage;
+    }
+
+    private function changeCountry(\Cart $cart, array $countryCodes): ?\Country
+    {
+        if (null === $country = $this->findTaxCalculationCountry($cart, $countryCodes)) {
+            throw new \RuntimeException('Could not find suitable country to switch to.');
+        }
+
+        $contextCountry = $this->context->country;
+
+        if ((int) $contextCountry->id === (int) $country->id) {
+            return null;
+        }
+
+        $this->context->country = $country;
+
+        return $contextCountry;
+    }
+
+    private function findTaxCalculationCountry(\Cart $cart, array $countryCodes): ?\Country
+    {
+        $shopId = (int) $cart->id_shop;
+        $taxAddressType = $this->configuration->getTaxAddressType($shopId);
+
+        if ('id_address_delivery' === $taxAddressType) {
+            // as of writing this comment, only domestic delivery is available
+            $isoCode = $countryCodes['delivery'] ?? 'PL';
+
+            return $this->getCountryByIsoCode($isoCode, (int) $cart->id_lang);
+        }
+
+        if (isset($countryCodes['invoice'])) {
+            return $this->getCountryByIsoCode($countryCodes['invoice'], (int) $cart->id_lang);
+        }
+
+        $taxAddressId = (int) $cart->id_address_invoice;
+        $taxAddress = $this->manager->getRepository(\Address::class)->find($taxAddressId);
+
+        if (null === $taxAddress || 0 >= $countryId = (int) $taxAddress->id_country) {
+            $countryId = $this->configuration->getDefaultCountryId($shopId);
+        }
+
+        return $this->manager
+            ->getRepository(\Country::class)
+            ->find($countryId, (int) $cart->id_lang);
+    }
+
+    private function getCountryByIsoCode(string $isoCode, int $languageId): \Country
+    {
+        $country = $this->manager
+            ->getRepository(\Country::class)
+            ->findOneBy([
+                'iso_code' => $isoCode,
+                'id_lang' => $languageId,
+            ], ['active' => 'DESC']);
+
+        if (null !== $country) {
+            return $country;
+        }
+
+        throw new \RuntimeException(sprintf('Country "%s" not found.', $isoCode)); // TODO specific exception
     }
 }
