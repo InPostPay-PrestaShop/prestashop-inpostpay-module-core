@@ -8,6 +8,7 @@ use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
+use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\View\Templating\RendererInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
@@ -24,12 +25,20 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
      */
     private $renderer;
 
-    public function __construct(GuiConfigurationInterface $configuration, GeneralConfigurationInterface $generalConfiguration, WidgetInterface $module, RendererInterface $renderer)
-    {
+    public function __construct(
+        GuiConfigurationInterface $configuration,
+        GeneralConfigurationInterface $generalConfiguration,
+        WidgetInterface $module,
+        RendererInterface $renderer,
+        \Context $context,
+        BasketSessionRepositoryInterface $basketSessionRepository
+    ) {
         $this->configuration = $configuration;
         $this->generalConfiguration = $generalConfiguration;
         $this->module = $module;
         $this->renderer = $renderer;
+        $this->context = $context;
+        $this->basketSessionRepository = $basketSessionRepository;
     }
 
     public static function getHookName(): string
@@ -53,12 +62,12 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
             throw new \InvalidArgumentException(sprintf('Parameter "product" expected to be an instance of "%s", "%s" given.', ProductLazyArray::class, get_debug_type($product)));
         }
 
-        if ('' === $widget = $this->renderWidget($product, $parameters, self::HOOK_NAME)) {
+        if (self::HOOK_NAME !== $this->generalConfiguration->getProductCardDisplayHook()) {
             return '';
         }
 
         return $this->renderer->render('module:inpostizi/views/templates/hook/productButtonWidget.tpl', [
-            'widget' => $widget,
+            'widget' => $this->renderWidget($product, $parameters, self::HOOK_NAME),
             'refresh' => $this->generalConfiguration->isFullPageCacheModuleInUse(),
             'styles' => $this->getHtmlStyles(),
             'hookName' => self::HOOK_NAME,

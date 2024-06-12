@@ -21,6 +21,10 @@ const mainController = () => {
     const buttons = document.querySelectorAll(selectorsMap().inpostIziProductButtonWrapper);
 
     buttons.forEach((button) => {
+      if (button.getAttribute('data-refresh') !== 'true') {
+        return;
+      }
+
       const idProduct = parseInt(button.getAttribute('data-id-product'), 10);
       const hookName = button.getAttribute('data-hook');
 
