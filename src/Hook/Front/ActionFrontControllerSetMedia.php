@@ -6,6 +6,7 @@ namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\GeneralConfiguration;
+use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Security\AuthorizationChecker;
 use izi\prestashop\Security\Voter\BindingWidgetVoter;
@@ -36,11 +37,17 @@ final class ActionFrontControllerSetMedia implements HookInterface
     private $assetsProviders;
 
     /**
+     * @var GeneralConfigurationInterface
+     */
+    private $configuration;
+
+    /**
      * @param AssetManagerInterface $assetManager
      * @param AuthorizationCheckerInterface $authorizationChecker
      * @param iterable<AssetsProviderInterface> $assetsProviders
+     * @param GeneralConfigurationInterface $configuration
      */
-    public function __construct(/* \Module $module, \Context $context, EnvironmentInterface $environment, */ $assetManager, $authorizationChecker, $assetsProviders = [])
+    public function __construct(/* \Module $module, \Context $context, EnvironmentInterface $environment, */ $assetManager, $authorizationChecker, $assetsProviders = [], $configuration = null)
     {
         $arguments = func_get_args();
         if (isset($arguments[3]) && $arguments[3] instanceof AssetManagerInterface) {
@@ -52,6 +59,8 @@ final class ActionFrontControllerSetMedia implements HookInterface
                 new CommonAssetsProvider($arguments[0], $arguments[1], $arguments[2]),
                 new ProductPageAssetsProvider($configuration, $arguments[1]),
             ];
+        } elseif (null === $configuration) {
+            $configuration = new GeneralConfiguration(new Configuration());
         }
 
         if (!$assetManager instanceof AssetManagerInterface) {
@@ -66,9 +75,14 @@ final class ActionFrontControllerSetMedia implements HookInterface
             throw new \InvalidArgumentException(sprintf('Expected $assetsProviders to be iterable, "%s" given', get_debug_type($assetsProviders)));
         }
 
+        if (!$configuration instanceof GeneralConfigurationInterface) {
+            throw new \InvalidArgumentException(sprintf('Expected $configuration to be instance of "%s", "%s" given', GeneralConfigurationInterface::class, get_debug_type($configuration)));
+        }
+
         $this->assetManager = $assetManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->assetsProviders = $assetsProviders;
+        $this->configuration = $configuration;
     }
 
     public static function getHookName(): string
@@ -87,7 +101,10 @@ final class ActionFrontControllerSetMedia implements HookInterface
             return;
         }
 
-        if (!$this->authorizationChecker->isGranted(BindingWidgetVoter::VIEW, $request)) {
+        if (
+            !$this->configuration->isFullPageCacheModuleInUse()
+            && !$this->authorizationChecker->isGranted(BindingWidgetVoter::VIEW, $request)
+        ) {
             return;
         }
 

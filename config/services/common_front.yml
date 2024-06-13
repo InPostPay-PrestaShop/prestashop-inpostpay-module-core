@@ -16,6 +16,7 @@ services:
       - '@izi\prestashop\View\Asset\FrontAssetManager'
       - '@inpost.izi.security.authorization_checker'
       - !tagged inpost.izi.front_assets_provider
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
 
   izi\prestashop\Hook\Front\ActionGetPaymentOptions:
     class: izi\prestashop\Hook\Front\ActionGetPaymentOptions
@@ -34,8 +35,8 @@ services:
     tags:
       - { name: inpost.izi.hook }
     arguments:
-        - '@inpost.izi.module'
-        - '@izi\prestashop\Configuration\GeneralConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
 
   izi\prestashop\Hook\Front\DisplayOrderConfirmation:
     class: izi\prestashop\Hook\Front\DisplayOrderConfirmation
