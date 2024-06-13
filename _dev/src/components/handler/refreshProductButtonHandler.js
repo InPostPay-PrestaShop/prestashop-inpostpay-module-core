@@ -12,7 +12,7 @@ const refreshProductButtonHandler = async (buttonWrapper, hookName, idProduct) =
   const { content = null } = await widgetGetRequest(hookName, idProduct);
   const { inpostIziButton } = selectorsMap();
 
-  if (null === content) {
+  if (!content) {
     return;
   }
 
