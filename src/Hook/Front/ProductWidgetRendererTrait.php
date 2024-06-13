@@ -9,6 +9,7 @@ use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 trait ProductWidgetRendererTrait
 {
@@ -83,8 +84,8 @@ trait ProductWidgetRendererTrait
             return false;
         }
 
-        return $product['allow_oosp'] ||
-            \StockAvailable::getQuantityAvailableByProduct($product['id_product'], $product['id_product_attribute'], $this->context->shop->id) >= $product['minimal_quantity'];
+        return $product['allow_oosp']
+            || \StockAvailable::getQuantityAvailableByProduct($product['id_product'], $product['id_product_attribute'], $this->context->shop->id) >= $product['minimal_quantity'];
     }
 
     private function isCartBound(): bool
@@ -104,5 +105,14 @@ trait ProductWidgetRendererTrait
         $styles = $productWidget->getHtmlStyles();
 
         return iterator_to_array($styles);
+    }
+
+    private function shouldRenderCacheableHookContent(?Request $request): bool
+    {
+        if (!$this->generalConfiguration->isFullPageCacheModuleInUse()) {
+            return false;
+        }
+
+        return null === $request || !$request->isXmlHttpRequest();
     }
 }

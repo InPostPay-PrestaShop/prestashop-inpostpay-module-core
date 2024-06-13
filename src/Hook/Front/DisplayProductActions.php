@@ -66,7 +66,7 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
             return '';
         }
 
-        $refresh = $this->generalConfiguration->isFullPageCacheModuleInUse();
+        $refresh = $this->shouldRenderCacheableHookContent($parameters['request'] ?? null);
 
         return $this->renderer->render('module:inpostizi/views/templates/hook/productButtonWidget.tpl', [
             'widget' => $refresh ? '' : $this->renderWidget($product, $parameters, self::HOOK_NAME),
