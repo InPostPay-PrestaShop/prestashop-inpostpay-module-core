@@ -220,6 +220,10 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this->getLegacyContainer()->get($serviceName);
         }
 
+        if (Tools::version_compare(_PS_VERSION_, '1.7.7')) {
+            return $this->getPS176Container()->get($serviceName);
+        }
+
         try {
             $service = parent::get($serviceName);
         } catch (ServiceNotFoundException $exception) {
@@ -234,17 +238,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $service;
         }
 
-        if (!$this->context->controller instanceof FrontController || !class_exists(PrestaShopContainerBuilder::class)) {
-            throw ContainerNotFoundException::create();
-        }
-
-        try {
-            $container = PrestaShopContainerBuilder::getContainer('front', _PS_MODE_DEV_);
-        } catch (Exception $e) {
-            throw ContainerNotFoundException::create($e);
-        }
-
-        return $container->get($serviceName);
+        return $this->getFrontOfficeLegacyContainer()->get($serviceName);
     }
 
     /**
@@ -453,6 +447,46 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return !$this->get(AdvancedConfigurationInterface::class)->isDebugEnabled();
         } catch (Exception $e) {
             return false;
+        }
+    }
+
+    /**
+     * {@see \Module::get()} does not check if {@see \Controller::$container} is set on PS 1.7.6.
+     *
+     * @return ContainerInterface
+     */
+    private function getPS176Container()
+    {
+        if (isset($this->context->container)) {
+            return $this->context->container;
+        }
+
+        if (null !== $container = SymfonyContainer::getInstance()) {
+            return $container;
+        }
+
+        if ($this->context->controller instanceof Controller && null !== $container = $this->context->controller->getContainer()) {
+            return $container;
+        }
+
+        return $this->getFrontOfficeLegacyContainer();
+    }
+
+    /**
+     * Access container before {@see \FrontController::$container} is set in {@see \Controller::init()}.
+     *
+     * @return ContainerInterface
+     */
+    private function getFrontOfficeLegacyContainer()
+    {
+        if (!$this->context->controller instanceof FrontController || !class_exists(PrestaShopContainerBuilder::class)) {
+            throw ContainerNotFoundException::create();
+        }
+
+        try {
+            return PrestaShopContainerBuilder::getContainer('front', _PS_MODE_DEV_);
+        } catch (Exception $e) {
+            throw ContainerNotFoundException::create($e);
         }
     }
 }

@@ -6,8 +6,10 @@ namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 trait ProductWidgetRendererTrait
 {
@@ -25,6 +27,16 @@ trait ProductWidgetRendererTrait
      * @var WidgetInterface
      */
     private $module;
+
+    /**
+     * @var \Context
+     */
+    private $context;
+
+    /**
+     * @var BasketSessionRepositoryInterface
+     */
+    private $basketSessionRepository;
 
     /**
      * @param ProductLazyArray|array{id_product: int, add_to_cart_url: string|null} $product
@@ -60,12 +72,31 @@ trait ProductWidgetRendererTrait
      */
     private function shouldDisplayWidget(string $hookName, $product): bool
     {
-        // If add_to_cart_url is not set, the product is not available for sale.
-        if (null === $product['add_to_cart_url']) {
+        return $this->checkProductAvailability($product) || $this->isCartBound();
+    }
+
+    /**
+     * @param ProductLazyArray|array $product
+     */
+    private function checkProductAvailability($product): bool
+    {
+        if (!$product['available_for_order']) {
             return false;
         }
 
-        return $hookName === $this->generalConfiguration->getProductCardDisplayHook();
+        return $product['allow_oosp']
+            || \StockAvailable::getQuantityAvailableByProduct($product['id_product'], $product['id_product_attribute'], $this->context->shop->id) >= $product['minimal_quantity'];
+    }
+
+    private function isCartBound(): bool
+    {
+        $basketSession = $this->basketSessionRepository->findByEntityId($this->context->cart->id);
+
+        if (null === $basketSession) {
+            return false;
+        }
+
+        return $basketSession->isBasketBound();
     }
 
     private function getHtmlStyles(): array
@@ -74,5 +105,14 @@ trait ProductWidgetRendererTrait
         $styles = $productWidget->getHtmlStyles();
 
         return iterator_to_array($styles);
+    }
+
+    private function shouldRenderCacheableHookContent(?Request $request): bool
+    {
+        if (!$this->generalConfiguration->isFullPageCacheModuleInUse()) {
+            return false;
+        }
+
+        return null === $request || !$request->isXmlHttpRequest();
     }
 }
