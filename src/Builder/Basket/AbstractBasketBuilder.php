@@ -267,24 +267,38 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
         $attributes = $product['attributes'] ?? null;
 
-        if (is_array($product['attributes'])) {
-            return array_values($product['attributes']);
+        if (is_array($attributes)) {
+            return array_values($attributes);
         }
 
-        if (!is_string($attributes)) {
+        /* @see \CartCore::cacheSomeAttributesLists() */
+        if (!is_string($attributes) || '' === $attributes) {
             return [];
         }
 
-        $separator = \Context::getContext()->getTranslator()->trans(': ', [], 'Shop.Pdf');
+        $separator = $this->getConfiguration('PS_ATTRIBUTE_ANCHOR_SEPARATOR');
+        $pattern = sprintf('/(?>(?P<attribute>[^:]+:[^:]+)%1$s(?!%1$s([^:%1$s])+:))/', $separator);
 
-        return array_map(static function (string $attribute) use ($separator): array {
-            [$group, $name] = explode($separator, $attribute, 2);
+        if (!preg_match_all($pattern, $attributes . $separator, $matches)) {
+            return [];
+        }
 
-            return [
+        $attributes = [];
+
+        foreach ($matches['attribute'] as $attribute) {
+            if (!str_contains($attribute, ':')) {
+                continue;
+            }
+
+            [$group, $name] = explode(':', $attribute, 2);
+
+            $attributes[] = [
                 'group' => trim($group),
                 'name' => trim($name),
             ];
-        }, explode($this->getConfiguration('PS_ATTRIBUTE_ANCHOR_SEPARATOR'), $attributes));
+        }
+
+        return $attributes;
     }
 
     private function createQuantity(array $product, int $quantity): Quantity
