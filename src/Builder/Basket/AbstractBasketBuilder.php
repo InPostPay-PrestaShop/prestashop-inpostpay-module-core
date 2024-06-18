@@ -286,10 +286,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $attributes = [];
 
         foreach ($matches['attribute'] as $attribute) {
-            if (!str_contains($attribute, ':')) {
-                continue;
-            }
-
             [$group, $name] = explode(':', $attribute, 2);
 
             $attributes[] = [
