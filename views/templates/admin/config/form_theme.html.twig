@@ -2,7 +2,6 @@
 
 {% block _consents_configuration_consents_widget %}
   {% set child = prototype %}
-
   <div {{ block('widget_container_attributes') }} data-prototype="{{ block('consent_collection_item_widget')|e('html_attr') }}">
     <div class="js-consent-collection-item-container">
       {% for child in form %}
@@ -12,7 +11,14 @@
       {% endfor %}
     </div>
 
-    <button type="button" class="js-add-consent-collection-item btn btn-outline-primary">
+
+    <div class="js-consent-limit alert alert-warning d-print-none d-none">
+      <div class="alert-text">
+        {{ error_reach_consents_label }}
+      </div>
+    </div>
+
+    <button type="button" {% if form|length >= 10 %}disabled{% endif %} class="js-add-consent-collection-item btn btn-outline-primary">
       <i class="material-icons">add_circle</i>
       {{ add_consent_label }}
     </button>
