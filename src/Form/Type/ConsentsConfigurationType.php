@@ -28,6 +28,7 @@ final class ConsentsConfigurationType extends AbstractType
     public function finishView(FormView $view, FormInterface $form, array $options): void
     {
         $view['consents']->vars['add_consent_label'] = $this->translator->l('Add another consent', self::TRANSLATION_SOURCE);
+        $view['consents']->vars['error_reach_consents_label'] = $this->translator->l('You are not allowed to add more than 10 consents.', self::TRANSLATION_SOURCE);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

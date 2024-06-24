@@ -4,6 +4,7 @@ class ConsentCollection {
     item: '.js-consent-collection-item',
     addButton: '.js-add-consent-collection-item',
     removeButton: '.js-remove-consent-collection-item',
+    errorLimitConsent: '.js-consent-limit'
   };
   #nextIndex = 0;
   #itemContainer;
@@ -19,6 +20,8 @@ class ConsentCollection {
   }
 
   #init() {
+    this.#validateAddButton();
+
     this.wrapper
       .querySelector(this.#selectors.addButton)
       .addEventListener('click', () => this.#addItem());
@@ -46,10 +49,19 @@ class ConsentCollection {
       .addEventListener('click', (event) => {
         this.#removeItem(event.target);
       });
+
+    this.#validateAddButton();
   }
 
   #removeItem(button) {
     button.closest(this.#selectors.item).remove();
+    this.#validateAddButton();
+  }
+
+  #validateAddButton() {
+    const isLimitReached = this.#itemContainer.querySelectorAll(this.#selectors.item).length >= 10;
+    document.querySelector(this.#selectors.addButton).disabled = isLimitReached;
+    document.querySelector(this.#selectors.errorLimitConsent).classList.toggle('d-none', !isLimitReached);
   }
 }
 
