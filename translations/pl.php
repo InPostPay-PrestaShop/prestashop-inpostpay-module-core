@@ -64,6 +64,8 @@ $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_a166db0fa22cc43fd81255
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_e14e979d3bf9677c8f2f9d108297b95d'] = 'Możesz wybrać inny hook, jeśli masz problem z wyświetleniem widgetu InPost Pay w domyślnym hooku.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_dae272c53fe0f60237e1c5059ecdb4b8'] = 'Hook do wyświetlania widgetu w checkoucie';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_07f0748f41ceeea585873d4cd84166e1'] = 'Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku szablonu: \'{hook h=\"%s\"}\'.';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_38e0bba4abb1c099b3c3b9dfeed745c2'] = 'Full page cache w użyciu';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_678e433c080caebffb245f4ec097579d'] = 'Użyj tej opcji jeśli używasz modułu full page cache lub innych narzędzi full page cache typu varnish, lightspeed cache.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_7a440309fc897f07a1d99a07af29d8db'] = 'Maksymalna liczba produktów sugerowanych';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_2d18889b4f14532c8f33c95a7af033c9'] = 'W celu pokazania produktów sugerowanych należy uzupełnić sekcję Produktów Powiązanych w konfiguracji produktu.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_958f470d0b1c8fb2b9e62b48e8903299'] = 'bez limitu';
@@ -164,6 +166,7 @@ $_MODULE['<{inpostizi}prestashop>paymenttypetranslator_52a0d2a64ff310050981ded93
 $_MODULE['<{inpostizi}prestashop>paymenttypetranslator_bf12eb9565712f0d19eebc65ee067ffb'] = 'Limit zakupowy';
 $_MODULE['<{inpostizi}prestashop>paymenttypetranslator_db687137cec26f4c0a93e2d8f520e43e'] = 'Płatność odroczona';
 $_MODULE['<{inpostizi}prestashop>paymenttypetranslator_469ded86e4fce0e962b4d91cc7d426ce'] = 'Płatność przy odbiorze';
+$_MODULE['<{inpostizi}prestashop>widgetcontroller_eec51c10f6a01635ec7d8793167a3376'] = 'Nazwa hooka jest wymagana.';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_6d723e264f50033f7475fc6987af0df8'] = 'Aktualnie wybrana waluta nie jest obsługiwana.';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_28cf121fadf3ad860f04b535a29d2d96'] = 'W koszyku nie ma żadnych produktów.';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_782990a55975fc9d54d74f3ffb2c7dad'] = 'Koszyk nie istnieje.';
@@ -192,6 +195,7 @@ $_MODULE['<{inpostizi}prestashop>actionfrontcontrollersetmedia_05e070788d5522add
 $_MODULE['<{inpostizi}prestashop>actiongetpaymentoptions_a9e819aadeb05ca1df49418d8ef8faf2'] = 'Płać z InPost Pay';
 $_MODULE['<{inpostizi}prestashop>create_be503ee264d6b76ab103af34b1a92c58'] = 'Dla tego koszyka zostało już utworzone zamówienie.';
 $_MODULE['<{inpostizi}prestashop>create_d1363ee7cb061a5b383fd7a829dd9e5b'] = 'Wybrana opcja dostawy nie jest dostępna.';
+$_MODULE['<{inpostizi}prestashop>create_381065e4a69c2def0b193f3276663936'] = 'Wybrany kraj (%s) nie jest dostępny.';
 $_MODULE['<{inpostizi}prestashop>create_adfdd411bc1770971d1d4d05458e8701'] = 'Adres dostawy nie jest poprawny: %s';
 $_MODULE['<{inpostizi}prestashop>create_5da7b3dc1a91973a4cf0f9fd3201ce0a'] = 'Adres rozliczeniowy nie jest poprawny: %s';
 $_MODULE['<{inpostizi}prestashop>create_a7bf47f259b0e675d565b57d5bead1b4'] = 'Dane klienta nie są poprawne: %s';
