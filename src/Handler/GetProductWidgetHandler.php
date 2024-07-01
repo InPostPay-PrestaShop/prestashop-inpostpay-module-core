@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Handler;
 
+use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use izi\prestashop\ObjectModel\Repository\ProductRepository;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
@@ -42,18 +43,25 @@ final class GetProductWidgetHandler implements GetProductWidgetHandlerInterface
      */
     private $productRepository;
 
+    /**
+     * @var BasketSessionRepositoryInterface
+     */
+    private $basketSessionRepository;
+
     public function __construct(
         GuiConfigurationInterface $configuration,
         GeneralConfigurationInterface $generalConfiguration,
         WidgetInterface $module,
         \Context $context,
-        ProductRepository $productRepository
+        ProductRepository $productRepository,
+        BasketSessionRepositoryInterface $basketSessionRepository
     ) {
         $this->configuration = $configuration;
         $this->generalConfiguration = $generalConfiguration;
         $this->module = $module;
         $this->context = $context;
         $this->productRepository = $productRepository;
+        $this->basketSessionRepository = $basketSessionRepository;
     }
 
     public static function getHandledCommandClass(): string
