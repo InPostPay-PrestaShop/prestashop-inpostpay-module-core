@@ -11,7 +11,7 @@ require_once __DIR__ . '/CacheClearer.php';
 /**
  * @param InPostIzi $module
  */
-function upgrade_module_1_7_0(Module $module): bool
+function upgrade_module_1_7_1(Module $module): bool
 {
     CacheClearer::getInstance()->clear();
 
