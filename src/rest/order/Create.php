@@ -529,7 +529,7 @@ class Create
         }
 
         if ($product['active']) {
-            throw new CannotCreateOrderException($this->context->getTranslator()->trans('%product% is no longer available in this quantity. You cannot proceed with your order until the quantity is adjusted.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
+            throw new CannotCreateOrderException(sprintf($this->module->l('You can\'t proceed with your order, the product is not available in this quantity: %s', self::TRANSLATION_SOURCE), $product['name']));
         }
 
         throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));

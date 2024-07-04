@@ -245,6 +245,7 @@ services:
       - '@inpost.izi.module'
       - '@inpost.izi.context'
       - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
 
   izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface: '@izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandler'
   izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandler:

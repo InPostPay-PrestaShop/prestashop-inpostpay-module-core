@@ -113,6 +113,8 @@ final class CartListener implements EventSubscriberInterface
             return;
         }
 
+        // the user changed his current cart (e.g. using the reorder option)
+
         if (null === $currentBasketId = $this->context->cookie->inpostizi_basket_id ?? null) {
             return;
         }
@@ -121,8 +123,15 @@ final class CartListener implements EventSubscriberInterface
             return;
         }
 
-        // the user changed his current cart (e.g. using the reorder option)
-        $session->switchBasket(new Cart($this->context->cart));
-        $this->sessionRepository->persist($session);
+        if (null !== $orderId = $session->getOrderId()) {
+            $this->logger->notice('Order #{orderId}: basket ID was not removed from customer cookie.', [
+                'orderId' => $orderId,
+            ]);
+
+            unset($this->context->cookie->inpostizi_basket_id);
+        } else {
+            $session->switchBasket(new Cart($this->context->cart));
+            $this->sessionRepository->persist($session);
+        }
     }
 }
