@@ -254,7 +254,9 @@ class PrestashopOrder
         $orderDetails->order_comments = $this->readComments();
         $orderDetails->order_id = $this->order->id;
         $orderDetails->pos_id = $this->getConfiguration('INPOST_PAY_pos_id');
-        $orderDetails->order_creation_date = date("Y-m-d\TH:i:s.000\Z", strtotime($this->order->date_add));
+        $orderDetails->order_creation_date = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
+            ->setTimezone(new \DateTimeZone(BasketAppClientInterface::DATETIME_ZONE))
+            ->format(BasketAppClientInterface::DATETIME_FORMAT);
         $orderDetails->basket_id = $this->basketId;
 
         $orderDetails->order_merchant_status_description = $this->getStatusDescription($this->order);
