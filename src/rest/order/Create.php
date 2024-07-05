@@ -98,7 +98,7 @@ class Create
         return $cart;
     }
 
-    private function getOrderByCart(\Cart $cart): ?\Order
+    private function getOrderByCart(\Cart $cart): ?\OrderCore
     {
         if (is_callable([\Order::class, 'getByCartId'])) {
             return \Order::getByCartId($cart->id);
