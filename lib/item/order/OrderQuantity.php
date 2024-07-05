@@ -20,4 +20,15 @@ class OrderQuantity extends Quantity
 
         return $quantity;
     }
+
+    public static function integer(int $quantity, ?string $unit = null): self
+    {
+        $result = new self();
+
+        $result->quantity_type = self::INTEGER;
+        $result->quantity = $quantity;
+        $result->quantity_unit = $unit;
+
+        return $result;
+    }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace izi\prestashop\Controller\Api;
 
 use izi\prestashop\BasketApp\BasketAppClientInterface;
-use izi\prestashop\CartSession;
 use izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\GetBasketCommand;
@@ -23,7 +22,7 @@ final class BasketController extends AbstractApiController
         /** @var Basket $basket */
         $basket = $this->bus->handle(new GetBasketCommand($basketId));
 
-        return $this->basketResponse($basket, $basketId);
+        return $this->basketResponse($basket);
     }
 
     public function confirm(string $basketId, Request $request): JsonResponse
@@ -34,7 +33,7 @@ final class BasketController extends AbstractApiController
         /** @var Basket $basket */
         $basket = $this->bus->handle($command);
 
-        return $this->basketResponse($basket, $basketId);
+        return $this->basketResponse($basket);
     }
 
     public function update(string $basketId, Request $request): JsonResponse
@@ -45,7 +44,7 @@ final class BasketController extends AbstractApiController
         /** @var Basket $basket */
         $basket = $this->bus->handle($command);
 
-        return $this->basketResponse($basket, $basketId);
+        return $this->basketResponse($basket);
     }
 
     public function deleteBinding(string $basketId): JsonResponse
@@ -55,14 +54,12 @@ final class BasketController extends AbstractApiController
         return JsonResponse::create()->setContent(null);
     }
 
-    private function basketResponse(Basket $basket, string $basketId): JsonResponse
+    private function basketResponse(Basket $basket): JsonResponse
     {
         $data = $this->serializer->serialize($basket, 'json', [
             'datetime_format' => BasketAppClientInterface::DATETIME_FORMAT,
             'datetime_timezone' => BasketAppClientInterface::DATETIME_ZONE,
         ]);
-
-        CartSession::setBasketCacheById($basketId, $data); // TODO remove when not needed
 
         return JsonResponse::create()->setContent($data);
     }
