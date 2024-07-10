@@ -19,6 +19,11 @@ class PrestashopOrder
 
     private $orderData;
 
+    /**
+     * @var bool
+     */
+    private $freeShipping;
+
     public function __construct(\Order $order, string $basketId)
     {
         $this->order = $order;
@@ -142,10 +147,7 @@ class PrestashopOrder
         }, $deliveryCodes);
 
         $delivery->delivery_type = $data && isset($data->delivery->delivery_type) ? $data->delivery->delivery_type : 'COURIER';
-        $delivery->delivery_price = $this->createPrice(
-            $this->order->total_shipping_tax_excl,
-            $this->order->total_shipping_tax_incl
-        );
+        $delivery->delivery_price = $this->getDeliveryPrice();
         $delivery->delivery_date = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
             ->setTimestamp(strtotime('+2 days'))
             ->setTime(12, 0)
@@ -269,8 +271,13 @@ class PrestashopOrder
 
     public function readSummaryOrderBasePrice()
     {
-        $gross = $this->order->total_paid_tax_incl - $this->order->total_shipping_tax_incl;
-        $net = $this->order->total_paid_tax_excl - $this->order->total_shipping_tax_excl;
+        $gross = $this->order->total_paid_tax_incl;
+        $net = $this->order->total_paid_tax_excl;
+
+        if (!$this->hasFreeShippingCartRule()) {
+            $gross -= $this->order->total_shipping_tax_incl;
+            $net -= $this->order->total_shipping_tax_excl;
+        }
 
         return $this->createPrice($net, $gross);
     }
@@ -466,5 +473,32 @@ class PrestashopOrder
         $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
 
         return false === $result ? null : (int) $result;
+    }
+
+    private function hasFreeShippingCartRule(): bool
+    {
+        if (isset($this->freeShipping)) {
+            return $this->freeShipping;
+        }
+
+        foreach ($this->order->getCartRules() as $cartRule) {
+            if ($cartRule['free_shipping']) {
+                return $this->freeShipping = true;
+            }
+        }
+
+        return $this->freeShipping = false;
+    }
+
+    private function getDeliveryPrice(): \izi\item\Price
+    {
+        if ($this->hasFreeShippingCartRule()) {
+            return $this->createPrice(0., 0.);
+        }
+
+        return $this->createPrice(
+            (float) $this->order->total_shipping_tax_excl,
+            (float) $this->order->total_shipping_tax_incl
+        );
     }
 }
