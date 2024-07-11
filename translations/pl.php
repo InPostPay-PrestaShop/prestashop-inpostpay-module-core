@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{inpostizi}prestashop>inpostizi_be39a2c31fd39417d193787b0745002d'] = 'InPost Pay';
 $_MODULE['<{inpostizi}prestashop>inpostizi_e92d43479cae605e1a18eb091520f704'] = 'Moduł wymaga PHP w wersji 7.1.3 lub późniejszej.';
 $_MODULE['<{inpostizi}prestashop>inpostizi_3f93d44654423ff8a5fcbbfe8d82f57f'] = 'Nie udało się zaktualizować struktury bazy danych.';
@@ -93,6 +93,7 @@ $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e9adbbd1cd7eff7e1a588c3
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_d3188981fad68a05eec51ac57e69feca'] = 'W przypadku środowiska sandbox skontaktuj się z InPost. W przypadku środowiska produkcyjnego - zaloguj się do InPost i pobierz POS ID.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_f13673c7e261fd8d00915c9cb768ad95'] = 'Komentarz zamówienia';
 $_MODULE['<{inpostizi}prestashop>consentsconfigurationtype_0329ef5c3f8994cecdac9af09fd73ba5'] = 'Dodaj kolejną zgodę';
+$_MODULE['<{inpostizi}prestashop>consentsconfigurationtype_5ea36dda38a845c7617f1da9712721d9'] = 'Maksymalna ilość zgód wynosi 10.';
 $_MODULE['<{inpostizi}prestashop>messageoptionstype_510e3417f3b9f45ab725ed761aba7cdd'] = 'Doklej dodatkową zawartość do komentarza klienta w przypadku dostawy do Paczkomatu';
 $_MODULE['<{inpostizi}prestashop>messageoptionstype_c59e73ddbd9accb6cceb84986bfb9633'] = 'Format wiadomości';
 $_MODULE['<{inpostizi}prestashop>messageoptionstype_5a584bae80c34e6ee9b177aa167eb865'] = 'Dostępne parametry';
