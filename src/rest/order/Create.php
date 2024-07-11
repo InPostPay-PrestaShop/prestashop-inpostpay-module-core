@@ -22,6 +22,7 @@ use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
 use izi\prestashop\MerchantApi\Exception\InternalServerErrorException;
 use izi\prestashop\MerchantApi\Model\Order\Request\AccountInfo;
+use izi\prestashop\MerchantApi\Model\Order\Request\AddressDetails;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\ObjectModel\Exception\InvalidDataException;
 use izi\prestashop\Serializer\SerializerFactory;
@@ -98,7 +99,7 @@ class Create
         return $cart;
     }
 
-    private function getOrderByCart(\Cart $cart): ?\Order
+    private function getOrderByCart(\Cart $cart): ?\OrderCore
     {
         if (is_callable([\Order::class, 'getByCartId'])) {
             return \Order::getByCartId($cart->id);
@@ -229,16 +230,9 @@ class Create
 
         if (null !== $deliveryAddress) {
             $this->fillWithDeliveryAddressData($address, $deliveryAddress);
+        } else {
+            $this->fillWithAccountInfoData($address, $accountInfo);
         }
-
-        $clientAddress = $accountInfo->getAddress();
-
-        $address->firstname = $address->firstname ?? $accountInfo->getName();
-        $address->lastname = $address->lastname ?? $accountInfo->getSurname();
-        $address->id_country = $address->id_country ?? $this->getCountryId($clientAddress->getCountryCode());
-        $address->city = $address->city ?? $clientAddress->getCity();
-        $address->postcode = $address->postcode ?? $clientAddress->getPostalCode();
-        $address->address1 = $address->address1 ?? $clientAddress->getAddress();
 
         if ($existingAddress = $this->findExistingAddress($customer, $address)) {
             return $existingAddress;
@@ -267,7 +261,22 @@ class Create
         $address->id_country = $this->getCountryId($deliveryAddress->getCountryCode());
         $address->city = $deliveryAddress->getCity();
         $address->postcode = $deliveryAddress->getPostalCode();
-        $address->address1 = $deliveryAddress->getAddress();
+
+        $this->setAddressFields($address, $deliveryAddress->getAddress(), $deliveryAddress->getAddressDetails());
+    }
+
+    private function fillWithAccountInfoData(\AddressCore $address, AccountInfo $accountInfo): void
+    {
+        $clientAddress = $accountInfo->getAddress();
+
+        $address->firstname = $accountInfo->getName();
+        $address->lastname = $accountInfo->getSurname();
+
+        $address->id_country = $this->getCountryId($clientAddress->getCountryCode());
+        $address->city = $clientAddress->getCity();
+        $address->postcode = $clientAddress->getPostalCode();
+
+        $this->setAddressFields($address, $clientAddress->getAddress(), $clientAddress->getAddressDetails());
     }
 
     private function findOrCreateInvoiceAddress(InvoiceDetails $invoiceDetails, AccountInfo $accountInfo, \Customer $customer): \AddressCore
@@ -284,7 +293,7 @@ class Create
         $address->postcode = $invoiceDetails->getPostalCode();
         $address->address1 = $invoiceDetails->getStreet();
         $address->address2 = $invoiceDetails->getBuilding();
-        if ($flat = $invoiceDetails->getFlat()) {
+        if ('' !== $flat = (string) $invoiceDetails->getFlat()) {
             $address->address2 .= ' / ' . $flat;
         }
 
@@ -331,6 +340,33 @@ class Create
             if (in_array($field, $requiredFields, true)) {
                 $address->{$field} = $phoneNumber;
             }
+        }
+    }
+
+    private function setAddressFields(\AddressCore $address, string $addressLine, ?AddressDetails $addressDetails): void
+    {
+        $requiredFields = $address->getFieldsRequiredDB();
+
+        if (!in_array('address2', $requiredFields, true)) {
+            $address->address1 = $addressLine;
+
+            return;
+        }
+
+        if (
+            null === $addressDetails
+            || in_array($building = (string) $addressDetails->getBuilding(), ['', AddressDetails::BUILDING_NUMBER_PLACEHOLDER], true)
+        ) {
+            $address->address1 = $addressLine;
+            $address->address2 = '-';
+
+            return;
+        }
+
+        $address->address1 = $addressDetails->getStreet() ?? '-';
+        $address->address2 = $building;
+        if ('' !== $flat = (string) $addressDetails->getFlat()) {
+            $address->address2 .= ' / ' . $flat;
         }
     }
 
@@ -529,7 +565,7 @@ class Create
         }
 
         if ($product['active']) {
-            throw new CannotCreateOrderException($this->context->getTranslator()->trans('%product% is no longer available in this quantity. You cannot proceed with your order until the quantity is adjusted.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
+            throw new CannotCreateOrderException(sprintf($this->module->l('You can\'t proceed with your order, the product is not available in this quantity: %s', self::TRANSLATION_SOURCE), $product['name']));
         }
 
         throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));

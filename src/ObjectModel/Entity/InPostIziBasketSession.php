@@ -40,6 +40,8 @@ class InPostIziBasketSession extends \ObjectModel
 
     /**
      * @var string|null base64 encoded {@see Basket}
+     *
+     * @deprecated no longer used, to be removed
      */
     public $basket_cache;
 
