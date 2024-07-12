@@ -271,6 +271,7 @@ class PrestashopOrder
         $orderDetails->order_merchant_status_description = $this->getStatusDescription($this->order);
         $orderDetails->order_base_price = $this->readSummaryOrderBasePrice();
         $orderDetails->order_final_price = $this->readSummaryOrderFinalPrice();
+        $orderDetails->order_discount = $this->getDiscountsTotal();
         $orderDetails->delivery_references_list = $this->getTrackingNumbers();
         $orderDetails->currency = 'PLN';
         $orderDetails->payment_type = $this->readPaymentType();
@@ -369,6 +370,11 @@ class PrestashopOrder
         $objectManager = $module->get(ObjectManagerInterface::class);
 
         return (new CarrierModuleTrackingNumberProvider($objectManager))->getTrackingNumbers((int) $this->order->id);
+    }
+
+    private function getDiscountsTotal(): float
+    {
+        return (float) \Tools::math_round($this->order->total_discounts_tax_incl, 2);
     }
 
     private function createProduct(array $data): OrderProduct
