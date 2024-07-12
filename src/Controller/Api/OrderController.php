@@ -37,6 +37,8 @@ class OrderController extends AbstractApiController
     {
         $order = $this->getOrderById((int) $orderId);
 
+        \Shop::setContext(\Shop::CONTEXT_SHOP, (int) $order->id_shop);
+
         $basketId = CartSession::getBasketIdByCartId((int) $order->id_cart);
         $response = PrestashopOrder::getOrder($order, $basketId);
 

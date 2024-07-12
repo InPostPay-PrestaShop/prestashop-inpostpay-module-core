@@ -2,6 +2,8 @@
 
 namespace izi\item;
 
+use izi\prestashop\Common\Product\ProductImage;
+
 abstract class Product extends \izi\Item
 {
     /**
@@ -38,6 +40,11 @@ abstract class Product extends \izi\Item
      * @var string|null
      */
     protected $product_image;
+
+    /**
+     * @var ProductImage[]
+     */
+    protected $additional_product_images;
 
     /**
      * @var Price

@@ -7,15 +7,26 @@ use izi\item\order\OrderQuantity;
 use izi\item\ProductAttribute;
 use izi\prestashop\BasketApp\BasketAppClientInterface;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
+use izi\prestashop\Common\Product\ProductImage;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
+use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 
+/**
+ * @todo refactor...
+ */
 class PrestashopOrder
 {
+    /**
+     * @var ImageRetriever
+     */
+    private $imageRetriever;
+
     private $basketId;
     private $order;
     private $customer;
     private $deliveryDetails;
+    private $language;
 
     private $orderData;
 
@@ -31,6 +42,9 @@ class PrestashopOrder
 
         $this->deliveryDetails = new \Address((int) $this->order->id_address_delivery);
         $this->customer = new \Customer((int) $this->order->id_customer);
+        $this->language = new \Language((int) $this->order->id_lang);
+
+        $this->imageRetriever = new ImageRetriever(\Context::getContext()->link);
     }
 
     public static function getOrder(\Order $order, string $basketId): \izi\item\order\Order
@@ -376,10 +390,17 @@ class PrestashopOrder
         $model = new \Product((int) $data['product_id'], false, $this->order->id_lang, $this->order->id_shop);
 
         if (\Validate::isLoadedObject($model)) {
+            $images = $this->imageRetriever->getProductImages([
+                'id_product' => $model->id,
+                'id_product_attribute' => $data['product_attribute_id'],
+            ], $this->language);
+            $imageUrl = $this->getCoverImageUrl($images);
+
             $product->product_category = $model->id_category_default;
             $product->product_description = $this->formatDescription((string) $model->description) ?: $this->formatDescription((string) $model->description_short);
             $product->product_link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->order->id_lang, $this->order->id_shop, $data['product_attribute_id']);
-            $product->product_image = $this->getImageUrl($data, $model);
+            $product->product_image = $imageUrl;
+            $product->additional_product_images = $this->getProductImages($images);
         }
 
         return $product;
@@ -421,60 +442,6 @@ class PrestashopOrder
         return \Tools::substr($description, 0, 1000);
     }
 
-    private function getImageUrl(array $product, \Product $model): ?string
-    {
-        if (null === $imageId = $this->getImageId($product)) {
-            return null;
-        }
-
-        $linkRewrite = $model->link_rewrite ?? \Tools::str2url($model->name);
-
-        return \Context::getContext()->link->getImageLink($linkRewrite, $imageId, 'cart_default');
-    }
-
-    private function getImageId(array $product): ?int
-    {
-        if (null !== $imageId = $this->getCombinationImageId((int) $product['product_attribute_id'])) {
-            return $imageId;
-        }
-
-        return $this->getProductCoverImageId((int) $product['product_id']);
-    }
-
-    private function getCombinationImageId(int $combinationId): ?int
-    {
-        if (0 >= $combinationId) {
-            return null;
-        }
-
-        $query = (new \DbQuery())
-            ->select('pai.id_image')
-            ->from('product_attribute_image', 'pai')
-            ->innerJoin('image', 'i', 'i.id_image = pai.id_image')
-            ->innerJoin('image_shop', 'is', 'is.id_image = i.id_image AND is.id_shop = ' . (int) $this->order->id_shop)
-            ->where('pai.id_product_attribute = ' . $combinationId)
-            ->orderBy('is.cover DESC')
-            ->orderBy('i.position ASC');
-
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
-
-        return false === $result ? null : (int) $result;
-    }
-
-    private function getProductCoverImageId(int $productId): ?int
-    {
-        $query = (new \DbQuery())
-            ->select('is.id_image')
-            ->from('image', 'i')
-            ->innerJoin('image_shop', 'is', 'is.id_image = i.id_image AND is.id_shop = ' . (int) $this->order->id_shop)
-            ->where('i.id_product = ' . $productId)
-            ->where('is.cover = 1');
-
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
-
-        return false === $result ? null : (int) $result;
-    }
-
     private function hasFreeShippingCartRule(): bool
     {
         if (isset($this->freeShipping)) {
@@ -500,5 +467,44 @@ class PrestashopOrder
             (float) $this->order->total_shipping_tax_excl,
             (float) $this->order->total_shipping_tax_incl
         );
+    }
+
+    private function getCoverImageUrl(array $images): ?string
+    {
+        if (null === $image = $this->getCoverImage($images)) {
+            return null;
+        }
+
+        $image = $image['bySize']['cart_default'] ?? $image['small'];
+
+        return $image['url'];
+    }
+
+    private function getCoverImage(array $images): ?array
+    {
+        foreach ($images as $image) {
+            if (!empty($image['cover'])) {
+                return $image;
+            }
+        }
+
+        if (false !== $image = reset($images)) {
+            return $image;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return ProductImage[]
+     */
+    private function getProductImages(array $images): array
+    {
+        return array_values(array_map(static function (array $image): ProductImage {
+            $smallSize = $image['bySize']['home_default'] ?? $image['medium'];
+            $normalSize = $image['bySize']['medium_default'] ?? $image['large'];
+
+            return new ProductImage($smallSize['url'], $normalSize['url']);
+        }, $images));
     }
 }
