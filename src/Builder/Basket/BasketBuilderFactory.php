@@ -7,6 +7,7 @@ namespace izi\prestashop\Builder\Basket;
 use izi\prestashop\Builder\Basket\BasketAppRequestBuilderInterface as RequestBuilder;
 use izi\prestashop\Builder\Basket\MerchantApiResponseBuilderInterface as ResponseBuilder;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
+use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ContextManager;
 use izi\prestashop\Entities\BasketInterface;
 use Psr\Clock\ClockInterface;
@@ -29,15 +30,26 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
     private $consentsConfiguration;
 
     /**
+     * @var ProductConfigurationInterface
+     */
+    private $productConfiguration;
+
+    /**
      * @var DeliveryFactory
      */
     private $deliveryFactory;
 
-    public function __construct(ClockInterface $clock, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration, DeliveryFactory $deliveryFactory)
-    {
+    public function __construct(
+        ClockInterface $clock,
+        ContextManager $contextManager,
+        ConsentsConfigurationInterface $consentsConfiguration,
+        ProductConfigurationInterface $productConfiguration,
+        DeliveryFactory $deliveryFactory
+    ) {
         $this->clock = $clock;
         $this->contextManager = $contextManager;
         $this->consentsConfiguration = $consentsConfiguration;
+        $this->productConfiguration = $productConfiguration;
         $this->deliveryFactory = $deliveryFactory;
     }
 
@@ -49,6 +61,7 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
             $cart,
             $this->contextManager,
             $this->consentsConfiguration,
+            $this->productConfiguration,
             $this->deliveryFactory
         );
 
@@ -63,6 +76,7 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
             $cart,
             $this->contextManager,
             $this->consentsConfiguration,
+            $this->productConfiguration,
             $this->deliveryFactory
         );
 

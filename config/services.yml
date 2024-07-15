@@ -163,6 +163,19 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader'
 
+  izi\prestashop\Form\Type\Image\ImageTypeChoiceType:
+    class: izi\prestashop\Form\Type\Image\ImageTypeChoiceType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Form\ChoiceList\ProductImageTypeChoiceLoader'
+
+  izi\prestashop\Form\Type\ProductConfigurationType:
+    class: izi\prestashop\Form\Type\ProductConfigurationType
+    autowire: true
+    tags:
+      - { name: form.type }
+
   izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader
     public: false
@@ -180,6 +193,12 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
 
+  izi\prestashop\Form\ChoiceList\ProductImageTypeChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\ProductImageTypeChoiceLoader
+    public: false
+    arguments:
+      - '@izi\prestashop\ObjectModel\Repository\ImageTypeRepository'
+
   izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler
@@ -190,6 +209,7 @@ services:
       - '@izi\prestashop\Configuration\ApiConfigurationInterface'
       - '@izi\prestashop\Configuration\OrdersConfigurationInterface'
       - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@izi\prestashop\Configuration\ProductConfigurationInterface'
       - '@izi\prestashop\Cache\ConfigurationCache'
       - '@inpost.izi.module'
 
@@ -241,6 +261,7 @@ services:
       - '@izi\prestashop\Configuration\ApiConfigurationInterface'
       - '@izi\prestashop\Configuration\OrdersConfigurationInterface'
       - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@izi\prestashop\Configuration\ProductConfigurationInterface'
 
   izi\prestashop\Form\Type\ConsentsConfigurationType:
     class: izi\prestashop\Form\Type\ConsentsConfigurationType
