@@ -8,6 +8,7 @@ use izi\item\ProductAttribute;
 use izi\prestashop\BasketApp\BasketAppClientInterface;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\Product\ProductImage;
+use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
@@ -22,6 +23,11 @@ class PrestashopOrder
      */
     private $imageRetriever;
 
+    /**
+     * @var \InPostIzi
+     */
+    private $module;
+
     private $basketId;
     private $order;
     private $customer;
@@ -35,14 +41,21 @@ class PrestashopOrder
      */
     private $freeShipping;
 
+    /**
+     * @var ProductConfigurationInterface
+     */
+    private $productConfiguration;
+
     public function __construct(\Order $order, string $basketId)
     {
         $this->order = $order;
         $this->basketId = $basketId;
+        $this->module = \Module::getInstanceByName('inpostizi');
 
         $this->deliveryDetails = new \Address((int) $this->order->id_address_delivery);
         $this->customer = new \Customer((int) $this->order->id_customer);
         $this->language = new \Language((int) $this->order->id_lang);
+        $this->productConfiguration = $this->module->get(ProductConfigurationInterface::class);
 
         $this->imageRetriever = new ImageRetriever(\Context::getContext()->link);
     }
@@ -469,13 +482,22 @@ class PrestashopOrder
         );
     }
 
+    private function getImageTypeNameByImageTypeId(int $idImageType, $defaultValue): ?string
+    {
+        $imageType = $idImageType ? new \ImageType($idImageType) : null;
+
+        return $imageType && \Validate::isLoadedObject($imageType) ? $imageType->name : $defaultValue;
+    }
+
     private function getCoverImageUrl(array $images): ?string
     {
         if (null === $image = $this->getCoverImage($images)) {
             return null;
         }
 
-        $image = $image['bySize']['cart_default'] ?? $image['small'];
+        $idImageType = $this->productConfiguration->getNormalImageTypeId((int) $this->order->id_shop);
+
+        $image = $image['bySize'][$this->getImageTypeNameByImageTypeId($idImageType, 'cart_default')] ?? $image['small'];
 
         return $image['url'];
     }
@@ -500,9 +522,14 @@ class PrestashopOrder
      */
     private function getProductImages(array $images): array
     {
-        return array_values(array_map(static function (array $image): ProductImage {
-            $smallSize = $image['bySize']['home_default'] ?? $image['medium'];
-            $normalSize = $image['bySize']['medium_default'] ?? $image['large'];
+        $idImageTypeSmall = $this->productConfiguration->getSmallImageTypeId((int) $this->order->id_shop);
+        $idImageTypeLarge = $this->productConfiguration->getLargeImageTypeId((int) $this->order->id_shop);
+        $smallFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeSmall, 'home_default');
+        $largeFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeLarge, 'medium_default');
+
+        return array_values(array_map(static function (array $image) use ($smallFormatName, $largeFormatName): ProductImage {
+            $smallSize = $image['bySize'][$smallFormatName] ?? $image['medium'];
+            $normalSize = $image['bySize'][$largeFormatName] ?? $image['large'];
 
             return new ProductImage($smallSize['url'], $normalSize['url']);
         }, $images));

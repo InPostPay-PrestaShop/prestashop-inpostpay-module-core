@@ -104,6 +104,9 @@ final class GeneralConfigurationType extends AbstractType
             ->add('ordersConfiguration', OrdersConfigurationType::class, [
                 'label' => false,
             ])
+            ->add('productConfiguration', ProductConfigurationType::class, [
+                'label' => $this->translator->l('Product images configuration', self::TRANSLATION_SOURCE),
+            ])
             ->add('maxSuggestedProducts', IntegerType::class, [
                 'property_path' => 'generalConfiguration.maxSuggestedProducts',
                 'required' => false,

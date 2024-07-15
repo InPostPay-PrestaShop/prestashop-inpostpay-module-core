@@ -66,6 +66,7 @@ $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_dae272c53fe0f60237e1c5
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_07f0748f41ceeea585873d4cd84166e1'] = 'Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku szablonu: \'{hook h=\"%s\"}\'.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_38e0bba4abb1c099b3c3b9dfeed745c2'] = 'Full page cache w użyciu';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_678e433c080caebffb245f4ec097579d'] = 'Użyj tej opcji jeśli używasz modułu full page cache lub innych narzędzi full page cache typu varnish, lightspeed cache.';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_0d5381fd4e980fb92ffc90a505b4e992'] = 'Konfiguracja zdjęć produktów';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_7a440309fc897f07a1d99a07af29d8db'] = 'Maksymalna liczba produktów sugerowanych';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_2d18889b4f14532c8f33c95a7af033c9'] = 'W celu pokazania produktów sugerowanych należy uzupełnić sekcję Produktów Powiązanych w konfiguracji produktu.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_958f470d0b1c8fb2b9e62b48e8903299'] = 'bez limitu';
@@ -80,6 +81,12 @@ $_MODULE['<{inpostizi}prestashop>clientcredentialstype_1b4739e491387ef5d8a546854
 $_MODULE['<{inpostizi}prestashop>clientcredentialstype_6c85cec035e657aa259dffe971845c11'] = 'Pamiętaj, że Client Secret w zależności od wybranego środowiska różni się. Aby uzyskać sandboxowe Client Secret skontaktuj się z nami przez formularz kontaktowy. Aby uzyskać produkcyjne Client Secret zaloguj się do InPost i uzupełnij dane sklepu.';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_0ba29c6a1afacf586b03a26162c72274'] = 'Środowisko';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_02a5fb45d7cc2eb4a4913f760b397416'] = 'Wybierz środowisko, na którym chcesz pokazać usługę InPost Pay. Pamiętaj, aby przed przejściem na środowisko produkcyjne upewnić się, że usługa w Twoim sklepie działa prawidłowo.';
+$_MODULE['<{inpostizi}prestashop>productconfigurationtype_dc69b3498766f84bb8aa3316146bdd53'] = 'Typ zdjęcia na liście produktów';
+$_MODULE['<{inpostizi}prestashop>productconfigurationtype_47b35415c84af2e3bb76cacfa921a23a'] = 'Ten format zdjęcia będzie wyświetlany na liście produktów w aplikacji.';
+$_MODULE['<{inpostizi}prestashop>productconfigurationtype_fe6d529783e5c4708e3ee5c627af8c25'] = 'Typ zdjęcia w szczegółach produktu';
+$_MODULE['<{inpostizi}prestashop>productconfigurationtype_8a285266cbcb8bfa7bcb6e98b0603ece'] = 'Ten format zdjęcia będzie wyświetlany na szczegółach poszczególnego produktu w aplikacji.';
+$_MODULE['<{inpostizi}prestashop>productconfigurationtype_46fb7288f3d200a582083cacc0718c8c'] = 'Type zdjecia duży';
+$_MODULE['<{inpostizi}prestashop>productconfigurationtype_abc274de1ccce773f2a8d7f8844d48b9'] = 'Ten typ zdjęcia będzie wyświetlany na powiększone zdjęcie produktu w aplikacji.';
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_b2270e0389d0e5acd30d865141272052'] = 'Wyłącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_7f77e3d7178f0b1979d13c101a456450'] = 'Włącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_fd282be0a539046c5c22736ef41f4350'] = 'Status zamówienia utworzonego przez InPost Pay';
