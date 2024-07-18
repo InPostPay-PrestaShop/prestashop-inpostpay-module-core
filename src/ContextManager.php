@@ -36,6 +36,11 @@ final class ContextManager
         $this->configuration = $configuration ?? new PrestaShopConfiguration(new Configuration());
     }
 
+    public function getContext(): \Context
+    {
+        return $this->context;
+    }
+
     /**
      * @param array{
      *     currency?: Currency,

@@ -13,6 +13,7 @@ class OrderDetails extends \izi\Item
     protected $payment_type;
     protected $order_base_price;
     protected $order_final_price;
+    protected $order_discount;
     protected $currency;
     protected $delivery_references_list;
 }

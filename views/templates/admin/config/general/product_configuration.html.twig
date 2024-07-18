@@ -1,0 +1,22 @@
+{% set productForm = form.productConfiguration %}
+
+<p class="h3 mb-3">
+  {{ form_label(productForm, null, {
+    'label_attr': {
+      'class': 'p-0'
+    }
+  }) }}
+</p>
+
+
+<div class="row">
+  <div class="col-lg-3 col-md-4 mt-1">
+    {{ form_row(productForm.normalImageTypeId) }}
+  </div>
+  <div class="col-lg-3 col-md-4 mt-1">
+    {{ form_row(productForm.smallImageTypeId) }}
+  </div>
+  <div class="col-lg-3 col-md-4 mt-1">
+    {{ form_row(productForm.largeImageTypeId) }}
+  </div>
+</div>

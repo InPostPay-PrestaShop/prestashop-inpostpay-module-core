@@ -20,6 +20,9 @@ final class UpdateConsentsConfigurationCommand implements ConsentsConfigurationI
      * @var Collection<Consent>
      *
      * @Assert\Valid()
+     * @Assert\Count(
+     *     max = 10,
+     * )
      */
     private $consents;
 

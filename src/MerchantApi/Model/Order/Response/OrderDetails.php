@@ -66,9 +66,14 @@ final class OrderDetails implements \JsonSerializable
     private $delivery_references_list;
 
     /**
+     * @var float|null
+     */
+    private $order_discount;
+
+    /**
      * @param string[] $delivery_references_list
      */
-    public function __construct(string $order_id, string $pos_id, \DateTimeImmutable $order_creation_date, string $basket_id, string $order_merchant_status_description, PaymentType $payment_type, Price $order_base_price, Price $order_final_price, Currency $currency, array $delivery_references_list = [], ?string $order_comments = null)
+    public function __construct(string $order_id, string $pos_id, \DateTimeImmutable $order_creation_date, string $basket_id, string $order_merchant_status_description, PaymentType $payment_type, Price $order_base_price, Price $order_final_price, Currency $currency, array $delivery_references_list = [], ?string $order_comments = null, ?float $order_discount = null)
     {
         $this->order_comments = $order_comments;
         $this->order_id = $order_id;
@@ -81,6 +86,7 @@ final class OrderDetails implements \JsonSerializable
         $this->order_final_price = $order_final_price;
         $this->currency = $currency;
         $this->delivery_references_list = $delivery_references_list;
+        $this->order_discount = $order_discount;
     }
 
     public function getComments(): ?string
@@ -126,6 +132,11 @@ final class OrderDetails implements \JsonSerializable
     public function getFinalPrice(): Price
     {
         return $this->order_final_price;
+    }
+
+    public function getDiscount(): ?float
+    {
+        return $this->order_discount;
     }
 
     public function getCurrency(): Currency

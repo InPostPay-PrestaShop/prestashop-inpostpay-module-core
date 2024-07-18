@@ -15,15 +15,21 @@ use izi\prestashop\Common\Currency;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\ProductAttribute;
+use izi\prestashop\Common\Product\ProductImage;
 use izi\prestashop\Common\Product\ProductVariant;
 use izi\prestashop\Common\PromoCode;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
 use izi\prestashop\Configuration\OrdersConfiguration;
+use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ContextManager;
+use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Core\Cart\Calculator;
 
+/**
+ * @todo split into separate services
+ */
 abstract class AbstractBasketBuilder implements BasketBuilderInterface
 {
     /**
@@ -42,9 +48,19 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $consentsConfiguration;
 
     /**
+     * @var ProductConfigurationInterface
+     */
+    private $productConfiguration;
+
+    /**
      * @var DeliveryFactory
      */
     private $deliveryFactory;
+
+    /**
+     * @var ImageRetriever
+     */
+    private $imageRetriever;
 
     /**
      * @var \DateTimeImmutable|null
@@ -61,12 +77,20 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private $additionalInformation;
 
-    public function __construct(\Cart $cart, ContextManager $contextManager, ConsentsConfigurationInterface $consentsConfiguration, DeliveryFactory $deliveryFactory)
-    {
+    public function __construct(
+        \Cart $cart,
+        ContextManager $contextManager,
+        ConsentsConfigurationInterface $consentsConfiguration,
+        ProductConfigurationInterface $productConfiguration,
+        DeliveryFactory $deliveryFactory,
+        ?ImageRetriever $imageRetriever = null
+    ) {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
         $this->consentsConfiguration = $consentsConfiguration;
         $this->deliveryFactory = $deliveryFactory;
+        $this->productConfiguration = $productConfiguration;
+        $this->imageRetriever = $imageRetriever ?? new ImageRetriever($contextManager->getContext()->link);
     }
 
     /**
@@ -188,7 +212,10 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
         $category = $model->getDefaultCategory();
         $description = $this->formatDescription((string) $model->description) ?: $this->formatDescription((string) $model->description_short);
-        $link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->cart->id_lang, null, $combinationId);
+        $link = $this->contextManager->getContext()->link->getProductLink($model, null, null, null, $this->cart->id_lang, null, $combinationId);
+
+        $images = $this->imageRetriever->getProductImages($product, $this->contextManager->getContext()->language);
+        $imageUrl = $this->getCoverImageUrl($images);
 
         return new Product(
             sprintf('%d.%d.%d', $model->id, $combinationId, $customizationId),
@@ -199,11 +226,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $product['ean13'] ?? $model->ean13,
             $description,
             $link,
-            $this->getImageUrl($product, $model, $combinationId),
+            $imageUrl,
             $promoPrice,
             null,
             $this->getProductAttributes($product),
-            $this->getProductVariants($product)
+            $this->getProductVariants($product),
+            $this->getProductImages($images)
         );
     }
 
@@ -221,19 +249,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $description = preg_replace('/&(?:#\d+|[a-zA-Z]+);/', '', $description);
 
         return \Tools::substr($description, 0, 1000);
-    }
-
-    private function getImageUrl(array $product, \Product $model, int $combinationId): string
-    {
-        $imageId = $product['id_image'] ?? $this->getDefaultImageId($model->id, $combinationId);
-
-        if (null === $imageId) {
-            return '';
-        }
-
-        $linkRewrite = $model->link_rewrite ?? \Tools::str2url($model->name);
-
-        return \Context::getContext()->link->getImageLink($linkRewrite, $imageId, 'small_default');
     }
 
     /**
@@ -499,7 +514,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             return [];
         }
 
-        $context = \Context::getContext();
+        $context = $this->contextManager->getContext();
         $languageId = (int) $this->cart->id_lang;
 
         $cmsPages = \CMS::getCMSPages($languageId, null, true, $this->cart->id_shop);
@@ -599,7 +614,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function getPriceComputingPrecision(): int
     {
-        $context = \Context::getContext();
+        $context = $this->contextManager->getContext();
 
         if (is_callable([$context, 'getComputingPrecision'])) {
             return $context->getComputingPrecision();
@@ -618,37 +633,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getConfiguration(string $key)
     {
         return \Configuration::get($key, null, null, $this->cart->id_shop);
-    }
-
-    private function getDefaultImageId(int $productId, int $combinationId): ?int
-    {
-        if ($imageId = $this->getDefaultCombinationImageId($combinationId)) {
-            return $imageId;
-        }
-
-        $cover = \Product::getCover($productId);
-
-        return isset($cover['id_image']) ? (int) $cover['id_image'] : null;
-    }
-
-    private function getDefaultCombinationImageId(int $combinationId): ?int
-    {
-        if (0 >= $combinationId) {
-            return null;
-        }
-
-        $query = (new \DbQuery())
-            ->select('pai.id_image')
-            ->from('product_attribute_image', 'pai')
-            ->innerJoin('image', 'i', 'i.id_image = pai.id_image')
-            ->join(\Shop::addSqlAssociation('image', 'i'))
-            ->where('pai.id_product_attribute = ' . $combinationId)
-            ->orderBy('image_shop.cover DESC')
-            ->orderBy('i.position ASC');
-
-        $result = \Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue($query);
-
-        return false === $result ? null : (int) $result;
     }
 
     private function prepareRelatedProducts(array $cartProducts): array
@@ -739,5 +723,64 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
             return $this->newCalculator($products, $cartRules, null);
         }, $this->cart, \CartCore::class))();
+    }
+
+    private function getImageTypeNameByImageTypeId(int $idImageType, string $defaultValue): string
+    {
+        $imageType = $idImageType ? new \ImageType($idImageType) : null;
+
+        return $imageType && \Validate::isLoadedObject($imageType) ? $imageType->name : $defaultValue;
+    }
+
+    private function getCoverImageUrl(array $images): ?string
+    {
+        if (null === $image = $this->getCoverImage($images)) {
+            return null;
+        }
+
+        $idImageType = $this->productConfiguration->getNormalImageTypeId((int) $this->cart->id_shop);
+
+        $image = $image['bySize'][$this->getImageTypeNameByImageTypeId($idImageType, 'cart_default')] ?? $image['small'];
+
+        return $image['url'];
+    }
+
+    private function getCoverImage(array $images): ?array
+    {
+        foreach ($images as $image) {
+            if (!empty($image['cover'])) {
+                return $image;
+            }
+        }
+
+        if (false !== $image = reset($images)) {
+            return $image;
+        }
+
+        return null;
+    }
+
+    /**
+     * @return ProductImage[]
+     */
+    private function getProductImages(array $images): array
+    {
+        if ([] === $images) {
+            return [];
+        }
+
+        $images = array_slice($images, 0, 10);
+
+        $idImageTypeSmall = $this->productConfiguration->getSmallImageTypeId((int) $this->cart->id_shop);
+        $idImageTypeLarge = $this->productConfiguration->getLargeImageTypeId((int) $this->cart->id_shop);
+        $smallFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeSmall, 'home_default');
+        $largeFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeLarge, 'medium_default');
+
+        return array_map(static function (array $image) use ($smallFormatName, $largeFormatName): ProductImage {
+            $smallSize = $image['bySize'][$smallFormatName] ?? $image['medium'];
+            $normalSize = $image['bySize'][$largeFormatName] ?? $image['large'];
+
+            return new ProductImage($smallSize['url'], $normalSize['url']);
+        }, $images);
     }
 }

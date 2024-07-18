@@ -128,6 +128,16 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
 
+  izi\prestashop\Configuration\ProductConfigurationInterface:
+    alias: izi\prestashop\Configuration\ProductConfiguration
+    public: true
+
+  izi\prestashop\Configuration\ProductConfiguration:
+    class: izi\prestashop\Configuration\ProductConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
   izi\prestashop\Configuration\ShippingConfigurationInterface:
     alias: izi\prestashop\Configuration\ShippingConfiguration
     public: true # todo
@@ -392,6 +402,14 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  izi\prestashop\ObjectModel\Repository\ImageTypeRepository:
+    class: izi\prestashop\ObjectModel\Repository\ImageTypeRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: ImageType }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   inpost.izi.object_model.order_repository:
     class: izi\prestashop\ObjectModel\Repository\ObjectRepository
     public: false
@@ -579,6 +597,7 @@ services:
       - '@inpost.izi.clock'
       - '@izi\prestashop\ContextManager'
       - '@izi\prestashop\Configuration\ConsentsConfiguration'
+      - '@izi\prestashop\Configuration\ProductConfiguration'
       - '@izi\prestashop\Builder\Basket\DeliveryFactory'
 
   izi\prestashop\Cache\ConfigurationCache:

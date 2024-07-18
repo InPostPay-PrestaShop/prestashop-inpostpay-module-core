@@ -12,6 +12,7 @@ use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PersistentConfigurationInterface;
+use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\Handler\CommandHandlerTrait;
 use Psr\SimpleCache\CacheInterface;
 
@@ -35,6 +36,11 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
     private $generalConfiguration;
 
     /**
+     * @var PersistentConfigurationInterface<ProductConfigurationInterface>
+     */
+    private $productConfiguration;
+
+    /**
      * @var CacheInterface
      */
     private $cache;
@@ -49,11 +55,18 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
      * @param OrdersConfiguration $ordersConfiguration
      * @param GeneralConfiguration $generalConfiguration
      */
-    public function __construct(ApiConfigurationInterface $apiConfiguration, OrdersConfigurationInterface $ordersConfiguration, GeneralConfigurationInterface $generalConfiguration, CacheInterface $cache, $module)
-    {
+    public function __construct(
+        ApiConfigurationInterface $apiConfiguration,
+        OrdersConfigurationInterface $ordersConfiguration,
+        GeneralConfigurationInterface $generalConfiguration,
+        ProductConfigurationInterface $productConfiguration,
+        CacheInterface $cache,
+        $module
+    ) {
         $this->apiConfiguration = $apiConfiguration;
         $this->ordersConfiguration = $ordersConfiguration;
         $this->generalConfiguration = $generalConfiguration;
+        $this->productConfiguration = $productConfiguration;
         $this->cache = $cache;
         $this->module = $module;
     }
@@ -63,6 +76,7 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
         $this->apiConfiguration->persist($command->getApiConfiguration());
         $this->ordersConfiguration->persist($command->getOrdersConfiguration());
         $this->generalConfiguration->persist($command->getGeneralConfiguration());
+        $this->productConfiguration->persist($command->getProductConfiguration());
 
         $this->module->registerHook($command->getGeneralConfiguration()->getProductCardDisplayHook());
         $this->module->registerHook($command->getGeneralConfiguration()->getCheckoutButtonDisplayHook());
