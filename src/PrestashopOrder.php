@@ -488,7 +488,7 @@ class PrestashopOrder
         );
     }
 
-    private function getImageTypeNameByImageTypeId(int $idImageType, $defaultValue): ?string
+    private function getImageTypeNameByImageTypeId(int $idImageType, string $defaultValue): ?string
     {
         $imageType = $idImageType ? new \ImageType($idImageType) : null;
 
@@ -528,16 +528,22 @@ class PrestashopOrder
      */
     private function getProductImages(array $images): array
     {
+        if ([] === $images) {
+            return [];
+        }
+
+        $images = array_slice($images, 0, 10);
+
         $idImageTypeSmall = $this->productConfiguration->getSmallImageTypeId((int) $this->order->id_shop);
         $idImageTypeLarge = $this->productConfiguration->getLargeImageTypeId((int) $this->order->id_shop);
         $smallFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeSmall, 'home_default');
         $largeFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeLarge, 'medium_default');
 
-        return array_values(array_map(static function (array $image) use ($smallFormatName, $largeFormatName): ProductImage {
+        return array_map(static function (array $image) use ($smallFormatName, $largeFormatName): ProductImage {
             $smallSize = $image['bySize'][$smallFormatName] ?? $image['medium'];
             $normalSize = $image['bySize'][$largeFormatName] ?? $image['large'];
 
             return new ProductImage($smallSize['url'], $normalSize['url']);
-        }, $images));
+        }, $images);
     }
 }
