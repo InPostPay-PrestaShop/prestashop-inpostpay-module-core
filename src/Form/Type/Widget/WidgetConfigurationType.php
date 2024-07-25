@@ -31,8 +31,6 @@ final class WidgetConfigurationType extends AbstractType
                 'help' => $this->translator->l('Specifies the orientation of the widget in the space available for it. If your template allocates a narrow space for the widget the setting will not affect the appearance.', self::TRANSLATION_SOURCE),
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
-                    'data-attribute' => 'class',
-                    'data-value-pattern' => 'float-%s',
                 ],
             ])
             ->add('darkMode', ChoiceType::class, [
@@ -44,7 +42,6 @@ final class WidgetConfigurationType extends AbstractType
                 ],
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
-                    'data-attribute' => 'dark_mode',
                 ],
             ])
             ->add('variant', WidgetVariantChoiceType::class, [
@@ -52,14 +49,12 @@ final class WidgetConfigurationType extends AbstractType
                 'help' => $this->translator->l('The widget is available in 2 color variants. Choose the one more suitable for your store\'s color scheme.', self::TRANSLATION_SOURCE),
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
-                    'data-attribute' => 'variant',
                 ],
             ])
             ->add('frameStyle', WidgetFrameStyleChoiceType::class, [
                 'label' => $this->translator->l('Frame style', self::TRANSLATION_SOURCE),
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
-                    'data-attribute' => 'frame_style',
                 ],
             ])
             ->add('minWidthPx', IntegerType::class, [
@@ -67,7 +62,6 @@ final class WidgetConfigurationType extends AbstractType
                 'label' => $this->translator->l('Min width', self::TRANSLATION_SOURCE),
                 'attr' => [
                     'class' => 'js-widget-container-style-provider',
-                    'data-style' => 'min-width',
                 ],
                 'unit' => 'px',
             ])
@@ -76,7 +70,14 @@ final class WidgetConfigurationType extends AbstractType
                 'label' => $this->translator->l('Max width', self::TRANSLATION_SOURCE),
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
-                    'data-attribute' => 'max_width',
+                ],
+                'unit' => 'px',
+            ])
+            ->add('minHeightPx', IntegerType::class, [
+                'required' => false,
+                'label' => $this->translator->l('Min height', self::TRANSLATION_SOURCE),
+                'attr' => [
+                    'class' => 'js-widget-attribute-provider',
                 ],
                 'unit' => 'px',
             ]);

@@ -5,7 +5,7 @@
   </div>
 
   {% for formElement in form %}
-    {% if formElement.vars.name not in ['minWidthPx', 'maxWidthPx'] %}
+    {% if formElement.vars.name not in ['minWidthPx', 'maxWidthPx', 'minHeightPx'] %}
       <div class="col-xl col-lg-3 col-sm-6 col-12 col-xs-12 mt-2">
         {{ form_row(formElement) }}
       </div>
@@ -19,5 +19,8 @@
   </div>
   <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
     {{ form_row(form.maxWidthPx) }}
+  </div>
+  <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
+    {{ form_row(form.minHeightPx) }}
   </div>
 </div>
