@@ -12,6 +12,9 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
     public const WIDTH_MIN_PX = 220;
     public const WIDTH_MAX_PX = 600;
 
+    public const HEIGHT_MIN_PX = 48;
+    public const HEIGHT_MAX_PX = 64;
+
     /**
      * @var BindingPlace|null
      */
@@ -75,6 +78,13 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
      * @Assert\Range(min=Configuration::WIDTH_MIN_PX, max=Configuration::WIDTH_MAX_PX)
      */
     private $maxWidthPx;
+
+    /**
+     * @var int|null
+     *
+     * @Assert\Range(min=Configuration::HEIGHT_MIN_PX, max=Configuration::HEIGHT_MAX_PX)
+     */
+    private $minHeightPx;
 
     /**
      * @var FrameStyle|null
@@ -240,6 +250,18 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
         return $this->frameStyle;
     }
 
+    public function getMinHeightPx(): ?int
+    {
+        return $this->minHeightPx;
+    }
+
+    public function setMinHeightPx(?int $minHeight): self
+    {
+        $this->minHeightPx = $minHeight;
+
+        return $this;
+    }
+
     public function setFrameStyle(?FrameStyle $frameStyle): self
     {
         $this->frameStyle = $frameStyle;
@@ -301,6 +323,10 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
 
         if (null !== $this->frameStyle) {
             yield 'frame_style' => $this->frameStyle->value;
+        }
+
+        if (null !== $this->minHeightPx) {
+            yield 'min_height' => $this->minHeightPx;
         }
     }
 }
