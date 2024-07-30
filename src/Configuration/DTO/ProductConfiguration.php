@@ -4,23 +4,29 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration\DTO;
 
-
 use izi\prestashop\Configuration\ProductConfigurationInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class ProductConfiguration implements ProductConfigurationInterface
 {
     /**
      * @var int|null
+     *
+     * @Assert\NotNull
      */
     private $normalImageTypeId;
 
     /**
      * @var int|null
+     *
+     * @Assert\NotNull
      */
     private $smallImageTypeId;
 
     /**
      * @var int|null
+     *
+     * @Assert\NotNull
      */
     private $largeImageTypeId;
 
@@ -41,7 +47,7 @@ final class ProductConfiguration implements ProductConfigurationInterface
 
     public function setNormalImageTypeId(?\ImageType $imageType): void
     {
-        $this->normalImageTypeId = $imageType ? $imageType->id : null;
+        $this->normalImageTypeId = null === $imageType ? null : (int) $imageType->id;
     }
 
     public function getSmallImageTypeId(?int $shopId = null): ?int
@@ -49,9 +55,9 @@ final class ProductConfiguration implements ProductConfigurationInterface
         return $this->smallImageTypeId;
     }
 
-    public function setSmallImageTypeId(?\ImageType $smallImageType): void
+    public function setSmallImageTypeId(?\ImageType $imageType): void
     {
-        $this->smallImageTypeId = $smallImageType ? $smallImageType->id : null;
+        $this->smallImageTypeId = null === $imageType ? null : (int) $imageType->id;
     }
 
     public function getLargeImageTypeId(?int $shopId = null): ?int
@@ -59,8 +65,8 @@ final class ProductConfiguration implements ProductConfigurationInterface
         return $this->largeImageTypeId;
     }
 
-    public function setLargeImageTypeId(?\ImageType $largeImageType): void
+    public function setLargeImageTypeId(?\ImageType $imageType): void
     {
-        $this->largeImageTypeId = $largeImageType ? $largeImageType->id : null;
+        $this->largeImageTypeId = null === $imageType ? null : (int) $imageType->id;
     }
 }
