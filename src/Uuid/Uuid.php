@@ -6,6 +6,8 @@ namespace izi\prestashop\Uuid;
 
 abstract class Uuid implements \JsonSerializable
 {
+    public const CANONICAL_FORMAT_LENGTH = 36;
+
     private $uuid;
 
     public function __construct(?string $uuid = null)

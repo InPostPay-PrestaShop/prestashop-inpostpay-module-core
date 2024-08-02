@@ -6,6 +6,7 @@ namespace izi\prestashop\Builder\Basket;
 
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\Consent;
+use izi\prestashop\Common\Basket\ConsentLink;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Common\Basket\Product;
@@ -508,40 +509,65 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getConsents(): array
     {
-        $configConsents = $this->consentsConfiguration->getConsents((int) $this->cart->id_shop);
+        $configConsents = $this->consentsConfiguration->getConsents($shopId = (int) $this->cart->id_shop);
 
         if ([] === $configConsents) {
             return [];
         }
 
-        $context = $this->contextManager->getContext();
         $languageId = (int) $this->cart->id_lang;
 
-        $cmsPages = \CMS::getCMSPages($languageId, null, true, $this->cart->id_shop);
+        $cmsPages = \CMS::getCMSPages($languageId, null, true, $shopId);
 
         $cmsPagesById = [];
         foreach ($cmsPages as $page) {
             $cmsPagesById[$page['id_cms']] = $page;
         }
 
-        $consents = [];
-
-        foreach ($configConsents as $consent) {
-            if (!isset($cmsPagesById[$cmsId = $consent->getCmsPageId()])) {
-                continue;
+        $getLinkUrl = function (DTO\ConsentLink $link) use (&$cmsPagesById, $languageId, $shopId): ?string {
+            if (!isset($cmsPagesById[$cmsId = $link->getCmsPageId()])) {
+                return null;
             }
 
             $page = &$cmsPagesById[$cmsId];
-            if (!isset($page['url'])) {
-                $page['url'] = $context->link->getCMSLink($cmsId, $page['link_rewrite'], null, $languageId, $this->cart->id_shop);
+
+            return $page['url'] ?? $page['url'] = $this->contextManager->getContext()->link->getCMSLink(
+                $cmsId,
+                $page['link_rewrite'],
+                null,
+                $languageId,
+                $shopId
+            );
+        };
+
+        $consents = [];
+
+        foreach ($configConsents as $consent) {
+            if (null === $mainUrl = $getLinkUrl($consent->getLink())) {
+                continue;
+            }
+
+            $additionalLinks = [];
+            foreach ($consent->getAdditionalLinks() as $link) {
+                if (null === $additionalUrl = $getLinkUrl($link)) {
+                    continue;
+                }
+
+                $additionalLinks[] = new ConsentLink(
+                    $link->getId(),
+                    $additionalUrl,
+                    $link->getLabel($languageId)
+                );
             }
 
             $consents[] = new Consent(
                 $consent->getId(),
-                $page['url'],
+                $mainUrl,
                 $this->getConsentDescription($consent, $languageId),
                 $consent->getVersion(),
-                $consent->getRequirementType() ?? ConsentRequirementType::Optional()
+                $consent->getRequirementType() ?? ConsentRequirementType::Optional(),
+                $consent->getLinkLabel($languageId),
+                $additionalLinks
             );
         }
 
@@ -569,14 +595,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         return OrdersConfiguration::normalizeAvailablePaymentOptions($configuration, (int) $this->cart->id_shop);
     }
 
-    private function calculateProductPrice(
-        int $productId,
-        ?int $combinationId = null,
-        bool $withTax = true,
-        bool $withReduction = true,
-        int $quantity = 1,
-        ?int $customizationId = null
-    ): ?float {
+    private function calculateProductPrice(int $productId, ?int $combinationId = null, bool $withTax = true, bool $withReduction = true, int $quantity = 1, ?int $customizationId = null): ?float
+    {
         return \Product::getPriceStatic(
             $productId,
             $withTax,

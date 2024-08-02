@@ -1,75 +1,43 @@
 {% use 'bootstrap_4_layout.html.twig' %}
 
-{% block _consents_configuration_consents_widget %}
+{% block collection_widget %}
   {% set child = prototype %}
-  <div {{ block('widget_container_attributes') }} data-prototype="{{ block('consent_collection_item_widget')|e('html_attr') }}">
-    <div class="js-consent-collection-item-container">
+  {% set attr = attr|merge({class: (attr.class|default('') ~ ' js-collection-form')|trim}) %}
+
+  <div {{ block('widget_container_attributes') }} data-prototype="{{ block('collection_entry_row')|e('html_attr') }}">
+    <div class="js-collection-entries-container mb-2">
       {% for child in form %}
-        <div class="js-consent-collection-item">
-          {{ block('consent_collection_item_widget') }}
+        <div class="js-collection-entry">
+          {{ block('collection_entry_row') }}
         </div>
       {% endfor %}
     </div>
 
-
-    <div class="js-consent-limit alert alert-warning d-print-none d-none">
-      <div class="alert-text">
-        {{ error_reach_consents_label }}
-      </div>
-    </div>
-
-    <button type="button" {% if form|length >= 10 %}disabled{% endif %} class="js-add-consent-collection-item btn btn-outline-primary">
-      <i class="material-icons">add_circle</i>
-      {{ add_consent_label }}
-    </button>
-  </div>
-{% endblock %}
-
-{% block consent_collection_item_widget %}
-  <div class="row d-flex">
-    <div class="col-xs-3 col-3">
-      {{ form_label(child.cmsPageId, null, {
-        'label_attr': {
-          'class': 'p-0 mb-2'
-        }
-      }) }}
-
-      <div class="form-group">
-        {{ form_widget(child.cmsPageId) }}
-      </div>
-    </div>
-
-    <div class="col-xs-5 col-5">
+    {% if allow_add %}
       <div class="d-flex">
-        {{ form_label(child.descriptions, null, {
-          'label_attr': {
-            'class': 'p-0 mb-2 d-inline'
-          }
-        }) }}
-      </div>
-      <div class="form-group">
-        {{ form_widget(child.descriptions) }}
-      </div>
-    </div>
+        <button type="button" class="js-add-collection-entry btn btn-outline-primary">
+          <i class="material-icons">add_circle</i>
+          {{ add_entry_label is defined ? add_entry_label : 'Add'|trans({}, 'Admin.Actions') }}
+        </button>
 
-    <div class="col-xs-3 col-3">
-      {{ form_label(child.requirementType, null, {
-        'label_attr': {
-          'class': 'p-0 mb-2'
-        }
-      }) }}
-      <div class="form-group">
-        {{ form_widget(child.requirementType) }}
+        {% if max_count_message is defined %}
+          <div class="js-max-collection-count-message alert alert-warning d-none d-print-none mb-0 ml-3">
+            <div class="alert-text">
+              {{ max_count_message }}
+            </div>
+          </div>
+        {% endif %}
       </div>
-    </div>
-
-    <div class="col-xs-1 col-1 m-auto">
-      <button type="button" class="js-remove-consent-collection-item btn btn-outline-secondary float-right btn-sm" title="{{ 'Remove'|trans({}, 'Admin.Actions') }}">
-        <i class="material-icons icon-delete">clear</i>
-      </button>
-    </div>
+    {% endif %}
   </div>
 {% endblock %}
+
+{%- block collection_entry_row -%}
+  <div class="form-group p-3 border">
+    {{ form_label(child) }}
+    {{ form_widget(child, {'allow_delete': allow_delete}) }}
+  </div>
+{%- endblock -%}
 
 {%- block integer_widget -%}
   {%- set type = type|default('number') -%}
@@ -310,3 +278,96 @@
     </div>
   </div>
 {% endblock available_payment_options_choice_widget %}
+
+{% block consent_widget %}
+  <div class="row d-flex mb-3">
+    <div class="col-xs-8 col-8 mt-auto">
+      <div class="d-flex">
+        {{ form_label(form.descriptions, null, {
+          'label_attr': {
+            'class': 'p-0 mb-2 d-inline'
+          }
+        }) }}
+      </div>
+
+      {{ form_widget(form.descriptions) }}
+    </div>
+
+    <div class="col-xs-3 col-3 mt-auto">
+      {{ form_label(form.requirementType, null, {
+        'label_attr': {
+          'class': 'p-0 mb-2'
+        }
+      }) }}
+
+      {{ form_widget(form.requirementType) }}
+    </div>
+
+    {% if allow_delete is defined and allow_delete %}
+      <div class="col-xs-1 col-1 mt-auto text-right">
+        <button type="button" class="js-remove-collection-entry btn btn-outline-secondary">
+          <i class="material-icons">remove_circle</i>
+          {{ 'Remove'|trans({}, 'Admin.Actions') }}
+        </button>
+      </div>
+    {% endif %}
+  </div>
+
+  {{ form_label(form.additionalLinks, null, {
+    'label_attr': {
+      'class': 'h4'
+    }
+  }) }}
+
+  {{ form_row(form.link) }}
+  {{ form_widget(form.additionalLinks) }}
+
+  {{ form_rest(form) }}
+{% endblock %}
+
+{% block consent_link_widget %}
+  <div class="row d-flex mb-3">
+    <div class="col-xs-3 col-3 mt-auto">
+      {{ form_label(form.id, null, {
+        'label_attr': {
+          'class': 'p-0 mb-2'
+        }
+      }) }}
+
+      {{ form_widget(form.id) }}
+    </div>
+
+    <div class="col-xs-3 col-3 mt-auto">
+      {{ form_label(form.cmsPageId, null, {
+        'label_attr': {
+          'class': 'p-0 mb-2'
+        }
+      }) }}
+
+      {{ form_widget(form.cmsPageId) }}
+    </div>
+
+    <div class="col-xs-5 col-5 mt-auto">
+      <div class="d-flex">
+        {{ form_label(form.labels, null, {
+          'label_attr': {
+            'class': 'p-0 mb-2 d-inline'
+          }
+        }) }}
+      </div>
+
+      {{ form_widget(form.labels) }}
+    </div>
+
+    {% if allow_delete is defined and allow_delete %}
+      <div class="col-xs-1 col-1 mt-auto text-right">
+        <button type="button" class="js-remove-collection-entry btn btn-outline-secondary">
+          <i class="material-icons">remove_circle</i>
+          {{ 'Remove'|trans({}, 'Admin.Actions') }}
+        </button>
+      </div>
+    {% endif %}
+
+    {{ form_rest(form) }}
+  </div>
+{% endblock %}

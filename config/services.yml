@@ -13,8 +13,10 @@ services:
   izi\prestashop\Controller\Admin\ConfigurationController:
     class: izi\prestashop\Controller\Admin\ConfigurationController
     public: false
+    autowire: true
     tags:
       - { name: controller.service_arguments }
+      - { name: container.service_subscriber }
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@inpost.izi.context'
@@ -255,6 +257,20 @@ services:
       - '@izi\prestashop\Order\Message\MessageFormatterInterface'
       - '@izi\prestashop\Translation\LegacyTranslator'
 
+  izi\prestashop\Validator\Consent\DescriptionUsesIdPlaceholdersValidator:
+    class: izi\prestashop\Validator\Consent\DescriptionUsesIdPlaceholdersValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+
+  izi\prestashop\Validator\Consent\UniqueIdentifiersValidator:
+    class: izi\prestashop\Validator\Consent\UniqueIdentifiersValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+
   izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory:
     class: izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory
     arguments:
@@ -271,6 +287,13 @@ services:
 
   izi\prestashop\Form\Type\Consent\ConsentType:
     class: izi\prestashop\Form\Type\Consent\ConsentType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+
+  izi\prestashop\Form\Type\Consent\ConsentLinkType:
+    class: izi\prestashop\Form\Type\Consent\ConsentLinkType
     tags:
       - { name: form.type }
     arguments:

@@ -31,13 +31,28 @@ final class Consent implements \JsonSerializable
      */
     private $requirement_type;
 
-    public function __construct(string $consent_id, string $consent_link, string $consent_description, string $consent_version, ConsentRequirementType $requirement_type)
+    /**
+     * @var string|null
+     */
+    private $label_link;
+
+    /**
+     * @var ConsentLink[]
+     */
+    private $additional_consent_links;
+
+    /**
+     * @param ConsentLink[] $additional_consent_links
+     */
+    public function __construct(string $consent_id, string $consent_link, string $consent_description, string $consent_version, ConsentRequirementType $requirement_type, ?string $label_link = null, array $additional_consent_links = [])
     {
         $this->consent_id = $consent_id;
         $this->consent_link = $consent_link;
         $this->consent_description = $consent_description;
         $this->consent_version = $consent_version;
         $this->requirement_type = $requirement_type;
+        $this->label_link = $label_link;
+        $this->additional_consent_links = $additional_consent_links;
     }
 
     public function getId(): string
@@ -58,6 +73,19 @@ final class Consent implements \JsonSerializable
     public function getVersion(): string
     {
         return $this->consent_version;
+    }
+
+    public function getLinkLabel(): ?string
+    {
+        return $this->label_link;
+    }
+
+    /**
+     * @return ConsentLink[]
+     */
+    public function getAdditionalLinks(): array
+    {
+        return $this->additional_consent_links;
     }
 
     public function getRequirementType(): ConsentRequirementType
