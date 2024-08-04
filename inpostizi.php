@@ -282,7 +282,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     /**
      * @return Request
      *
-     * @interal
+     * @internal
      */
     public function getCurrentRequest()
     {
@@ -300,7 +300,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     /**
      * @return LoggerInterface
      *
-     * @interal
+     * @internal
      */
     public function getLogger()
     {

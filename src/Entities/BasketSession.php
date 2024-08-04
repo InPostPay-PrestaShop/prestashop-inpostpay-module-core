@@ -182,7 +182,7 @@ final class BasketSession implements SwitchableBasketSessionInterface
     }
 
     /**
-     * @interal
+     * @internal
      */
     public function getModel(): InPostIziBasketSession
     {

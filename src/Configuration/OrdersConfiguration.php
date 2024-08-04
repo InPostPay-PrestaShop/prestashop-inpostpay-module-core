@@ -46,7 +46,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
     }
 
     /**
-     * @interal
+     * @internal
      *
      * @return PaymentType[]
      */

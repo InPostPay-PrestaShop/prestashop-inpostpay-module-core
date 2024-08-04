@@ -35,7 +35,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      *
      * @Assert\All(
      *     @Assert\All(
-     *         @Assert\Type("string")
+     *         @Assert\Type("string"),
      *     )
      * )
      */
@@ -52,7 +52,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      * @var PaymentType[]
      *
      * @Assert\All(
-     *     @Assert\Type(PaymentType::class)
+     *     @Assert\Type(PaymentType::class),
      * )
      */
     private $availablePaymentOptions;
@@ -176,7 +176,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this;
     }
 
-    /* @interal */
+    /**
+     * @internal
+     */
     public function getMessageOptions(): MessageOptions
     {
         return $this->messageOptions ?? ($this->messageOptions = new MessageOptions());

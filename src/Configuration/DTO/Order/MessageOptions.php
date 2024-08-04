@@ -8,7 +8,9 @@ use izi\prestashop\Order\Message\MessageFormatterInterface;
 use izi\prestashop\Validator\ProcessableMessageFormat;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/* @interal */
+/**
+ * @internal
+ */
 final class MessageOptions implements \JsonSerializable
 {
     /**
