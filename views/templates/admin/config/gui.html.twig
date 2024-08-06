@@ -14,34 +14,29 @@
 
         {{ form_errors(form) }}
 
-        {% set widgetForms = [
-          form.cartWidgetDisplayConfiguration,
-          form.productWidgetDisplayConfiguration,
-          form.loginPageWidgetDisplayConfiguration,
-          form.registerFormPageWidgetDisplayConfiguration,
-          form.checkoutPageWidgetDisplayConfiguration,
-          form.miniCartPageWidgetDisplayConfiguration
-        ] %}
+        {% set activeName = null %}
+        {% set widgetForms = {} %}
 
-        {% set activeIndex = null %}
-
-        {% for widgetForm in widgetForms %}
-          {% if widgetForm.vars.valid == false and activeIndex == null %}
-            {% set activeIndex = loop.index0 %}
+        {% for name, child in form %}
+          {% if child.vars.binding_place is defined %}
+            {% set widgetForms = widgetForms|merge({(name): child}) %}
+            {% if not child.vars.valid and activeName is same as (null) %}
+              {% set activeName = name %}
+            {% endif %}
           {% endif %}
         {% endfor %}
 
-        {% if activeIndex == null %}
-          {% set activeIndex = 0 %}
+        {% if activeName is same as(null) %}
+          {% set activeName = widgetForms|keys|first %}
         {% endif %}
 
         <ul class="nav nav-pills border-top-0 bg-light" id="gui_tabs" role="tablist">
-          {% for widgetForm in widgetForms %}
+          {% for name, widgetForm in widgetForms %}
             <li class="nav-item" role="presentation">
               <a
                 class="nav-link
-                {% if activeIndex == loop.index0 %}active{% endif %}
-                {% if widgetForm.vars.valid == false %}text-danger{% endif %}
+                {% if activeName is same as(name) %}active{% endif %}
+                {% if widgetForm.vars.valid is same as(false) %}text-danger{% endif %}
                 "
                 id="{{ widgetForm.vars.id }}-tab"
                 data-toggle="tab"
@@ -51,7 +46,7 @@
               >
                 {{ widgetForm.vars.label }}
 
-                {% if widgetForm.vars.valid == false %}
+                {% if not widgetForm.vars.valid %}
                   <span
                       class="material-icons"
                       data-toggle="popover"
@@ -66,19 +61,21 @@
         </ul>
 
         <div class="tab-content p-0" id="gui_tabs_content">
-          {% for widgetForm in widgetForms %}
+          {% for name, widgetForm in widgetForms %}
             <div
               class="
                 tab-pane fade
-                {% if activeIndex == loop.index0 %}show active in{% endif %}
+                {% if activeName is same as(name) %}show active in{% endif %}
               "
               id="{{ widgetForm.vars.id }}"
               role="tabpanel"
             >
-              {{ form_widget(widgetForm) }}
+              {{ form_row(widgetForm) }}
             </div>
           {% endfor %}
         </div>
+
+        {{ form_rest(form) }}
 
         <div class="card-footer clearfix">
           <a href="{{ path('admin_module_manage') }}" class="btn btn-outline-secondary">{{ 'Back'|trans }}</a>

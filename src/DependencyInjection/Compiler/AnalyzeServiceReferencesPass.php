@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\DependencyInjection\Compiler;
 
 use izi\prestashop\DependencyInjection\Argument\ServiceClosureArgument;
+use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Compiler\AnalyzeServiceReferencesPass as DecoratedPass;
 use Symfony\Component\DependencyInjection\Compiler\RepeatablePassInterface;
 use Symfony\Component\DependencyInjection\Compiler\RepeatedPass;
@@ -53,15 +54,22 @@ final class AnalyzeServiceReferencesPass implements RepeatablePassInterface
         $this->pass->process($container);
         $graph = $container->getCompiler()->getServiceReferenceGraph();
 
+        $aliases = array_map(static function (Alias $alias) {
+            return (string) $alias;
+        }, $container->getAliases());
+
         foreach ($container->findTaggedServiceIds($this->locatorTag) as $locatorId => $tags) {
             $definition = $container->getDefinition($locatorId);
 
             /** @var ServiceClosureArgument $value */
             foreach ($definition->getArgument(0) as $value) {
+                $id = (string) $value->getValue();
+                $id = $aliases[$id] ?? $id;
+
                 $graph->connect(
                     $locatorId,
                     $definition,
-                    $id = (string) $value->getValue(),
+                    $id,
                     $container->getDefinition($id)
                 );
             }

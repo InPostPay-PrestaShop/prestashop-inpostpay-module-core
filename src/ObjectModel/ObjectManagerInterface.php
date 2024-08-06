@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\ObjectModel;
 
+use izi\prestashop\Database\Connection;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 
 /**
@@ -24,7 +25,7 @@ interface ObjectManagerInterface
      *
      * @return T|null
      */
-    public function find(string $class, int $id, ?int $languageId = null): ?\ObjectModel;
+    public function find(string $class, int $id, ?int $languageId = null/*, ?int $shopId = null*/): ?\ObjectModel;
 
     public function refresh(\ObjectModel $model);
 
@@ -32,6 +33,8 @@ interface ObjectManagerInterface
      * @template T of \ObjectModel
      *
      * @param class-string<T> $class
+     *
+     * @return array<string, mixed> normalized {@see \ObjectModel::$definition}
      */
     public function getMetadata(string $class): array;
 
@@ -51,5 +54,5 @@ interface ObjectManagerInterface
      *
      * @return QueryBuilder<T>
      */
-    public function createQueryBuilder(string $class): QueryBuilder;
+    public function createQueryBuilder(string $class/*, ?int $languageId = null*/): QueryBuilder;
 }

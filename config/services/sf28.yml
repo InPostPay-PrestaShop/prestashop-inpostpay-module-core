@@ -54,3 +54,15 @@ services:
     autowire: true
     tags:
       - { name: inpost.izi.hook }
+
+  inpost.izi.constraint_validator_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: validator.constraint_validator }
+
+  inpost.izi.gui_configuration_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: inpost.izi.gui_configuration_dependency, index_by: key }

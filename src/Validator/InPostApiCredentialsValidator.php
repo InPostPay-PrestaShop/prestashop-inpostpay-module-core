@@ -87,10 +87,12 @@ final class InPostApiCredentialsValidator extends ConstraintValidator
             return;
         }
 
-        if ([] !== array_diff(self::REQUIRED_SCOPES, $scopes)) {
-            $this->context
-                ->buildViolation($this->translator->l('The granted access token does not have all of the required permissions. To resolve this issue, please contact support.', self::TRANSLATION_SOURCE))
-                ->addViolation();
+        if ([] === array_diff(self::REQUIRED_SCOPES, $scopes)) {
+            return;
         }
+
+        $this->context
+            ->buildViolation($this->translator->l('The granted access token does not have all of the required permissions. To resolve this issue, please contact support.', self::TRANSLATION_SOURCE))
+            ->addViolation();
     }
 }

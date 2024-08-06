@@ -157,14 +157,6 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
 
-  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
-  izi\prestashop\Configuration\GuiConfiguration:
-    class: izi\prestashop\Configuration\GuiConfiguration
-    public: false
-    arguments:
-      - '@izi\prestashop\Configuration\Adapter\Configuration'
-      - '@inpost.izi.serializer'
-
   izi\prestashop\Configuration\AdvancedConfigurationInterface:
     alias: izi\prestashop\Configuration\AdvancedConfiguration
     public: true
@@ -320,8 +312,8 @@ services:
       - '@inpost.izi.object_model.order_state_repository'
       - '@izi\prestashop\Configuration\OrdersConfiguration'
 
-  izi\prestashop\ObjectModel\Connection:
-    class: izi\prestashop\ObjectModel\Connection
+  izi\prestashop\Database\Connection:
+    class: izi\prestashop\Database\Connection
     public: true
     arguments:
       - '@inpost.izi.db'
@@ -338,7 +330,7 @@ services:
     class: izi\prestashop\ObjectModel\ObjectManager
     public: true
     arguments:
-      - '@izi\prestashop\ObjectModel\Connection'
+      - '@izi\prestashop\Database\Connection'
       - '@izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactory'
       - '@izi\prestashop\ObjectModel\Hydrator'
 
@@ -444,6 +436,17 @@ services:
       - '@inpost.izi.serializer'
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
       - '%inpost.izi.basket_session_model_class%'
+
+  izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\ProductRestrictionsRepository:
+    class: izi\prestashop\Repository\ProductRestrictionsRepository
+    tags:
+      - { name: inpost.izi.gui_configuration_dependency, key: izi\prestashop\Repository\ProductRestrictionsRepositoryInterface }
+    arguments:
+      - '@izi\prestashop\Database\Connection'
 
   izi\prestashop\Hook\Common\ActionCartDeleteBefore:
     class: izi\prestashop\Hook\Common\ActionCartDeleteBefore
@@ -683,3 +686,9 @@ services:
     public: false
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  inpost.izi.shop_context:
+    class: PrestaShop\PrestaShop\Adapter\Shop\Context
+    public: false
+    tags:
+      - { name: inpost.izi.gui_configuration_dependency, key: context }

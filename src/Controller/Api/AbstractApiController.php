@@ -26,7 +26,7 @@ abstract class AbstractApiController
      */
     protected $bus;
 
-    public function __construct(Serializer $serializer, CommandBusInterface $bus)
+    public function __construct(SerializerInterface $serializer, CommandBusInterface $bus)
     {
         $this->serializer = $serializer;
         $this->bus = $bus;

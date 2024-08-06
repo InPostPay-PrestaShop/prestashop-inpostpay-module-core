@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
+use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
@@ -51,9 +53,9 @@ trait ProductWidgetRendererTrait
             return '';
         }
 
-        $productWidget = $this->configuration->getProductWidgetDisplayConfiguration();
+        $productWidget = GuiConfiguration::getDisplayConfig($this->configuration, BindingPlace::ProductCard());
 
-        if (!$productWidget->isDisplayed()) {
+        if (!$productWidget->isDisplayed($product)) {
             return '';
         }
 
@@ -101,10 +103,14 @@ trait ProductWidgetRendererTrait
 
     private function getHtmlStyles(): array
     {
-        $productWidget = $this->configuration->getProductWidgetDisplayConfiguration();
+        $productWidget = GuiConfiguration::getDisplayConfig($this->configuration, BindingPlace::ProductCard());
         $styles = $productWidget->getHtmlStyles();
 
-        return iterator_to_array($styles);
+        if ($styles instanceof \Traversable) {
+            $styles = iterator_to_array($styles);
+        }
+
+        return $styles;
     }
 
     private function shouldRenderCacheableHookContent(?Request $request): bool

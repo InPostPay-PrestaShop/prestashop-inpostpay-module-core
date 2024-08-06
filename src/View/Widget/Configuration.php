@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class Configuration implements \IteratorAggregate, \JsonSerializable
 {
     public const WIDTH_MIN_PX = 220;
-    public const WIDTH_MAX_PX = 600;
+    public const WIDTH_MAX_PX = 1200;
 
     public const HEIGHT_MIN_PX = 48;
     public const HEIGHT_MAX_PX = 64;
@@ -77,6 +77,7 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
      *
      * @Assert\Range(min=Configuration::WIDTH_MIN_PX, max=Configuration::WIDTH_MAX_PX)
      */
+    // TODO @Assert\GreaterThanOrEqual(propertyPath="minWidthPx")
     private $maxWidthPx;
 
     /**
@@ -97,16 +98,32 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
         $this->basket = $basket;
     }
 
+    public static function for(BindingPlace $bindingPlace): self
+    {
+        return new self($bindingPlace, $bindingPlace->requiresExistingBasket());
+    }
+
     public function getBindingPlace(): BindingPlace
     {
         return $this->bindingPlace ?? BindingPlace::ProductCard();
     }
 
+    /**
+     * @deprecated use {@see withBindingPlace()} instead
+     */
     public function setBindingPlace(BindingPlace $bindingPlace): self
     {
         $this->bindingPlace = $bindingPlace;
 
         return $this;
+    }
+
+    public function withBindingPlace(BindingPlace $bindingPlace): self
+    {
+        $clone = clone $this;
+        $clone->bindingPlace = $bindingPlace;
+
+        return $clone;
     }
 
     public function getLanguage(): Language
@@ -174,11 +191,22 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
         return $this->basket;
     }
 
+    /**
+     * @deprecated use {@see withBasket()} instead
+     */
     public function setBasket(bool $basket): self
     {
         $this->basket = $basket;
 
         return $this;
+    }
+
+    public function withBasket(bool $basket): self
+    {
+        $clone = clone $this;
+        $clone->basket = $basket;
+
+        return $clone;
     }
 
     public function isDarkMode(): bool

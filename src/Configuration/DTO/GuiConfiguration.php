@@ -6,131 +6,153 @@ namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Configuration\WidgetDisplayConfigurationInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class GuiConfiguration implements GuiConfigurationInterface
+final class GuiConfiguration implements GuiConfigurationInterface, \ArrayAccess
 {
     /**
-     * @var WidgetDisplayConfiguration|null
+     * @var array<string, WidgetDisplayConfigurationInterface> configurations by BindingPlace value
      *
-     * @Assert\Valid()
+     * @Assert\Valid
+     * @Assert\All({
+     *     @Assert\NotNull,
+     * })
      */
-    private $cartWidgetDisplayConfiguration;
+    private $displayConfigurations = [];
+
+    private static $supportedBindingPlaces;
 
     /**
-     * @var WidgetDisplayConfiguration|null
-     *
-     * @Assert\Valid()
+     * @param WidgetDisplayConfigurationInterface[] $displayConfigurations
      */
-    private $productWidgetDisplayConfiguration;
+    public function __construct(array $displayConfigurations = [])
+    {
+        foreach ($displayConfigurations as $displayConfiguration) {
+            $this->addDisplayConfiguration($displayConfiguration);
+        }
+    }
+
+    public static function getSupportedBindingPlaces(): array
+    {
+        if (isset(self::$supportedBindingPlaces)) {
+            return self::$supportedBindingPlaces;
+        }
+
+        self::$supportedBindingPlaces = [];
+
+        foreach (BindingPlace::getBindingWidgetDisplayPlaces() as $bindingPlace) {
+            self::$supportedBindingPlaces[$bindingPlace->value] = $bindingPlace;
+        }
+
+        return self::$supportedBindingPlaces;
+    }
+
+    public function getDisplayConfiguration(BindingPlace $bindingPlace): WidgetDisplayConfigurationInterface
+    {
+        $offset = $bindingPlace->value;
+
+        return $this[$offset] ?? WidgetDisplayConfiguration::for($bindingPlace);
+    }
+
+    public function addDisplayConfiguration(WidgetDisplayConfigurationInterface $displayConfiguration): void
+    {
+        $offset = $displayConfiguration->getWidgetConfiguration()->getBindingPlace()->value;
+
+        $this[$offset] = $displayConfiguration;
+    }
 
     /**
-     * @var WidgetDisplayConfiguration|null
-     *
-     * @Assert\Valid()
+     * @return WidgetDisplayConfigurationInterface|null[]
      */
-    private $loginPageWidgetDisplayConfiguration;
+    public function getDisplayConfigurations(): array
+    {
+        return $this->displayConfigurations;
+    }
 
     /**
-     * @var WidgetDisplayConfiguration|null
-     *
-     * @Assert\Valid()
+     * @deprecated
      */
-    private $registerFormPageWidgetDisplayConfiguration;
+    public function getCartWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
+    {
+        return $this->getDisplayConfiguration(BindingPlace::BasketSummary());
+    }
 
     /**
-     * @var WidgetDisplayConfiguration|null
-     *
-     * @Assert\Valid()
+     * @deprecated
      */
-    private $checkoutPageWidgetDisplayConfiguration;
+    public function getProductWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
+    {
+        return $this->getDisplayConfiguration(BindingPlace::ProductCard());
+    }
 
     /**
-     * @var WidgetDisplayConfiguration|null
-     *
-     * @Assert\Valid()
+     * @deprecated
      */
-    private $miniCartPageWidgetDisplayConfiguration;
-
-    public function __construct(?WidgetDisplayConfiguration $cartWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $productWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $loginPageWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $registerFormPageWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $checkoutPageWidgetDisplayConfiguration = null, ?WidgetDisplayConfiguration $miniCartPageWidgetDisplayConfiguration = null)
+    public function getLoginPageWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
     {
-        $this->cartWidgetDisplayConfiguration = $cartWidgetDisplayConfiguration;
-        $this->productWidgetDisplayConfiguration = $productWidgetDisplayConfiguration;
-        $this->loginPageWidgetDisplayConfiguration = $loginPageWidgetDisplayConfiguration;
-        $this->registerFormPageWidgetDisplayConfiguration = $registerFormPageWidgetDisplayConfiguration;
-        $this->checkoutPageWidgetDisplayConfiguration = $checkoutPageWidgetDisplayConfiguration;
-        $this->miniCartPageWidgetDisplayConfiguration = $miniCartPageWidgetDisplayConfiguration;
+        return $this->getDisplayConfiguration(BindingPlace::LoginPage());
     }
 
-    public function getCartWidgetDisplayConfiguration(): WidgetDisplayConfiguration
+    /**
+     * @deprecated
+     */
+    public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
     {
-        return $this->cartWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::BasketSummary());
+        return $this->getDisplayConfiguration(BindingPlace::RegisterFormPage());
     }
 
-    public function setCartWidgetDisplayConfiguration(?WidgetDisplayConfiguration $cartWidgetDisplayConfiguration): self
+    /**
+     * @deprecated
+     */
+    public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
     {
-        $this->cartWidgetDisplayConfiguration = $cartWidgetDisplayConfiguration;
-
-        return $this;
+        return $this->getDisplayConfiguration(BindingPlace::CheckoutPage());
     }
 
-    public function getProductWidgetDisplayConfiguration(): WidgetDisplayConfiguration
+    /**
+     * @deprecated
+     */
+    public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
     {
-        return $this->productWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::ProductCard());
+        return $this->getDisplayConfiguration(BindingPlace::MiniCartPage());
     }
 
-    public function setProductWidgetDisplayConfiguration(?WidgetDisplayConfiguration $productWidgetDisplayConfiguration): self
+    public function offsetExists($offset): bool
     {
-        $this->productWidgetDisplayConfiguration = $productWidgetDisplayConfiguration;
+        $supportedBindingPlaces = self::getSupportedBindingPlaces();
 
-        return $this;
+        return isset($supportedBindingPlaces[$offset]);
     }
 
-    public function getLoginPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
+    public function offsetGet($offset): ?WidgetDisplayConfigurationInterface
     {
-        return $this->loginPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::LoginPage());
+        if (!isset($this[$offset])) {
+            throw new \DomainException(sprintf('Undefined offset: "%s".', $offset));
+        }
+
+        return $this->displayConfigurations[$offset] ?? null;
     }
 
-    public function setLoginPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $loginPageWidgetDisplayConfiguration): self
+    public function offsetSet($offset, $value): void
     {
-        $this->loginPageWidgetDisplayConfiguration = $loginPageWidgetDisplayConfiguration;
+        if (!isset($this[$offset])) {
+            throw new \DomainException(sprintf('Undefined offset: "%s".', $offset));
+        }
 
-        return $this;
+        if (null !== $value && !$value instanceof WidgetDisplayConfigurationInterface) {
+            throw new \InvalidArgumentException(sprintf('Expected null or an instance of "%s", "%s" given.', WidgetDisplayConfigurationInterface::class, get_debug_type($value)));
+        }
+
+        $this->displayConfigurations[$offset] = $value;
     }
 
-    public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
+    public function offsetUnset($offset): void
     {
-        return $this->registerFormPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::RegisterFormPage());
-    }
+        if (!isset($this[$offset])) {
+            return;
+        }
 
-    public function setRegisterFormPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $registerFormPageWidgetDisplayConfiguration): self
-    {
-        $this->registerFormPageWidgetDisplayConfiguration = $registerFormPageWidgetDisplayConfiguration;
-
-        return $this;
-    }
-
-    public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
-    {
-        return $this->checkoutPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::CheckoutPage());
-    }
-
-    public function setCheckoutPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $checkoutPageWidgetDisplayConfiguration): self
-    {
-        $this->checkoutPageWidgetDisplayConfiguration = $checkoutPageWidgetDisplayConfiguration;
-
-        return $this;
-    }
-
-    public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
-    {
-        return $this->miniCartPageWidgetDisplayConfiguration ?? new WidgetDisplayConfiguration(BindingPlace::MiniCartPage());
-    }
-
-    public function setMiniCartPageWidgetDisplayConfiguration(?WidgetDisplayConfiguration $miniCartPageWidgetDisplayConfiguration): self
-    {
-        $this->miniCartPageWidgetDisplayConfiguration = $miniCartPageWidgetDisplayConfiguration;
-
-        return $this;
+        $this->displayConfigurations[$offset] = null;
     }
 }
