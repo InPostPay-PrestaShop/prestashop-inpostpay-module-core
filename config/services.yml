@@ -178,6 +178,29 @@ services:
     tags:
       - { name: form.type }
 
+  izi\prestashop\Form\Type\ObjectModelType:
+    class: izi\prestashop\Form\Type\ObjectModelType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Form\Type\Product\ProductRestrictionsType:
+    class: izi\prestashop\Form\Type\Product\ProductRestrictionsType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Form\Type\Widget\ProductPageDisplayConfigurationType:
+    class: izi\prestashop\Form\Type\Widget\ProductPageDisplayConfigurationType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+
   izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\OrderStateChoiceLoader
     public: false
@@ -378,9 +401,10 @@ services:
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler
     public: false
-    autowire: true
     tags:
       - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfigurationInterface'
 
   izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler:
@@ -430,9 +454,13 @@ services:
   izi\prestashop\Handler\Config\Status\ConfigurationStatusChecker:
     class: izi\prestashop\Handler\Config\Status\ConfigurationStatusChecker
     public: false
-    autowire: true
     tags:
       - { name: inpost.izi.status_checker }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@izi\prestashop\Configuration\OrdersConfigurationInterface'
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - '@validator'
 
   izi\prestashop\Handler\Config\Status\DeliveryOptionsStatusChecker:
     class: izi\prestashop\Handler\Config\Status\DeliveryOptionsStatusChecker
@@ -471,3 +499,18 @@ services:
       - InPostIzi
 
   izi\prestashop\Order\Message\ParameterDescriptorInterface: '@izi\prestashop\Order\Message\ParametersExtractor'
+
+  inpost.izi.shop_context:
+    alias: prestashop.adapter.shop.context
+    public: false
+
+  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfiguration:
+    class: izi\prestashop\Configuration\GuiConfiguration
+    autowire: true
+    public: false
+    tags:
+      - { name: container.service_subscriber, key: context, id: inpost.izi.shop_context }
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'

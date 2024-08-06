@@ -61,7 +61,9 @@ final class ProvideServiceLocatorFactoriesPass implements CompilerPassInterface
             $definition = $container->getDefinition($id);
             $reference = isset($aliases[$id]) ? new Reference($aliases[$id]) : $reference;
 
-            if (null !== $class = $definition->getClass()) {
+            $class = $definition->getClass();
+
+            if (null !== $class && (class_exists($class) || interface_exists($class))) {
                 $reference = new TypedReference((string) $reference, $class);
             }
 

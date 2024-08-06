@@ -25,23 +25,34 @@ class Query
     private $sql;
 
     /**
+     * @var int|null
+     */
+    private $languageId;
+
+    /**
      * @param class-string<T> $class
      */
-    public function __construct(ObjectManagerInterface $manager, string $class, string $sql)
+    public function __construct(ObjectManagerInterface $manager, string $class, string $sql, ?int $languageId = null)
     {
         $this->manager = $manager;
         $this->class = $class;
         $this->sql = $sql;
+        $this->languageId = $languageId;
+    }
+
+    public function getSql(): string
+    {
+        return $this->sql;
     }
 
     /**
      * @return T[]
      */
-    public function getResult(?int $languageId = null): array
+    public function getResult(): array
     {
         $data = $this->getArrayResult();
 
-        return $this->manager->getHydrator()->hydrateCollection($data, $this->class, $languageId);
+        return $this->manager->getHydrator()->hydrateCollection($data, $this->class, $this->languageId);
     }
 
     public function getArrayResult(): array
@@ -52,10 +63,12 @@ class Query
     /**
      * @return T|null
      */
-    public function getOneOrNullResult(?int $languageId = null): ?\ObjectModel
+    public function getOneOrNullResult(): ?\ObjectModel
     {
-        $data = $this->getArrayResult();
+        if ([] === $data = $this->getArrayResult()) {
+            return null;
+        }
 
-        return $this->manager->getHydrator()->hydrate($data, $this->class, null, $languageId);
+        return $this->manager->getHydrator()->hydrate($data, $this->class, null, $this->languageId);
     }
 }

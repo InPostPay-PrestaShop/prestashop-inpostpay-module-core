@@ -68,3 +68,16 @@ services:
     decorates: translator
     arguments:
       - '@izi\prestashop\Translation\DomainNormalizingTranslator.inner'
+
+  izi\prestashop\Form\Type\Compatibility\CategoryChoiceTreeType:
+    class: izi\prestashop\Form\Type\Compatibility\CategoryChoiceTreeType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@PrestaShop\PrestaShop\Adapter\Category\CategoryDataProvider'
+
+  PrestaShop\PrestaShop\Adapter\Category\CategoryDataProvider:
+    class: PrestaShop\PrestaShop\Adapter\Category\CategoryDataProvider
+    public: false
+    arguments:
+      - '@PrestaShop\PrestaShop\Adapter\LegacyContext'

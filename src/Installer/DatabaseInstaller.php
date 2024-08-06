@@ -7,6 +7,7 @@ namespace izi\prestashop\Installer;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ShopAwareConfigurationInterface;
 use izi\prestashop\Installer\Database\Version_1_4_0;
+use izi\prestashop\Installer\Database\Version_1_9_0;
 
 final class DatabaseInstaller
 {
@@ -95,6 +96,9 @@ final class DatabaseInstaller
     {
         $db = \Db::getInstance();
 
-        return [new Version_1_4_0($db)];
+        return [
+            new Version_1_4_0($db),
+            new Version_1_9_0($db),
+        ];
     }
 }

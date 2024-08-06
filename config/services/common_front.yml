@@ -404,3 +404,42 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
       - '@inpost.izi.context'
+
+  inpost.izi.validator:
+    class: Symfony\Component\Validator\Validator\ValidatorInterface
+    public: false
+    factory: [ izi\prestashop\Validator\ValidatorFactory, create ]
+    tags:
+      - { name: inpost.izi.gui_configuration_dependency, key: validator }
+    arguments:
+      - '@inpost.izi.constraint_validator_locator'
+
+  izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator:
+    class: izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator:
+    class: izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator:
+    class: izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface'
+
+  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfiguration:
+    class: izi\prestashop\Configuration\GuiConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+      - '@?inpost.izi.gui_configuration_locator'

@@ -149,7 +149,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
             $this->manager->save($model);
 
             return;
-        } catch (\PrestaShopDatabaseException $e) {
+        } catch (\PrestaShopDatabaseException|\PrestaShopException $e) {
             if (null !== $model->id || !in_array((int) $e->getCode(), [1062, 1557, 1569, 1586], true)) {
                 throw $e;
             }

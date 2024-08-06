@@ -1,4 +1,5 @@
 import { DOMReady } from '../helpers/DOM';
+import ChoiceTree from '@components/form/choice-tree';
 
 const SELECTORS = {
   form: '[name="gui_configuration"]',
@@ -41,6 +42,7 @@ const handleStylesChanges = () => {
 
   const handleSelectChange = () => {
     const formData = new FormData(form);
+    formData.append('gui_configuration[invalid_extra_field]', 'temporary valid form submission countermeasure');
 
     fetch("", {
       "headers": {
@@ -57,5 +59,17 @@ const handleStylesChanges = () => {
   })
 }
 
+const initChoiceTree = () => {
+  const choiceTreeContainer = document.querySelector('.js-choice-tree-container');
 
+  if (null !== choiceTreeContainer) {
+    new ChoiceTree(choiceTreeContainer).enableAutoCheckChildren();
+  }
+}
+
+const initGui = () => {
+  initChoiceTree();
+}
+
+DOMReady(initGui);
 DOMReady(handleStylesChanges);
