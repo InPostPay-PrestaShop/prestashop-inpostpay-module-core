@@ -1,5 +1,6 @@
 <?php
 
+use InPost\Izi\Upgrade\AssetsRemoverTrait;
 use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
 use izi\prestashop\Configuration\Adapter\Configuration;
@@ -12,15 +13,17 @@ if (!defined('_PS_VERSION_')) {
 
 require_once __DIR__ . '/CacheClearer.php';
 require_once __DIR__ . '/ConfigUpdaterTrait.php';
+require_once __DIR__ . '/AssetsRemoverTrait.php';
 
 class InPostIziUpdater_1_9_0
 {
     use ConfigUpdaterTrait;
+    use AssetsRemoverTrait;
 
-    /**
-     * @var Module
-     */
-    private $module;
+    private const STALE_ASSETS = [
+        'js/prestashopizi.972421cbefe1f8bf3243.js',
+        'js/prestashopizi.972421cbefe1f8bf3243.js.map',
+    ];
 
     /**
      * @var DatabaseInstaller
@@ -37,7 +40,8 @@ class InPostIziUpdater_1_9_0
     {
         CacheClearer::getInstance()->clear();
 
-        return $this->installer->install($this->module);
+        return $this->installer->install($this->module)
+            && $this->removeStaleAssets(self::STALE_ASSETS);
     }
 }
 
