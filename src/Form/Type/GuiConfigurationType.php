@@ -107,5 +107,13 @@ final class GuiConfigurationType extends AbstractType
             default:
                 return '';
         }
+
+        // translations moved to BindingPlace enum, kept for AdminModuleTranslations message discovery
+        // ->l('Cart page', self::TRANSLATION_SOURCE),
+        // ->l('Product card', self::TRANSLATION_SOURCE),
+        // ->l('Login page', self::TRANSLATION_SOURCE),
+        // ->l('Register page', self::TRANSLATION_SOURCE),
+        // ->l('Checkout page', self::TRANSLATION_SOURCE),
+        // ->l('Cart preview', self::TRANSLATION_SOURCE),
     }
 }
