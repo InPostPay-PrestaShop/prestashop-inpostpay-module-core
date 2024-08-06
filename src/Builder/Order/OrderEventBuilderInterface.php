@@ -7,6 +7,9 @@ namespace izi\prestashop\Builder\Order;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
 use izi\prestashop\Common\Order\MerchantOrderStatus;
 
+/**
+ * @method $this setCustomerOrderId(?string $customerOrderId)
+ */
 interface OrderEventBuilderInterface
 {
     public function build(): OrderEvent;
