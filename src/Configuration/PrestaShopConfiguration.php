@@ -9,6 +9,8 @@ class PrestaShopConfiguration
     public const DEFAULT_CURRENCY_ID = 'PS_CURRENCY_DEFAULT';
     public const DEFAULT_COUNTRY_ID = 'PS_COUNTRY_DEFAULT';
     public const TAX_ADDRESS_TYPE = 'PS_TAX_ADDRESS_TYPE';
+    public const FREE_DELIVERY_MIN_AMOUNT = 'PS_SHIPPING_FREE_PRICE';
+    public const SHIPPING_HANDLING_COST = 'PS_SHIPPING_HANDLING';
 
     /**
      * @var LanguageAwareConfigurationInterface
@@ -20,17 +22,17 @@ class PrestaShopConfiguration
         $this->configuration = $configuration;
     }
 
-    public function getDefaultCurrencyId(int $shopId = null): int
+    public function getDefaultCurrencyId(?int $shopId = null): int
     {
         return (int) $this->configuration->get(self::DEFAULT_CURRENCY_ID, $shopId);
     }
 
-    public function getDefaultCountryId(int $shopId = null): int
+    public function getDefaultCountryId(?int $shopId = null): int
     {
         return (int) $this->configuration->get(self::DEFAULT_COUNTRY_ID, $shopId);
     }
 
-    public function getTaxAddressType(int $shopId = null): string
+    public function getTaxAddressType(?int $shopId = null): string
     {
         $value = $this->configuration->get(self::TAX_ADDRESS_TYPE, $shopId);
 
@@ -39,5 +41,15 @@ class PrestaShopConfiguration
         }
 
         return 'id_address_delivery';
+    }
+
+    public function getFreeDeliveryMinAmount(?int $shopId = null): float
+    {
+        return (float) $this->configuration->get(self::FREE_DELIVERY_MIN_AMOUNT, $shopId);
+    }
+
+    public function getShippingHandlingCost(?int $shopId = null): float
+    {
+        return (float) $this->configuration->get(self::SHIPPING_HANDLING_COST, $shopId);
     }
 }

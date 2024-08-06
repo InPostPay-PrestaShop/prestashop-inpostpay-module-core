@@ -437,6 +437,15 @@ services:
       - Cart
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  inpost.izi.object_model.address_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Address }
+    arguments:
+      - Address
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   izi\prestashop\Repository\BasketSessionRepository:
     class: izi\prestashop\Repository\BasketSessionRepository
     public: false
@@ -626,6 +635,39 @@ services:
       - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
       - '@inpost.izi.clock'
       - '@izi\prestashop\Translation\ServiceNameTranslator'
+      - '@izi\prestashop\Shipping\DeliveryPriceCalculator'
+
+  izi\prestashop\Shipping\DeliveryPriceCalculator:
+    class: izi\prestashop\Shipping\DeliveryPriceCalculator
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@inpost.izi.object_model.address_repository'
+      - '@izi\prestashop\Currency\PriceConverterInterface'
+      - '@izi\prestashop\Shipping\FreeDelivery\MinAmountCalculationStrategyInterface'
+
+  izi\prestashop\Currency\PriceConverterInterface: '@izi\prestashop\Currency\PriceConverter'
+  izi\prestashop\Currency\PriceConverter:
+    class: izi\prestashop\Currency\PriceConverter
+    public: false
+    arguments:
+      - '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+
+  izi\prestashop\Shipping\FreeDelivery\GenericStrategy:
+    class: izi\prestashop\Shipping\FreeDelivery\GenericStrategy
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+
+  izi\prestashop\Shipping\FreeDelivery\MinAmountCalculationStrategyInterface: '@izi\prestashop\Shipping\FreeDelivery\PriceRangeStrategy'
+  izi\prestashop\Shipping\FreeDelivery\PriceRangeStrategy:
+    class: izi\prestashop\Shipping\FreeDelivery\PriceRangeStrategy
+    public: false
+    arguments:
+      - '@izi\prestashop\Shipping\FreeDelivery\GenericStrategy'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
   izi\prestashop\Translation\LegacyTranslator:
     class: izi\prestashop\Translation\LegacyTranslator
