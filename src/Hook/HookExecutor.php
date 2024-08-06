@@ -10,6 +10,10 @@ use Psr\Container\ContainerInterface;
 
 final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInterface
 {
+    private const DEPRECATED_HOOKS = [
+        Common\ActionCartSave::HOOK_NAME,
+    ];
+
     /**
      * @var ContainerInterface
      */
@@ -80,6 +84,10 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
         $hookNames = [];
 
         foreach (self::getSubscribedServices() as $hookName => $serviceName) {
+            if (in_array($hookName, self::DEPRECATED_HOOKS, true)) {
+                continue;
+            }
+
             $class = '?' === $serviceName[0] ? substr($serviceName, 1) : $serviceName;
 
             if (is_subclass_of($class, AliasedHookInterface::class)) {

@@ -22,12 +22,28 @@ class QueryBuilder extends \DbQuery
     private $class;
 
     /**
+     * @var int|null
+     */
+    private $languageId;
+
+    /**
      * @param class-string<T> $class
      */
-    public function __construct(ObjectManagerInterface $manager, string $class)
+    public function __construct(ObjectManagerInterface $manager, string $class, ?int $languageId = null)
     {
         $this->manager = $manager;
         $this->class = $class;
+        $this->languageId = $languageId;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setLanguageId(?int $languageId): self
+    {
+        $this->languageId = $languageId;
+
+        return $this;
     }
 
     /**
@@ -35,6 +51,6 @@ class QueryBuilder extends \DbQuery
      */
     public function build(): Query
     {
-        return new Query($this->manager, $this->class, parent::build());
+        return new Query($this->manager, $this->class, parent::build(), $this->languageId);
     }
 }

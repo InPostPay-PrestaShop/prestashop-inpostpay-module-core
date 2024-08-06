@@ -11,7 +11,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /**
  * "Flips" the default "choices_as_values" option value on Sf 2.8.
  *
- * @interal
+ * @internal
  */
 final class ChoicesAsValuesTypeExtension extends AbstractTypeExtension
 {

@@ -69,3 +69,19 @@ services:
         izi\prestashop\MerchantApi\Command\UpdateBasketCommand: '@izi\prestashop\MerchantApi\Handler\UpdateBasketHandlerInterface'
         izi\prestashop\MerchantApi\Command\UpdateOrderCommand: '@izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface'
         izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand: '@izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface'
+
+  inpost.izi.constraint_validator_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator: '@izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator'
+        izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator: '@izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator'
+        izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator'
+
+  inpost.izi.gui_configuration_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - validator: '@inpost.izi.validator'
+        context: '@inpost.izi.shop_context'
+        izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepositoryInterface'

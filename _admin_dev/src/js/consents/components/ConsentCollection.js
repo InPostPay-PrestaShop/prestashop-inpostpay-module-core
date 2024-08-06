@@ -1,68 +1,34 @@
-class ConsentCollection {
-  #selectors = {
-    itemContainer: '.js-consent-collection-item-container',
-    item: '.js-consent-collection-item',
-    addButton: '.js-add-consent-collection-item',
-    removeButton: '.js-remove-consent-collection-item',
-    errorLimitConsent: '.js-consent-limit'
-  };
-  #nextIndex = 0;
-  #itemContainer;
+import CollectionForm from './../../components/collection-form';
+
+export default class ConsentCollection {
+  /**
+   * @type {CollectionForm}
+   */
+  #collection;
 
   /**
    * @param {HTMLElement} wrapper
    */
   constructor(wrapper) {
     this.wrapper = wrapper;
-    this.#itemContainer = this.wrapper.querySelector(this.#selectors.itemContainer);
-    this.#nextIndex = this.#itemContainer.querySelectorAll(this.#selectors.item).length;
+    this.#collection = new CollectionForm(this.wrapper);
     this.#init();
   }
 
   #init() {
-    this.#validateAddButton();
+    this.wrapper.querySelectorAll(CollectionForm.selector).forEach(this.#createLinksForm);
 
-    this.wrapper
-      .querySelector(this.#selectors.addButton)
-      .addEventListener('click', () => this.#addItem());
+    this.wrapper.addEventListener(CollectionForm.events.entryAdded, (event) => {
+      const wrapper = event.detail.querySelector(CollectionForm.selector);
 
-    this.wrapper
-      .querySelectorAll(this.#selectors.removeButton)
-      .forEach((button) => button.addEventListener('click', (event) => {
-        this.#removeItem(event.target);
-      }));
+      this.#createLinksForm(wrapper);
+    });
   }
 
-  #addItem() {
-    const item = document.createElement('div');
-
-    item.classList.add('js-consent-collection-item');
-    item.innerHTML = this.wrapper
-      .dataset
-      .prototype
-      .replace(/__name__/g, this.#nextIndex++);
-
-    this.#itemContainer.append(item);
-
-    item
-      .querySelector(this.#selectors.removeButton)
-      .addEventListener('click', (event) => {
-        this.#removeItem(event.target);
-      });
-
-    this.#validateAddButton();
-  }
-
-  #removeItem(button) {
-    button.closest(this.#selectors.item).remove();
-    this.#validateAddButton();
-  }
-
-  #validateAddButton() {
-    const isLimitReached = this.#itemContainer.querySelectorAll(this.#selectors.item).length >= 10;
-    document.querySelector(this.#selectors.addButton).disabled = isLimitReached;
-    document.querySelector(this.#selectors.errorLimitConsent).classList.toggle('d-none', !isLimitReached);
+  /**
+   * @param {HTMLElement} wrapper
+   */
+  #createLinksForm(wrapper) {
+    new CollectionForm(wrapper);
   }
 }
-
-export default ConsentCollection;

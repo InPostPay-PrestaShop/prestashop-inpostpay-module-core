@@ -15,6 +15,7 @@ use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\ObjectModel\Repository\CarrierRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
+use izi\prestashop\Shipping\DeliveryPriceCalculatorInterface;
 use izi\prestashop\Translation\ServiceNameTranslator;
 use Psr\Clock\ClockInterface;
 
@@ -41,14 +42,20 @@ class DeliveryFactory
     private $serviceNameTranslator;
 
     /**
+     * @var DeliveryPriceCalculatorInterface
+     */
+    private $priceCalculator;
+
+    /**
      * @param CarrierRepository $carrierRepository
      */
-    public function __construct(ShippingConfigurationInterface $configuration, ObjectRepositoryInterface $carrierRepository, ClockInterface $clock, ServiceNameTranslator $serviceNameTranslator)
+    public function __construct(ShippingConfigurationInterface $configuration, ObjectRepositoryInterface $carrierRepository, ClockInterface $clock, ServiceNameTranslator $serviceNameTranslator, DeliveryPriceCalculatorInterface $priceCalculator)
     {
         $this->configuration = $configuration;
         $this->carrierRepository = $carrierRepository;
         $this->clock = $clock;
         $this->serviceNameTranslator = $serviceNameTranslator;
+        $this->priceCalculator = $priceCalculator;
     }
 
     /**
@@ -75,13 +82,14 @@ class DeliveryFactory
 
             $price = $isFreeShipping
                 ? PriceFactory::create(0., 0.)
-                : $this->getCarrierPrice($cart, (int) $carrier->id);
+                : $this->priceCalculator->getDeliveryPrice($cart, $carrier);
 
             $deliveryOptions[] = new DeliveryOption(
                 $deliveryType,
                 $deliveryDate,
                 $price,
-                $this->getOptionalServices($deliveryType, $cart, $options, $carrier, $isFreeShipping)
+                $this->getOptionalServices($deliveryType, $cart, $options, $carrier, $isFreeShipping),
+                $this->priceCalculator->getFreeDeliveryMinAmount($cart, $carrier)
             );
         }
 
@@ -130,53 +138,18 @@ class DeliveryFactory
 
     private function getServicePrice(ServiceOptions $options, \Cart $cart, \Carrier $carrier, \Carrier $defaultCarrier, bool $isFreeShipping): Price
     {
-        $serviceCost = $this->getServiceAdditionalCost($options, $cart, $carrier);
+        $servicePrice = $this->priceCalculator->getAdditionalServicePrice($cart, $carrier, $options);
 
         if ($isFreeShipping || $carrier === $defaultCarrier) {
-            return $serviceCost;
+            return $servicePrice;
         }
 
-        $carrierPrice = $this->getCarrierPrice($cart, (int) $carrier->id);
-        $defaultCarrierPrice = $this->getCarrierPrice($cart, (int) $defaultCarrier->id);
+        $carrierPrice = $this->priceCalculator->getDeliveryPrice($cart, $carrier);
+        $defaultCarrierPrice = $this->priceCalculator->getDeliveryPrice($cart, $defaultCarrier);
 
-        return $serviceCost
+        return $servicePrice
             ->add($carrierPrice)
             ->sub($defaultCarrierPrice);
-    }
-
-    private function getServiceAdditionalCost(ServiceOptions $options, \Cart $cart, \Carrier $carrier): Price
-    {
-        if (!$carrier->shipping_handling) {
-            return PriceFactory::create(0., 0.);
-        }
-
-        if (0. === $net = $options->getAdditionalCost() ?? 0.) {
-            return PriceFactory::create(0., 0.);
-        }
-
-        $address = $this->getTaxAddress($cart);
-        $gross = $carrier->getTaxCalculator($address)->addTaxes($net);
-
-        return PriceFactory::create($net, $gross);
-    }
-
-    private function getCarrierPrice(\Cart $cart, int $carrierId): Price
-    {
-        $net = $cart->getPackageShippingCost($carrierId, false);
-        $gross = $cart->getPackageShippingCost($carrierId);
-
-        return PriceFactory::create($net, $gross);
-    }
-
-    private function getTaxAddress(\Cart $cart): \Address
-    {
-        if (in_array($type = \Configuration::get('PS_TAX_ADDRESS_TYPE'), ['id_address_delivery', 'id_address_invoice'])) {
-            $addressId = $cart->$type;
-        } else {
-            $addressId = $cart->id_address_delivery;
-        }
-
-        return \Address::initialize($addressId);
     }
 
     private function checkServiceAvailability(ServiceCode $serviceCode, ServiceOptions $options): bool
@@ -230,7 +203,7 @@ class DeliveryFactory
     {
         return $this->clock
             ->now()
-            ->setTimestamp(strtotime('+2 days'))
+            ->modify('+2 days')
             ->setTime(12, 0);
     }
 }

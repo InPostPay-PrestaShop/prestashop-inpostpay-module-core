@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\Collection;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler;
+use izi\prestashop\Validator\Unique;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -16,13 +17,14 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 final class UpdateConsentsConfigurationCommand implements ConsentsConfigurationInterface
 {
+    public const CONSENTS_COUNT_MAX = 10;
+
     /**
      * @var Collection<Consent>
      *
-     * @Assert\Valid()
-     * @Assert\Count(
-     *     max = 10,
-     * )
+     * @Assert\Valid
+     * @Assert\Count(max = UpdateConsentsConfigurationCommand::CONSENTS_COUNT_MAX)
+     * @Unique(normalizer = {Consent::class, "normalize"})
      */
     private $consents;
 

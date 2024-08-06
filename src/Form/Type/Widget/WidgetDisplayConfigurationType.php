@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Form\Type\Widget;
 
+use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
 use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 use izi\prestashop\Translation\LegacyTranslator;
@@ -28,6 +29,7 @@ final class WidgetDisplayConfigurationType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['description'] = $options['description'];
+        $view->vars['binding_place'] = $options['binding_place'];
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -52,10 +54,18 @@ final class WidgetDisplayConfigurationType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            'data_class' => WidgetDisplayConfiguration::class,
-            'description' => '',
-        ]);
+        $resolver
+            ->setRequired('binding_place')
+            ->setDefaults([
+                'data_class' => WidgetDisplayConfiguration::class,
+                'empty_data' => static function (FormInterface $form) {
+                    $bindingPlace = $form->getConfig()->getOption('binding_place');
+
+                    return WidgetDisplayConfiguration::for($bindingPlace);
+                },
+                'description' => '',
+            ])
+            ->setAllowedTypes('binding_place', BindingPlace::class);
 
         $resolver->setAllowedTypes('description', 'string');
     }

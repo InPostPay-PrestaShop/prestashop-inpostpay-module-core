@@ -38,7 +38,7 @@ final class ContainerFactory
      *
      * @param class-string<T> $className
      *
-     * @return T|ContainerBuilder
+     * @return T
      */
     public function create(string $className, iterable $resources): ContainerInterface
     {
@@ -46,16 +46,15 @@ final class ContainerFactory
         $cachePath = sprintf('%s%s.php', $this->cacheDir, $shortName);
         $cache = new ConfigCache($cachePath, _PS_MODE_DEV_);
 
-        if ($cache->isFresh()) {
-            require_once $cachePath;
+        if (!$cache->isFresh()) {
+            $container = $this->buildContainer($resources);
 
-            return new $className();
+            $this->dumpContainer($container, $cache, $namespace, $shortName);
         }
 
-        $container = $this->buildContainer($resources);
-        $this->dumpContainer($container, $cache, $namespace, $shortName);
+        require_once $cachePath;
 
-        return $container;
+        return new $className();
     }
 
     private function resolveClassName(string $className): array

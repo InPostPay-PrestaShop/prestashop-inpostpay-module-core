@@ -176,7 +176,7 @@ class PrestashopOrder
         $delivery->delivery_type = $data && isset($data->delivery->delivery_type) ? $data->delivery->delivery_type : 'COURIER';
         $delivery->delivery_price = $this->getDeliveryPrice();
         $delivery->delivery_date = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
-            ->setTimestamp(strtotime('+2 days'))
+            ->modify('+2 days')
             ->setTime(12, 0)
             ->setTimezone(new \DateTimeZone(BasketAppClientInterface::DATETIME_ZONE))
             ->format(BasketAppClientInterface::DATETIME_FORMAT);
@@ -275,6 +275,7 @@ class PrestashopOrder
 
         $orderDetails->order_comments = $this->readComments();
         $orderDetails->order_id = $this->order->id;
+        $orderDetails->customer_order_id = $this->order->reference;
         $orderDetails->pos_id = $this->getConfiguration('INPOST_PAY_pos_id');
         $orderDetails->order_creation_date = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
             ->setTimezone(new \DateTimeZone(BasketAppClientInterface::DATETIME_ZONE))

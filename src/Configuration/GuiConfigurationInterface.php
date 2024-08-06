@@ -4,19 +4,53 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
-use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
+use izi\prestashop\Common\BindingPlace;
 
+/**
+ * @method static BindingPlace[] getSupportedBindingPlaces()
+ * @method WidgetDisplayConfigurationInterface getDisplayConfiguration(BindingPlace $bindingPlace)
+ */
 interface GuiConfigurationInterface
 {
-    public function getCartWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
+    /**
+     * @deprecated use {@see getDisplayConfiguration()} instead
+     *
+     * @return WidgetDisplayConfigurationInterface
+     */
+    public function getCartWidgetDisplayConfiguration();
 
-    public function getProductWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
+    /**
+     * @deprecated use {@see getDisplayConfiguration()} instead
+     *
+     * @return WidgetDisplayConfigurationInterface
+     */
+    public function getProductWidgetDisplayConfiguration();
 
-    public function getLoginPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
+    /**
+     * @deprecated use {@see getDisplayConfiguration()} instead
+     *
+     * @return WidgetDisplayConfigurationInterface
+     */
+    public function getLoginPageWidgetDisplayConfiguration();
 
-    public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
+    /**
+     * @deprecated use {@see getDisplayConfiguration()} instead
+     *
+     * @return WidgetDisplayConfigurationInterface
+     */
+    public function getRegisterFormPageWidgetDisplayConfiguration();
 
-    public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
+    /**
+     * @deprecated use {@see getDisplayConfiguration()} instead
+     *
+     * @return WidgetDisplayConfigurationInterface
+     */
+    public function getCheckoutPageWidgetDisplayConfiguration();
 
-    public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration;
+    /**
+     * @deprecated use {@see getDisplayConfiguration()} instead
+     *
+     * @return WidgetDisplayConfigurationInterface
+     */
+    public function getMiniCartPageWidgetDisplayConfiguration();
 }

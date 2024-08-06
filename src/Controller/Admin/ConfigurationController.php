@@ -230,27 +230,34 @@ final class ConfigurationController extends AbstractController
         $form = $this->createForm(AdvancedConfigurationType::class, $configuration->copy());
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $command = new UpdateAdvancedConfigurationCommand($form->getData());
+        if (!$form->isSubmitted()) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Malformed request.',
+            ], 400);
+        }
 
-            try {
-                $bus->handle($command);
+        if (!$form->isValid()) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => (string) $form->getErrors(),
+            ], 422);
+        }
 
-                return new JsonResponse([
-                    'success' => true,
-                    'message' => $this->trans('Successful update.', [], 'Admin.Notifications.Success'),
-                ]);
-            } catch (\Exception $e) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => $e->getMessage(),
-                ], 500);
-            }
-        } else {
+        $command = new UpdateAdvancedConfigurationCommand($form->getData());
+
+        try {
+            $bus->handle($command);
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => $this->trans('Successful update.', [], 'Admin.Notifications.Success'),
+            ]);
+        } catch (\Exception $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => $this->trans('Oops... looks like an unexpected error occurred', [], 'Admin.Notifications.Error'),
-            ], 400);
+            ], 500);
         }
     }
 

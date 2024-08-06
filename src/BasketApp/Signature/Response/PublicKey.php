@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\BasketApp\Signature\Response;
 
 use izi\prestashop\Serializer\Normalizer\DenormalizableInterface;
+use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 
 final class PublicKey implements \JsonSerializable, DenormalizableInterface
 {
@@ -32,7 +33,7 @@ final class PublicKey implements \JsonSerializable, DenormalizableInterface
     public static function denormalize(array $data): self
     {
         if (!isset($data['public_key_base64'], $data['version'])) {
-            throw new \DomainException('Array data does not contain all of the required parameters.');
+            throw new UnexpectedValueException('Array data does not contain all of the required parameters.');
         }
 
         $key = new self($data['public_key_base64'], $data['version']);

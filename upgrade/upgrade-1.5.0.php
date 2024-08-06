@@ -5,6 +5,7 @@ use InPost\Izi\Upgrade\ConfigUpdaterTrait;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\Consent;
+use izi\prestashop\Configuration\DTO\ConsentLink;
 use izi\prestashop\Configuration\DTO\HtmlStyles;
 use izi\prestashop\View\Widget\Alignment;
 use izi\prestashop\View\Widget\Configuration as WidgetConfiguration;
@@ -120,16 +121,16 @@ class InPostIziUpdater_1_5_0
 
                     $dateUpdated = DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $data['date_upd']);
 
-                    foreach ($cmsPageIds as $cmsPageId) {
-                        if (0 >= $cmsPageId) {
+                    foreach ($cmsPageIds as $index => $cmsPageId) {
+                        if (0 >= $cmsPageId = (int) $cmsPageId) {
                             continue;
                         }
 
                         $consentsByShopGroup[$shopGroupId][$shopId][] = new Consent(
-                            null,
-                            (int) $cmsPageId,
+                            new ConsentLink((string) $index, $cmsPageId),
                             $descriptions,
                             $requirementType,
+                            [],
                             $dateUpdated
                         );
                     }

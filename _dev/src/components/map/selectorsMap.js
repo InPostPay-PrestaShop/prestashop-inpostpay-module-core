@@ -2,7 +2,8 @@
 const defaultMap = {
   productPageForm: '#add-to-cart-or-refresh',
   inpostIziButton: 'inpost-izi-button',
-  inpostIziProductButtonWrapper: '.js-inpost-izi-product-btn-wrapper'
+  inpostIziProductButtonWrapper: '.js-inpost-izi-product-btn-wrapper',
+  inpostIziAddToCartAlert: '.js-inpost-izi-add-to-cart-alert',
 };
 
 /**

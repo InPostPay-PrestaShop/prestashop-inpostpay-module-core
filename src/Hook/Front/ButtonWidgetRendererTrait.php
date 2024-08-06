@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Common\BindingPlace;
-use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
+use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Configuration\WidgetDisplayConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 trait ButtonWidgetRendererTrait
@@ -40,24 +41,24 @@ trait ButtonWidgetRendererTrait
         $configuration = $this->getConfigurationForBinding($bindingPlace);
         $styles = $configuration->getHtmlStyles();
 
-        return iterator_to_array($styles);
+        if ($styles instanceof \Traversable) {
+            $styles = iterator_to_array($styles);
+        }
+
+        return $styles;
     }
 
-    private function getConfigurationForBinding(BindingPlace $bindingPlace): WidgetDisplayConfiguration
+    private function getConfigurationForBinding(BindingPlace $bindingPlace): WidgetDisplayConfigurationInterface
     {
         switch ($bindingPlace) {
             case BindingPlace::BasketSummary():
-                return $this->configuration->getCartWidgetDisplayConfiguration();
             case BindingPlace::LoginPage():
-                return $this->configuration->getLoginPageWidgetDisplayConfiguration();
             case BindingPlace::RegisterFormPage():
-                return $this->configuration->getRegisterFormPageWidgetDisplayConfiguration();
             case BindingPlace::CheckoutPage():
-                return $this->configuration->getCheckoutPageWidgetDisplayConfiguration();
             case BindingPlace::MiniCartPage():
-                return $this->configuration->getMiniCartPageWidgetDisplayConfiguration();
+                return GuiConfiguration::getDisplayConfig($this->configuration, $bindingPlace);
             default:
-                throw new \InvalidArgumentException(sprintf('Unknown binding place "%s".', $bindingPlace->value));
+                throw new \DomainException(sprintf('Unsupported binding place "%s".', $bindingPlace->value));
         }
     }
 }

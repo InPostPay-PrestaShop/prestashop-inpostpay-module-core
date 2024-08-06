@@ -1,8 +1,8 @@
 <?php
 
+use InPost\Izi\Upgrade\AssetsRemoverTrait;
 use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
-use Symfony\Component\Filesystem\Filesystem;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -10,15 +10,17 @@ if (!defined('_PS_VERSION_')) {
 
 require_once __DIR__ . '/CacheClearer.php';
 require_once __DIR__ . '/ConfigUpdaterTrait.php';
+require_once __DIR__ . '/AssetsRemoverTrait.php';
 
 class InPostIziUpdater_1_7_0
 {
     use ConfigUpdaterTrait;
+    use AssetsRemoverTrait;
 
-    /**
-     * @var Module
-     */
-    private $module;
+    private const STALE_ASSETS = [
+        'js/prestashopizi.f8bd8f9189c554596cce.js',
+        'js/prestashopizi.f8bd8f9189c554596cce.js.map',
+    ];
 
     public function __construct(Db $db, Module $module)
     {
@@ -31,7 +33,7 @@ class InPostIziUpdater_1_7_0
         CacheClearer::getInstance()->clear();
 
         return $this->fixAvailablePaymentOptionsConfig()
-            && $this->removeStaleAssets();
+            && $this->removeStaleAssets(self::STALE_ASSETS);
     }
 
     private function fixAvailablePaymentOptionsConfig(): bool
@@ -67,21 +69,6 @@ class InPostIziUpdater_1_7_0
         }
 
         return $configs;
-    }
-
-    private function removeStaleAssets(): bool
-    {
-        $basePath = sprintf('%s/views', rtrim($this->module->getLocalPath(), '/'));
-        $files = array_map(static function (string $file) use ($basePath): string {
-            return sprintf('%s/%s', $basePath, $file);
-        }, [
-            'js/prestashopizi.f8bd8f9189c554596cce.js',
-            'js/prestashopizi.f8bd8f9189c554596cce.js.map',
-        ]);
-
-        (new Filesystem())->remove($files);
-
-        return true;
     }
 }
 
