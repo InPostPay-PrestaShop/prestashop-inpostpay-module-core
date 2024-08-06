@@ -161,7 +161,7 @@ final class WidgetController
             $result = $this->bus->handle($command);
 
             return new JsonResponse([
-                'content' => $result->getContent()
+                'content' => $result->getContent(),
             ]);
         } catch (\Exception $e) {
             return $this->handleException($e);
