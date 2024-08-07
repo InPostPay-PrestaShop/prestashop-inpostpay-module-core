@@ -275,6 +275,7 @@ class PrestashopOrder
 
         $orderDetails->order_comments = $this->readComments();
         $orderDetails->order_id = $this->order->id;
+        $orderDetails->customer_order_id = $this->order->reference;
         $orderDetails->pos_id = $this->getConfiguration('INPOST_PAY_pos_id');
         $orderDetails->order_creation_date = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
             ->setTimezone(new \DateTimeZone(BasketAppClientInterface::DATETIME_ZONE))

@@ -16,4 +16,5 @@ class OrderDetails extends \izi\Item
     protected $order_discount;
     protected $currency;
     protected $delivery_references_list;
+    protected $customer_order_id;
 }
