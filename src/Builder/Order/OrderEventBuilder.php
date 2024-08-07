@@ -46,17 +46,11 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
      */
     private $trackingNumbers;
 
-    /**
-     * @var string|null
-     */
-    private $customerOrderId;
-
     public function __construct(\Order $order, ClockInterface $clock, OrderStatusDescriptionProvider $orderStatusDescriptionProvider)
     {
         $this->order = $order;
         $this->clock = $clock;
         $this->statusDescriptionProvider = $orderStatusDescriptionProvider;
-        $this->customerOrderId = $order->reference;
     }
 
     /**
@@ -99,20 +93,13 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
         return $this;
     }
 
-    public function setCustomerOrderId(?string $customerOrderId): OrderEventBuilderInterface
-    {
-        $this->customerOrderId = $customerOrderId;
-
-        return $this;
-    }
-
     public function build(): OrderEvent
     {
         $eventData = $this->createEventData();
         $eventTime = $this->getEventTime();
         $eventId = $this->getEventId($eventTime);
 
-        return new OrderEvent($eventId, $eventTime, $eventData, null, $this->customerOrderId);
+        return new OrderEvent($eventId, $eventTime, $eventData);
     }
 
     private function getEventId(\DateTimeImmutable $eventTime): string
