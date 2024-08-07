@@ -96,6 +96,7 @@ export default class CollectionForm {
 
     this.wrapper.dispatchEvent(new CustomEvent(CollectionForm.events.entryAdded, {
       detail: entry,
+      bubbles: true,
     }));
   }
 
