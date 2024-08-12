@@ -81,7 +81,9 @@ final class DeliveryPriceCalculator implements DeliveryPriceCalculatorInterface
             return $amount;
         }
 
-        return $this->priceConverter->convertByIds($amount, (int) $cart->id_currency);
+        $amount = $this->priceConverter->convertByIds($amount, (int) $cart->id_currency);
+
+        return \Tools::ps_round($amount, 2);
     }
 
     private function applyTaxes(\Cart $cart, \Carrier $carrier, float $netAmount): float

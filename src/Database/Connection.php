@@ -56,7 +56,7 @@ class Connection
             $this->db->execute($sql);
         });
 
-        return $this->db->numRows();
+        return (int) $this->db->numRows();
     }
 
     public function fetchAllAssociative(string $sql): array

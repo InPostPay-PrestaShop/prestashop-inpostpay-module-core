@@ -63,7 +63,7 @@ final class DatabaseInstaller
         }
 
         usort($migrations, static function (DatabaseMigrationInterface $m1, DatabaseMigrationInterface $m2): int {
-            return \Tools::version_compare($m1->getVersion(), $m2->getVersion(), null);
+            return version_compare($m1->getVersion(), $m2->getVersion());
         });
 
         return $migrations;
