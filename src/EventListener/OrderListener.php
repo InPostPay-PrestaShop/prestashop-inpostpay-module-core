@@ -6,6 +6,7 @@ namespace izi\prestashop\EventListener;
 
 use izi\prestashop\Command\UpdateOrderStatusCommand;
 use izi\prestashop\CommandBusInterface;
+use izi\prestashop\Common\Order\MerchantOrderStatus;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Event\OrderStatusUpdatedEvent;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
@@ -67,7 +68,7 @@ final class OrderListener implements EventSubscriberInterface
         }
 
         $eventTime = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $order->date_upd);
-        $command = new UpdateOrderStatusCommand((string) $event->getOrderId(), $eventTime);
+        $command = new UpdateOrderStatusCommand((string) $event->getOrderId(), $eventTime, $this->getMerchantOrderStatus($order, $event->getNewOrderStatus()));
 
         try {
             $this->bus->handle($command);
@@ -78,5 +79,14 @@ final class OrderListener implements EventSubscriberInterface
                 'orderStatusId' => (int) $event->getNewOrderStatus()->id,
             ]);
         }
+    }
+
+    private function getMerchantOrderStatus(\Order $order, \OrderState $orderState): ?MerchantOrderStatus
+    {
+        if (empty(\OrderPayment::getByOrderReference($order->reference)) && $orderState->id === (int) \Configuration::get('PS_OS_CANCELED')) {
+            return MerchantOrderStatus::OrderRejected();
+        }
+
+        return null;
     }
 }
