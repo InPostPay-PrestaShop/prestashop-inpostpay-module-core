@@ -6,6 +6,7 @@ namespace izi\prestashop\Shipping;
 
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Price;
+use izi\prestashop\Common\PriceAmount;
 use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Currency\PriceConverterInterface;
@@ -73,17 +74,17 @@ final class DeliveryPriceCalculator implements DeliveryPriceCalculatorInterface
         return PriceFactory::create($netAmount, $grossAmount);
     }
 
-    public function getFreeDeliveryMinAmount(\Cart $cart, \Carrier $carrier): ?float
+    public function getFreeDeliveryMinAmount(\Cart $cart, \Carrier $carrier): ?PriceAmount
     {
         $amount = $this->freeDeliveryStrategy->getMinAmount($cart, $carrier);
 
         if (null === $amount || 0. === $amount) {
-            return $amount;
+            return null;
         }
 
         $amount = $this->priceConverter->convertByIds($amount, (int) $cart->id_currency);
 
-        return \Tools::ps_round($amount, 2);
+        return new PriceAmount(\Tools::ps_round($amount, 2));
     }
 
     private function applyTaxes(\Cart $cart, \Carrier $carrier, float $netAmount): float
