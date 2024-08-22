@@ -7,6 +7,7 @@ namespace izi\prestashop\Serializer;
 use izi\prestashop\Serializer\Normalizer\CustomDenormalizer;
 use izi\prestashop\Serializer\Normalizer\DateTimeNormalizer as DateTimeNormalizerPolyfill;
 use izi\prestashop\Serializer\Normalizer\EnumDenormalizer;
+use izi\prestashop\Serializer\Normalizer\PriceAmountNormalizer;
 use izi\prestashop\Serializer\Normalizer\JsonSerializableNormalizer as JsonSerializableNormalizerPolyfill;
 use izi\prestashop\Serializer\Normalizer\ObjectNormalizer as CustomObjectNormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceNormalizer;
@@ -39,6 +40,7 @@ final class SerializerFactory
     {
         return [
             new PriceNormalizer(),
+            new PriceAmountNormalizer(),
             new EnumDenormalizer(),
             new CustomDenormalizer(),
             new CustomNormalizer(),

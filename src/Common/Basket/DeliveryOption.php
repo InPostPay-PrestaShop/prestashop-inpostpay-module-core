@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Common\Basket;
 
 use izi\prestashop\Common\Delivery\DeliveryType;
+use izi\prestashop\Common\PriceAmount;
 use izi\prestashop\Common\Price;
 
 final class DeliveryOption implements \JsonSerializable
@@ -30,14 +31,14 @@ final class DeliveryOption implements \JsonSerializable
     private $delivery_options;
 
     /**
-     * @var float|null
+     * @var PriceAmount|null
      */
     private $free_delivery_minimum_gross_price;
 
     /**
      * @param OptionalService[] $delivery_options
      */
-    public function __construct(DeliveryType $delivery_type, \DateTimeImmutable $delivery_date, Price $delivery_price, array $delivery_options = [], ?float $free_delivery_minimum_gross_price = null)
+    public function __construct(DeliveryType $delivery_type, \DateTimeImmutable $delivery_date, Price $delivery_price, array $delivery_options = [], ?PriceAmount $free_delivery_minimum_gross_price = null)
     {
         $this->delivery_type = $delivery_type;
         $this->delivery_date = $delivery_date;
@@ -69,7 +70,7 @@ final class DeliveryOption implements \JsonSerializable
         return $this->delivery_options;
     }
 
-    public function getFreeDeliveryMinimumGrossPrice(): ?float
+    public function getFreeDeliveryMinimumGrossPrice(): ?PriceAmount
     {
         return $this->free_delivery_minimum_gross_price;
     }
