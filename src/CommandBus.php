@@ -19,6 +19,7 @@ use izi\prestashop\Command\GetOrderEventsCommand;
 use izi\prestashop\Command\GetProductWidgetCommand;
 use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\Command\UpdateBasketCommand;
+use izi\prestashop\Command\UpdateOrderAddressDeliveryCommand;
 use izi\prestashop\Command\UpdateOrderStatusCommand;
 use izi\prestashop\Command\UpdateOrderTrackingNumbersCommand;
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
@@ -37,6 +38,7 @@ use izi\prestashop\Handler\GetOrderEventsHandlerInterface;
 use izi\prestashop\Handler\GetProductWidgetHandlerInterface;
 use izi\prestashop\Handler\UnbindBasketHandlerInterface;
 use izi\prestashop\Handler\UpdateBasketHandlerInterface;
+use izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderStatusHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface;
 use izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand;
@@ -67,6 +69,7 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
     {
         return [
             UpdateOrderStatusCommand::class => UpdateOrderStatusHandlerInterface::class,
+            UpdateOrderAddressDeliveryCommand::class => UpdateOrderAddressDeliveryHandlerInterface::class,
             UpdateOrderTrackingNumbersCommand::class => UpdateOrderTrackingNumbersHandlerInterface::class,
             UpdateBasketCommand::class => UpdateBasketHandlerInterface::class,
             UnbindBasketCommand::class => UnbindBasketHandlerInterface::class,

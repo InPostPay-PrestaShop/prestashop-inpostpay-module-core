@@ -100,6 +100,10 @@ services:
   izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
   izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
 
+  izi\prestashop\Order\Address\AddressDataMapper:
+    class: izi\prestashop\Order\Address\AddressDataMapper
+    public: false
+
   izi\prestashop\Configuration\Adapter\Configuration:
     class: izi\prestashop\Configuration\Adapter\Configuration
     public: false
@@ -255,6 +259,19 @@ services:
       - '@izi\prestashop\Builder\Order\OrderEventBuilderFactory'
       - '@izi\prestashop\BasketApp\Order\OrdersApiClientInterface'
       - '@inpost.izi.general_logger'
+
+  izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface: '@izi\prestashop\Handler\UpdateOrderAddressDeliveryHandler'
+  izi\prestashop\Handler\UpdateOrderAddressDeliveryHandler:
+    class: izi\prestashop\Handler\UpdateOrderAddressDeliveryHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\Builder\Order\OrderEventBuilderFactory'
+      - '@izi\prestashop\BasketApp\Order\OrdersApiClientInterface'
+      - '@izi\prestashop\Order\Address\AddressDataMapper'
+      - '@izi\prestashop\ObjectModel\ObjectManager'
 
   izi\prestashop\Handler\GetClientDetailsHandlerInterface: '@izi\prestashop\Handler\GetClientDetailsHandler'
   izi\prestashop\Handler\GetClientDetailsHandler:
@@ -534,6 +551,22 @@ services:
       - '@inpost.izi.module'
       - '@inpost.izi.context'
       - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore:
+      class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore
+      public: false
+      tags:
+          - { name: inpost.izi.hook }
+      arguments:
+          - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter:
+      class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter
+      public: false
+      tags:
+          - { name: inpost.izi.hook }
+      arguments:
+          - '@izi\prestashop\Event\EventDispatcherInterface'
 
   izi\prestashop\EventListener\ShipmentListener:
     class: izi\prestashop\EventListener\ShipmentListener
