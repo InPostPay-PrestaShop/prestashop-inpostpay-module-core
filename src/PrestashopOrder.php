@@ -7,6 +7,7 @@ use izi\item\order\OrderQuantity;
 use izi\item\ProductAttribute;
 use izi\prestashop\BasketApp\BasketAppClientInterface;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
+use izi\prestashop\Order\Address\AddressDataMapper;
 use izi\prestashop\Common\Product\ProductImage;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
@@ -46,6 +47,11 @@ class PrestashopOrder
      */
     private $productConfiguration;
 
+    /**
+     * @var AddressDataMapper
+     */
+    private $addressDataMapper;
+
     public function __construct(\Order $order, string $basketId)
     {
         $this->order = $order;
@@ -58,6 +64,7 @@ class PrestashopOrder
         $this->productConfiguration = $this->module->get(ProductConfigurationInterface::class);
 
         $this->imageRetriever = new ImageRetriever(\Context::getContext()->link);
+        $this->addressDataMapper = new AddressDataMapper();
     }
 
     public static function getOrder(\Order $order, string $basketId): \izi\item\order\Order
@@ -182,8 +189,9 @@ class PrestashopOrder
             ->format(BasketAppClientInterface::DATETIME_FORMAT);
 
         $delivery->mail = $this->order->getCustomer()->email;
-        $delivery->phone_number = $this->mapPhone();
-        $delivery->delivery_address = $this->mapDeliveryAddress();
+
+        $delivery->phone_number = $this->addressDataMapper->mapPhoneNumber($this->deliveryDetails);
+        $delivery->delivery_address = $this->addressDataMapper->mapDeliveryAddress($this->deliveryDetails);
 
         $delivery->courier_note = $this->readComments();
 
@@ -197,23 +205,6 @@ class PrestashopOrder
 
     public function mapDeliveryAddress()
     {
-        if ($data = $this->getOrderData()) {
-            if (isset($data->delivery, $data->delivery->delivery_address)) {
-                return $data->delivery->delivery_address;
-            }
-
-            if (isset($data->account_info)) {
-                $deliveryAddress = new \izi\item\order\DeliveryAddress();
-                $deliveryAddress->name = $data->account_info->name . ' ' . $data->account_info->surname;
-                $deliveryAddress->country_code = $data->account_info->client_address->country_code;
-                $deliveryAddress->address = $data->account_info->client_address->address;
-                $deliveryAddress->city = $data->account_info->client_address->city;
-                $deliveryAddress->postal_code = $data->account_info->client_address->postal_code;
-
-                return $deliveryAddress;
-            }
-        }
-
         $deliveryAddress = new \izi\item\order\DeliveryAddress();
 
         $deliveryAddress->name = $this->customer->firstname . ' ' . $this->customer->lastname;

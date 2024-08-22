@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Builder\Order;
 
+use izi\prestashop\BasketApp\Order\Request\Delivery;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
 use izi\prestashop\Common\Order\MerchantOrderStatus;
 
@@ -32,4 +33,11 @@ interface OrderEventBuilderInterface
      * @return static
      */
     public function setTrackingNumbers(?array $numbers): self;
+
+    /**
+     * @param Delivery|null $delivery
+     *
+     * @return static
+     */
+    public function setDeliveryData(?Delivery $delivery): self;
 }

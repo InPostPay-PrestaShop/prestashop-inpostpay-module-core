@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Builder\Order;
 
+use izi\prestashop\BasketApp\Order\Request\Delivery;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
 use izi\prestashop\Common\Order\MerchantOrderStatus;
 use izi\prestashop\Common\Order\MerchantOrderStatusData;
@@ -45,6 +46,16 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
      * @var string[]|null
      */
     private $trackingNumbers;
+
+    /**
+     * @var string|null
+     */
+    private $customerOrderId;
+
+    /**
+     * @var Delivery|null
+     */
+    private $delivery;
 
     public function __construct(\Order $order, ClockInterface $clock, OrderStatusDescriptionProvider $orderStatusDescriptionProvider)
     {
@@ -93,13 +104,37 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
         return $this;
     }
 
+    public function setCustomerOrderId(?string $customerOrderId): OrderEventBuilderInterface
+    {
+        $this->customerOrderId = $customerOrderId;
+
+        return $this;
+    }
+
+    /**
+     * @return static
+     */
+    public function setDeliveryData(?Delivery $delivery): OrderEventBuilderInterface
+    {
+        $this->delivery = $delivery;
+
+        return $this;
+    }
+
     public function build(): OrderEvent
     {
         $eventData = $this->createEventData();
         $eventTime = $this->getEventTime();
         $eventId = $this->getEventId($eventTime);
 
-        return new OrderEvent($eventId, $eventTime, $eventData);
+        return new OrderEvent(
+            $eventId,
+            $eventTime,
+            $eventData,
+            null,
+            $this->customerOrderId,
+            $this->delivery
+        );
     }
 
     private function getEventId(\DateTimeImmutable $eventTime): string

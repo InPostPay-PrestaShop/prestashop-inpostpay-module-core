@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace izi\prestashop\Common\Order;
+namespace izi\prestashop\MerchantApi\Model\Order\Request;
 
 final class DeliveryAddress implements \JsonSerializable
 {
     /**
-     * @var string|null
+     * @var string
      */
     private $name;
 
     /**
-     * @var string|null
+     * @var string
      */
     private $country_code;
 
@@ -31,22 +31,27 @@ final class DeliveryAddress implements \JsonSerializable
      */
     private $postal_code;
 
+    /**
+     * @var AddressDetails|null
+     */
+    private $address_details;
 
-    public function __construct(string $address, string $city, string $postal_code, ?string $name = null, ?string $country_code = null)
+    public function __construct(string $name, string $country_code, string $address, string $city, string $postal_code, ?AddressDetails $address_details = null)
     {
         $this->name = $name;
         $this->country_code = $country_code;
         $this->address = $address;
         $this->city = $city;
         $this->postal_code = $postal_code;
+        $this->address_details = $address_details;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function getCountryCode(): ?string
+    public function getCountryCode(): string
     {
         return $this->country_code;
     }
@@ -64,6 +69,11 @@ final class DeliveryAddress implements \JsonSerializable
     public function getPostalCode(): string
     {
         return $this->postal_code;
+    }
+
+    public function getAddressDetails(): ?AddressDetails
+    {
+        return $this->address_details;
     }
 
     public function jsonSerialize(): array

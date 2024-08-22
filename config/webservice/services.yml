@@ -15,6 +15,7 @@ services:
         izi\prestashop\Command\UpdateOrderStatusCommand: '@izi\prestashop\Handler\UpdateOrderStatusHandlerInterface'
         izi\prestashop\Command\UpdateBasketCommand: '@izi\prestashop\Handler\UpdateBasketHandlerInterface'
         izi\prestashop\Command\UnbindBasketCommand: '@izi\prestashop\Handler\UnbindBasketHandlerInterface'
+        izi\prestashop\Command\UpdateOrderAddressDeliveryCommand: '@izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface'
 
   inpost.izi.hook_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
@@ -27,3 +28,6 @@ services:
         actionObjectInPostShipmentModelUpdateAfter: '@izi\prestashop\Hook\Common\ActionShipmentUpdateAfter'
         actionValidateOrder: '@izi\prestashop\Hook\Common\ActionValidateOrder'
         actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'
+        actionObjectOrderUpdateBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore'
+        actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
+
