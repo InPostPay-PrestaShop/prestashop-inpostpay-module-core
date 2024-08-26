@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Model\Order\Request;
 
-use izi\prestashop\Common\Order\DeliveryAddress;
+use izi\prestashop\MerchantApi\Model\Order\Request\DeliveryAddress;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\PhoneNumber;
