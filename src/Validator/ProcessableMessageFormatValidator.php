@@ -16,7 +16,7 @@ use izi\prestashop\Common\Price;
 use izi\prestashop\MerchantApi\Model\Order\Request\AccountInfo;
 use izi\prestashop\MerchantApi\Model\Order\Request\ClientAddress;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
-use izi\prestashop\MerchantApi\Model\Order\Request\DeliveryAddress;
+use izi\prestashop\Common\Order\DeliveryAddress;
 use izi\prestashop\MerchantApi\Model\Order\Request\OrderDetails;
 use izi\prestashop\Order\Message\MessageFormatterInterface;
 use izi\prestashop\Translation\LegacyTranslator;
