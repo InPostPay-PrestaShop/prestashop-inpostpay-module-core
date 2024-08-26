@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Validator;
 
+use izi\item\order\DeliveryAddress;
 use izi\prestashop\Common\Currency;
 use izi\prestashop\Common\Customer\InvoiceDetails;
 use izi\prestashop\Common\Customer\LegalForm;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Order\Consent;
 use izi\prestashop\MerchantApi\Model\Order\Request\Delivery;
-use izi\prestashop\MerchantApi\Model\Order\Request\DeliveryAddress;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Common\Price;
@@ -92,7 +92,14 @@ final class ProcessableMessageFormatValidator extends ConstraintValidator
         );
 
         $deliveryType = DeliveryType::Courier();
-        $deliveryAddress = new DeliveryAddress('full name', 'PL', 'address', 'city', '12-123');
+
+        $deliveryAddress = new DeliveryAddress();
+
+        $deliveryAddress->name = 'full name';
+        $deliveryAddress->country_code = 'PL';
+        $deliveryAddress->address = 'address';
+        $deliveryAddress->city = 'city';
+        $deliveryAddress->postal_code = '12-123';
 
         yield new CreateOrderRequest(
             $orderDetails,
