@@ -39,18 +39,25 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
      */
     private $deliveryFactory;
 
+    /**
+     * @var DeliveryRelatedProductFactory
+     */
+    private $deliveryRelatedProductFactory;
+
     public function __construct(
         ClockInterface $clock,
         ContextManager $contextManager,
         ConsentsConfigurationInterface $consentsConfiguration,
         ProductConfigurationInterface $productConfiguration,
-        DeliveryFactory $deliveryFactory
+        DeliveryFactory $deliveryFactory,
+        DeliveryRelatedProductFactory $deliveryRelatedProductFactory
     ) {
         $this->clock = $clock;
         $this->contextManager = $contextManager;
         $this->consentsConfiguration = $consentsConfiguration;
         $this->productConfiguration = $productConfiguration;
         $this->deliveryFactory = $deliveryFactory;
+        $this->deliveryRelatedProductFactory = $deliveryRelatedProductFactory;
     }
 
     public function createRequestBuilder(BasketInterface $basket): RequestBuilder
@@ -62,7 +69,8 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
             $this->contextManager,
             $this->consentsConfiguration,
             $this->productConfiguration,
-            $this->deliveryFactory
+            $this->deliveryFactory,
+            $this->deliveryRelatedProductFactory
         );
 
         return $builder->setExpirationDate($this->getExpirationDate());
@@ -77,7 +85,8 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
             $this->contextManager,
             $this->consentsConfiguration,
             $this->productConfiguration,
-            $this->deliveryFactory
+            $this->deliveryFactory,
+            $this->deliveryRelatedProductFactory
         );
 
         return $builder->setExpirationDate($this->getExpirationDate());
