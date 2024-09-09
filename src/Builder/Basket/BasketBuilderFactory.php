@@ -40,7 +40,7 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
     private $deliveryFactory;
 
     /**
-     * @var DeliveryRelatedProductFactory
+     * @var ProductDeliveryFactory
      */
     private $deliveryRelatedProductFactory;
 
@@ -50,7 +50,7 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
         ConsentsConfigurationInterface $consentsConfiguration,
         ProductConfigurationInterface $productConfiguration,
         DeliveryFactory $deliveryFactory,
-        DeliveryRelatedProductFactory $deliveryRelatedProductFactory
+        ProductDeliveryFactory $deliveryRelatedProductFactory
     ) {
         $this->clock = $clock;
         $this->contextManager = $contextManager;

@@ -7,18 +7,21 @@ namespace izi\prestashop\Builder\Basket;
 use izi\prestashop\Common\Basket\DeliveryOption;
 use izi\prestashop\Common\Basket\Quantity;
 use izi\prestashop\Common\Basket\Summary;
+use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Dimensions;
 use izi\prestashop\Common\Price;
+use izi\prestashop\Common\Product\DeliveryProduct;
 use izi\prestashop\Common\Product\DeliveryRelatedProducts;
 use izi\prestashop\Common\Weight;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
+use izi\prestashop\ObjectModel\Repository\CarrierRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\Shipping\CartTotal\CartTotalDeliveryStrategyInterface;
 use izi\prestashop\Shipping\CartWeight\CartWeightDeliveryStrategyInterface;
 use izi\prestashop\Shipping\ProductDimensions\ProductDimensionsDeliveryStrategyInterface;
 use izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDeliveryInterface;
 
-class DeliveryRelatedProductFactory
+class ProductDeliveryFactory
 {
     private $cartBaseWeight = [];
 
@@ -52,6 +55,9 @@ class DeliveryRelatedProductFactory
      */
     private $productRestrictionDelivery;
 
+    /**
+     * @param CarrierRepository $carrierRepository
+     */
     public function __construct(
         ShippingConfigurationInterface $configuration,
         ObjectRepositoryInterface $carrierRepository,
@@ -68,22 +74,37 @@ class DeliveryRelatedProductFactory
         $this->productRestrictionDelivery = $productRestrictionDelivery;
     }
 
-    public function getDeliveryRelatedProducts(
+    public function createForCartProduct(
+        DeliveryType $deliveryType,
+        \Cart $cart,
+        \Product $product,
+        Price $unitPrice,
+        float $weight,
+        Quantity $quantity
+    ): DeliveryProduct {
+        $totalPrice = $unitPrice->multiply($quantity->getQuantity());
+        $totalWeight = (new Weight($weight))->multiply($quantity->getQuantity());
+        $isDeliveryOptionAvailable = $this->isDeliveryOptionAvailable($product, $deliveryType, $totalPrice, $totalWeight, $cart);
+
+        return new DeliveryProduct($deliveryType, $isDeliveryOptionAvailable);
+    }
+
+    public function createForRelatedProduct(
         DeliveryOption $deliveryOption,
         Summary $summary,
         \Cart $cart,
         \Product $product,
         Price $productPrice,
         Quantity $quantity
-    ): DeliveryRelatedProducts
-    {
+    ): DeliveryRelatedProducts {
+        $deliveryType = $deliveryOption->getType();
         $basketNewPrice = $this->getCartTotalWithNewProduct($productPrice, $quantity, $this->getCartBasePrice($summary));
         $basketNewWeight = $this->getCartWeightWithNewProduct($product, $quantity, $cart);
-        $isDeliveryOptionAvailable = $this->isDeliveryOptionAvailable($product, $deliveryOption, $basketNewPrice, $basketNewWeight, $cart);
-        $isFreeDelivery = $isDeliveryOptionAvailable ? $this->isFreeDelivery($deliveryOption, $basketNewPrice) : false; // if delivery option is not available, free delivery is not possible
+        $isDeliveryOptionAvailable = $this->isDeliveryOptionAvailable($product, $deliveryType, $basketNewPrice, $basketNewWeight, $cart);
+        $isFreeDelivery = $isDeliveryOptionAvailable && $this->isFreeDelivery($deliveryOption, $basketNewPrice); // if delivery option is not available, free delivery is not possible
 
         return new DeliveryRelatedProducts(
-            $deliveryOption->getType(),
+            $deliveryType,
             $isDeliveryOptionAvailable,
             $isFreeDelivery
         );
@@ -91,13 +112,12 @@ class DeliveryRelatedProductFactory
 
     private function isDeliveryOptionAvailable(
         \Product $product,
-        DeliveryOption $deliveryOption,
+        DeliveryType $deliveryType,
         Price $basketNewPrice,
         Weight $basketNewWeight,
         \Cart $cart
-    ): bool
-    {
-        $options = $this->configuration->getShippingOptions($deliveryOption->getType(), (int) $cart->id_shop);
+    ): bool {
+        $options = $this->configuration->getShippingOptions($deliveryType, (int) $cart->id_shop);
         $referenceId = $options->getCarrierMapping()->getReferenceId();
 
         if (null === $referenceId || null === $carrier = $this->carrierRepository->findOneByReferenceId($referenceId)) {
@@ -138,11 +158,11 @@ class DeliveryRelatedProductFactory
     private function getCartWeightWithNewProduct(\Product $product, Quantity $quantity, \Cart $cart): Weight
     {
         $productWeight = new Weight((float) $product->weight);
-        $defaultAttribute = \Product::getDefaultAttribute($product->id);
+        $defaultCombinationId = (int) \Product::getDefaultAttribute($product->id);
         $cartWeight = $this->getCartBaseWeight($cart);
 
-        if (0 < $defaultAttribute) {
-            $combination = new \Combination($defaultAttribute);
+        if (0 < $defaultCombinationId) {
+            $combination = new \Combination($defaultCombinationId);
             $productWeight = $productWeight->add(new Weight((float) $combination->weight));
         }
 
@@ -163,5 +183,3 @@ class DeliveryRelatedProductFactory
         return $this->cartBaseWeight[$cart->id];
     }
 }
-
-

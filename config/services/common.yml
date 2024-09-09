@@ -660,7 +660,7 @@ services:
       - '@izi\prestashop\Configuration\ConsentsConfiguration'
       - '@izi\prestashop\Configuration\ProductConfiguration'
       - '@izi\prestashop\Builder\Basket\DeliveryFactory'
-      - '@izi\prestashop\Builder\Basket\DeliveryRelatedProductFactory'
+      - '@izi\prestashop\Builder\Basket\ProductDeliveryFactory'
 
   izi\prestashop\Cache\ConfigurationCache:
     class: izi\prestashop\Cache\ConfigurationCache
@@ -690,8 +690,8 @@ services:
       - '@izi\prestashop\Translation\ServiceNameTranslator'
       - '@izi\prestashop\Shipping\DeliveryPriceCalculator'
 
-  izi\prestashop\Builder\Basket\DeliveryRelatedProductFactory:
-    class: izi\prestashop\Builder\Basket\DeliveryRelatedProductFactory
+  izi\prestashop\Builder\Basket\ProductDeliveryFactory:
+    class: izi\prestashop\Builder\Basket\ProductDeliveryFactory
     public: false
     arguments:
       - '@izi\prestashop\Configuration\ShippingConfigurationInterface'
@@ -764,13 +764,7 @@ services:
     class: izi\prestashop\Shipping\ProductDimensions\GenericStrategy
     public: false
 
-  izi\prestashop\Shipping\ProductDimensions\ProductDimensionsStrategy:
-    class: izi\prestashop\Shipping\ProductDimensions\ProductDimensionsStrategy
-    public: false
-    arguments:
-      - '@izi\prestashop\Shipping\ProductDimensions\GenericStrategy'
-
-  izi\prestashop\Shipping\ProductDimensions\ProductDimensionsDeliveryStrategyInterface: '@izi\prestashop\Shipping\ProductDimensions\ProductDimensionsStrategy'
+  izi\prestashop\Shipping\ProductDimensions\ProductDimensionsDeliveryStrategyInterface: '@izi\prestashop\Shipping\ProductDimensions\GenericStrategy'
 
   izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery:
     class: izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery

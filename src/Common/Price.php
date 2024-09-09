@@ -66,7 +66,10 @@ final class Price implements \JsonSerializable
         );
     }
 
-    public function multiply(float $multiplier): self
+    /**
+     * @param float|int $multiplier
+     */
+    public function multiply($multiplier): self
     {
         return new self(
             $this->net * $multiplier,

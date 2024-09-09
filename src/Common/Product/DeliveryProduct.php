@@ -29,7 +29,7 @@ final class DeliveryProduct implements \JsonSerializable
         return $this->delivery_type;
     }
 
-    public function getDeliveryAvailable(): bool
+    public function isDeliveryAvailable(): bool
     {
         return $this->if_delivery_available;
     }
