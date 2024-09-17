@@ -7,6 +7,7 @@ import bindIziButtonEvents from "../components/events/bindIziButtonEvents";
 import initGetOrderCompleteIfCartBound from "../components/handler/initGetOrderCompleteIfCartBound";
 import refreshProductButtonHandler from "../components/handler/refreshProductButtonHandler";
 import selectorsMap from "../components/map/selectorsMap";
+import eventSourceCleanupHandler from "../components/handler/eventSourceCleanupHandler";
 
 const mainController = () => {
   const attachEvents = () => {
@@ -14,6 +15,7 @@ const mainController = () => {
     prestashop.on('updatedCart', updatedCartHandler);
     prestashop.on('updatedProduct', updatedProductHandler);
     document.addEventListener('iziModalEventClose', iziModalClosedEventHandler);
+    window.addEventListener('beforeunload', eventSourceCleanupHandler);
     bindIziButtonEvents();
   }
 
