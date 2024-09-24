@@ -124,6 +124,10 @@ class ProductDeliveryFactory
             return false;
         }
 
+        if (!$carrier->active) {
+            return false;
+        }
+
         if (false === $this->productRestrictionDelivery->isShippingAvailableBasedOnProductCarrierRestriction($carrier, $product)) {
             return false;
         }
@@ -136,7 +140,17 @@ class ProductDeliveryFactory
             return false;
         }
 
-        return $this->cartWeightDeliveryStrategy->isShippingAvailableBasedOnTotalWeight($carrier, $basketNewWeight);
+        if (false === $this->cartWeightDeliveryStrategy->isShippingAvailableBasedOnTotalWeight($carrier, $basketNewWeight)) {
+            return false;
+        }
+
+        if (!$carrier->is_module || !$carrier->shipping_external || $carrier->is_free) {
+            return true;
+        }
+
+        // carrier modules can disable delivery options by returning false as the shipping cost
+        // TODO: pass modified product list
+        return false !== $cart->getPackageShippingCost($carrier->id);
     }
 
     private function isFreeDelivery(DeliveryOption $deliveryOption, Price $basketNewPrice): bool
