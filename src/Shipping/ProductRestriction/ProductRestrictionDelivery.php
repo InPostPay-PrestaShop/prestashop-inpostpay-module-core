@@ -8,7 +8,11 @@ final class ProductRestrictionDelivery implements ProductRestrictionDeliveryInte
 {
     public function isShippingAvailableBasedOnProductCarrierRestriction(\Carrier $carrier, \Product $product): bool
     {
-        if ([] === $carriersRestricted = $product->getCarriers()) {
+        $carriersRestricted = array_filter($product->getCarriers(), static function (array $carrier): bool {
+            return (bool) $carrier['active'];
+        });
+
+        if ([] === $carriersRestricted) {
             return true;
         }
 
