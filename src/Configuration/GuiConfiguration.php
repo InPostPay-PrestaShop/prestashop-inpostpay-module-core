@@ -411,7 +411,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             return;
         }
 
-        foreach ($this->getContext()->getAllShopIds() as $shopId) {
+        foreach ($this->getContext()->getContextListShopID() as $shopId) {
             $shopId = (int) $shopId;
             $cache = ($this->getCachedProductRestrictions($shopId))
                 ->setHasCategoryRestrictions($repository->hasCategoryRestrictions($shopId))
