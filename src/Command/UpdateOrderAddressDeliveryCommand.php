@@ -21,8 +21,6 @@ final class UpdateOrderAddressDeliveryCommand
      */
     private $eventTime;
 
-    private $addressDeliveryId;
-
     public function __construct(string $orderId, \DateTimeImmutable $eventTime)
     {
         $this->orderId = $orderId;

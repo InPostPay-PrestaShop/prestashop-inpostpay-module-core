@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\BasketApp\Order\Request;
 
-use DateTimeImmutable;
 use izi\prestashop\Common\Order\DeliveryAddress;
 use izi\prestashop\Common\PhoneNumber;
 
@@ -38,8 +39,7 @@ final class Delivery implements \JsonSerializable
      */
     private $courier_note;
 
-
-    public function __construct(?DateTimeImmutable $delivery_date = null, ?string $mail = null, ?PhoneNumber $phone_number = null, ?string $delivery_point = null, ?DeliveryAddress $delivery_address = null, ?string $courier_note = null)
+    public function __construct(?\DateTimeImmutable $delivery_date = null, ?string $mail = null, ?PhoneNumber $phone_number = null, ?string $delivery_point = null, ?DeliveryAddress $delivery_address = null, ?string $courier_note = null)
     {
         $this->delivery_date = $delivery_date;
         $this->mail = $mail;
@@ -49,7 +49,7 @@ final class Delivery implements \JsonSerializable
         $this->courier_note = $courier_note;
     }
 
-    public function getDeliveryDate(): ?DateTimeImmutable
+    public function getDeliveryDate(): ?\DateTimeImmutable
     {
         return $this->delivery_date;
     }

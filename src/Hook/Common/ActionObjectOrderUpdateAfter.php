@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\Hook\Common;
 
 use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Event\OrderEvent;
-use izi\prestashop\Event\ShipmentEvent;
 use izi\prestashop\Hook\HookInterface;
 
 final class ActionObjectOrderUpdateAfter implements HookInterface

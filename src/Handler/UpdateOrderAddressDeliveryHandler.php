@@ -8,6 +8,7 @@ use izi\prestashop\BasketApp\Order\OrdersApiClientInterface;
 use izi\prestashop\BasketApp\Order\Request\Delivery;
 use izi\prestashop\Builder\Order\OrderEventBuilderFactoryInterface;
 use izi\prestashop\Command\UpdateOrderAddressDeliveryCommand;
+use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Order\Address\AddressDataMapper;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 
@@ -33,19 +34,19 @@ final class UpdateOrderAddressDeliveryHandler implements UpdateOrderAddressDeliv
     /**
      * @var AddressDataMapper
      */
-    private $addressCommonMapper;
+    private $addressDataMapper;
 
     /**
-     * @var ObjectManager
+     * @var ObjectManagerInterface
      */
     private $objectManager;
 
-    public function __construct(BasketSessionRepositoryInterface $sessionRepository, OrderEventBuilderFactoryInterface $eventBuilderFactory, OrdersApiClientInterface $client, AddressDataMapper $addressCommonMapper, \izi\prestashop\ObjectModel\ObjectManagerInterface $objectManager)
+    public function __construct(BasketSessionRepositoryInterface $sessionRepository, OrderEventBuilderFactoryInterface $eventBuilderFactory, OrdersApiClientInterface $client, AddressDataMapper $addressDataMapper, ObjectManagerInterface $objectManager)
     {
         $this->sessionRepository = $sessionRepository;
         $this->eventBuilderFactory = $eventBuilderFactory;
         $this->client = $client;
-        $this->addressCommonMapper = $addressCommonMapper;
+        $this->addressDataMapper = $addressDataMapper;
         $this->objectManager = $objectManager;
     }
 
@@ -79,25 +80,23 @@ final class UpdateOrderAddressDeliveryHandler implements UpdateOrderAddressDeliv
         return sprintf('DA_%s_%d', $orderId, $eventTime->getTimestamp());
     }
 
-    private function getDeliveryData(int $addressDeliveryId): Delivery
+    private function getDeliveryData(int $deliveryAddressId): Delivery
     {
-        $address = $this->objectManager->find(\Address::class, $addressDeliveryId);
+        $address = $this->objectManager->find(\Address::class, $deliveryAddressId);
 
         if (null === $address) {
-            throw new \DomainException(sprintf('Address "%d" does not exist.', $addressDeliveryId));
+            throw new \DomainException(sprintf('Address "%d" does not exist.', $deliveryAddressId));
         }
 
-        $deliveryAddress = $this->addressCommonMapper->mapDeliveryAddress($address);
-        $phoneNumber = $this->addressCommonMapper->mapPhoneNumber($address);
+        $deliveryAddress = $this->addressDataMapper->mapDeliveryAddress($address);
+        $phoneNumber = $this->addressDataMapper->mapPhoneNumber($address);
 
         return new Delivery(
             null,
             null,
-            $phoneNumber ?? null,
+            $phoneNumber,
             null,
-            $deliveryAddress ?? null,
-            null
+            $deliveryAddress
         );
-
     }
 }

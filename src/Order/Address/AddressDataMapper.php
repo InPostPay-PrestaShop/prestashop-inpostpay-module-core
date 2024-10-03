@@ -1,37 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace izi\prestashop\Order\Address;
 
 use izi\prestashop\Common\Order\DeliveryAddress;
 use izi\prestashop\Common\PhoneNumber;
-use izi\prestashop\ObjectModel\ObjectManager;
 
 class AddressDataMapper
 {
     public function mapDeliveryAddress(\Address $address): DeliveryAddress
     {
         return new DeliveryAddress(
-            $address->firstname . ' ' . $address->lastname,
-            'PL',
-            $address->address1 . ' ' . $address->address2,
+            $this->getAddressLine($address),
             $address->city,
-            $address->postcode
+            $address->postcode,
+            sprintf('%s %s', $address->firstname, $address->lastname),
+            'PL'
         );
     }
 
-    public function mapPhoneNumber(\Address $address)
+    public function mapPhoneNumber(\Address $address): PhoneNumber
     {
-        $trigPhone = $this->readPhone($address);
+        [$prefix, $phone] = $this->getPhoneNumberData($address);
 
-        $phoneNumber = new PhoneNumber(
-            $trigPhone[0],
-            $trigPhone[1]
-        );
-
-        return $phoneNumber;
+        return new PhoneNumber($prefix, $phone);
     }
 
-    private function readPhone(\Address $address)
+    private function getPhoneNumberData(\Address $address): array
     {
         foreach (['phone', 'phone_mobile'] as $field) {
             $value = (string) $address->{$field};
@@ -41,6 +37,17 @@ class AddressDataMapper
             }
         }
 
-        return ['+48', $address->phone];
+        $phone = $address->phone ?: $address->phone_mobile;
+
+        return ['+48', (string) $phone];
+    }
+
+    private function getAddressLine(\Address $address): string
+    {
+        if (!$address->address2) {
+            return (string) $address->address1;
+        }
+
+        return sprintf('%s %s', $address->address1, $address->address2);
     }
 }

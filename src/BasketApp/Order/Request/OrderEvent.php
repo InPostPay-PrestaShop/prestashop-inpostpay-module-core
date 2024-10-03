@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\BasketApp\Order\Request;
 
-use izi\prestashop\Common\Order\MerchantOrderStatusData;
 use izi\prestashop\Common\PhoneNumber;
 
 final class OrderEvent implements \JsonSerializable
@@ -25,28 +24,16 @@ final class OrderEvent implements \JsonSerializable
     private $phone_number;
 
     /**
-     * @var MerchantOrderStatusData
+     * @var OrderEventData
      */
     private $event_data;
 
-    /**
-     * @var string|null
-     */
-    private $customer_order_id;
-
-    /**
-     * @var Delivery|null
-     */
-    private $delivery;
-
-    public function __construct(string $event_id, \DateTimeImmutable $event_data_time, MerchantOrderStatusData $event_data, ?PhoneNumber $phone_number = null, ?string $customer_order_id = null, ?Delivery $delivery = null)
+    public function __construct(string $event_id, \DateTimeImmutable $event_data_time, OrderEventData $event_data, ?PhoneNumber $phone_number = null)
     {
         $this->event_id = $event_id;
         $this->event_data_time = $event_data_time;
         $this->phone_number = $phone_number;
         $this->event_data = $event_data;
-        $this->customer_order_id = $customer_order_id;
-        $this->delivery = $delivery;
     }
 
     public function getId(): string
@@ -64,19 +51,9 @@ final class OrderEvent implements \JsonSerializable
         return $this->phone_number;
     }
 
-    public function getData(): MerchantOrderStatusData
+    public function getData(): OrderEventData
     {
         return $this->event_data;
-    }
-
-    public function getCustomerOrderId(): ?string
-    {
-        return $this->customer_order_id;
-    }
-
-    public function getDelivery(): ?Delivery
-    {
-        return $this->delivery;
     }
 
     public function jsonSerialize(): array

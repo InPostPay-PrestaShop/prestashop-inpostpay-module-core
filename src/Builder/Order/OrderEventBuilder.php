@@ -6,8 +6,8 @@ namespace izi\prestashop\Builder\Order;
 
 use izi\prestashop\BasketApp\Order\Request\Delivery;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
+use izi\prestashop\BasketApp\Order\Request\OrderEventData;
 use izi\prestashop\Common\Order\MerchantOrderStatus;
-use izi\prestashop\Common\Order\MerchantOrderStatusData;
 use Psr\Clock\ClockInterface;
 
 final class OrderEventBuilder implements OrderEventBuilderInterface
@@ -46,11 +46,6 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
      * @var string[]|null
      */
     private $trackingNumbers;
-
-    /**
-     * @var string|null
-     */
-    private $customerOrderId;
 
     /**
      * @var Delivery|null
@@ -104,13 +99,6 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
         return $this;
     }
 
-    public function setCustomerOrderId(?string $customerOrderId): OrderEventBuilderInterface
-    {
-        $this->customerOrderId = $customerOrderId;
-
-        return $this;
-    }
-
     /**
      * @return static
      */
@@ -127,14 +115,7 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
         $eventTime = $this->getEventTime();
         $eventId = $this->getEventId($eventTime);
 
-        return new OrderEvent(
-            $eventId,
-            $eventTime,
-            $eventData,
-            null,
-            $this->customerOrderId,
-            $this->delivery
-        );
+        return new OrderEvent($eventId, $eventTime, $eventData);
     }
 
     private function getEventId(\DateTimeImmutable $eventTime): string
@@ -147,14 +128,15 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
         return $this->eventTime ?? $this->clock->now();
     }
 
-    private function createEventData(): MerchantOrderStatusData
+    private function createEventData(): OrderEventData
     {
         $statusDescription = $this->statusDescriptionProvider->getStatus($this->order);
 
-        return new MerchantOrderStatusData(
+        return new OrderEventData(
             $this->status,
             $statusDescription,
-            $this->trackingNumbers
+            $this->trackingNumbers,
+            $this->delivery
         );
     }
 }

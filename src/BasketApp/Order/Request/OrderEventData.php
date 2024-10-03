@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace izi\prestashop\Common\Order;
+namespace izi\prestashop\BasketApp\Order\Request;
 
-final class MerchantOrderStatusData implements \JsonSerializable
+use izi\prestashop\Common\Order\MerchantOrderStatus;
+
+final class OrderEventData implements \JsonSerializable
 {
     /**
      * @var MerchantOrderStatus|null
@@ -22,13 +24,19 @@ final class MerchantOrderStatusData implements \JsonSerializable
     private $delivery_references_list;
 
     /**
+     * @var Delivery|null
+     */
+    private $delivery;
+
+    /**
      * @param string[]|null $delivery_references_list
      */
-    public function __construct(?MerchantOrderStatus $order_status = null, ?string $order_merchant_status_description = null, ?array $delivery_references_list = null)
+    public function __construct(?MerchantOrderStatus $order_status = null, ?string $order_merchant_status_description = null, ?array $delivery_references_list = null, ?Delivery $delivery = null)
     {
         $this->order_status = $order_status;
         $this->order_merchant_status_description = $order_merchant_status_description;
         $this->delivery_references_list = $delivery_references_list;
+        $this->delivery = $delivery;
     }
 
     public function getStatus(): ?MerchantOrderStatus
@@ -47,6 +55,11 @@ final class MerchantOrderStatusData implements \JsonSerializable
     public function getDeliveryReferencesList(): ?array
     {
         return $this->delivery_references_list;
+    }
+
+    public function getDelivery(): ?Delivery
+    {
+        return $this->delivery;
     }
 
     public function jsonSerialize(): array
