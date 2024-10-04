@@ -144,13 +144,8 @@ class ProductDeliveryFactory
             return false;
         }
 
-        if (!$carrier->is_module || !$carrier->shipping_external || $carrier->is_free) {
-            return true;
-        }
-
-        // carrier modules can disable delivery options by returning false as the shipping cost
         // TODO: pass modified product list
-        return false !== $cart->getPackageShippingCost($carrier->id);
+        return $this->checkModuleRestrictions($carrier, $cart);
     }
 
     private function isFreeDelivery(DeliveryOption $deliveryOption, Price $basketNewPrice): bool
@@ -195,5 +190,23 @@ class ProductDeliveryFactory
         }
 
         return $this->cartBaseWeight[$cart->id];
+    }
+
+    /**
+     * Carrier modules can disable delivery options by returning false as the shipping cost.
+     */
+    private function checkModuleRestrictions(\Carrier $carrier, \Cart $cart): bool
+    {
+        if (!$carrier->is_module || !$carrier->shipping_external || $carrier->is_free) {
+            return true;
+        }
+
+        $shippingCost = (\Closure::bind(function () use ($carrier) {
+            $products = $this->getProducts();
+
+            return $this->getPackageShippingCostFromModule($carrier, 10., $products);
+        }, $cart, \Cart::class))();
+
+        return false !== $shippingCost;
     }
 }
