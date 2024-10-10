@@ -25,70 +25,73 @@ final class Version_1_9_0 extends AbstractMigration
         return '1.9.0';
     }
 
-    public function up(): bool
+    public function up(): void
     {
-        return $this->createCategoryRestrictionsTable()
-            && $this->createManufacturerRestrictionsTable()
-            && $this->createAttributeGroupRestrictionsTable();
+        $this->createCategoryRestrictionsTable();
+        $this->createManufacturerRestrictionsTable();
+        $this->createAttributeGroupRestrictionsTable();
     }
 
-    private function createCategoryRestrictionsTable(): bool
+    private function createCategoryRestrictionsTable(): void
     {
-        return $this->db->execute('
+        $this->connection->executeStatement('
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . ProductRestrictionsRepository::CATEGORY_RESTRICTIONS_TABLE . '` (
                 id_category INT(10) UNSIGNED NOT NULL,
                 id_shop INT(11),
-                FOREIGN KEY `' . self::CATEGORY_ID_FK . '` (`id_category`)
-                    REFERENCES `' . _DB_PREFIX_ . 'category` (`id_category`)
-                    ON DELETE CASCADE,
-                FOREIGN KEY `' . self::CATEGORY_SHOP_ID_FK . '` (`id_shop`)
-                    REFERENCES `' . _DB_PREFIX_ . 'shop` (`id_shop`)
-                    ON DELETE CASCADE,
                 CONSTRAINT `' . self::CATEGORY_SHOP_ID_IDX . '` UNIQUE (`id_category`, `id_shop`)
             )
             ENGINE = ' . _MYSQL_ENGINE_ . '
             CHARSET = utf8
             COLLATE = utf8_general_ci;
         ');
+
+        $this->addForeignKey(ProductRestrictionsRepository::CATEGORY_RESTRICTIONS_TABLE, 'category', ['id_category'], ['id_category'], self::CATEGORY_ID_FK, [
+            'onDelete' => 'CASCADE',
+        ]);
+        $this->addForeignKey(ProductRestrictionsRepository::CATEGORY_RESTRICTIONS_TABLE, 'shop', ['id_shop'], ['id_shop'], self::CATEGORY_SHOP_ID_FK, [
+            'onDelete' => 'CASCADE',
+        ]);
     }
 
-    private function createManufacturerRestrictionsTable(): bool
+    private function createManufacturerRestrictionsTable(): void
     {
-        return $this->db->execute('
+        $this->connection->executeStatement('
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . ProductRestrictionsRepository::MANUFACTURER_RESTRICTIONS_TABLE . '` (
                 id_manufacturer INT(10) UNSIGNED NOT NULL,
                 id_shop INT(11),
-                FOREIGN KEY `' . self::MANUFACTURER_ID_FK . '` (`id_manufacturer`)
-                    REFERENCES `' . _DB_PREFIX_ . 'manufacturer` (`id_manufacturer`)
-                    ON DELETE CASCADE,
-                FOREIGN KEY `' . self::MANUFACTURER_SHOP_ID_FK . '` (`id_shop`)
-                    REFERENCES `' . _DB_PREFIX_ . 'shop` (`id_shop`)
-                    ON DELETE CASCADE,
                 CONSTRAINT `' . self::MANUFACTURER_SHOP_ID_IDX . '` UNIQUE (`id_manufacturer`, `id_shop`)
             )
             ENGINE = ' . _MYSQL_ENGINE_ . '
             CHARSET = utf8
             COLLATE = utf8_general_ci;
         ');
+
+        $this->addForeignKey(ProductRestrictionsRepository::MANUFACTURER_RESTRICTIONS_TABLE, 'manufacturer', ['id_manufacturer'], ['id_manufacturer'], self::MANUFACTURER_ID_FK, [
+            'onDelete' => 'CASCADE',
+        ]);
+        $this->addForeignKey(ProductRestrictionsRepository::MANUFACTURER_RESTRICTIONS_TABLE, 'shop', ['id_shop'], ['id_shop'], self::MANUFACTURER_SHOP_ID_FK, [
+            'onDelete' => 'CASCADE',
+        ]);
     }
 
-    private function createAttributeGroupRestrictionsTable(): bool
+    private function createAttributeGroupRestrictionsTable(): void
     {
-        return $this->db->execute('
+        $this->connection->executeStatement('
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . ProductRestrictionsRepository::ATTRIBUTE_GROUP_RESTRICTIONS_TABLE . '` (
                 id_attribute_group INT(11) NOT NULL,
                 id_shop INT(11),
-                FOREIGN KEY `' . self::ATTRIBUTE_GROUP_ID_FK . '` (`id_attribute_group`)
-                    REFERENCES `' . _DB_PREFIX_ . 'attribute_group` (`id_attribute_group`)
-                    ON DELETE CASCADE,
-                FOREIGN KEY `' . self::ATTRIBUTE_GROUP_SHOP_ID_FK . '` (`id_shop`)
-                    REFERENCES `' . _DB_PREFIX_ . 'shop` (`id_shop`)
-                    ON DELETE CASCADE,
                 CONSTRAINT `' . self::ATTRIBUTE_GROUP_SHOP_ID_IDX . '` UNIQUE (`id_attribute_group`, `id_shop`)
             )
             ENGINE = ' . _MYSQL_ENGINE_ . '
             CHARSET = utf8
             COLLATE = utf8_general_ci;
         ');
+
+        $this->addForeignKey(ProductRestrictionsRepository::ATTRIBUTE_GROUP_RESTRICTIONS_TABLE, 'attribute_group', ['id_attribute_group'], ['id_attribute_group'], self::ATTRIBUTE_GROUP_ID_FK, [
+            'onDelete' => 'CASCADE',
+        ]);
+        $this->addForeignKey(ProductRestrictionsRepository::ATTRIBUTE_GROUP_RESTRICTIONS_TABLE, 'shop', ['id_shop'], ['id_shop'], self::ATTRIBUTE_GROUP_SHOP_ID_FK, [
+            'onDelete' => 'CASCADE',
+        ]);
     }
 }
