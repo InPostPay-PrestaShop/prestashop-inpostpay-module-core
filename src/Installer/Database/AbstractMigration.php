@@ -104,7 +104,7 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
         try {
             $this->connection->executeStatement($sql);
         } catch (\PrestaShopDatabaseException $e) {
-            if (150 === $e->getCode()) {
+            if (1215 === $e->getCode()) {
                 // ignore silently: possible column types mismatch (e.g. due to migration from earlier PS versions) or the referenced table uses MyISAM engine
                 return;
             }
