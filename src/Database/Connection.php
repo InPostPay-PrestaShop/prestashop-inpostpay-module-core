@@ -106,8 +106,11 @@ class Connection
 
     private function normalizeException(\PrestaShopException $e): \PrestaShopDatabaseException
     {
-        $code = $e instanceof \PrestaShopDatabaseException ? $this->db->getNumberError() : $e->getCode();
+        $previous = $e->getPrevious();
+        $errorCode = $previous instanceof \PDOException
+            ? $previous->errorInfo[1] ?? $this->db->getNumberError()
+            : $this->db->getNumberError();
 
-        return new \PrestaShopDatabaseException($e->getMessage(), $code, $e);
+        return new \PrestaShopDatabaseException($e->getMessage(), $errorCode, $e);
     }
 }
