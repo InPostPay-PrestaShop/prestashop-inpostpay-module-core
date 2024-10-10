@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Handler;
 
-use izi\prestashop\Repository\BasketSessionRepositoryInterface;
-use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
-use izi\prestashop\ObjectModel\Repository\ProductRepository;
-use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use izi\prestashop\Command\GetProductWidgetCommand;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Handler\Result\ProductWidgetResult;
 use izi\prestashop\Hook\Front\ProductWidgetRendererTrait;
+use izi\prestashop\ObjectModel\Repository\ProductRepository;
+use izi\prestashop\Repository\BasketSessionRepositoryInterface;
+use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
+use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 final class GetProductWidgetHandler implements GetProductWidgetHandlerInterface
 {
@@ -99,7 +99,6 @@ final class GetProductWidgetHandler implements GetProductWidgetHandlerInterface
             $this->context->language
         );
     }
-
 
     private function getPresenterFactory(): \ProductPresenterFactory
     {

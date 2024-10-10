@@ -3,8 +3,8 @@
 use InPost\Izi\Upgrade\AssetsRemoverTrait;
 use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
-use izi\prestashop\Hook\Admin\DisplayAdminOrderLeft;
 use izi\prestashop\Common\PaymentType;
+use izi\prestashop\Hook\Admin\DisplayAdminOrderLeft;
 use izi\prestashop\Hook\Common\ActionCartSave;
 use izi\prestashop\Hook\Common\ActionCartUpdateAfter;
 use izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate;

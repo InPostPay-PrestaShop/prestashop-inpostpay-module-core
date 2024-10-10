@@ -11,7 +11,6 @@ use izi\prestashop\MerchantApi\Exception\MalformedRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
-use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 
 abstract class AbstractApiController

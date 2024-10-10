@@ -17,32 +17,29 @@ final class Version_1_4_0 extends AbstractMigration
         return '1.4.0';
     }
 
-    public function up(): bool
+    public function up(): void
     {
         if (!$this->tableExists(self::SESSIONS_TABLE)) {
-            return $this->createSessionTable();
+            $this->createSessionTable();
+
+            return;
         }
 
-        return $this->cleanupSessionsTable()
-            && $this->dropColumn(self::SESSIONS_TABLE, 'basket_cached')
-            && $this->dropColumn(self::SESSIONS_TABLE, 'event')
-            && $this->changeColumn(self::SESSIONS_TABLE, 'session_id', 'INT(10) UNSIGNED NOT NULL')
-            && $this->changeColumn(self::SESSIONS_TABLE, 'cart_id', 'VARCHAR(255) NOT NULL')
-            && $this->changeColumn(self::SESSIONS_TABLE, 'order_id', 'INT(10) UNSIGNED')
-            && $this->changeColumn(self::SESSIONS_TABLE, 'redirected', 'TINYINT(1) NOT NULL DEFAULT 0')
-            && $this->addForeignKey(self::SESSIONS_TABLE, 'cart', ['session_id'], ['id_cart'], self::CART_ID_FK, [
-                'onDelete' => 'CASCADE',
-            ])
-            && $this->addForeignKey(self::SESSIONS_TABLE, 'orders', ['order_id'], ['id_order'], self::ORDER_ID_FK, [
-                'onDelete' => 'CASCADE',
-            ])
-            && $this->addUniqueIndex(self::SESSIONS_TABLE, ['session_id'], self::CART_ID_IDX)
-            && $this->addUniqueIndex(self::SESSIONS_TABLE, ['cart_id'], self::BASKET_ID_IDX);
+        $this->cleanupSessionsTable();
+        $this->dropColumn(self::SESSIONS_TABLE, 'basket_cached');
+        $this->dropColumn(self::SESSIONS_TABLE, 'event');
+        $this->changeColumn(self::SESSIONS_TABLE, 'session_id', 'INT(10) UNSIGNED NOT NULL');
+        $this->changeColumn(self::SESSIONS_TABLE, 'cart_id', 'VARCHAR(255) NOT NULL');
+        $this->changeColumn(self::SESSIONS_TABLE, 'order_id', 'INT(10) UNSIGNED');
+        $this->changeColumn(self::SESSIONS_TABLE, 'redirected', 'TINYINT(1) NOT NULL DEFAULT 0');
+        $this->addUniqueIndex(self::SESSIONS_TABLE, ['session_id'], self::CART_ID_IDX);
+        $this->addUniqueIndex(self::SESSIONS_TABLE, ['cart_id'], self::BASKET_ID_IDX);
+        $this->addForeignKeys();
     }
 
-    private function createSessionTable(): bool
+    private function createSessionTable(): void
     {
-        return $this->db->execute('
+        $this->connection->executeStatement('
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . self::SESSIONS_TABLE . '` (
                 id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
                 session_id INT(10) UNSIGNED NOT NULL,
@@ -55,12 +52,6 @@ final class Version_1_4_0 extends AbstractMigration
                 coupons TEXT,
                 redirected TINYINT(1) NOT NULL DEFAULT 0,
                 PRIMARY KEY (`id`),
-                FOREIGN KEY `' . self::CART_ID_FK . '` (`session_id`)
-                    REFERENCES `' . _DB_PREFIX_ . 'cart` (`id_cart`)
-                    ON DELETE CASCADE,
-                FOREIGN KEY `' . self::ORDER_ID_FK . '` (`order_id`)
-                    REFERENCES `' . _DB_PREFIX_ . 'orders` (`id_order`)
-                    ON DELETE CASCADE,
                 CONSTRAINT `' . self::CART_ID_IDX . '` UNIQUE (`session_id`),
                 CONSTRAINT `' . self::BASKET_ID_IDX . '` UNIQUE (`cart_id`)
             )
@@ -68,19 +59,31 @@ final class Version_1_4_0 extends AbstractMigration
             CHARSET = utf8
             COLLATE = utf8_general_ci;
         ');
+
+        $this->addForeignKeys();
     }
 
-    private function cleanupSessionsTable(): bool
+    private function addForeignKeys(): void
     {
-        return $this->deleteUnassociatedSessions()
-            && $this->updateNonExistentOrderIds()
-            && $this->deleteDuplicatedCartAssociations()
-            && $this->deleteDuplicatedIdentifiers();
+        $this->addForeignKey(self::SESSIONS_TABLE, 'cart', ['session_id'], ['id_cart'], self::CART_ID_FK, [
+            'onDelete' => 'CASCADE',
+        ]);
+        $this->addForeignKey(self::SESSIONS_TABLE, 'orders', ['order_id'], ['id_order'], self::ORDER_ID_FK, [
+            'onDelete' => 'CASCADE',
+        ]);
     }
 
-    private function deleteUnassociatedSessions(): bool
+    private function cleanupSessionsTable(): void
     {
-        return $this->db->execute('
+        $this->deleteUnassociatedSessions();
+        $this->updateNonExistentOrderIds();
+        $this->deleteDuplicatedCartAssociations();
+        $this->deleteDuplicatedIdentifiers();
+    }
+
+    private function deleteUnassociatedSessions(): void
+    {
+        $this->connection->executeStatement('
             DELETE bs
             FROM `' . _DB_PREFIX_ . self::SESSIONS_TABLE . '` bs
             LEFT JOIN  `' . _DB_PREFIX_ . 'cart` c
@@ -89,9 +92,9 @@ final class Version_1_4_0 extends AbstractMigration
         ');
     }
 
-    private function updateNonExistentOrderIds(): bool
+    private function updateNonExistentOrderIds(): void
     {
-        return $this->db->execute('
+        $this->connection->executeStatement('
             UPDATE `' . _DB_PREFIX_ . self::SESSIONS_TABLE . '` bs
             LEFT JOIN  `' . _DB_PREFIX_ . 'orders` o
                 ON o.id_order = bs.order_id
@@ -100,11 +103,15 @@ final class Version_1_4_0 extends AbstractMigration
         ');
     }
 
-    private function deleteDuplicatedCartAssociations(): bool
+    private function deleteDuplicatedCartAssociations(): void
     {
-        if (!$this->db->delete(self::SESSIONS_TABLE, 'confirmation_response IS NULL AND order_id IS NULL')) {
-            return false;
-        }
+        $sql = (new \DbQuery())
+            ->type('DELETE')
+            ->from(self::SESSIONS_TABLE)
+            ->where('confirmation_response IS NULL')
+            ->where('order_id IS NULL');
+
+        $this->connection->executeStatement((string) $sql);
 
         $sql = (new \DbQuery())
             ->select('session_id, COUNT(*) - 1 AS `limit`')
@@ -112,27 +119,19 @@ final class Version_1_4_0 extends AbstractMigration
             ->groupBy('session_id')
             ->having('COUNT(*) > 1');
 
-        $data = $this->db->executeS($sql);
-
-        if (false === $data) {
-            return false;
-        }
-
-        $result = true;
+        $data = $this->connection->fetchAllAssociative((string) $sql);
 
         foreach ($data as $row) {
-            $result &= $this->db->execute('
+            $this->connection->executeStatement('
                 DELETE FROM `' . _DB_PREFIX_ . self::SESSIONS_TABLE . '`
                 WHERE session_id = ' . (int) $row['session_id'] . '
                 ORDER BY confirmation_response IS NULL
                 LIMIT ' . (int) $row['limit']
             );
         }
-
-        return (bool) $result;
     }
 
-    private function deleteDuplicatedIdentifiers(): bool
+    private function deleteDuplicatedIdentifiers(): void
     {
         $sql = (new \DbQuery())
             ->select('cart_id, COUNT(*) - 1 AS `limit`')
@@ -140,23 +139,15 @@ final class Version_1_4_0 extends AbstractMigration
             ->groupBy('cart_id')
             ->having('COUNT(*) > 1');
 
-        $data = $this->db->executeS($sql);
-
-        if (false === $data) {
-            return false;
-        }
-
-        $result = true;
+        $data = $this->connection->fetchAllAssociative((string) $sql);
 
         foreach ($data as $row) {
-            $result &= $this->db->execute('
+            $this->connection->executeStatement('
                 DELETE FROM `' . _DB_PREFIX_ . self::SESSIONS_TABLE . '`
                 WHERE cart_id = "' . $row['cart_id'] . '"
                 ORDER BY confirmation_response IS NULL
                 LIMIT ' . (int) $row['limit']
             );
         }
-
-        return (bool) $result;
     }
 }

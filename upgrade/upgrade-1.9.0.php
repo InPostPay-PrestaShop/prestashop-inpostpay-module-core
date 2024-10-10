@@ -4,6 +4,7 @@ use InPost\Izi\Upgrade\AssetsRemoverTrait;
 use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
 use izi\prestashop\Configuration\Adapter\Configuration;
+use izi\prestashop\Database\Connection;
 use izi\prestashop\Installer\Database\Version_1_9_0;
 use izi\prestashop\Installer\DatabaseInstaller;
 
@@ -39,9 +40,9 @@ class InPostIziUpdater_1_9_0
     public function upgrade(): bool
     {
         CacheClearer::getInstance()->clear();
+        $this->installer->install($this->module);
 
-        return $this->installer->install($this->module)
-            && $this->removeStaleAssets(self::STALE_ASSETS);
+        return $this->removeStaleAssets(self::STALE_ASSETS);
     }
 }
 
@@ -52,7 +53,7 @@ function upgrade_module_1_9_0(Module $module): bool
 {
     $db = Db::getInstance();
     $dbInstaller = new DatabaseInstaller(new Configuration($db), [
-        new Version_1_9_0($db),
+        new Version_1_9_0(new Connection($db)),
     ]);
 
     return (new InPostIziUpdater_1_9_0($module, $dbInstaller))->upgrade();

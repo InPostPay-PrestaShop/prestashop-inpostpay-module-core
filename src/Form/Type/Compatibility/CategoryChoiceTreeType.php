@@ -34,8 +34,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\Constraints\Choice;
 
 /**
  * Polyfill for PS < 1.7.6.
