@@ -8,7 +8,7 @@ interface DatabaseMigrationInterface
 {
     public function getVersion(): string;
 
-    public function up(): bool;
+    public function up();
 
-    public function down(): bool;
+    public function down();
 }

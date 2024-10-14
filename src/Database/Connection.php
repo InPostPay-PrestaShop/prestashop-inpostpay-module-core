@@ -36,6 +36,12 @@ class Connection
             $result = $closure();
         } catch (\PrestaShopDatabaseException $e) {
             throw $this->normalizeException($e);
+        } catch (\PrestaShopException $e) {
+            if (!$e->getPrevious() instanceof \PDOException) {
+                throw $e;
+            }
+
+            throw $this->normalizeException($e);
         }
 
         if (false !== $result || !$error = $this->db->getNumberError()) {
@@ -53,7 +59,7 @@ class Connection
     public function executeStatement(string $sql): int
     {
         $this->execute(function () use ($sql) {
-            $this->db->execute($sql);
+            return $this->db->execute($sql);
         });
 
         return (int) $this->db->numRows();
@@ -98,8 +104,13 @@ class Connection
         });
     }
 
-    private function normalizeException(\PrestaShopDatabaseException $e): \PrestaShopDatabaseException
+    private function normalizeException(\PrestaShopException $e): \PrestaShopDatabaseException
     {
-        return new \PrestaShopDatabaseException($e->getMessage(), $this->db->getNumberError());
+        $previous = $e->getPrevious();
+        $errorCode = $previous instanceof \PDOException
+            ? $previous->errorInfo[1] ?? $this->db->getNumberError()
+            : $this->db->getNumberError();
+
+        return new \PrestaShopDatabaseException($e->getMessage(), $errorCode, $e);
     }
 }
