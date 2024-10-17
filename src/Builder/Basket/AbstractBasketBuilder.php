@@ -846,19 +846,28 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getDeliveryRelatedProducts(\Product $productModel, Price $price, Quantity $quantity): ?array
     {
-        $deliveryProduct = [];
+        $hasUnavailable = false;
+        $productDeliveryDetails = [];
 
         if (null === $this->cartSummary) {
             return null;
         }
 
-        $deliveryOptions = $this->getAvailableDeliveryOptions($this->cart);
+        foreach (DeliveryType::cases() as $deliveryType) {
+            $freeDeliveryAmount = $this->getFreeDeliveryAmount($deliveryType);
+            $productDelivery = $this->productDeliveryFactory->createForRelatedProduct($deliveryType, $this->cartSummary, $this->cart, $productModel, $price, $quantity, $freeDeliveryAmount);
+            $productDeliveryDetails[] = $productDelivery;
 
-        foreach ($deliveryOptions as $option) {
-            $deliveryProduct[] = $this->productDeliveryFactory->createForRelatedProduct($option, $this->cartSummary, $this->cart, $productModel, $price, $quantity);
+            if (!$productDelivery->isDeliveryAvailable()) {
+                $hasUnavailable = true;
+            }
         }
 
-        return $deliveryProduct;
+        if (!$hasUnavailable) {
+            return null;
+        }
+
+        return $productDeliveryDetails;
     }
 
     /**
@@ -894,5 +903,20 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         }
 
         return $this->productDeliveryFactory->createForCartProduct($deliveryType, $this->cart, $product, $price, $weight, $quantity);
+    }
+
+    private function getFreeDeliveryAmount(DeliveryType $deliveryType): ?float
+    {
+        foreach ($this->getAvailableDeliveryOptions($this->cart) as $deliveryOption) {
+            if ($deliveryType === $deliveryOption->getType()) {
+                if (null === $amount = $deliveryOption->getFreeDeliveryMinimumGrossPrice()) {
+                    return null;
+                }
+
+                return $amount->getPriceAmount();
+            }
+        }
+
+        return null;
     }
 }

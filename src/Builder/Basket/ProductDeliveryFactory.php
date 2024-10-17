@@ -90,18 +90,18 @@ class ProductDeliveryFactory
     }
 
     public function createForRelatedProduct(
-        DeliveryOption $deliveryOption,
+        DeliveryType $deliveryType,
         Summary $summary,
         \Cart $cart,
         \Product $product,
         Price $productPrice,
-        Quantity $quantity
+        Quantity $quantity,
+        ?float $freeDeliveryAmount = null
     ): DeliveryRelatedProducts {
-        $deliveryType = $deliveryOption->getType();
         $basketNewPrice = $this->getCartTotalWithNewProduct($productPrice, $quantity, $this->getCartBasePrice($summary));
         $basketNewWeight = $this->getCartWeightWithNewProduct($product, $quantity, $cart);
         $isDeliveryOptionAvailable = $this->isDeliveryOptionAvailable($product, $deliveryType, $basketNewPrice, $basketNewWeight, $cart);
-        $isFreeDelivery = $isDeliveryOptionAvailable && $this->isFreeDelivery($deliveryOption, $basketNewPrice); // if delivery option is not available, free delivery is not possible
+        $isFreeDelivery = $isDeliveryOptionAvailable && $this->isFreeDelivery($freeDeliveryAmount, $basketNewPrice); // if delivery option is not available, free delivery is not possible
 
         return new DeliveryRelatedProducts(
             $deliveryType,
@@ -148,13 +148,13 @@ class ProductDeliveryFactory
         return $this->checkModuleRestrictions($carrier, $cart);
     }
 
-    private function isFreeDelivery(DeliveryOption $deliveryOption, Price $basketNewPrice): bool
+    private function isFreeDelivery(?float $freeDeliveryAmount, Price $basketNewPrice): bool
     {
-        if (null === $deliveryOption->getFreeDeliveryMinimumGrossPrice() || 0 >= $deliveryOption->getFreeDeliveryMinimumGrossPrice()->getPriceAmount()) {
+        if (null === $freeDeliveryAmount) {
             return false;
         }
 
-        return $basketNewPrice->getGross() >= $deliveryOption->getFreeDeliveryMinimumGrossPrice()->getPriceAmount();
+        return $basketNewPrice->getGross() >= $freeDeliveryAmount;
     }
 
     private function getCartTotalWithNewProduct(Price $productPrice, Quantity $quantity, Price $basketBasePrice): Price
