@@ -19,6 +19,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
     use SafeDeserializerTrait;
 
     private const INITIAL_OS_ID = 'INPOST_PAY_INITIAL_OS_ID';
+    private const COD_OS_ID = 'INPOST_PAY_COD_OS_ID';
     private const PAID_OS_ID = 'INPOST_PAY_authorized_payment';
     private const STATUS_DESCRIPTION_MAP = 'INPOST_PAY_OS_DESCRIPTION_MAP';
     private const AVAILABLE_PAYMENT_OPTIONS = 'INPOST_PAY_AVAILABLE_PAYMENT_OPTIONS';
@@ -76,9 +77,49 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         return [];
     }
 
-    public function getInitialStatusId(?int $shopId = null): ?int
+    /**
+     * @internal
+     */
+    public static function resolveInitialStatusId(OrdersConfigurationInterface $configuration, ?PaymentType $paymentType = null, ?int $shopId = null): ?int
     {
-        return (int) $this->configuration->get(self::INITIAL_OS_ID, $shopId);
+        if ($configuration instanceof self) {
+            return $configuration->getInitialStatusId($paymentType, $shopId);
+        }
+
+        $class = new \ReflectionClass($configuration);
+        $method = $class->getMethod('getInitialStatusId');
+        $paramType = $method->getParameters()[0]->getType();
+
+        if (null !== $paramType && 'int' === $paramType->getName()) {
+            @trigger_error(sprintf('Method "%s::getInitialStatusId()" will require passing an instance of %s or null as the first argument.', OrdersConfigurationInterface::class, PaymentType::class), \E_USER_DEPRECATED);
+
+            return $configuration->getInitialStatusId($shopId);
+        }
+
+        return $configuration->getInitialStatusId($paymentType, $shopId);
+    }
+
+    /**
+     * @param PaymentType|int|null $paymentType
+     */
+    public function getInitialStatusId($paymentType = null, ?int $shopId = null): int
+    {
+        if (is_int($paymentType)) {
+            @trigger_error(sprintf('Passing $shopId as the first argument of "%s::%s()" is deprecated.', OrdersConfigurationInterface::class, __METHOD__), \E_USER_DEPRECATED);
+
+            $shopId = (int) $paymentType;
+            $paymentType = null;
+        }
+
+        if (null !== $paymentType && !$paymentType instanceof PaymentType) {
+            throw new \InvalidArgumentException(sprintf('Expected $paymentType to be an instance of "%", "%s" given.', PaymentType::class, get_debug_type($paymentType)));
+        }
+
+        if (PaymentType::CashOnDelivery() === $paymentType && null !== $codStatusId = $this->getCashOnDeliveryStatusId($shopId)) {
+            return $codStatusId;
+        }
+
+        return (int) $this->getDefaultInitialStatusId($shopId);
     }
 
     public function getPaidStatusId(?int $shopId = null): ?int
@@ -147,19 +188,25 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
     public function copy(): OrdersConfigurationInterface
     {
         $configuration = new DTO\OrdersConfiguration(
-            $this->getInitialStatusId(),
+            $this->getDefaultInitialStatusId(),
             $this->getPaidStatusId(),
             $this->getPointOfSaleId(),
             $this->getStatusDescriptionMap(),
             $this->getAvailablePaymentOptions()
         );
 
-        return $configuration->setMessageOptions($this->getMessageOptions());
+        return $configuration
+            ->setCashOnDeliveryStatusId($this->getCashOnDeliveryStatus())
+            ->setMessageOptions($this->getMessageOptions());
     }
 
     public function persist(OrdersConfigurationInterface $configuration): void
     {
-        $this->configuration->set(self::INITIAL_OS_ID, $configuration->getInitialStatusId());
+        $defaultInitialStatusId = self::resolveInitialStatusId($configuration);
+        $codStatusId = self::resolveInitialStatusId($configuration, PaymentType::CashOnDelivery());
+
+        $this->configuration->set(self::INITIAL_OS_ID, $defaultInitialStatusId);
+        $this->configuration->set(self::COD_OS_ID, $codStatusId);
         $this->configuration->set(self::PAID_OS_ID, $configuration->getPaidStatusId());
         $this->configuration->set(self::POS_ID, $configuration->getPointOfSaleId());
         $this->setOrderStatusDescriptionMapping($configuration->getStatusDescriptionMap());
@@ -270,5 +317,31 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         $value = $this->serializer->serialize($options, 'json');
         $this->configuration->set(self::MESSAGE_FORMAT, $value);
         $this->messageOptions[0] = $options;
+    }
+
+    private function getDefaultInitialStatusId(?int $shopId = null): ?int
+    {
+        $value = $this->configuration->get(self::INITIAL_OS_ID, $shopId);
+
+        return null === $value ? null : (int) $value;
+    }
+
+    private function getCashOnDeliveryStatusId(?int $shopId = null): ?int
+    {
+        $value = $this->configuration->get(self::COD_OS_ID, $shopId);
+
+        return null === $value ? null : (int) $value;
+    }
+
+    private function getCashOnDeliveryStatus(): ?\OrderState
+    {
+        if (null === $statusId = $this->getCashOnDeliveryStatusId()) {
+            return null;
+        }
+
+        $status = new \OrderState();
+        $status->id = $statusId;
+
+        return $status;
     }
 }

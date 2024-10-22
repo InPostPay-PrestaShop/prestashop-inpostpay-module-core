@@ -30,7 +30,10 @@
 
 <div class="row mt-n3 align-items-end">
   <div class="col-xl-3 col-lg-4 col-md-6 mt-3">
-    {{ form_row(form.ordersConfiguration.initialStatusId) }}
+    {{ form_row(form.ordersConfiguration.defaultInitialStatusId) }}
+  </div>
+  <div class="col-xl-3 col-lg-4 col-md-6 mt-3">
+    {{ form_row(form.ordersConfiguration.cashOnDeliveryStatusId) }}
   </div>
   <div class="col-xl-3 col-lg-4 col-md-6 mt-3">
     {{ form_row(form.ordersConfiguration.paidStatusId) }}
