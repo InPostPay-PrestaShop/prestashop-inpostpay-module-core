@@ -12,7 +12,10 @@ use izi\prestashop\Common\PaymentType;
  */
 interface OrdersConfigurationInterface
 {
-    public function getInitialStatusId(?int $shopId = null): ?int;
+    /**
+     * @param PaymentType|null $paymentType if null, returns a default order status for unspecified payment option
+     */
+    public function getInitialStatusId($paymentType = null/*, ?int $shopId = null*/): ?int;
 
     public function getPaidStatusId(?int $shopId = null): ?int;
 

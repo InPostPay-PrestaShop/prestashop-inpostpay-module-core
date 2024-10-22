@@ -19,7 +19,16 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      *
      * @Assert\GreaterThan(0)
      */
-    private $initialStatusId;
+    private $defaultInitialStatusId;
+
+    /**
+     * @var int|null
+     *
+     * @Assert\NotNull()
+     *
+     * @Assert\GreaterThan(0)
+     */
+    private $cashOnDeliveryStatusId;
 
     /**
      * @var int|null
@@ -73,21 +82,65 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
     {
         [$posId, $statusDescriptionMap, $availablePaymentOptions] = $this->normalizeConstructorArguments(func_get_args(), func_num_args());
 
-        $this->initialStatusId = $initialStatusId;
+        $this->defaultInitialStatusId = $initialStatusId;
         $this->paidStatusId = $paidStatusId;
         $this->setPointOfSaleId($posId);
         $this->setStatusDescriptionMap($statusDescriptionMap);
         $this->setAvailablePaymentOptions($availablePaymentOptions);
     }
 
-    public function getInitialStatusId(?int $shopId = null): ?int
+    /**
+     * @param PaymentType|int|null $paymentType
+     */
+    public function getInitialStatusId($paymentType = null, ?int $shopId = null): ?int
     {
-        return $this->initialStatusId;
+        if (is_int($paymentType)) {
+            @trigger_error(sprintf('Passing $shopId as the first argument of "%s::%s()" is deprecated.', OrdersConfigurationInterface::class, __METHOD__), \E_USER_DEPRECATED);
+
+            $paymentType = null;
+        }
+
+        if (null !== $paymentType && !$paymentType instanceof PaymentType) {
+            throw new \InvalidArgumentException(sprintf('Expected $paymentType to be an instance of "%", "%s" given.', PaymentType::class, get_debug_type($paymentType)));
+        }
+
+        if (PaymentType::CashOnDelivery() === $paymentType) {
+            return $this->cashOnDeliveryStatusId;
+        }
+
+        return $this->defaultInitialStatusId;
     }
 
+    /**
+     * @deprecated
+     */
     public function setInitialStatusId(?\OrderState $initialStatus): self
     {
-        $this->initialStatusId = null === $initialStatus ? null : (int) $initialStatus->id;
+        @trigger_error(sprintf('Method "%s:%s()" is deprecated.', __CLASS__, __METHOD__), \E_USER_DEPRECATED);
+
+        return $this->setDefaultInitialStatusId($initialStatus);
+    }
+
+    public function getDefaultInitialStatusId(): ?int
+    {
+        return $this->defaultInitialStatusId;
+    }
+
+    public function setDefaultInitialStatusId(?\OrderState $initialStatus): self
+    {
+        $this->defaultInitialStatusId = null === $initialStatus ? null : (int) $initialStatus->id;
+
+        return $this;
+    }
+
+    public function getCashOnDeliveryStatusId(): ?int
+    {
+        return $this->cashOnDeliveryStatusId;
+    }
+
+    public function setCashOnDeliveryStatusId(?\OrderState $codStatus): self
+    {
+        $this->cashOnDeliveryStatusId = null === $codStatus ? null : (int) $codStatus->id;
 
         return $this;
     }
@@ -184,7 +237,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->messageOptions ?? ($this->messageOptions = new MessageOptions());
     }
 
-    /* @internal */
+    /**
+     * @internal
+     */
     public function setMessageOptions(MessageOptions $options): self
     {
         $this->messageOptions = $options;
