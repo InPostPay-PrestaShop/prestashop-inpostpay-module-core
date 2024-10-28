@@ -1,5 +1,6 @@
 <?php
 
+use InPost\Izi\Upgrade\AssetsRemoverTrait;
 use InPost\Izi\Upgrade\CacheClearer;
 use izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter;
 use izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore;
@@ -9,13 +10,16 @@ if (!defined('_PS_VERSION_')) {
 }
 
 require_once __DIR__ . '/CacheClearer.php';
+require_once __DIR__ . '/AssetsRemoverTrait.php';
 
 class InPostIziUpdater_1_10_0
 {
-    /**
-     * @var Module
-     */
-    private $module;
+    use AssetsRemoverTrait;
+
+    private const STALE_ASSETS = [
+        'js/prestashopizi.58c5a80572557c0d225d.js',
+        'js/prestashopizi.58c5a80572557c0d225d.js.map',
+    ];
 
     public function __construct(Module $module)
     {
@@ -27,7 +31,8 @@ class InPostIziUpdater_1_10_0
         CacheClearer::getInstance()->clear();
 
         return $this->registerHooks()
-            && $this->initCodPaymentOrderStateConfig();
+            && $this->initCodPaymentOrderStateConfig()
+            && $this->removeStaleAssets(self::STALE_ASSETS);
     }
 
     private function registerHooks(): bool
