@@ -846,7 +846,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getDeliveryRelatedProducts(\Product $productModel, Price $price, Quantity $quantity): ?array
     {
-        $hasUnavailable = false;
         $productDeliveryDetails = [];
 
         if (null === $this->cartSummary) {
@@ -857,14 +856,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $freeDeliveryAmount = $this->getFreeDeliveryAmount($deliveryType);
             $productDelivery = $this->productDeliveryFactory->createForRelatedProduct($deliveryType, $this->cartSummary, $this->cart, $productModel, $price, $quantity, $freeDeliveryAmount);
             $productDeliveryDetails[] = $productDelivery;
-
-            if (!$productDelivery->isDeliveryAvailable()) {
-                $hasUnavailable = true;
-            }
-        }
-
-        if (!$hasUnavailable) {
-            return null;
         }
 
         return $productDeliveryDetails;
