@@ -100,6 +100,10 @@ services:
   izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
   izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
 
+  izi\prestashop\Order\Address\AddressDataMapper:
+    class: izi\prestashop\Order\Address\AddressDataMapper
+    public: false
+
   izi\prestashop\Configuration\Adapter\Configuration:
     class: izi\prestashop\Configuration\Adapter\Configuration
     public: false
@@ -256,6 +260,19 @@ services:
       - '@izi\prestashop\BasketApp\Order\OrdersApiClientInterface'
       - '@inpost.izi.general_logger'
 
+  izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface: '@izi\prestashop\Handler\UpdateOrderAddressDeliveryHandler'
+  izi\prestashop\Handler\UpdateOrderAddressDeliveryHandler:
+    class: izi\prestashop\Handler\UpdateOrderAddressDeliveryHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\Builder\Order\OrderEventBuilderFactory'
+      - '@izi\prestashop\BasketApp\Order\OrdersApiClientInterface'
+      - '@izi\prestashop\Order\Address\AddressDataMapper'
+      - '@izi\prestashop\ObjectModel\ObjectManager'
+
   izi\prestashop\Handler\GetClientDetailsHandlerInterface: '@izi\prestashop\Handler\GetClientDetailsHandler'
   izi\prestashop\Handler\GetClientDetailsHandler:
     class: izi\prestashop\Handler\GetClientDetailsHandler
@@ -359,6 +376,22 @@ services:
     public: false
     tags:
       - { name: inpost.izi.model_repository, model_class: Carrier }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\ObjectModel\Repository\RangePriceRepository:
+    class: izi\prestashop\ObjectModel\Repository\RangePriceRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: RangePrice }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\ObjectModel\Repository\RangeWeightRepository:
+    class: izi\prestashop\ObjectModel\Repository\RangeWeightRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: RangeWeight }
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
@@ -535,6 +568,22 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\Event\EventDispatcherInterface'
 
+  izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore:
+      class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore
+      public: false
+      tags:
+          - { name: inpost.izi.hook }
+      arguments:
+          - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter:
+      class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter
+      public: false
+      tags:
+          - { name: inpost.izi.hook }
+      arguments:
+          - '@izi\prestashop\Event\EventDispatcherInterface'
+
   izi\prestashop\EventListener\ShipmentListener:
     class: izi\prestashop\EventListener\ShipmentListener
     tags:
@@ -611,6 +660,7 @@ services:
       - '@izi\prestashop\Configuration\ConsentsConfiguration'
       - '@izi\prestashop\Configuration\ProductConfiguration'
       - '@izi\prestashop\Builder\Basket\DeliveryFactory'
+      - '@izi\prestashop\Builder\Basket\ProductDeliveryFactory'
 
   izi\prestashop\Cache\ConfigurationCache:
     class: izi\prestashop\Cache\ConfigurationCache
@@ -639,6 +689,18 @@ services:
       - '@inpost.izi.clock'
       - '@izi\prestashop\Translation\ServiceNameTranslator'
       - '@izi\prestashop\Shipping\DeliveryPriceCalculator'
+
+  izi\prestashop\Builder\Basket\ProductDeliveryFactory:
+    class: izi\prestashop\Builder\Basket\ProductDeliveryFactory
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\ShippingConfigurationInterface'
+      - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+      - '@izi\prestashop\Shipping\CartTotal\CartTotalDeliveryStrategyInterface'
+      - '@izi\prestashop\Shipping\CartWeight\CartWeightDeliveryStrategyInterface'
+      - '@izi\prestashop\Shipping\ProductDimensions\ProductDimensionsDeliveryStrategyInterface'
+      - '@izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDeliveryInterface'
+
 
   izi\prestashop\Shipping\DeliveryPriceCalculator:
     class: izi\prestashop\Shipping\DeliveryPriceCalculator
@@ -671,6 +733,44 @@ services:
       - '@izi\prestashop\Shipping\FreeDelivery\GenericStrategy'
       - '@izi\prestashop\Configuration\PrestaShopConfiguration'
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\Shipping\CartTotal\GenericStrategy:
+    class: izi\prestashop\Shipping\CartTotal\GenericStrategy
+    public: false
+
+  izi\prestashop\Shipping\CartTotal\PriceRangeStrategy:
+    class: izi\prestashop\Shipping\CartTotal\PriceRangeStrategy
+    public: false
+    arguments:
+      - '@izi\prestashop\Shipping\CartTotal\GenericStrategy'
+      - '@izi\prestashop\ObjectModel\Repository\RangePriceRepository'
+
+  izi\prestashop\Shipping\CartTotal\CartTotalDeliveryStrategyInterface: '@izi\prestashop\Shipping\CartTotal\PriceRangeStrategy'
+
+  izi\prestashop\Shipping\CartWeight\GenericStrategy:
+    class: izi\prestashop\Shipping\CartWeight\GenericStrategy
+    public: false
+
+  izi\prestashop\Shipping\CartWeight\WeightRangeStrategy:
+    class: izi\prestashop\Shipping\CartWeight\WeightRangeStrategy
+    public: false
+    arguments:
+      - '@izi\prestashop\Shipping\CartWeight\GenericStrategy'
+      - '@izi\prestashop\ObjectModel\Repository\RangeWeightRepository'
+
+  izi\prestashop\Shipping\CartWeight\CartWeightDeliveryStrategyInterface: '@izi\prestashop\Shipping\CartWeight\WeightRangeStrategy'
+
+  izi\prestashop\Shipping\ProductDimensions\GenericStrategy:
+    class: izi\prestashop\Shipping\ProductDimensions\GenericStrategy
+    public: false
+
+  izi\prestashop\Shipping\ProductDimensions\ProductDimensionsDeliveryStrategyInterface: '@izi\prestashop\Shipping\ProductDimensions\GenericStrategy'
+
+  izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery:
+    class: izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery
+    public: false
+
+  izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDeliveryInterface: '@izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery'
 
   izi\prestashop\Translation\LegacyTranslator:
     class: izi\prestashop\Translation\LegacyTranslator

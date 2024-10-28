@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Handler;
 
-use izi\prestashop\Common\Order\MerchantOrderStatusData;
 use izi\prestashop\MerchantApi\Command\UpdateOrderCommand;
+use izi\prestashop\MerchantApi\Model\Order\Response\OrderStatusData;
 
 interface UpdateOrderHandlerInterface
 {
-    public function __invoke(UpdateOrderCommand $command): MerchantOrderStatusData;
+    public function __invoke(UpdateOrderCommand $command): OrderStatusData;
 }

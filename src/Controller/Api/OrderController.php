@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace izi\prestashop\Controller\Api;
 
 use izi\prestashop\CartSession;
-use izi\prestashop\Common\Order\MerchantOrderStatusData;
 use izi\prestashop\MerchantApi\Command\UpdateOrderCommand;
 use izi\prestashop\MerchantApi\Exception\OrderNotFoundException;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\MerchantApi\Model\Order\Request\OrderEvent;
+use izi\prestashop\MerchantApi\Model\Order\Response\OrderStatusData;
 use izi\prestashop\PrestashopOrder;
 use izi\prestashop\rest\order\Create;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -50,7 +50,7 @@ class OrderController extends AbstractApiController
         $event = $this->decodeRequest($request, OrderEvent::class);
         $command = new UpdateOrderCommand($orderId, $event);
 
-        /** @var MerchantOrderStatusData $orderStatus */
+        /** @var OrderStatusData $orderStatus */
         $orderStatus = $this->bus->handle($command);
 
         return new JsonResponse($orderStatus);

@@ -56,13 +56,13 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.9.2';
+        $this->version = '1.10.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
         $this->ps_versions_compliancy = [
             'min' => '1.7.0.0',
-            'max' => '8.1.99',
+            'max' => '8.2.99',
         ];
 
         parent::__construct();
@@ -92,7 +92,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         try {
             (new DatabaseInstaller())->install($this);
         } catch (Exception $e) {
-            $this->_errors[] = $this->l('Could not update the database schema: .' . $e->getMessage());
+            $this->_errors[] = $this->l('Could not update the database schema.');
             $this->getLogger()->critical('Installer error: {exception}.', [
                 'exception' => $e,
             ]);
