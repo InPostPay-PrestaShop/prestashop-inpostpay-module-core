@@ -8,13 +8,12 @@ use izi\prestashop\Common\Customer\InvoiceDetails;
 use izi\prestashop\Common\Customer\LegalForm;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
-use izi\prestashop\Common\Order\Delivery;
-use izi\prestashop\Common\Order\DeliveryAddress;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use izi\prestashop\Configuration\OrdersConfiguration;
+use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
@@ -24,6 +23,8 @@ use izi\prestashop\MerchantApi\Exception\InternalServerErrorException;
 use izi\prestashop\MerchantApi\Model\Order\Request\AccountInfo;
 use izi\prestashop\MerchantApi\Model\Order\Request\AddressDetails;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
+use izi\prestashop\MerchantApi\Model\Order\Request\Delivery;
+use izi\prestashop\MerchantApi\Model\Order\Request\DeliveryAddress;
 use izi\prestashop\ObjectModel\Exception\InvalidDataException;
 use izi\prestashop\Serializer\SerializerFactory;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
@@ -57,6 +58,11 @@ class Create
      */
     private $bus;
 
+    /**
+     * @var OrdersConfigurationInterface
+     */
+    private $ordersConfiguration;
+
     public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null)
     {
         $this->context = $context ?? \Context::getContext();
@@ -64,6 +70,7 @@ class Create
         $this->module = $module ?? \Module::getInstanceByName('inpostizi');
         $this->shippingConfiguration = $shippingConfiguration ?? $this->module->get(ShippingConfigurationInterface::class);
         $this->bus = $bus ?? $this->module->get(CommandBusInterface::class);
+        $this->ordersConfiguration = new OrdersConfiguration(new Configuration());
     }
 
     /**
@@ -124,7 +131,9 @@ class Create
             throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $deliveryType->value));
         }
 
-        $this->checkPaymentType($request->getOrderDetails()->getPaymentType(), $shopId);
+        $paymentType = $request->getOrderDetails()->getPaymentType();
+
+        $this->checkPaymentType($paymentType, $shopId);
 
         $customer = $this->findOrCreateCustomer($cart, $request->getAccountInfo());
         $addresses = $this->findOrCreateAddresses($customer, $request);
@@ -137,7 +146,7 @@ class Create
 
         $this->module->validateOrder(
             $cart->id,
-            (int) \Configuration::get('INPOST_PAY_INITIAL_OS_ID'),
+            (int) OrdersConfiguration::resolveInitialStatusId($this->ordersConfiguration, $paymentType, $shopId),
             $cart->getOrderTotal(),
             $this->module->displayName,
             null,
@@ -655,8 +664,7 @@ class Create
 
     private function checkPaymentType(PaymentType $paymentType, int $shopId): void
     {
-        $configuration = new Configuration();
-        $availablePaymentOptions = (new OrdersConfiguration($configuration))->getAvailablePaymentOptions($shopId);
+        $availablePaymentOptions = $this->ordersConfiguration->getAvailablePaymentOptions($shopId);
 
         if (in_array($paymentType, $availablePaymentOptions, true)) {
             return;

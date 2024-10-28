@@ -7,6 +7,7 @@ namespace izi\prestashop\Form\Type;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
 use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Form\Event\ApiConfigurationValidatedEvent;
+use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
 use izi\prestashop\Hook\Front\DisplayIziCheckoutButton;
 use izi\prestashop\Hook\Front\DisplayIziThankYou;
@@ -15,6 +16,7 @@ use izi\prestashop\Hook\Front\DisplayPaymentReturn;
 use izi\prestashop\Hook\Front\DisplayProductActions;
 use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
 use izi\prestashop\Translation\LegacyTranslator;
+use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -23,8 +25,6 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GroupSequence;
-use PrestaShopBundle\Form\Admin\Type\SwitchType;
-use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 
 final class GeneralConfigurationType extends AbstractType
 {

@@ -48,7 +48,7 @@ final class UpdateOrderTrackingNumbersHandler implements UpdateOrderTrackingNumb
         return UpdateOrderTrackingNumbersCommand::class;
     }
 
-    public function __invoke(UpdateOrderTrackingNumbersCommand $command)
+    public function __invoke(UpdateOrderTrackingNumbersCommand $command): void
     {
         if (null === $this->sessionRepository->findByOrderId($orderId = $command->getOrderId())) {
             return;

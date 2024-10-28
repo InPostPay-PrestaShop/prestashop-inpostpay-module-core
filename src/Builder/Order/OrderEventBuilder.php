@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Builder\Order;
 
+use izi\prestashop\BasketApp\Order\Request\Delivery;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
+use izi\prestashop\BasketApp\Order\Request\OrderEventData;
 use izi\prestashop\Common\Order\MerchantOrderStatus;
-use izi\prestashop\Common\Order\MerchantOrderStatusData;
 use Psr\Clock\ClockInterface;
 
 final class OrderEventBuilder implements OrderEventBuilderInterface
@@ -45,6 +46,11 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
      * @var string[]|null
      */
     private $trackingNumbers;
+
+    /**
+     * @var Delivery|null
+     */
+    private $delivery;
 
     public function __construct(\Order $order, ClockInterface $clock, OrderStatusDescriptionProvider $orderStatusDescriptionProvider)
     {
@@ -93,6 +99,16 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
         return $this;
     }
 
+    /**
+     * @return static
+     */
+    public function setDeliveryData(?Delivery $delivery): OrderEventBuilderInterface
+    {
+        $this->delivery = $delivery;
+
+        return $this;
+    }
+
     public function build(): OrderEvent
     {
         $eventData = $this->createEventData();
@@ -112,14 +128,15 @@ final class OrderEventBuilder implements OrderEventBuilderInterface
         return $this->eventTime ?? $this->clock->now();
     }
 
-    private function createEventData(): MerchantOrderStatusData
+    private function createEventData(): OrderEventData
     {
         $statusDescription = $this->statusDescriptionProvider->getStatus($this->order);
 
-        return new MerchantOrderStatusData(
+        return new OrderEventData(
             $this->status,
             $statusDescription,
-            $this->trackingNumbers
+            $this->trackingNumbers,
+            $this->delivery
         );
     }
 }

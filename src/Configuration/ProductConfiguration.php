@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
-use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
-use izi\prestashop\Hook\Front\DisplayProductActions;
-use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
-
 /**
  * @implements PersistentConfigurationInterface<ProductConfigurationInterface>
  */

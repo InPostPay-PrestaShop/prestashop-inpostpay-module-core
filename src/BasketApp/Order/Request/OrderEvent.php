@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\BasketApp\Order\Request;
 
-use izi\prestashop\Common\Order\MerchantOrderStatusData;
 use izi\prestashop\Common\PhoneNumber;
 
 final class OrderEvent implements \JsonSerializable
@@ -25,11 +24,11 @@ final class OrderEvent implements \JsonSerializable
     private $phone_number;
 
     /**
-     * @var MerchantOrderStatusData
+     * @var OrderEventData
      */
     private $event_data;
 
-    public function __construct(string $event_id, \DateTimeImmutable $event_data_time, MerchantOrderStatusData $event_data, ?PhoneNumber $phone_number = null)
+    public function __construct(string $event_id, \DateTimeImmutable $event_data_time, OrderEventData $event_data, ?PhoneNumber $phone_number = null)
     {
         $this->event_id = $event_id;
         $this->event_data_time = $event_data_time;
@@ -52,7 +51,7 @@ final class OrderEvent implements \JsonSerializable
         return $this->phone_number;
     }
 
-    public function getData(): MerchantOrderStatusData
+    public function getData(): OrderEventData
     {
         return $this->event_data;
     }

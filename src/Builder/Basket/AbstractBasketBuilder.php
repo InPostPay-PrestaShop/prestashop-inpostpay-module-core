@@ -8,13 +8,17 @@ use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\Consent;
 use izi\prestashop\Common\Basket\ConsentLink;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
+use izi\prestashop\Common\Basket\DeliveryOption;
 use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Common\Basket\Product;
 use izi\prestashop\Common\Basket\Quantity;
 use izi\prestashop\Common\Basket\Summary;
 use izi\prestashop\Common\Currency;
+use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\Price;
+use izi\prestashop\Common\Product\DeliveryProduct;
+use izi\prestashop\Common\Product\DeliveryRelatedProducts;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductImage;
 use izi\prestashop\Common\Product\ProductVariant;
@@ -59,6 +63,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $deliveryFactory;
 
     /**
+     * @var ProductDeliveryFactory
+     */
+    private $productDeliveryFactory;
+
+    /**
      * @var ImageRetriever
      */
     private $imageRetriever;
@@ -78,12 +87,23 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private $additionalInformation;
 
+    /**
+     * @var DeliveryProduct[]|null
+     */
+    private $availableDeliveryOptions;
+
+    /**
+     * @var Summary
+     */
+    private $cartSummary;
+
     public function __construct(
         \Cart $cart,
         ContextManager $contextManager,
         ConsentsConfigurationInterface $consentsConfiguration,
         ProductConfigurationInterface $productConfiguration,
         DeliveryFactory $deliveryFactory,
+        ProductDeliveryFactory $deliveryRelatedProductFactory,
         ?ImageRetriever $imageRetriever = null
     ) {
         $this->cart = $cart;
@@ -91,6 +111,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $this->consentsConfiguration = $consentsConfiguration;
         $this->deliveryFactory = $deliveryFactory;
         $this->productConfiguration = $productConfiguration;
+        $this->productDeliveryFactory = $deliveryRelatedProductFactory;
         $this->imageRetriever = $imageRetriever ?? new ImageRetriever($contextManager->getContext()->link);
     }
 
@@ -131,10 +152,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
             $cartProducts = $this->cart->getProducts(false, false, null, true, true);
             $products = array_map([$this, 'createCartProduct'], $cartProducts);
+            $this->cartSummary = $this->createSummary($products);
 
             return $this->doBuild(
-                $this->createSummary($products),
-                $this->deliveryFactory->getAvailableDeliveryOptions($this->cart),
+                $this->cartSummary,
+                $this->getAvailableDeliveryOptions($this->cart),
                 $products,
                 $this->getConsents(),
                 $this->getPromoCodes(),
@@ -206,7 +228,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         return PriceFactory::create((float) $net, (float) $gross);
     }
 
-    private function createProduct(\Product $model, array $product, Quantity $quantity, Price $basePrice, Price $promoPrice): Product
+    private function createProduct(\Product $model, array $product, Quantity $quantity, Price $basePrice, Price $promoPrice, $related = false): Product
     {
         $combinationId = array_key_exists('id_product_attribute', $product) ? (int) $product['id_product_attribute'] : 0;
         $customizationId = array_key_exists('id_customization', $product) ? (int) $product['id_customization'] : 0;
@@ -232,7 +254,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             null,
             $this->getProductAttributes($product),
             $this->getProductVariants($product),
-            $this->getProductImages($images)
+            $this->getProductImages($images),
+            $related ? null : $this->getDeliveryProduct($model, $promoPrice, $quantity, (float) $product['weight']),
+            $related ? $this->getDeliveryRelatedProducts($model, $promoPrice, $quantity) : null
         );
     }
 
@@ -458,7 +482,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $product,
             $this->createQuantity($product, $quantity),
             $this->getRelatedProductBasePrice($product, $quantity),
-            $this->getRelatedProductPromoPrice($product, $quantity)
+            $this->getRelatedProductPromoPrice($product, $quantity),
+            true
         );
     }
 
@@ -802,5 +827,87 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
             return new ProductImage($smallSize['url'], $normalSize['url']);
         }, $images);
+    }
+
+    /**
+     * @return DeliveryOption[]
+     */
+    private function getAvailableDeliveryOptions(\Cart $cart): array
+    {
+        if (null === $this->availableDeliveryOptions) {
+            $this->availableDeliveryOptions = $this->deliveryFactory->getAvailableDeliveryOptions($cart);
+        }
+
+        return $this->availableDeliveryOptions;
+    }
+
+    /**
+     * @return DeliveryRelatedProducts[]|null
+     */
+    private function getDeliveryRelatedProducts(\Product $productModel, Price $price, Quantity $quantity): ?array
+    {
+        $productDeliveryDetails = [];
+
+        if (null === $this->cartSummary) {
+            return null;
+        }
+
+        foreach (DeliveryType::cases() as $deliveryType) {
+            $freeDeliveryAmount = $this->getFreeDeliveryAmount($deliveryType);
+            $productDelivery = $this->productDeliveryFactory->createForRelatedProduct($deliveryType, $this->cartSummary, $this->cart, $productModel, $price, $quantity, $freeDeliveryAmount);
+            $productDeliveryDetails[] = $productDelivery;
+        }
+
+        return $productDeliveryDetails;
+    }
+
+    /**
+     * @return DeliveryProduct[]|null
+     */
+    private function getDeliveryProduct(\Product $product, Price $price, Quantity $quantity, float $weight): ?array
+    {
+        $hasUnavailable = false;
+        $productDeliveryDetails = [];
+
+        foreach (DeliveryType::cases() as $deliveryType) {
+            $productDelivery = $this->createCartProductDeliveryDetails($deliveryType, $product, $price, $quantity, $weight);
+            $productDeliveryDetails[] = $productDelivery;
+
+            if (!$productDelivery->isDeliveryAvailable()) {
+                $hasUnavailable = true;
+            }
+        }
+
+        if (!$hasUnavailable) {
+            return null;
+        }
+
+        return $productDeliveryDetails;
+    }
+
+    private function createCartProductDeliveryDetails(DeliveryType $deliveryType, \Product $product, Price $price, Quantity $quantity, float $weight): DeliveryProduct
+    {
+        foreach ($this->getAvailableDeliveryOptions($this->cart) as $deliveryOption) {
+            if ($deliveryType === $deliveryOption->getType()) {
+                return new DeliveryProduct($deliveryType, true);
+            }
+        }
+
+        return $this->productDeliveryFactory->createForCartProduct($deliveryType, $this->cart, $product, $price, $weight, $quantity);
+    }
+
+    private function getFreeDeliveryAmount(DeliveryType $deliveryType): ?float
+    {
+        foreach ($this->getAvailableDeliveryOptions($this->cart) as $deliveryOption) {
+            if ($deliveryType === $deliveryOption->getType()) {
+                if (null === $amount = $deliveryOption->getFreeDeliveryMinimumGrossPrice()) {
+                    return null;
+                }
+
+                return $amount->getPriceAmount();
+            }
+        }
+
+        return null;
     }
 }

@@ -59,6 +59,7 @@ final class DisplayIziThankYou implements HookInterface
 
     /**
      * @param $presentedOrder OrderLazyArray|array
+     *
      * @return \Order|null
      */
     private function getOrderObject($presentedOrder): ?\Order

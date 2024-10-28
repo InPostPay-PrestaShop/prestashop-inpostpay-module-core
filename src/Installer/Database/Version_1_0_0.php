@@ -14,9 +14,9 @@ final class Version_1_0_0 extends AbstractMigration
         return '1.0.0';
     }
 
-    public function up(): bool
+    public function up(): void
     {
-        return $this->db->execute('
+        $this->connection->executeStatement('
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'inpostizi_basket_session` (
                 id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
                 session_id TEXT,

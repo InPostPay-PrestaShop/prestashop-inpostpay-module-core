@@ -10,7 +10,6 @@ use Symfony\Component\Form\FormEvents;
 
 final class ReindexDataListener implements EventSubscriberInterface
 {
-
     public static function getSubscribedEvents(): array
     {
         return [

@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace izi\prestashop;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use izi\prestashop\Controller\Admin\ConfigurationController;
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
 use izi\prestashop\DependencyInjection\Dumper\PhpDumper;
-use izi\prestashop\Handler\Config\CheckStatusHandler;
 use PrestaShopBundle\PrestaShopBundle;
 use Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;

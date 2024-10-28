@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace izi\prestashop\MerchantApi\Handler;
 
 use izi\prestashop\Builder\Order\OrderStatusDescriptionProvider;
-use izi\prestashop\Common\Order\MerchantOrderStatusData;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\MerchantApi\Command\UpdateOrderCommand;
 use izi\prestashop\MerchantApi\Exception\OrderNotFoundException;
 use izi\prestashop\MerchantApi\Model\Order\Request\OrderEvent;
 use izi\prestashop\MerchantApi\Model\Order\Request\PaymentStatus;
+use izi\prestashop\MerchantApi\Model\Order\Response\OrderStatusData;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -52,7 +52,7 @@ final class UpdateOrderHandler implements UpdateOrderHandlerInterface
         return UpdateOrderCommand::class;
     }
 
-    public function __invoke(UpdateOrderCommand $command): MerchantOrderStatusData
+    public function __invoke(UpdateOrderCommand $command): OrderStatusData
     {
         $order = $this->repository->find((int) $command->getOrderId());
 
@@ -65,7 +65,7 @@ final class UpdateOrderHandler implements UpdateOrderHandlerInterface
         $this->updateOrderStatus($order, $event);
         $this->saveTransactionId($order, $event);
 
-        return new MerchantOrderStatusData(
+        return new OrderStatusData(
             null,
             $this->statusDescriptionProvider->getStatus($order)
         );

@@ -56,13 +56,13 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.9.2';
+        $this->version = '1.10.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
         $this->ps_versions_compliancy = [
             'min' => '1.7.0.0',
-            'max' => '8.1.99',
+            'max' => '8.2.99',
         ];
 
         parent::__construct();
@@ -89,10 +89,13 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return false;
         }
 
-        $dbInstaller = new DatabaseInstaller();
-
-        if (!$dbInstaller->install($this)) {
+        try {
+            (new DatabaseInstaller())->install($this);
+        } catch (Exception $e) {
             $this->_errors[] = $this->l('Could not update the database schema.');
+            $this->getLogger()->critical('Installer error: {exception}.', [
+                'exception' => $e,
+            ]);
 
             return false;
         }
@@ -111,6 +114,38 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $this->setUpRoutingLoaderResolver();
 
         return parent::uninstall();
+    }
+
+    /**
+     * @return array
+     */
+    public function runUpgradeModule()
+    {
+        try {
+            $result = parent::runUpgradeModule();
+
+            if (!$result['available_upgrade']) {
+                return $result;
+            }
+
+            if ($result['success']) {
+                $this->getLogger()->info('Upgraded module to version {version}.', [
+                    'version' => $result['upgraded_to'],
+                ]);
+            } else {
+                $this->getLogger()->error('Could not upgrade module.', [
+                    'details' => $result,
+                ]);
+            }
+
+            return $result;
+        } catch (\Throwable $e) {
+            $this->getLogger()->critical('Upgrade error: {exception}.', [
+                'exception' => $e,
+            ]);
+
+            throw $e;
+        }
     }
 
     /**
@@ -192,9 +227,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
                 ->get(HookExecutorInterface::class)
                 ->execute($hookName, $parameters);
         } catch (Throwable $e) {
-            $this->getLogger()->critical('Error executing hook "{hookName}": {error}', [
+            $this->getLogger()->critical('Error executing hook "{hookName}": {exception}', [
                 'hookName' => $hookName,
-                'error' => $e,
+                'exception' => $e,
             ]);
 
             if ($this->isDebugEnabled()) {

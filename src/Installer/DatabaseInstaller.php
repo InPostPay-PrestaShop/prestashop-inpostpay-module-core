@@ -6,6 +6,7 @@ namespace izi\prestashop\Installer;
 
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ShopAwareConfigurationInterface;
+use izi\prestashop\Database\Connection;
 use izi\prestashop\Installer\Database\Version_1_4_0;
 use izi\prestashop\Installer\Database\Version_1_9_0;
 
@@ -32,7 +33,7 @@ final class DatabaseInstaller
         $this->migrations = $migrations ?? $this->getDefaultMigrations();
     }
 
-    public function install(\Module $module): bool
+    public function install(\Module $module): void
     {
         $currentVersion = $this->configuration->getGlobal(self::SCHEMA_VERSION_CONFIG_KEY) ?: '0';
 
@@ -42,17 +43,13 @@ final class DatabaseInstaller
             }
 
             if (\Tools::version_compare($module->version, $version)) {
-                return true;
+                return;
             }
 
-            if (!$this->migrateUp($migration)) {
-                return false;
-            }
+            $this->migrateUp($migration);
 
             $currentVersion = $version;
         }
-
-        return true;
     }
 
     private function getSortedMigrations(): array
@@ -69,19 +66,10 @@ final class DatabaseInstaller
         return $migrations;
     }
 
-    private function migrateUp(DatabaseMigrationInterface $migration): bool
+    private function migrateUp(DatabaseMigrationInterface $migration): void
     {
-        try {
-            if (!$migration->up()) {
-                return false;
-            }
-
-            $this->updateSchemaVersion($migration->getVersion());
-        } catch (\Exception $e) {
-            return false;
-        }
-
-        return true;
+        $migration->up();
+        $this->updateSchemaVersion($migration->getVersion());
     }
 
     private function updateSchemaVersion(?string $version): void
@@ -94,11 +82,11 @@ final class DatabaseInstaller
      */
     private function getDefaultMigrations(): array
     {
-        $db = \Db::getInstance();
+        $connection = new Connection(\Db::getInstance());
 
         return [
-            new Version_1_4_0($db),
-            new Version_1_9_0($db),
+            new Version_1_4_0($connection),
+            new Version_1_9_0($connection),
         ];
     }
 }
