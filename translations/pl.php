@@ -14,10 +14,10 @@ $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_9d7278cdb71e13934fa097ee3d
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_47b43d98eac64ba3744f6a317beb332d'] = 'Widget będzie wyświetlany w podglądzie koszyka. Wymaga użycia niestandardowego hooku - należy zaimplementować w szablonie \"{hook h=\'displayIziCartPreviewButton\'}\".';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_bb54cce5a0fb4e80d1b2dce5a28d6efb'] = 'Strona koszyka';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_e6f28601734051de0cef66878bac1c0e'] = 'Strona produktu';
-$_MODULE['<{inpostizi}prestashop>guiconfigurationtype_3a76dfe4d90c1f5622a12f85901fba21'] = 'Podgląd koszyka';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_024588fa3c938f335a36fec9f17624f4'] = 'Strona logowania';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_6b0a73cbb6db5290d1efe67976ef14c0'] = 'Strona rejestracji';
 $_MODULE['<{inpostizi}prestashop>guiconfigurationtype_30ae44c4afa98b529400daa23dfc0202'] = 'Strona zamówienia';
+$_MODULE['<{inpostizi}prestashop>guiconfigurationtype_3a76dfe4d90c1f5622a12f85901fba21'] = 'Podgląd koszyka';
 $_MODULE['<{inpostizi}prestashop>shippingconfigurationtype_5055d1a4444c630d6839f48ab48aef91'] = 'Kurier';
 $_MODULE['<{inpostizi}prestashop>shippingconfigurationtype_39b6fda48dbec22f92c82517456047c2'] = 'Paczkomat';
 $_MODULE['<{inpostizi}prestashop>environmentchoicetype_2652eec977dcb2a5aea85f5bec235b05'] = 'Sandbox';
@@ -26,6 +26,7 @@ $_MODULE['<{inpostizi}prestashop>environmentchoicetype_19dd6c1cec504ac854645f352
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_0ba29c6a1afacf586b03a26162c72274'] = 'Środowisko';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_02a5fb45d7cc2eb4a4913f760b397416'] = 'Wybierz środowisko, na którym chcesz pokazać usługę InPost Pay. Pamiętaj, aby przed przejściem na środowisko produkcyjne upewnić się, że usługa w Twoim sklepie działa prawidłowo.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_fd282be0a539046c5c22736ef41f4350'] = 'Status zamówienia utworzonego przez InPost Pay';
+$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_32e0295e9c28454d52b4f4f3643b46e7'] = 'Status zamówienia utworzonego przez InPost Pay (płatność za pobraniem)';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_05a5fcc9d88a553b80b2633aa4556d58'] = 'Status dla zamówienia opłaconego przez InPost Pay';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_33af8066d3c83110d4bd897f687cedd2'] = 'Statusy zamówień';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_3a6abb709e118a970dd1ddd06f5c0fcd'] = 'Dostępne metody płatności';

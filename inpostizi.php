@@ -92,7 +92,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         try {
             (new DatabaseInstaller())->install($this);
         } catch (Exception $e) {
-            $this->_errors[] = $this->l('Could not update the database schema: .' . $e->getMessage());
+            $this->_errors[] = $this->l('Could not update the database schema.');
             $this->getLogger()->critical('Installer error: {exception}.', [
                 'exception' => $e,
             ]);
