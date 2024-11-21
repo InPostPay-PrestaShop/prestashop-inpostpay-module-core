@@ -2,7 +2,11 @@ import dispatchInpostUpdateCount from "../widget/dispatchInpostUpdateCount";
 import getCartCountRequest from "../http/getCartCountRequest";
 
 const updateCartHandler = async (event) => {
-  const count = event?.resp?.cart?.products_count || null;
+  let count = event?.resp?.cart?.products_count || null;
+
+  if (null === count) {
+    count = window.prestashop?.cart?.products_count || null;
+  }
 
   if (typeof count === 'number') {
     dispatchInpostUpdateCount(count);

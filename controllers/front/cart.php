@@ -2,19 +2,18 @@
 
 class InpostIziCartModuleFrontController extends ModuleFrontController
 {
-    protected $content_only;
-
-    public function displayAjax()
+    public function init()
     {
-        $this->display();
-    }
+        parent::init();
 
-    public function display()
-    {
         header('Content-type: application/json');
+        $nbTotalProducts = 0;
+
+        if (Validate::isLoadedObject($this->context->cart) === false) {
+            exit(json_encode(['count' => $nbTotalProducts]));
+        }
 
         $products = $this->context->cart->getProducts();
-        $nbTotalProducts = 0;
 
         foreach ($products as $product) {
             $nbTotalProducts += (int) $product['cart_quantity'];
