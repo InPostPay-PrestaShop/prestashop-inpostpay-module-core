@@ -13,6 +13,7 @@ use izi\prestashop\Hook\HookExecutorInterface;
 use izi\prestashop\Hook\WidgetConfigurationResolver;
 use izi\prestashop\Hook\WidgetRenderer;
 use izi\prestashop\Installer\DatabaseInstaller;
+use izi\prestashop\Module\Exception\ModuleErrorInterface;
 use PrestaShop\PrestaShop\Adapter\ContainerBuilder as PrestaShopContainerBuilder;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
@@ -53,10 +54,15 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     private $adminKernel;
 
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.10.0';
+        $this->version = '1.11.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -139,7 +145,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             }
 
             return $result;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->getLogger()->critical('Upgrade error: {exception}.', [
                 'exception' => $e,
             ]);
@@ -227,6 +233,10 @@ class InPostIzi extends PaymentModule implements WidgetInterface
                 ->get(HookExecutorInterface::class)
                 ->execute($hookName, $parameters);
         } catch (Throwable $e) {
+            if ($e instanceof ModuleErrorInterface) {
+                throw $e;
+            }
+
             $this->getLogger()->critical('Error executing hook "{hookName}": {exception}', [
                 'hookName' => $hookName,
                 'exception' => $e,
@@ -321,15 +331,33 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     public function getCurrentRequest()
     {
+        return $this->getRequestStack()->getCurrentRequest() ?: Request::createFromGlobals();
+    }
+
+    /**
+     * @return RequestStack
+     *
+     * @internal
+     */
+    public function getRequestStack()
+    {
+        if (isset($this->requestStack)) {
+            return $this->requestStack;
+        }
+
         try {
             /** @var RequestStack $requestStack */
             $requestStack = $this->get('request_stack');
-            $request = $requestStack->getCurrentRequest();
+            if (null !== $requestStack->getCurrentRequest()) {
+                return $this->requestStack = $requestStack;
+            }
         } catch (ServiceNotFoundException $e) {
-            $request = null;
         }
 
-        return null !== $request ? $request : $this->createRequestFromGlobals();
+        $this->requestStack = new RequestStack();
+        $this->requestStack->push(Request::createFromGlobals());
+
+        return $this->requestStack;
     }
 
     /**
@@ -346,20 +374,6 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         } catch (Exception $e) {
             return new Psr\Log\NullLogger();
         }
-    }
-
-    /**
-     * @return Request
-     */
-    private function createRequestFromGlobals()
-    {
-        static $request;
-
-        if (!isset($request)) {
-            $request = Request::createFromGlobals();
-        }
-
-        return $request;
     }
 
     /**

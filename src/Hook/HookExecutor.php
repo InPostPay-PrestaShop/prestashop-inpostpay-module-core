@@ -33,6 +33,9 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
     public static function getSubscribedServices(): array
     {
         return [
+            Admin\ActionAdminControllerSetMedia::HOOK_NAME => '?' . Admin\ActionAdminControllerSetMedia::class,
+            Admin\ActionAdminCartRuleSaveAfter::HOOK_NAME => '?' . Admin\ActionAdminCartRuleSaveAfter::class,
+            Admin\DisplayBackOfficeHeader::HOOK_NAME => '?' . Admin\DisplayBackOfficeHeader::class,
             Admin\DisplayAdminOrderLeft::HOOK_NAME => '?' . Admin\DisplayAdminOrderLeft::class,
             Admin\DisplayAdminOrderSide::HOOK_NAME => '?' . Admin\DisplayAdminOrderSide::class,
 

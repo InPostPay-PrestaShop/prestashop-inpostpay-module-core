@@ -8,6 +8,7 @@ use izi\prestashop\Command\BindBasketCommand;
 use izi\prestashop\Command\Config\CheckStatusCommand;
 use izi\prestashop\Command\Config\DownloadModuleDataCommand;
 use izi\prestashop\Command\Config\UpdateAdvancedConfigurationCommand;
+use izi\prestashop\Command\Config\UpdateCartRuleOptionsCommand;
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
@@ -27,6 +28,7 @@ use izi\prestashop\Handler\BindBasketHandlerInterface;
 use izi\prestashop\Handler\Config\CheckStatusHandlerInterface;
 use izi\prestashop\Handler\Config\DownloadModuleDataHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandlerInterface;
+use izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface;
@@ -98,6 +100,7 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             UpdateAdvancedConfigurationCommand::class => '?' . UpdateAdvancedConfigurationHandlerInterface::class,
             CheckStatusCommand::class => '?' . CheckStatusHandlerInterface::class,
             DownloadModuleDataCommand::class => '?' . DownloadModuleDataHandlerInterface::class,
+            UpdateCartRuleOptionsCommand::class => '?' . UpdateCartRuleOptionsHandlerInterface::class,
         ];
     }
 

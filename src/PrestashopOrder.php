@@ -426,15 +426,23 @@ class PrestashopOrder
             return [];
         }
 
-        return array_map(static function (string $attribute): ProductAttribute {
-            [$group, $name] = explode(':', $attribute, 2);
+        $result = [];
+
+        foreach ($matches['attribute'] as $attribute) {
+            [$group, $name] = array_map('trim', explode(':', $attribute, 2));
+
+            if ('' === $group || '' === $name) {
+                continue;
+            }
 
             $productAttribute = new ProductAttribute();
-            $productAttribute->attribute_name = trim($group);
-            $productAttribute->attribute_value = trim($name);
+            $productAttribute->attribute_name = $group;
+            $productAttribute->attribute_value = $name;
 
-            return $productAttribute;
-        }, $matches['attribute']);
+            $result[] = $productAttribute;
+        }
+
+        return $result;
     }
 
     private function formatDescription(string $description): string

@@ -1,6 +1,7 @@
 # config page configuration
 imports:
   - { resource: services/common.yml }
+  - { resource: services/common_admin.yml }
 
 services:
   izi\prestashop\CommandBus:
@@ -21,14 +22,6 @@ services:
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@inpost.izi.context'
       - !tagged inpost.izi.config_initializer
-
-  izi\prestashop\View\Asset\AssetManagerInterface: '@izi\prestashop\View\Asset\AdminAssetManager'
-  izi\prestashop\View\Asset\AdminAssetManager:
-    class: izi\prestashop\View\Asset\AdminAssetManager
-    public: false
-    arguments:
-      - '@inpost.izi.module'
-      - '@inpost.izi.context'
 
   izi\prestashop\Form\Type\GeneralConfigurationType:
     class: izi\prestashop\Form\Type\GeneralConfigurationType

@@ -35,7 +35,7 @@ final class ActionCartDeleteBefore implements HookInterface
         $cart = $parameters['object'] ?? null;
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Parameter "object" expected to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
+            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
         }
 
         if (0 >= $cartId = (int) $cart->id) {

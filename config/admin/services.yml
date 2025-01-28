@@ -1,6 +1,7 @@
 # PS >= 1.7.4 BO configuration
 imports:
   - { resource: ../services/sf34.yml }
+  - { resource: ../services/common_admin.yml }
 
 parameters:
   container.autowiring.strict_mode: true
@@ -9,12 +10,25 @@ services:
   _defaults:
     public: false
     autowire: true
+    bind:
+      $context: '@inpost.izi.context'
+      $assetsProviders: !tagged inpost.izi.admin_assets_provider
+      $formFactory: '@=container.has("form.factory") ? service("form.factory") : service("inpost.izi.form_factory")'
+
+  izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter:
+    class: izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter
+
+  izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia:
+    class: izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia
 
   izi\prestashop\Hook\Admin\DisplayAdminOrderSide:
     class: izi\prestashop\Hook\Admin\DisplayAdminOrderSide
 
   izi\prestashop\Hook\Admin\DisplayAdminOrderLeft:
     class: izi\prestashop\Hook\Admin\DisplayAdminOrderLeft
+
+  izi\prestashop\Hook\Admin\DisplayBackOfficeHeader:
+    class: izi\prestashop\Hook\Admin\DisplayBackOfficeHeader
 
   izi\prestashop\CommandBus:
     class: izi\prestashop\CommandBus
@@ -25,3 +39,19 @@ services:
     tags: [ container.service_subscriber ]
     arguments:
       $widget: '@inpost.izi.module'
+
+  izi\prestashop\Form\FormFactoryFactory:
+    class: izi\prestashop\Form\FormFactoryFactory
+
+  inpost.izi.form_factory:
+    class: Symfony\Component\Form\FormFactoryInterface
+    factory: [ '@izi\prestashop\Form\FormFactoryFactory', create ]
+    arguments:
+      - '@inpost.izi.form_type_locator'
+
+  inpost.izi.form_type_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - { name: container.service_locator }
+    arguments:
+      - izi\prestashop\Form\Type\CartRuleOptionsType: '@izi\prestashop\Form\Type\CartRuleOptionsType'

@@ -35,7 +35,7 @@ final class ActionShipmentAddAfter implements HookInterface
         $shipment = $parameters['object'] ?? null;
 
         if (!$shipment instanceof \InPostShipmentModel) {
-            throw new \InvalidArgumentException(sprintf('Parameter "object" expected to be an instance of "%s", "%s" given.', \InPostShipmentModel::class, get_debug_type($shipment)));
+            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \InPostShipmentModel::class, get_debug_type($shipment)));
         }
 
         $this->dispatcher->dispatch(new ShipmentEvent($shipment), ShipmentEvent::CREATED);

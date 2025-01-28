@@ -61,7 +61,7 @@ final class DisplayOrderConfirmation implements HookInterface
         $order = $parameters['order'] ?? null;
 
         if (!$order instanceof \Order) {
-            throw new \InvalidArgumentException(sprintf('Parameter "order" expected to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($order)));
+            throw new \InvalidArgumentException(sprintf('Expected parameter "order" to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($order)));
         }
 
         $this->removeSavedBasketId($order);
