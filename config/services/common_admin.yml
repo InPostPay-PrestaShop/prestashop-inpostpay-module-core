@@ -1,0 +1,32 @@
+# common BO configuration
+services:
+  izi\prestashop\View\Asset\AssetManagerInterface: '@izi\prestashop\View\Asset\AdminAssetManager'
+  izi\prestashop\View\Asset\AdminAssetManager:
+    class: izi\prestashop\View\Asset\AdminAssetManager
+    public: false
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+
+  izi\prestashop\View\Asset\Provider\Admin\CartRulesAssetsProvider:
+    class: izi\prestashop\View\Asset\Provider\Admin\CartRulesAssetsProvider
+    public: false
+    tags:
+      - { name: inpost.izi.admin_assets_provider }
+    arguments:
+      - '@inpost.izi.context'
+      - '@inpost.izi.request_stack'
+
+  izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandlerInterface: '@izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandler'
+  izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandler:
+    class: izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    autowire: true
+
+  izi\prestashop\Form\Type\CartRuleOptionsType:
+    class: izi\prestashop\Form\Type\CartRuleOptionsType
+    tags:
+      - { name: form.type }
+    autowire: true

@@ -41,7 +41,7 @@ final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
         $orderId = $parameters['id_order'] ?? null;
 
         if (!is_int($orderId)) {
-            throw new \InvalidArgumentException(sprintf('Parameter "id_order" expected to be an integer, "%s" given.', get_debug_type($orderId)));
+            throw new \InvalidArgumentException(sprintf('Expected parameter "id_order" to be an integer, "%s" given.', get_debug_type($orderId)));
         }
 
         if (!$orderData = CartSession::getOrderData($orderId)) {

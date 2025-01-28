@@ -62,7 +62,19 @@ class Connection
             return $this->db->execute($sql);
         });
 
-        return (int) $this->db->numRows();
+        return (int) $this->db->Affected_Rows();
+    }
+
+    /**
+     * @param string $sql
+     *
+     * @return array<string, mixed>|false
+     */
+    public function fetchAssociative(string $sql)
+    {
+        return $this->execute(function () use ($sql) {
+            return $this->db->getRow($sql);
+        });
     }
 
     public function fetchAllAssociative(string $sql): array
@@ -104,6 +116,27 @@ class Connection
         });
     }
 
+    /**
+     * @param array<string, mixed> $data column-value pairs
+     * @param array<string|int, mixed> $criteria update criteria
+     *
+     * @return int Number of affected rows
+     */
+    public function update(string $table, array $data, array $criteria = []): int
+    {
+        $this->execute(function () use ($table, $data, $criteria) {
+            return $this->db->update(
+                $table,
+                $data,
+                $this->getWhereConditions($criteria),
+                0,
+                true
+            );
+        });
+
+        return (int) $this->db->Affected_Rows();
+    }
+
     private function normalizeException(\PrestaShopException $e): \PrestaShopDatabaseException
     {
         $previous = $e->getPrevious();
@@ -112,5 +145,35 @@ class Connection
             : $this->db->getNumberError();
 
         return new \PrestaShopDatabaseException($e->getMessage(), $errorCode, $e);
+    }
+
+    /**
+     * @param array<string, mixed> $criteria
+     */
+    private function getWhereConditions(array $criteria): string
+    {
+        if ([] === $criteria) {
+            return '';
+        }
+
+        $conditions = [];
+
+        foreach ($criteria as $key => $value) {
+            if (is_int($key)) {
+                // $value should be raw SQL
+                $conditions[] = (string) $value;
+
+                continue;
+            }
+
+            $column = bqSQL($key);
+            if (null === $value) {
+                $conditions[] = sprintf('`%s` IS NULL', $column);
+            } else {
+                $conditions[] = sprintf('`%s` = \'%s\'', $column, pSQL($value));
+            }
+        }
+
+        return implode(' AND ', $conditions);
     }
 }

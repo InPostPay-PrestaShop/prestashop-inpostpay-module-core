@@ -7,6 +7,7 @@ namespace izi\prestashop\Hook\Front;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\GeneralConfiguration;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
+use izi\prestashop\Hook\AssetRegistryUpdaterTrait;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Security\AuthorizationChecker;
 use izi\prestashop\Security\Voter\BindingWidgetVoter;
@@ -19,12 +20,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 final class ActionFrontControllerSetMedia implements HookInterface
 {
-    public const HOOK_NAME = 'actionFrontControllerSetMedia';
+    use AssetRegistryUpdaterTrait;
 
-    /**
-     * @var AssetManagerInterface
-     */
-    private $assetManager;
+    public const HOOK_NAME = 'actionFrontControllerSetMedia';
 
     /**
      * @var AuthorizationCheckerInterface
@@ -113,24 +111,5 @@ final class ActionFrontControllerSetMedia implements HookInterface
         }
 
         // $this->module->l('Something went wrong. Please try again later.', self::HOOK_NAME) kept for \AdminTranslationsController translatable message discovery
-    }
-
-    private function registerAssets(AssetsProviderInterface $assetsProvider): void
-    {
-        if (null === $assets = $assetsProvider->getAssets()) {
-            return;
-        }
-
-        foreach ($assets->getJavaScripts() as $path => $options) {
-            $this->assetManager->registerJavaScript($path, $options);
-        }
-
-        foreach ($assets->getStyleSheets() as $path => $options) {
-            $this->assetManager->registerStyleSheet($path, $options);
-        }
-
-        if ([] !== $jsVars = $assets->getJavaScriptVariables()) {
-            $this->assetManager->registerJavaScriptVariables($jsVars);
-        }
     }
 }

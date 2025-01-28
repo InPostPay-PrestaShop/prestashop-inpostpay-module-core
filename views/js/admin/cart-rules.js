@@ -1,0 +1,3 @@
+(()=>{(()=>{"use strict";var l={};(e=>{document.readyState==="loading"?document.addEventListener("DOMContentLoaded",e):e()})(()=>{const e=document.getElementById("inpostizi_form_tab"),t=document.getElementById("cart_rule_form");e!==null&&t!==null&&t.appendChild(e.content.cloneNode(!0));const n=document.getElementById("inpostizi_nav_link"),o=document.getElementById("cart_rule_link_actions").closest("ul");n!==null&&o!==null&&o.appendChild(n.content.cloneNode(!0))})})();})();
+
+//# sourceMappingURL=cart-rules.js.map

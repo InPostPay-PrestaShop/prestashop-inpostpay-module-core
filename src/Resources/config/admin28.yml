@@ -28,11 +28,6 @@ services:
     calls:
       - { method: setContainer, arguments: [ '@service_container' ] }
 
-  izi\prestashop\Form\TypeExtension\ChoicesAsValuesTypeExtension:
-    class: izi\prestashop\Form\TypeExtension\ChoicesAsValuesTypeExtension
-    tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\ChoiceType }
-
   annotations.dummy_registry:
     class: Doctrine\Common\Annotations\AnnotationRegistry
     calls:

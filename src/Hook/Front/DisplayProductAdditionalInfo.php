@@ -63,7 +63,7 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
         $product = $parameters['product'] ?? null;
 
         if (!isset($product['id_product']) || !is_numeric($product['id_product'])) {
-            throw new \InvalidArgumentException(sprintf('Parameter "product" expected to be an array or an instance of "%s", "%s" given.', ProductLazyArray::class, get_debug_type($product)));
+            throw new \InvalidArgumentException(sprintf('Expected parameter "product" to be an array or an instance of "%s", "%s" given.', ProductLazyArray::class, get_debug_type($product)));
         }
 
         if (self::HOOK_NAME !== $this->generalConfiguration->getProductCardDisplayHook()) {

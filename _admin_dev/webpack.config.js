@@ -11,7 +11,9 @@ const entries = [
 ];
 
 const getEntries = () => {
-  const entry = {};
+  const entry = {
+    'cart-rules': './src/js/cart-rules.js',
+  };
 
   entries.forEach((name) => {
     entry[name] = [

@@ -63,7 +63,7 @@ final class ActionGetPaymentOptions implements HookInterface
         $cart = $parameters['cart'] ?? null;
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
+            throw new \InvalidArgumentException(sprintf('Expected parameter "cart" to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
         }
 
         if (0 >= (int) $cart->id || !$this->currencyChecker->check($this->paymentModule, (int) $cart->id_currency)) {

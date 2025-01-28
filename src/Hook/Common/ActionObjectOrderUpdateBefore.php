@@ -32,7 +32,7 @@ final class ActionObjectOrderUpdateBefore implements HookInterface
         $orderObj = $parameters['object'] ?? null;
 
         if (!$orderObj instanceof \Order) {
-            throw new \InvalidArgumentException(sprintf('Parameter "object" expected to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($orderObj)));
+            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($orderObj)));
         }
 
         $this->dispatcher->dispatch(new OrderEvent($orderObj), OrderEvent::BEFORE_UPDATE);
