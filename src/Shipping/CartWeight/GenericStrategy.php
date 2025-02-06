@@ -10,7 +10,7 @@ final class GenericStrategy implements CartWeightDeliveryStrategyInterface
 {
     public function isShippingAvailableBasedOnTotalWeight(\Carrier $carrier, Weight $cartWeight): bool
     {
-        return $this->checkMaxWeight($carrier, $cartWeight) && (!$carrier->range_behavior || (int) $carrier->shipping_method !== \Carrier::SHIPPING_METHOD_WEIGHT);
+        return $this->checkMaxWeight($carrier, $cartWeight);
     }
 
     private function checkMaxWeight(\Carrier $carrier, Weight $cartWeight): bool
