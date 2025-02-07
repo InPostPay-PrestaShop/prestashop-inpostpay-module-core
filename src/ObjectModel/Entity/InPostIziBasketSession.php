@@ -55,6 +55,11 @@ class InPostIziBasketSession extends \ObjectModel
      */
     public $redirected = false;
 
+    /**
+     * @var string|null
+     */
+    public $binding_api_key;
+
     public static $definition = [
         'table' => 'inpostizi_basket_session',
         'primary' => 'id',
@@ -68,6 +73,7 @@ class InPostIziBasketSession extends \ObjectModel
             'basket_cache' => ['type' => self::TYPE_STRING, 'allow_null' => true],
             'coupons' => ['type' => self::TYPE_BOOL, 'allow_null' => true],
             'redirected' => ['type' => self::TYPE_BOOL],
+            'binding_api_key' => ['type' => self::TYPE_STRING, 'allow_null' => true],
         ],
     ];
 }

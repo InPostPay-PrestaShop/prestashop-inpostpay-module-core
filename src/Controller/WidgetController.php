@@ -8,7 +8,9 @@ use izi\prestashop\BasketApp\Basket\Request\Browser;
 use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\Command\BindBasketCommand;
 use izi\prestashop\Command\GenerateDeepLinkCommand;
+use izi\prestashop\Command\GetBasketBindingKeyCommand;
 use izi\prestashop\Command\GetBindingConfirmationCommand;
+use izi\prestashop\Command\GetOrderConfirmationUrlCommand;
 use izi\prestashop\Command\GetOrderEventsCommand;
 use izi\prestashop\Command\GetProductWidgetCommand;
 use izi\prestashop\Command\UnbindBasketCommand;
@@ -16,8 +18,10 @@ use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Common\Currency;
 use izi\prestashop\Common\PhoneNumber;
+use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\Entities\Cart;
+use izi\prestashop\Handler\Result\BasketBindingKey;
 use izi\prestashop\Handler\Result\BasketBindingResult;
 use izi\prestashop\Handler\Result\BindingConfirmationStream;
 use izi\prestashop\Handler\Result\DeepLink;
@@ -25,19 +29,28 @@ use izi\prestashop\Handler\Result\OrderEventStream;
 use izi\prestashop\Handler\Result\ProductWidgetResult;
 use izi\prestashop\Http\Exception\HttpExceptionInterface as BasketAppHttpException;
 use izi\prestashop\Http\Response\EventStreamResponse;
+use izi\prestashop\Security\Voter\BindingWidgetVoter;
 use Psr\Clock\ClockInterface;
+use Psr\Container\ContainerInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
-final class WidgetController
+final class WidgetController implements ServiceSubscriberInterface
 {
     public const TRANSLATION_SOURCE = 'widgetcontroller';
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
 
     /**
      * @var \Module
@@ -64,7 +77,7 @@ final class WidgetController
      */
     private $bus;
 
-    public function __construct(\Module $module, \Context $context, ClockInterface $clock, DenormalizerInterface $denormalizer, CommandBusInterface $bus)
+    public function __construct(\Module $module, \Context $context, ?ClockInterface $clock, ?DenormalizerInterface $denormalizer, CommandBusInterface $bus)
     {
         $this->module = $module;
         $this->context = $context;
@@ -73,6 +86,64 @@ final class WidgetController
         $this->bus = $bus;
     }
 
+    public static function getSubscribedServices(): array
+    {
+        return [
+            '?' . AuthorizationCheckerInterface::class,
+            '?' . DenormalizerInterface::class,
+            '?' . ClockInterface::class,
+        ];
+    }
+
+    /**
+     * @required
+     */
+    public function setContainer(ContainerInterface $container): void
+    {
+        $this->container = $container;
+    }
+
+    public function getBindingKey(Request $request): JsonResponse
+    {
+        try {
+            $this->denyAccessUnlessGranted(BindingWidgetVoter::VIEW, $request);
+
+            if (!\Validate::isLoadedObject($this->context->cart)) {
+                return new JsonResponse([
+                    'message' => $this->module->l('Cart does not exist.', self::TRANSLATION_SOURCE),
+                    'error_code' => 'CART_NOT_FOUND',
+                ], 404);
+            }
+
+            $command = new GetBasketBindingKeyCommand($this->createBasket());
+
+            /** @var BasketBindingKey $result */
+            $result = $this->bus->handle($command);
+            $this->context->cookie->inpostizi_basket_id = $result->getBasketId();
+
+            return new JsonResponse($result->getBindingKey());
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    public function getOrderConfirmationUrl(Request $request): JsonResponse
+    {
+        try {
+            $command = new GetOrderConfirmationUrlCommand((string) $this->context->cookie->inpostizi_basket_id);
+
+            /** @var string $url */
+            $url = $this->bus->handle($command);
+
+            return new JsonResponse($url);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
+    }
+
+    /**
+     * @deprecated
+     */
     public function getDeepLink(): JsonResponse
     {
         try {
@@ -87,6 +158,9 @@ final class WidgetController
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function getPayData(Request $request, ?string $prefix = null, ?string $number = null): Response
     {
         try {
@@ -102,6 +176,9 @@ final class WidgetController
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function getOrderComplete(): EventStreamResponse
     {
         $command = new GetOrderEventsCommand((string) $this->context->cookie->inpostizi_basket_id);
@@ -116,6 +193,9 @@ final class WidgetController
         });
     }
 
+    /**
+     * @deprecated
+     */
     public function getIsBound(): EventStreamResponse
     {
         $command = new GetBindingConfirmationCommand($this->context->cart->id ?? null);
@@ -134,6 +214,9 @@ final class WidgetController
         });
     }
 
+    /**
+     * @deprecated
+     */
     public function deleteBinding(): JsonResponse
     {
         try {
@@ -148,13 +231,16 @@ final class WidgetController
         }
     }
 
+    /**
+     * @deprecated
+     */
     public function getWidgetHook(string $hook, int $productId): JsonResponse
     {
-        if ('' === $hook = trim($hook)) {
-            throw new BadRequestHttpException($this->module->l('Hook name is required.', self::TRANSLATION_SOURCE));
-        }
-
         try {
+            if ('' === $hook = trim($hook)) {
+                throw new BadRequestHttpException($this->module->l('Hook name is required.', self::TRANSLATION_SOURCE));
+            }
+
             $command = new GetProductWidgetCommand($hook, $productId);
 
             /** @var ProductWidgetResult $result */
@@ -218,13 +304,13 @@ final class WidgetController
         }
 
         $browser = array_merge($browser, [
-            'data_time' => $this->clock->now()->format(\DateTime::RFC3339),
+            'data_time' => $this->getClock()->now()->format(\DateTime::RFC3339),
             'customer_ip' => $request->server->get('REMOTE_ADDR'),
             'port' => $request->server->get('SERVER_PORT'),
         ]);
 
         try {
-            return $this->denormalizer->denormalize($browser, Browser::class);
+            return $this->getDenormalizer()->denormalize($browser, Browser::class);
         } catch (ExceptionInterface $e) {
             throw new BadRequestHttpException($this->module->l('Malformed browser data.', self::TRANSLATION_SOURCE), $e);
         }
@@ -283,5 +369,57 @@ final class WidgetController
         return new JsonResponse([
             'message' => $this->module->l('Something went wrong. Please try again later.', self::TRANSLATION_SOURCE),
         ], 500);
+    }
+
+    /**
+     * @param mixed $attributes
+     * @param mixed $subject
+     */
+    private function denyAccessUnlessGranted($attributes, $subject = null, string $message = 'Access Denied.'): void
+    {
+        if ($this->isGranted($attributes, $subject)) {
+            return;
+        }
+
+        throw new AccessDeniedHttpException($message);
+    }
+
+    private function isGranted($attributes, $subject = null): bool
+    {
+        if (null === $authChecker = $this->get(AuthorizationCheckerInterface::class)) {
+            return false;
+        }
+
+        return $authChecker->isGranted($attributes, $subject);
+    }
+
+    /**
+     * @template T
+     *
+     * @param class-string<T> $name
+     *
+     * @return T|null
+     */
+    private function get(string $name)
+    {
+        if (!isset($this->container)) {
+            return null;
+        }
+
+        if (!$this->container->has($name)) {
+            return null;
+        }
+
+        return $this->container->get($name);
+    }
+
+    private function getClock(): ClockInterface
+    {
+        return $this->clock ?? ($this->clock = $this->get(ClockInterface::class));
+    }
+
+    private function getDenormalizer(): DenormalizerInterface
+    {
+        return $this->denormalizer ?? ($this->denormalizer = $this->get(DenormalizerInterface::class));
     }
 }

@@ -36,6 +36,13 @@ class Assets
         return $this;
     }
 
+    public function removeJavaScript(string $path): self
+    {
+        unset($this->javaScripts[$path]);
+
+        return $this;
+    }
+
     /**
      * @return array<string, array> options by path
      */

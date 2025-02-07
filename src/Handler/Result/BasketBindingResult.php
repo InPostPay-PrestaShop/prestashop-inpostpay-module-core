@@ -7,6 +7,9 @@ namespace izi\prestashop\Handler\Result;
 use izi\prestashop\BasketApp\Basket\Response\QrCode;
 use izi\prestashop\Common\Error\Error;
 
+/**
+ * @deprecated
+ */
 final class BasketBindingResult
 {
     /**

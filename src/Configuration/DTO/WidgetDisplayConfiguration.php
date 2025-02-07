@@ -7,6 +7,7 @@ namespace izi\prestashop\Configuration\DTO;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\WidgetDisplayConfigurationInterface;
 use izi\prestashop\View\Widget\Configuration;
+use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInterface
@@ -24,7 +25,7 @@ final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInte
     private $displayed;
 
     /**
-     * @var Configuration|null
+     * @var WidgetConfigurationInterface|null
      *
      * @Assert\Valid
      */
@@ -37,7 +38,7 @@ final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInte
      */
     private $htmlStyles;
 
-    public function __construct(Configuration $widgetConfiguration, bool $displayed = false, ?HtmlStyles $htmlStyles = null)
+    public function __construct(WidgetConfigurationInterface $widgetConfiguration, bool $displayed = false, ?HtmlStyles $htmlStyles = null)
     {
         $this->bindingPlace = $widgetConfiguration->getBindingPlace();
         $this->displayed = $displayed;
@@ -52,12 +53,15 @@ final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInte
         return new self($widgetConfiguration);
     }
 
-    public function getWidgetConfiguration(): Configuration
+    /**
+     * @return WidgetConfigurationInterface
+     */
+    public function getWidgetConfiguration()
     {
         return $this->widgetConfiguration ?? new Configuration($this->bindingPlace, false);
     }
 
-    public function setWidgetConfiguration(?Configuration $widgetConfiguration): self
+    public function setWidgetConfiguration(?WidgetConfigurationInterface $widgetConfiguration): self
     {
         $this->widgetConfiguration = $widgetConfiguration;
 

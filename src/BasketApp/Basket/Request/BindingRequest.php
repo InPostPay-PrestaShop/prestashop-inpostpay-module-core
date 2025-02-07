@@ -7,6 +7,9 @@ namespace izi\prestashop\BasketApp\Basket\Request;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Common\PhoneNumber;
 
+/**
+ * @deprecated
+ */
 final class BindingRequest implements \JsonSerializable
 {
     /**

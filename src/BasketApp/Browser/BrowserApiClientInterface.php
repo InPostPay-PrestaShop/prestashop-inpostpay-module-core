@@ -6,6 +6,9 @@ namespace izi\prestashop\BasketApp\Browser;
 
 use izi\prestashop\BasketApp\Exception\BrowserNotFoundException;
 
+/**
+ * @deprecated
+ */
 interface BrowserApiClientInterface
 {
     /**

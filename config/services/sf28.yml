@@ -122,3 +122,9 @@ services:
     class: izi\prestashop\Form\TypeExtension\ChoicesAsValuesTypeExtension
     tags:
       - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\ChoiceType }
+
+  inpost.izi.widget_controller_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: inpost.izi.widget_controller_dependency, index_by: key }

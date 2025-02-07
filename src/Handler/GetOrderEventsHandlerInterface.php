@@ -7,6 +7,9 @@ namespace izi\prestashop\Handler;
 use izi\prestashop\Command\GetOrderEventsCommand;
 use izi\prestashop\Handler\Result\OrderEventStream;
 
+/**
+ * @deprecated
+ */
 interface GetOrderEventsHandlerInterface
 {
     public function __invoke(GetOrderEventsCommand $command): OrderEventStream;

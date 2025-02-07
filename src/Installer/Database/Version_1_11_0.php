@@ -17,6 +17,12 @@ class Version_1_11_0 extends AbstractMigration
 
     public function up(): void
     {
+        $this->addColumn(Version_1_4_0::SESSIONS_TABLE, 'binding_api_key', 'VARCHAR(255)');
+        $this->createCartRuleOptionsTable();
+    }
+
+    private function createCartRuleOptionsTable(): void
+    {
         $this->connection->executeStatement('
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . CartRuleRepository::TABLE_NAME . '` (
                 `id_cart_rule` INT(10) UNSIGNED NOT NULL,

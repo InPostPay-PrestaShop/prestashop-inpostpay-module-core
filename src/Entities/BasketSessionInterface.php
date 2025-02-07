@@ -10,6 +10,9 @@ use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 
 /**
  * @template T of BasketInterface
+ *
+ * @method string|null getBindingApiKey()
+ * @method setBindingApiKey(string|null $key)
  */
 interface BasketSessionInterface
 {

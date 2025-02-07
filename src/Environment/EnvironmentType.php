@@ -17,15 +17,13 @@ final class EnvironmentType extends IntEnum
     private const PRODUCTION = 2;
     private const SANDBOX = 3;
 
+    /**
+     * @deprecated
+     */
     public function createEnvironment(): EnvironmentInterface
     {
-        switch ($this) {
-            case self::Uat():
-                return new UatEnvironment();
-            case self::Sandbox():
-                return new SandboxEnvironment();
-            default:
-                return new ProductionEnvironment();
-        }
+        @trigger_error(sprintf('"%s::%s()" is deprecated, use "%s::createEnvironment()" instead.', __CLASS__, __METHOD__, EnvironmentFactory::class), E_USER_DEPRECATED);
+
+        return (new EnvironmentFactory())->createEnvironment($this);
     }
 }

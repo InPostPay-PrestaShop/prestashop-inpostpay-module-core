@@ -1,0 +1,31 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": false,
+    "es6": true
+  },
+  "globals": {
+    "$": true,
+    "document": true,
+    "navigator": false,
+    "window": true,
+    "prestashop": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "airbnb-base",
+    "plugin:prettier/recommended",
+    "plugin:import/recommended"
+  ],
+  "rules": {
+    "max-len": ["error", { "code": 140 }],
+    "no-underscore-dangle": "off",
+    "no-restricted-syntax": "off",
+    "no-param-reassign": "off",
+    "import/no-unresolved": "off"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022
+  }
+}

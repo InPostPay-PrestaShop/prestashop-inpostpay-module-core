@@ -22,6 +22,8 @@ interface BasketsApiClientInterface
      * @throws BasketNotFoundException
      * @throws BrowserNotFoundException
      * @throws BasketExpiredException
+     *
+     * @deprecated
      */
     public function upsertBasket(string $basketId, Basket $basket): UpsertBasketResponse;
 
@@ -36,12 +38,16 @@ interface BasketsApiClientInterface
      * @throws BasketAlreadyBoundException
      * @throws BasketExpiredException
      * @throws PhoneBindingUnavailableException
+     *
+     * @deprecated
      */
     public function bindBasketsByPhoneNumber(string $basketId, BindingRequest $bindingRequest): void;
 
     /**
      * @throws BasketAlreadyBoundException
      * @throws BasketExpiredException
+     *
+     * @deprecated
      */
     public function bindBasketsByDeepLink(string $basketId, BindingRequest $bindingRequest): QrCode;
 

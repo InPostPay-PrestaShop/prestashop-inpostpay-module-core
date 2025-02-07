@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Handler\Result;
 
+/**
+ * @deprecated
+ */
 final class OrderEvent implements \JsonSerializable, \Stringable
 {
     private const ACTION_REFRESH = 'refresh';

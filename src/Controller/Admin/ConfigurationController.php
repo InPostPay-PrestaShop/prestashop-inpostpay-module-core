@@ -14,12 +14,15 @@ use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Configuration\AdvancedConfiguration;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
+use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
+use izi\prestashop\Configuration\DTO\ApiConfiguration;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Configuration\Initializer\ConfigurationInitializerInterface;
 use izi\prestashop\Configuration\ShippingConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
+use izi\prestashop\Environment\EnvironmentType;
 use izi\prestashop\Form\Type\AdvancedConfigurationType;
 use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
@@ -61,6 +64,17 @@ final class ConfigurationController extends AbstractController
         foreach ($configInitializers as $initializer) {
             $initializer->init();
         }
+    }
+
+    public static function getSubscribedServices(): array
+    {
+        $services = is_callable(['parent', 'getSubscribedServices'])
+            ? parent::getSubscribedServices()
+            : [];
+
+        return $services + [
+            ApiConfigurationInterface::class,
+        ];
     }
 
     /**
@@ -150,11 +164,17 @@ final class ConfigurationController extends AbstractController
             }
         }
 
+        $apiConfig = $this->getApiConfiguration();
+        $environment = $apiConfig->getEnvironment();
+        $merchantClientId = is_callable([$environment, 'getWidgetVersion']) && '2.0' === $environment->getWidgetVersion() ? $apiConfig->getMerchantClientId() : null;
+
         return $this->render('@Modules/inpostizi/views/templates/admin/config/gui.html.twig', [
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('GUI configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
             'is_legacy_admin_page' => $this->isLegacyAdminPage(),
+            'widget_js_uri' => $environment->getWidgetJavaScriptUri(),
+            'merchant_client_id' => $merchantClientId,
         ]);
     }
 
@@ -349,5 +369,14 @@ final class ConfigurationController extends AbstractController
         }
 
         return $hasAccess;
+    }
+
+    private function getApiConfiguration(): ApiConfigurationInterface
+    {
+        if ($this->has(ApiConfigurationInterface::class)) {
+            return $this->get(ApiConfigurationInterface::class);
+        }
+
+        return new ApiConfiguration(EnvironmentType::Sandbox());
     }
 }

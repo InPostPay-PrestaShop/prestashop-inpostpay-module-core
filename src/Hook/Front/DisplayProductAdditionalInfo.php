@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\AliasedHookInterface;
@@ -32,7 +33,8 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
         WidgetInterface $module,
         RendererInterface $renderer,
         \Context $context,
-        BasketSessionRepositoryInterface $basketSessionRepository
+        BasketSessionRepositoryInterface $basketSessionRepository,
+        ?ApiConfigurationInterface $apiConfiguration = null
     ) {
         $this->configuration = $configuration;
         $this->generalConfiguration = $generalConfiguration;
@@ -40,6 +42,7 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
         $this->renderer = $renderer;
         $this->context = $context;
         $this->basketSessionRepository = $basketSessionRepository;
+        $this->apiConfiguration = $apiConfiguration;
     }
 
     public static function getHookName(): string
