@@ -11,6 +11,7 @@ class PrestaShopConfiguration
     public const TAX_ADDRESS_TYPE = 'PS_TAX_ADDRESS_TYPE';
     public const FREE_DELIVERY_MIN_AMOUNT = 'PS_SHIPPING_FREE_PRICE';
     public const SHIPPING_HANDLING_COST = 'PS_SHIPPING_HANDLING';
+    public const ATTRIBUTES_SEPARATOR = 'PS_ATTRIBUTE_ANCHOR_SEPARATOR';
 
     /**
      * @var LanguageAwareConfigurationInterface
@@ -51,5 +52,10 @@ class PrestaShopConfiguration
     public function getShippingHandlingCost(?int $shopId = null): float
     {
         return (float) $this->configuration->get(self::SHIPPING_HANDLING_COST, $shopId);
+    }
+
+    public function getAttributesSeparator(?int $shopId = null): string
+    {
+        return (string) $this->configuration->get(self::ATTRIBUTES_SEPARATOR, $shopId);
     }
 }
