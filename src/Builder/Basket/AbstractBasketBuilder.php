@@ -27,6 +27,7 @@ use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
 use izi\prestashop\Configuration\OrdersConfiguration;
+use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ContextManager;
 use izi\prestashop\Database\Connection;
@@ -34,6 +35,7 @@ use izi\prestashop\Product\Price\BatchLowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceQuery;
 use izi\prestashop\Product\Price\NullLowestPriceProvider;
+use izi\prestashop\Product\Util\AttributeListParser;
 use izi\prestashop\PromoCode\CartRulePromoCodeProvider;
 use izi\prestashop\PromoCode\PromoCodeProviderInterface;
 use izi\prestashop\Repository\CartRuleRepository;
@@ -90,6 +92,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      * @var PromoCodeProviderInterface
      */
     private $promoCodeProvider;
+
+    /**
+     * @var AttributeListParser
+     */
+    private $attributeListParser;
 
     /**
      * @var \DateTimeImmutable|null
@@ -365,29 +372,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             return [];
         }
 
-        $separator = $this->getConfiguration('PS_ATTRIBUTE_ANCHOR_SEPARATOR');
-        $pattern = sprintf('/(?>(?P<attribute>[^:]+:[^:]+)%1$s(?!%1$s([^:%1$s])+:))/', $separator);
-
-        if (!preg_match_all($pattern, $attributes . $separator, $matches)) {
-            return [];
-        }
-
-        $attributes = [];
-
-        foreach ($matches['attribute'] as $attribute) {
-            [$group, $name] = array_map('trim', explode(':', $attribute, 2));
-
-            if ('' === $group || '' === $name) {
-                continue;
-            }
-
-            $attributes[] = [
-                'group' => $group,
-                'name' => $name,
-            ];
-        }
-
-        return $attributes;
+        return $this->getAttributeListParser()->parse($attributes, (int) $this->cart->id_shop);
     }
 
     private function createQuantity(array $product, int $quantity): Quantity
@@ -1006,6 +991,15 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             (int) $context->country->id,
             $customerGroupId,
             $combinationId
+        );
+    }
+
+    private function getAttributeListParser(): AttributeListParser
+    {
+        return $this->attributeListParser ?? $this->attributeListParser = new AttributeListParser(
+            new PrestaShopConfiguration(new Configuration()),
+            $this->contextManager->getContext(),
+            _PS_VERSION_
         );
     }
 }
