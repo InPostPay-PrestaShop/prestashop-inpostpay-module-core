@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\BasketApp\Basket\Request;
 
+/**
+ * @deprecated
+ */
 final class Browser implements \JsonSerializable
 {
     /**

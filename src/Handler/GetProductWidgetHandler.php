@@ -14,6 +14,9 @@ use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
+/**
+ * @deprecated
+ */
 final class GetProductWidgetHandler implements GetProductWidgetHandlerInterface
 {
     use ProductWidgetRendererTrait;

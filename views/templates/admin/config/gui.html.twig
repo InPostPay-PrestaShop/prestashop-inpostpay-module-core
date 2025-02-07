@@ -96,8 +96,13 @@
 
 {% block javascripts %}
   {{ parent() }}
-  <script type="text/javascript" src="https://izi-sandbox.inpost.pl/inpostizi.js">
-  </script>
-  <script type="text/javascript" src="{{ asset('js/admin/gui.js', 'InPostIzi') }}">
-  </script>
+
+  {% if merchant_client_id is not same as(null) %}
+    <script type="application/javascript">
+      window.inpostizi_merchant_client_id = '{{ merchant_client_id|e('js') }}';
+    </script>
+  {% endif %}
+
+  <script type="text/javascript" src="{{ widget_js_uri }}"></script>
+  <script type="text/javascript" src="{{ asset('js/admin/gui.js', 'InPostIzi') }}"></script>
 {% endblock %}

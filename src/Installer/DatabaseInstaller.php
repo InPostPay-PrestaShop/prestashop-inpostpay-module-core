@@ -7,6 +7,7 @@ namespace izi\prestashop\Installer;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ShopAwareConfigurationInterface;
 use izi\prestashop\Database\Connection;
+use izi\prestashop\Installer\Database\Version_1_11_0;
 use izi\prestashop\Installer\Database\Version_1_4_0;
 use izi\prestashop\Installer\Database\Version_1_9_0;
 
@@ -87,6 +88,7 @@ final class DatabaseInstaller
         return [
             new Version_1_4_0($connection),
             new Version_1_9_0($connection),
+            new Version_1_11_0($connection),
         ];
     }
 }

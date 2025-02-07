@@ -10,8 +10,12 @@ use izi\prestashop\Handler\Result\OrderEvent;
 use izi\prestashop\Handler\Result\OrderEventStream;
 use izi\prestashop\Http\Response\ServerSentEvent;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
+use izi\prestashop\Order\ContextCustomerUpdater;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 
+/**
+ * @deprecated
+ */
 final class GetOrderEventsHandler implements GetOrderEventsHandlerInterface
 {
     /**
@@ -20,20 +24,14 @@ final class GetOrderEventsHandler implements GetOrderEventsHandlerInterface
     private $repository;
 
     /**
-     * @var \Context
+     * @var ContextCustomerUpdater
      */
-    private $context;
-
-    /**
-     * @var ObjectManagerInterface
-     */
-    private $manager;
+    private $contextUpdater;
 
     public function __construct(BasketSessionRepositoryInterface $repository, \Context $context, ObjectManagerInterface $manager)
     {
         $this->repository = $repository;
-        $this->context = $context;
-        $this->manager = $manager;
+        $this->contextUpdater = new ContextCustomerUpdater($context, $manager);
     }
 
     public static function getHandledCommandClass(): string
@@ -48,7 +46,7 @@ final class GetOrderEventsHandler implements GetOrderEventsHandlerInterface
         }
 
         if (null !== $orderId = $session->getOrderId()) {
-            $this->updateCustomer((int) $orderId);
+            $this->contextUpdater->updateCustomer((int) $orderId);
         }
 
         return new OrderEventStream($this->createEventStream($session));
@@ -96,30 +94,5 @@ final class GetOrderEventsHandler implements GetOrderEventsHandlerInterface
         yield ServerSentEvent::builder()
             ->setRetry(2000)
             ->build();
-    }
-
-    private function updateCustomer(int $orderId): void
-    {
-        $order = $this->manager->getRepository(\Order::class)->find($orderId);
-
-        if (null === $order) {
-            throw new \RuntimeException('Order does not exist.');
-        }
-
-        if ((int) $this->context->customer->id === $customerId = (int) $order->id_customer) {
-            return;
-        }
-
-        $customer = $this->manager->getRepository(\Customer::class)->find($customerId);
-
-        if (null === $customer) {
-            throw new \RuntimeException('Customer does not exist.');
-        }
-
-        if (!$customer->is_guest) {
-            return;
-        }
-
-        $this->context->updateCustomer($customer);
     }
 }

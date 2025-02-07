@@ -36,6 +36,13 @@ final class HtmlStyles implements \IteratorAggregate, \JsonSerializable
      */
     private $marginBottom;
 
+    /**
+     * @var string|null
+     *
+     * @Assert\Choice(choices={"start", "center", "end"})
+     */
+    private $justifyContent;
+
     public function getMarginLeft(): ?int
     {
         return $this->marginLeft;
@@ -84,6 +91,21 @@ final class HtmlStyles implements \IteratorAggregate, \JsonSerializable
         return $this;
     }
 
+    public function getJustifyContent(): ?string
+    {
+        return $this->justifyContent;
+    }
+
+    /**
+     * @return $this
+     */
+    public function setJustifyContent(?string $justifyContent): self
+    {
+        $this->justifyContent = $justifyContent;
+
+        return $this;
+    }
+
     /**
      * @return \Generator
      */
@@ -103,6 +125,12 @@ final class HtmlStyles implements \IteratorAggregate, \JsonSerializable
 
         if (null !== $this->marginBottom) {
             yield 'margin-bottom' => sprintf('%dpx', $this->marginBottom);
+        }
+
+        if (null !== $this->justifyContent) {
+            yield 'display' => 'flex';
+            yield 'flex-wrap' => 'wrap';
+            yield 'justify-content' => $this->justifyContent;
         }
     }
 

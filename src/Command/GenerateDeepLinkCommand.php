@@ -8,6 +8,8 @@ use izi\prestashop\Handler\GenerateDeepLinkHandler;
 
 /**
  * @see GenerateDeepLinkHandler
+ *
+ * @deprecated
  */
 final class GenerateDeepLinkCommand
 {

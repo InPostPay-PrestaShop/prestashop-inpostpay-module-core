@@ -8,6 +8,8 @@ use izi\prestashop\Handler\GetOrderEventsHandler;
 
 /**
  * @see GetOrderEventsHandler
+ *
+ * @deprecated
  */
 final class GetOrderEventsCommand
 {

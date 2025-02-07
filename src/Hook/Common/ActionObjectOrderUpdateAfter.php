@@ -28,7 +28,7 @@ final class ActionObjectOrderUpdateAfter implements HookInterface
         return self::HOOK_NAME;
     }
 
-    public function execute(array $parameters)
+    public function execute(array $parameters): void
     {
         $orderObj = $parameters['object'] ?? null;
 
@@ -38,5 +38,4 @@ final class ActionObjectOrderUpdateAfter implements HookInterface
 
         $this->dispatcher->dispatch(new OrderEvent($orderObj), OrderEvent::UPDATED);
     }
-
 }

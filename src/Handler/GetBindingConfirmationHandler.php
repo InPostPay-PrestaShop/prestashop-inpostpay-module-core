@@ -11,6 +11,9 @@ use izi\prestashop\Http\Response\ServerSentEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BindingConfirmation;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 
+/**
+ * @deprecated
+ */
 final class GetBindingConfirmationHandler implements GetBindingConfirmationHandlerInterface
 {
     /**

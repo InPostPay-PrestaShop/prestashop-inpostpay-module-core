@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Handler;
 
 use izi\prestashop\BasketApp\Basket\BasketsApiClientInterface;
+use izi\prestashop\BasketApp\Basket\V2;
 use izi\prestashop\BasketApp\Exception\BasketExpiredException;
 use izi\prestashop\BasketApp\Exception\BasketNotBoundException;
 use izi\prestashop\BasketApp\Exception\BasketNotFoundException;
@@ -15,6 +16,8 @@ use Psr\Log\LoggerInterface;
 
 final class UpdateBasketHandler implements UpdateBasketHandlerInterface
 {
+    use CommandHandlerTrait;
+
     /**
      * @var BasketSessionRepositoryInterface
      */
@@ -37,15 +40,14 @@ final class UpdateBasketHandler implements UpdateBasketHandlerInterface
 
     public function __construct(BasketSessionRepositoryInterface $sessionRepository, BasketBuilderFactoryInterface $builderFactory, BasketsApiClientInterface $client, LoggerInterface $logger)
     {
+        if (!$client instanceof V2\BasketsApiClientInterface) {
+            @trigger_error(sprintf('Passing a $client that does not implement "%s" to "%s::__construct()" is deprecated.', V2\BasketsApiClientInterface::class, self::class));
+        }
+
         $this->sessionRepository = $sessionRepository;
         $this->builderFactory = $builderFactory;
         $this->client = $client;
         $this->logger = $logger;
-    }
-
-    public static function getHandledCommandClass(): string
-    {
-        return UpdateBasketCommand::class;
     }
 
     public function __invoke(UpdateBasketCommand $command)

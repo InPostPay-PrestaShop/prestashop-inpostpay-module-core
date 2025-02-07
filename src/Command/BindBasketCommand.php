@@ -12,6 +12,8 @@ use izi\prestashop\Handler\BindBasketHandler;
 
 /**
  * @see BindBasketHandler
+ *
+ * @deprecated
  */
 final class BindBasketCommand
 {

@@ -5,9 +5,15 @@ declare(strict_types=1);
 namespace izi\prestashop\View\Widget;
 
 use izi\prestashop\Common\BindingPlace;
+use izi\prestashop\Configuration\DTO\HtmlStyles;
+use izi\prestashop\View\Widget\V2\Size;
+use izi\prestashop\View\Widget\V2\WidgetConfiguration;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class Configuration implements \IteratorAggregate, \JsonSerializable
+/**
+ * @deprecated
+ */
+final class Configuration implements WidgetConfigurationInterface
 {
     public const WIDTH_MIN_PX = 220;
     public const WIDTH_MAX_PX = 1200;
@@ -77,7 +83,6 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
      *
      * @Assert\Range(min=Configuration::WIDTH_MIN_PX, max=Configuration::WIDTH_MAX_PX)
      */
-    // TODO @Assert\GreaterThanOrEqual(propertyPath="minWidthPx")
     private $maxWidthPx;
 
     /**
@@ -91,6 +96,11 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
      * @var FrameStyle|null
      */
     private $frameStyle;
+
+    /**
+     * @var Size|null
+     */
+    private $size;
 
     public function __construct(?BindingPlace $bindingPlace = null, bool $basket = false)
     {
@@ -155,7 +165,10 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
         return $this->productId;
     }
 
-    public function setProductId(?string $productId): self
+    /**
+     * @return $this
+     */
+    public function setProductId(?string $productId): WidgetConfigurationInterface
     {
         $this->productId = $productId;
 
@@ -266,6 +279,9 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
         return $this->maxWidthPx;
     }
 
+    /**
+     * @return $this
+     */
     public function setMaxWidthPx(?int $maxWidth): self
     {
         $this->maxWidthPx = $maxWidth;
@@ -276,6 +292,13 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
     public function getFrameStyle(): ?FrameStyle
     {
         return $this->frameStyle;
+    }
+
+    public function setFrameStyle(?FrameStyle $frameStyle): self
+    {
+        $this->frameStyle = $frameStyle;
+
+        return $this;
     }
 
     public function getMinHeightPx(): ?int
@@ -290,9 +313,22 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
         return $this;
     }
 
-    public function setFrameStyle(?FrameStyle $frameStyle): self
+    /**
+     * @internal
+     */
+    public function getSize(): ?Size
     {
-        $this->frameStyle = $frameStyle;
+        return $this->size;
+    }
+
+    /**
+     * @return $this
+     *
+     * @internal
+     */
+    public function setSize(?Size $size): self
+    {
+        $this->size = $size;
 
         return $this;
     }
@@ -356,5 +392,33 @@ final class Configuration implements \IteratorAggregate, \JsonSerializable
         if (null !== $this->minHeightPx) {
             yield 'min_height' => $this->minHeightPx;
         }
+    }
+
+    /**
+     * @internal
+     */
+    public function asV2Configuration(): WidgetConfiguration
+    {
+        return (new WidgetConfiguration($this->getBindingPlace()))
+            ->setFrameStyle($this->frameStyle)
+            ->setDarkMode($this->darkMode)
+            ->setVariant($this->variant)
+            ->setSize($this->size)
+            ->setMaxWidthPx($this->maxWidthPx)
+            ->setProductId($this->productId);
+    }
+
+    /**
+     * @internal
+     */
+    public function getV2ContainerStyles(): iterable
+    {
+        if (null === $this->alignment) {
+            return [];
+        }
+
+        $justifyContent = $this->alignment->toJustifyContentHtmlStyleValue();
+
+        return (new HtmlStyles())->setJustifyContent($justifyContent);
     }
 }

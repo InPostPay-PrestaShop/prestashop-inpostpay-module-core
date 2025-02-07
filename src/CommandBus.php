@@ -14,8 +14,10 @@ use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
 use izi\prestashop\Command\GenerateDeepLinkCommand;
+use izi\prestashop\Command\GetBasketBindingKeyCommand;
 use izi\prestashop\Command\GetBindingConfirmationCommand;
 use izi\prestashop\Command\GetClientDetailsCommand;
+use izi\prestashop\Command\GetOrderConfirmationUrlCommand;
 use izi\prestashop\Command\GetOrderEventsCommand;
 use izi\prestashop\Command\GetProductWidgetCommand;
 use izi\prestashop\Command\UnbindBasketCommand;
@@ -34,8 +36,10 @@ use izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface;
 use izi\prestashop\Handler\GenerateDeepLinkHandlerInterface;
+use izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface;
 use izi\prestashop\Handler\GetBindingConfirmationHandlerInterface;
 use izi\prestashop\Handler\GetClientDetailsHandlerInterface;
+use izi\prestashop\Handler\GetOrderConfirmationUrlHandlerInterface;
 use izi\prestashop\Handler\GetOrderEventsHandlerInterface;
 use izi\prestashop\Handler\GetProductWidgetHandlerInterface;
 use izi\prestashop\Handler\UnbindBasketHandlerInterface;
@@ -83,6 +87,10 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             GetBindingConfirmationCommand::class => '?' . GetBindingConfirmationHandlerInterface::class,
             GetOrderEventsCommand::class => '?' . GetOrderEventsHandlerInterface::class,
             GetProductWidgetCommand::class => '?' . GetProductWidgetHandlerInterface::class,
+
+            /* widget v2 */
+            GetBasketBindingKeyCommand::class => '?' . GetBasketBindingKeyHandlerInterface::class,
+            GetOrderConfirmationUrlCommand::class => '?' . GetOrderConfirmationUrlHandlerInterface::class,
 
             /* merchant API */
             ConfirmBasketBindingCommand::class => '?' . ConfirmBasketBindingHandlerInterface::class,

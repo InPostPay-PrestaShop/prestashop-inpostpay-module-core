@@ -6,6 +6,11 @@ namespace izi\prestashop\Environment;
 
 final class UatEnvironment implements EnvironmentInterface
 {
+    public function getType(): EnvironmentType
+    {
+        return EnvironmentType::Uat();
+    }
+
     public function getBasketAppApiUri(): string
     {
         return 'https://uat-api.inpost.pl';
@@ -24,5 +29,13 @@ final class UatEnvironment implements EnvironmentInterface
     public function getDeepLinkUri(): string
     {
         return 'inpostuat://izilink';
+    }
+
+    /**
+     * @internal
+     */
+    public function getWidgetVersion(): string
+    {
+        return '1.0';
     }
 }

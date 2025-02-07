@@ -14,6 +14,9 @@ use izi\prestashop\MerchantApi\Model\Basket\Request\BindingConfirmation;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BindingStatus;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 
+/**
+ * @deprecated
+ */
 final class GenerateDeepLinkHandler implements GenerateDeepLinkHandlerInterface
 {
     /**

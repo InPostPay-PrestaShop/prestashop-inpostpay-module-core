@@ -7,6 +7,9 @@ namespace izi\prestashop\Handler\Result;
 use izi\prestashop\Http\Response\ServerSentEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BindingConfirmation;
 
+/**
+ * @deprecated
+ */
 final class OrderEventStream
 {
     /**

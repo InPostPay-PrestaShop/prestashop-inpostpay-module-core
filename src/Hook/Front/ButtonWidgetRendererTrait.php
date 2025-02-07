@@ -33,6 +33,7 @@ trait ButtonWidgetRendererTrait
         return $this->module->renderWidget($hookName, [
             'config' => $configuration->getWidgetConfiguration(),
             'request' => $parameters['request'] ?? null,
+            'cart' => $parameters['cart'] ?? null,
         ]);
     }
 

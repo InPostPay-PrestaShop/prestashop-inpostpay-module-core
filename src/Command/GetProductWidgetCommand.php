@@ -8,6 +8,8 @@ use izi\prestashop\Handler\GetProductWidgetHandler;
 
 /**
  * @see GetProductWidgetHandler
+ *
+ * @deprecated
  */
 final class GetProductWidgetCommand
 {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\BasketApp;
 
 use izi\prestashop\BasketApp\Basket\BasketsApiClientInterface;
+use izi\prestashop\BasketApp\Basket\V2;
 use izi\prestashop\BasketApp\Browser\BrowserApiClientInterface;
 use izi\prestashop\BasketApp\Order\OrdersApiClientInterface;
 use izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface;
@@ -12,6 +13,7 @@ use izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface;
 
 /**
  * @extends PaymentsApiClientInterface
+ * @extends V2\BasketsApiClientInterface
  */
 interface BasketAppClientInterface extends BasketsApiClientInterface, BrowserApiClientInterface, OrdersApiClientInterface, SigningKeysApiClientInterface
 {

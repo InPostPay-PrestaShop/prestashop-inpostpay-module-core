@@ -14,6 +14,8 @@ final class Basket implements \JsonSerializable
 {
     /**
      * @var string|null
+     *
+     * @deprecated
      */
     private $browser_id;
 
@@ -65,6 +67,9 @@ final class Basket implements \JsonSerializable
         $this->consents = $consents;
     }
 
+    /**
+     * @deprecated
+     */
     public function getBrowserId(): ?string
     {
         return $this->browser_id;
@@ -120,6 +125,11 @@ final class Basket implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        return get_object_vars($this);
+        $vars = get_object_vars($this);
+        if (null === $vars['browser_id']) {
+            unset($vars['browser_id']);
+        }
+
+        return $vars;
     }
 }
