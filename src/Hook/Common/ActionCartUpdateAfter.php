@@ -47,7 +47,7 @@ final class ActionCartUpdateAfter implements HookInterface
         $cart = $parameters['object'] ?? null;
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
+            throw new \InvalidArgumentException(sprintf('Expected parameter "cart" to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
         }
 
         if ($this->context->controller instanceof \ModuleFrontControllerCore && $this->module === $this->context->controller->module) {

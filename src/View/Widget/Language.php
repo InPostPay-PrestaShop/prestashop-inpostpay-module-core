@@ -7,6 +7,8 @@ use izi\prestashop\Enum\StringEnum;
 /**
  * @method static self Pl()
  * @method static self En()
+ *
+ * @deprecated
  */
 final class Language extends StringEnum
 {

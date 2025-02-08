@@ -45,7 +45,7 @@ final class WidgetDisplayConfigurationType extends AbstractType
                 'help' => $this->translator->l('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', self::TRANSLATION_SOURCE),
             ])
             ->add('widgetConfiguration', WidgetConfigurationType::class, [
-                'label' => $this->translator->l('Cart page', self::TRANSLATION_SOURCE),
+                'label' => false,
             ])
             ->add('htmlStyles', HtmlStylesType::class, [
                 'label' => false,
@@ -65,8 +65,7 @@ final class WidgetDisplayConfigurationType extends AbstractType
                 },
                 'description' => '',
             ])
-            ->setAllowedTypes('binding_place', BindingPlace::class);
-
-        $resolver->setAllowedTypes('description', 'string');
+            ->setAllowedTypes('binding_place', BindingPlace::class)
+            ->setAllowedTypes('description', 'string');
     }
 }

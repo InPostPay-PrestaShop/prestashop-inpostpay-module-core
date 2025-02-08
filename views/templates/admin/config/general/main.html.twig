@@ -16,6 +16,15 @@
   </div>
 </div>
 
+<div class="row mt-n3 align-items-end">
+  <div class="col-lg-2 col-md-3 mt-3">
+    {{ form_row(form.apiConfiguration.widgetV2) }}
+  </div>
+  <div class="col-lg-2 col-md-3 mt-3">
+    {{ form_row(form.apiConfiguration.merchantClientId) }}
+  </div>
+</div>
+
 <div class="row mt-n3">
   <div class="col-xs-12 col-md-6 col-lg-8 col-xl-4 mt-3">
     {{ form_row(form.ordersConfiguration.availablePaymentOptions) }}

@@ -6,7 +6,7 @@ namespace izi\prestashop\Configuration;
 
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Validator\Sequentially;
-use izi\prestashop\View\Widget\Configuration;
+use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -58,7 +58,10 @@ final class ProductPageDisplayConfiguration implements ProductAwareWidgetDisplay
         return 0 === count($violations);
     }
 
-    public function getWidgetConfiguration(): Configuration
+    /**
+     * @return WidgetConfigurationInterface
+     */
+    public function getWidgetConfiguration()
     {
         return $this->configuration->getWidgetConfiguration();
     }

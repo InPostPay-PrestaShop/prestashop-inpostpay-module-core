@@ -27,7 +27,11 @@ final class WeightRangeStrategy implements CartWeightDeliveryStrategyInterface
 
     public function isShippingAvailableBasedOnTotalWeight(\Carrier $carrier, Weight $cartWeight): bool
     {
-        if ($this->genericStrategy->isShippingAvailableBasedOnTotalWeight($carrier, $cartWeight)) {
+        if (!$this->genericStrategy->isShippingAvailableBasedOnTotalWeight($carrier, $cartWeight)) {
+            return false;
+        }
+
+        if (!$carrier->range_behavior || \Carrier::SHIPPING_METHOD_WEIGHT !== (int) $carrier->shipping_method) {
             return true;
         }
 

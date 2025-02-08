@@ -8,6 +8,7 @@ use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Configuration\WidgetVersionCheckerTrait;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
@@ -15,6 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 trait ProductWidgetRendererTrait
 {
+    use WidgetVersionCheckerTrait;
+
     /**
      * @var GuiConfigurationInterface
      */
@@ -66,6 +69,7 @@ trait ProductWidgetRendererTrait
         return $this->module->renderWidget($hookName, [
             'config' => $configuration,
             'request' => $parameters['request'] ?? null,
+            'cart' => $parameters['cart'] ?? null,
         ]);
     }
 
@@ -116,6 +120,10 @@ trait ProductWidgetRendererTrait
     private function shouldRenderCacheableHookContent(?Request $request): bool
     {
         if (!$this->generalConfiguration->isFullPageCacheModuleInUse()) {
+            return false;
+        }
+
+        if (isset($this->apiConfiguration) && $this->isWidgetV2Enabled()) {
             return false;
         }
 

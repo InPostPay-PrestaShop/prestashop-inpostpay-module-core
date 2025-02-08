@@ -66,6 +66,8 @@ services:
         izi\prestashop\Command\GetBindingConfirmationCommand: '@izi\prestashop\Handler\GetBindingConfirmationHandlerInterface'
         izi\prestashop\Command\GetProductWidgetCommand: '@izi\prestashop\Handler\GetProductWidgetHandlerInterface'
         izi\prestashop\Command\GetOrderEventsCommand: '@izi\prestashop\Handler\GetOrderEventsHandlerInterface'
+        izi\prestashop\Command\GetBasketBindingKeyCommand: '@izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface'
+        izi\prestashop\Command\GetOrderConfirmationUrlCommand: '@izi\prestashop\Handler\GetOrderConfirmationUrlHandlerInterface'
         izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand: '@izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface'
         izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand: '@izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface'
         izi\prestashop\MerchantApi\Command\GetBasketCommand: '@izi\prestashop\MerchantApi\Handler\GetBasketHandlerInterface'
@@ -80,6 +82,9 @@ services:
       - izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator: '@izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator'
         izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator: '@izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator'
         izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator'
+        izi\prestashop\Validator\Cart\BindableValidator: '@izi\prestashop\Validator\Cart\BindableValidator'
+        izi\prestashop\Validator\Cart\HasProductsValidator: '@izi\prestashop\Validator\Cart\HasProductsValidator'
+        izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator: '@izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator'
 
   inpost.izi.gui_configuration_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
@@ -88,3 +93,11 @@ services:
       - validator: '@inpost.izi.validator'
         context: '@inpost.izi.shop_context'
         izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepositoryInterface'
+
+  inpost.izi.widget_controller_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface: '@inpost.izi.security.authorization_checker'
+        Symfony\Component\Serializer\Normalizer\DenormalizerInterface: '@inpost.izi.serializer'
+        Psr\Clock\ClockInterface: '@inpost.izi.clock'

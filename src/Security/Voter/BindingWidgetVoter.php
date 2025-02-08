@@ -55,12 +55,13 @@ final class BindingWidgetVoter extends Voter
             return true;
         }
 
-        if ('true' !== $subject->query->get('showIzi')) {
-            return false;
+        if ('true' === $subject->query->get('showIzi')) {
+            $this->context->cookie->izi_show = true;
+
+            return true;
         }
 
-        $this->context->cookie->izi_show = true;
-
-        return true;
+        return $this->context->controller instanceof \ProductControllerCore
+            && $this->configuration->isFullPageCacheModuleInUse();
     }
 }

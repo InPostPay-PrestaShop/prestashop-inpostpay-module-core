@@ -162,6 +162,16 @@ final class BasketSession implements SwitchableBasketSessionInterface
         return $this->cart;
     }
 
+    public function getBindingApiKey(): ?string
+    {
+        return $this->model->binding_api_key;
+    }
+
+    public function setBindingApiKey(?string $key): void
+    {
+        $this->model->binding_api_key = $key;
+    }
+
     /**
      * @param BasketInterface<\Cart> $basket
      */

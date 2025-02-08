@@ -8,6 +8,8 @@ use izi\prestashop\Handler\GetClientDetailsHandler;
 
 /**
  * @see GetClientDetailsHandler
+ *
+ * @deprecated
  */
 final class GetClientDetailsCommand
 {

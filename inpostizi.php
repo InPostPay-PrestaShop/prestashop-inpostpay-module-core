@@ -10,9 +10,12 @@ use izi\prestashop\DependencyInjection\ContainerFactory;
 use izi\prestashop\DependencyInjection\Exception\ContainerNotFoundException;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
+use izi\prestashop\Hook\Widget;
 use izi\prestashop\Hook\WidgetConfigurationResolver;
-use izi\prestashop\Hook\WidgetRenderer;
+use izi\prestashop\Hook\WidgetV1ParametersProvider;
 use izi\prestashop\Installer\DatabaseInstaller;
+use izi\prestashop\Module\Exception\ModuleErrorInterface;
+use izi\prestashop\View\Templating\SmartyRenderer;
 use PrestaShop\PrestaShop\Adapter\ContainerBuilder as PrestaShopContainerBuilder;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
@@ -53,10 +56,20 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     private $adminKernel;
 
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+
+    /**
+     * @var WidgetInterface
+     */
+    private $widget;
+
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '1.10.0';
+        $this->version = '1.11.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -139,7 +152,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             }
 
             return $result;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->getLogger()->critical('Upgrade error: {exception}.', [
                 'exception' => $e,
             ]);
@@ -218,15 +231,16 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             : $methodName;
 
         try {
-            $parameters = isset($arguments[0]) ? $arguments[0] : [];
-            if (!isset($parameters['request'])) {
-                $parameters['request'] = $this->getCurrentRequest();
-            }
+            $parameters = $this->normalizeHookParameters(isset($arguments[0]) ? $arguments[0] : []);
 
             return $this
                 ->get(HookExecutorInterface::class)
                 ->execute($hookName, $parameters);
         } catch (Throwable $e) {
+            if ($e instanceof ModuleErrorInterface) {
+                throw $e;
+            }
+
             $this->getLogger()->critical('Error executing hook "{hookName}": {exception}', [
                 'hookName' => $hookName,
                 'exception' => $e,
@@ -283,17 +297,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     public function renderWidget($hookName, array $configuration)
     {
-        $request = isset($configuration['request'])
-            ? $configuration['request']
-            : $this->getCurrentRequest();
+        $configuration = $this->normalizeHookParameters($configuration);
 
-        if ([] === $parameters = $this->getWidgetVariables($hookName, $configuration)) {
-            return '';
-        }
-
-        return $this
-            ->get(WidgetRenderer::class)
-            ->render($parameters['attributes'], $request);
+        return $this->getWidget()->renderWidget($hookName, $configuration);
     }
 
     /**
@@ -303,15 +309,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     public function getWidgetVariables($hookName, array $configuration)
     {
-        $config = $this
-            ->get(WidgetConfigurationResolver::class)
-            ->resolve($configuration);
+        $configuration = $this->normalizeHookParameters($configuration);
 
-        if (null === $config) {
-            return [];
-        }
-
-        return ['attributes' => $config];
+        return $this->getWidget()->getWidgetVariables($hookName, $configuration);
     }
 
     /**
@@ -321,15 +321,33 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     public function getCurrentRequest()
     {
+        return $this->getRequestStack()->getCurrentRequest() ?: Request::createFromGlobals();
+    }
+
+    /**
+     * @return RequestStack
+     *
+     * @internal
+     */
+    public function getRequestStack()
+    {
+        if (isset($this->requestStack)) {
+            return $this->requestStack;
+        }
+
         try {
             /** @var RequestStack $requestStack */
             $requestStack = $this->get('request_stack');
-            $request = $requestStack->getCurrentRequest();
+            if (null !== $requestStack->getCurrentRequest()) {
+                return $this->requestStack = $requestStack;
+            }
         } catch (ServiceNotFoundException $e) {
-            $request = null;
         }
 
-        return null !== $request ? $request : $this->createRequestFromGlobals();
+        $this->requestStack = new RequestStack();
+        $this->requestStack->push(Request::createFromGlobals());
+
+        return $this->requestStack;
     }
 
     /**
@@ -346,20 +364,6 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         } catch (Exception $e) {
             return new Psr\Log\NullLogger();
         }
-    }
-
-    /**
-     * @return Request
-     */
-    private function createRequestFromGlobals()
-    {
-        static $request;
-
-        if (!isset($request)) {
-            $request = Request::createFromGlobals();
-        }
-
-        return $request;
     }
 
     /**
@@ -479,7 +483,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     private function isDebugEnabled()
     {
         try {
-            return !$this->get(AdvancedConfigurationInterface::class)->isDebugEnabled();
+            return $this->get(AdvancedConfigurationInterface::class)->isDebugEnabled();
         } catch (Exception $e) {
             return false;
         }
@@ -523,5 +527,51 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         } catch (Exception $e) {
             throw ContainerNotFoundException::create($e);
         }
+    }
+
+    /**
+     * @return array
+     */
+    private function normalizeHookParameters(array $parameters)
+    {
+        if (!isset($parameters['request'])) {
+            $parameters['request'] = $this->getCurrentRequest();
+        }
+
+        if (!isset($parameters['cart'])) {
+            $parameters['cart'] = $this->context->cart;
+        }
+
+        return $parameters;
+    }
+
+    /**
+     * @return WidgetInterface
+     */
+    private function getWidget()
+    {
+        if (isset($this->widget)) {
+            return $this->widget;
+        }
+
+        try {
+            return $this->widget = $this->get('inpost.izi.widget');
+        } catch (ServiceNotFoundException $e) {
+            return $this->widget = $this->createWidget();
+        }
+    }
+
+    /**
+     * @return Widget
+     */
+    private function createWidget()
+    {
+        $renderer = new SmartyRenderer($this->context->smarty);
+        $paramsProvider = WidgetV1ParametersProvider::create(
+            $this->get(WidgetConfigurationResolver::class),
+            $this->context
+        );
+
+        return new Widget($renderer, $paramsProvider);
     }
 }

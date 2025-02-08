@@ -10,6 +10,9 @@ use izi\prestashop\BasketApp\Basket\Request\BindingRequest;
 use izi\prestashop\BasketApp\Basket\Response\BasketBindingResponse;
 use izi\prestashop\BasketApp\Basket\Response\QrCode;
 use izi\prestashop\BasketApp\Basket\Response\UpsertBasketResponse;
+use izi\prestashop\BasketApp\Basket\V2\BasketsApiClientInterface;
+use izi\prestashop\BasketApp\Basket\V2\Response\BasketBindingKeyResponse;
+use izi\prestashop\BasketApp\Basket\V2\Response\UpdateBasketResponse;
 use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
 use izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface;
@@ -30,7 +33,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-final class BasketAppClient implements BasketAppClientInterface, PaymentsApiClientInterface
+final class BasketAppClient implements BasketAppClientInterface, PaymentsApiClientInterface, BasketsApiClientInterface
 {
     /**
      * @var ClientInterface
@@ -66,6 +69,25 @@ final class BasketAppClient implements BasketAppClientInterface, PaymentsApiClie
         $this->baseUri = $baseUri ?? (new ProductionEnvironment())->getBasketAppApiUri();
     }
 
+    public function updateBasket(string $basketId, Basket $basket): UpdateBasketResponse
+    {
+        $request = $this->createRequest('PUT', sprintf('/v2/izi/basket/%s', $basketId), $basket);
+        $response = $this->sendRequest($request);
+
+        return $this->deserialize($response, UpdateBasketResponse::class);
+    }
+
+    public function initializeBasketBinding(string $basketId): BasketBindingKeyResponse
+    {
+        $request = $this->createRequest('PUT', sprintf('/v2/izi/basket/%s/binding', $basketId));
+        $response = $this->sendRequest($request);
+
+        return $this->deserialize($response, BasketBindingKeyResponse::class);
+    }
+
+    /**
+     * @deprecated
+     */
     public function upsertBasket(string $basketId, Basket $basket): UpsertBasketResponse
     {
         $request = $this->createRequest('PUT', sprintf('/v1/izi/basket/%s', $basketId), $basket);
@@ -126,6 +148,9 @@ final class BasketAppClient implements BasketAppClientInterface, PaymentsApiClie
         return $this->deserialize($response, BasketBindingResponse::class);
     }
 
+    /**
+     * @deprecated
+     */
     public function deleteBrowserBinding(string $browserId): void
     {
         $request = $this->createRequest('DELETE', sprintf('/v1/izi/browser/%s/binding', $browserId));

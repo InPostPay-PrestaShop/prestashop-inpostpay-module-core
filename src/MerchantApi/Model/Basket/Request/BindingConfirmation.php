@@ -65,6 +65,9 @@ final class BindingConfirmation implements \JsonSerializable, \Stringable
         return self::success($binding, $browserId);
     }
 
+    /**
+     * @deprecated
+     */
     public static function fromTrustedBrowserUpsertBasketResponse(string $browserId, BasketBindingResponse $binding, UpsertBasketResponse $response): self
     {
         if (!$binding->isBrowserTrusted()) {

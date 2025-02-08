@@ -4,6 +4,7 @@ use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\Controller\Api\BasketController;
 use izi\prestashop\Controller\Api\OrderController;
 use izi\prestashop\Controller\WidgetController;
+use izi\prestashop\Http\Client\ModuleVersionInfoProvidingClient;
 use izi\prestashop\Http\Exception\HttpExceptionInterface;
 use izi\prestashop\Http\Exception\ServerException;
 use izi\prestashop\MerchantApi\Exception\ApiException;
@@ -26,6 +27,16 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 {
     private const MERCHANT_ROUTES = [
         [
+            'path' => '/inpost/v2/izi/merchant/basket/binding-key',
+            'methods' => ['GET'],
+            'controller' => [WidgetController::class, 'getBindingKey'],
+        ],
+        [
+            'path' => '/inpost/v2/izi/merchant/order/confirmation-url',
+            'methods' => ['GET'],
+            'controller' => [WidgetController::class, 'getOrderConfirmationUrl'],
+        ],
+        [
             'path' => '/inpost/v1/izi/merchant/basket/get/link',
             'controller' => [WidgetController::class, 'getDeepLink'],
         ],
@@ -45,7 +56,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         [
             'path' => '/inpost/v1/izi/merchant/widget/get/{hook}/{productId}',
             'prefix' => '/inpost/v1/izi/merchant/widget/get',
-            'regex' => '#^/inpost/v1/izi/merchant/widget/get/(?<hook>.+)/(?<productId>\d+)$#',
+            'regex' => '#^/inpost/v1/izi/merchant/widget/get/(?<hook>\w+)/(?<productId>\d+)$#',
             'controller' => [WidgetController::class, 'getWidgetHook'],
         ],
         [
@@ -150,7 +161,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         $path = $this->getPath($request);
 
         try {
-            if (0 !== strpos($path, '/inpost/v1/izi/merchant/')) {
+            if (!str_contains($path, '/merchant/')) {
                 return $this->handleApiRequest($request, $path);
             }
 
@@ -215,6 +226,8 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         } elseif ($body = $response->getContent()) {
             $logger->debug('Response body: "{body}"', ['body' => $body]);
         }
+
+        $response->headers->set(ModuleVersionInfoProvidingClient::HEADER_NAME, $this->module->version);
 
         return $response;
     }
@@ -295,7 +308,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
                 continue;
             }
 
-            if (isset($route['prefix']) && 0 !== strpos($path, $route['prefix'])) {
+            if (isset($route['prefix']) && !str_starts_with($path, $route['prefix'])) {
                 continue;
             }
 

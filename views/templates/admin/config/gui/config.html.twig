@@ -1,26 +1,28 @@
-
 <div class="row mt-n2">
   <div class="col-xxl-auto col-12 col-xs-12 mt-2">
     {{ form_row(formDisplay) }}
   </div>
 
-  {% for formElement in form %}
-    {% if formElement.vars.name not in ['minWidthPx', 'maxWidthPx', 'minHeightPx'] %}
-      <div class="col-xl col-lg-3 col-sm-6 col-12 col-xs-12 mt-2">
-        {{ form_row(formElement) }}
+  {% set style_forms = ['minWidthPx', 'maxWidthPx', 'minHeightPx'] %}
+  {% if form.vars.for_v2 is defined and form.vars.for_v2 %}
+    {% set style_forms = style_forms|merge(['alignment']) %}
+  {% endif %}
+
+  {% for name, child in form %}
+    {% if name not in style_forms %}
+      <div class="col-xxl col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
+        {{ form_row(child) }}
       </div>
     {% endif %}
   {% endfor %}
 </div>
 
 <div class="row">
-  <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
-    {{ form_row(form.minWidthPx) }}
-  </div>
-  <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
-    {{ form_row(form.maxWidthPx) }}
-  </div>
-  <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
-    {{ form_row(form.minHeightPx) }}
-  </div>
+  {% for child in form %}
+    {% if not child.rendered %}
+    <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
+      {{ form_row(child) }}
+    </div>
+    {% endif %}
+  {% endfor %}
 </div>

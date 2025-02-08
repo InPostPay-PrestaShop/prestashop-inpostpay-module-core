@@ -9,6 +9,8 @@ use izi\prestashop\Enum\StringEnum;
 /**
  * @method static self Phone()
  * @method static self DeepLink()
+ *
+ * @deprecated
  */
 final class BindingMethod extends StringEnum
 {

@@ -7,10 +7,13 @@ use izi\item\order\OrderQuantity;
 use izi\item\ProductAttribute;
 use izi\prestashop\BasketApp\BasketAppClientInterface;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
-use izi\prestashop\Order\Address\AddressDataMapper;
 use izi\prestashop\Common\Product\ProductImage;
+use izi\prestashop\Configuration\Adapter\Configuration;
+use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
+use izi\prestashop\Order\Address\AddressDataMapper;
+use izi\prestashop\Product\Util\AttributeListParser;
 use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 
@@ -51,6 +54,11 @@ class PrestashopOrder
      * @var AddressDataMapper
      */
     private $addressDataMapper;
+
+    /**
+     * @var AttributeListParser
+     */
+    private $attributeListParser;
 
     public function __construct(\Order $order, string $basketId)
     {
@@ -104,7 +112,7 @@ class PrestashopOrder
             $date = \DateTimeImmutable::createFromFormat(\DateTime::RFC3339, $consent['dateUpdated']);
 
             $consents[] = [
-                'consent_id' => $consent['id'],
+                'consent_id' => $consent['link']['id'],
                 'consent_version' => false === $date ? '0' : (string) $date->getTimestamp(),
                 'is_accepted' => $consent['requirementType'] !== ConsentRequirementType::Optional()->value,
             ];
@@ -419,22 +427,13 @@ class PrestashopOrder
 
     private function getProductAttributes(string $attributes): array
     {
-        $separator = $this->getConfiguration('PS_ATTRIBUTE_ANCHOR_SEPARATOR');
-        $pattern = sprintf('/(?>(?P<attribute>[^:]+:[^:]+)%1$s(?!%1$s([^:%1$s])+:))/', $separator);
-
-        if (!preg_match_all($pattern, $attributes . $separator, $matches)) {
-            return [];
-        }
-
-        return array_map(static function (string $attribute): ProductAttribute {
-            [$group, $name] = explode(':', $attribute, 2);
-
+        return array_map(static function (array $attribute) {
             $productAttribute = new ProductAttribute();
-            $productAttribute->attribute_name = trim($group);
-            $productAttribute->attribute_value = trim($name);
+            $productAttribute->attribute_name = $attribute['group'];
+            $productAttribute->attribute_value = $attribute['name'];
 
             return $productAttribute;
-        }, $matches['attribute']);
+        }, $this->getAttributeListParser()->parse($attributes, (int) $this->order->id_shop));
     }
 
     private function formatDescription(string $description): string
@@ -537,5 +536,14 @@ class PrestashopOrder
 
             return new ProductImage($smallSize['url'], $normalSize['url']);
         }, $images);
+    }
+
+    private function getAttributeListParser(): AttributeListParser
+    {
+        return $this->attributeListParser ?? $this->attributeListParser = new AttributeListParser(
+            new PrestaShopConfiguration(new Configuration()),
+            \Context::getContext(),
+            _PS_VERSION_
+        );
     }
 }

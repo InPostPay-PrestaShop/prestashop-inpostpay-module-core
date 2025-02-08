@@ -8,6 +8,8 @@ use izi\prestashop\Handler\GetBindingConfirmationHandler;
 
 /**
  * @see GetBindingConfirmationHandler
+ *
+ * @deprecated
  */
 final class GetBindingConfirmationCommand
 {

@@ -17,6 +17,9 @@ use izi\prestashop\Handler\Result\BasketBindingResult;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BindingConfirmation;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 
+/**
+ * @deprecated
+ */
 final class BindBasketHandler implements BindBasketHandlerInterface
 {
     /**

@@ -8,13 +8,16 @@ use izi\prestashop\Command\BindBasketCommand;
 use izi\prestashop\Command\Config\CheckStatusCommand;
 use izi\prestashop\Command\Config\DownloadModuleDataCommand;
 use izi\prestashop\Command\Config\UpdateAdvancedConfigurationCommand;
+use izi\prestashop\Command\Config\UpdateCartRuleOptionsCommand;
 use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
 use izi\prestashop\Command\GenerateDeepLinkCommand;
+use izi\prestashop\Command\GetBasketBindingKeyCommand;
 use izi\prestashop\Command\GetBindingConfirmationCommand;
 use izi\prestashop\Command\GetClientDetailsCommand;
+use izi\prestashop\Command\GetOrderConfirmationUrlCommand;
 use izi\prestashop\Command\GetOrderEventsCommand;
 use izi\prestashop\Command\GetProductWidgetCommand;
 use izi\prestashop\Command\UnbindBasketCommand;
@@ -27,13 +30,16 @@ use izi\prestashop\Handler\BindBasketHandlerInterface;
 use izi\prestashop\Handler\Config\CheckStatusHandlerInterface;
 use izi\prestashop\Handler\Config\DownloadModuleDataHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandlerInterface;
+use izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface;
 use izi\prestashop\Handler\GenerateDeepLinkHandlerInterface;
+use izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface;
 use izi\prestashop\Handler\GetBindingConfirmationHandlerInterface;
 use izi\prestashop\Handler\GetClientDetailsHandlerInterface;
+use izi\prestashop\Handler\GetOrderConfirmationUrlHandlerInterface;
 use izi\prestashop\Handler\GetOrderEventsHandlerInterface;
 use izi\prestashop\Handler\GetProductWidgetHandlerInterface;
 use izi\prestashop\Handler\UnbindBasketHandlerInterface;
@@ -82,6 +88,10 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             GetOrderEventsCommand::class => '?' . GetOrderEventsHandlerInterface::class,
             GetProductWidgetCommand::class => '?' . GetProductWidgetHandlerInterface::class,
 
+            /* widget v2 */
+            GetBasketBindingKeyCommand::class => '?' . GetBasketBindingKeyHandlerInterface::class,
+            GetOrderConfirmationUrlCommand::class => '?' . GetOrderConfirmationUrlHandlerInterface::class,
+
             /* merchant API */
             ConfirmBasketBindingCommand::class => '?' . ConfirmBasketBindingHandlerInterface::class,
             DeleteBasketBindingCommand::class => '?' . DeleteBasketBindingHandlerInterface::class,
@@ -98,6 +108,7 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             UpdateAdvancedConfigurationCommand::class => '?' . UpdateAdvancedConfigurationHandlerInterface::class,
             CheckStatusCommand::class => '?' . CheckStatusHandlerInterface::class,
             DownloadModuleDataCommand::class => '?' . DownloadModuleDataHandlerInterface::class,
+            UpdateCartRuleOptionsCommand::class => '?' . UpdateCartRuleOptionsHandlerInterface::class,
         ];
     }
 

@@ -7,6 +7,9 @@ namespace izi\prestashop\Handler;
 use izi\prestashop\BasketApp\Basket\Response\ClientDetails;
 use izi\prestashop\Command\GetClientDetailsCommand;
 
+/**
+ * @deprecated
+ */
 interface GetClientDetailsHandlerInterface
 {
     public function __invoke(GetClientDetailsCommand $command): ?ClientDetails;

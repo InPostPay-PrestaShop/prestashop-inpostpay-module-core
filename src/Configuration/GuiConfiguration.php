@@ -17,6 +17,7 @@ use izi\prestashop\Validator\Product\NotInRestrictedCategory;
 use izi\prestashop\Validator\Product\NotOfType;
 use izi\prestashop\Validator\Product\NotWithRestrictedAttributes;
 use izi\prestashop\View\Widget\Configuration;
+use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -152,6 +153,9 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         return array_slice(self::getSupportedBindingPlaces(), 0, -1); // all supported except "ORDER_CREATE"
     }
 
+    /**
+     * @return WidgetDisplayConfigurationInterface<Configuration>
+     */
     public function getDisplayConfiguration(BindingPlace $bindingPlace): WidgetDisplayConfigurationInterface
     {
         if (!$bindingPlace->canDisplayBindingWidget()) {
@@ -280,7 +284,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
 
             $displayConfiguration = self::getDisplayConfig($configuration, $bindingPlace);
 
-            if (BindingPlace::ProductCard() === $bindingPlace && $displayConfiguration instanceof ProductRestrictionsProviderInterface) {
+            if ($displayConfiguration instanceof ProductRestrictionsProviderInterface && BindingPlace::ProductCard() === $bindingPlace) {
                 $productRestrictions = $displayConfiguration->getProductRestrictions() ?? new ProductRestrictions();
             }
 
@@ -309,7 +313,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         $this->configuration->set($this->getHtmlStyleConfigKey($bindingPlace), $value);
     }
 
-    private function setWidgetConfiguration(Configuration $config, BindingPlace $bindingPlace): void
+    private function setWidgetConfiguration(WidgetConfigurationInterface $config, BindingPlace $bindingPlace): void
     {
         $value = $this->serializer->serialize($config, 'json');
         $this->configuration->set($this->getConfigurationWidgetConfigKey($bindingPlace), $value);

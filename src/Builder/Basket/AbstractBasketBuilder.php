@@ -27,8 +27,19 @@ use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
 use izi\prestashop\Configuration\OrdersConfiguration;
+use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ContextManager;
+use izi\prestashop\Database\Connection;
+use izi\prestashop\Product\Price\BatchLowestPriceProviderInterface;
+use izi\prestashop\Product\Price\LowestPriceProviderInterface;
+use izi\prestashop\Product\Price\LowestPriceQuery;
+use izi\prestashop\Product\Price\NullLowestPriceProvider;
+use izi\prestashop\Product\Util\AttributeListParser;
+use izi\prestashop\PromoCode\CartRulePromoCodeProvider;
+use izi\prestashop\PromoCode\PromoCodeProviderInterface;
+use izi\prestashop\Repository\CartRuleRepository;
+use izi\prestashop\Repository\CartRuleRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Core\Cart\Calculator;
 
@@ -73,6 +84,21 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $imageRetriever;
 
     /**
+     * @var LowestPriceProviderInterface
+     */
+    private $lowestPriceProvider;
+
+    /**
+     * @var PromoCodeProviderInterface
+     */
+    private $promoCodeProvider;
+
+    /**
+     * @var AttributeListParser
+     */
+    private $attributeListParser;
+
+    /**
      * @var \DateTimeImmutable|null
      */
     private $expirationDate;
@@ -104,7 +130,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         ProductConfigurationInterface $productConfiguration,
         DeliveryFactory $deliveryFactory,
         ProductDeliveryFactory $deliveryRelatedProductFactory,
-        ?ImageRetriever $imageRetriever = null
+        ?ImageRetriever $imageRetriever = null,
+        ?LowestPriceProviderInterface $lowestPriceProvider = null,
+        ?PromoCodeProviderInterface $promoCodeProvider = null
     ) {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
@@ -113,6 +141,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $this->productConfiguration = $productConfiguration;
         $this->productDeliveryFactory = $deliveryRelatedProductFactory;
         $this->imageRetriever = $imageRetriever ?? new ImageRetriever($contextManager->getContext()->link);
+        $this->lowestPriceProvider = $lowestPriceProvider ?? new NullLowestPriceProvider();
+        $this->promoCodeProvider = $promoCodeProvider ?? CartRulePromoCodeProvider::create();
     }
 
     /**
@@ -151,7 +181,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $this->contextManager->changeContext($this->cart);
 
             $cartProducts = $this->cart->getProducts(false, false, null, true, true);
-            $products = array_map([$this, 'createCartProduct'], $cartProducts);
+            $products = $this->createCartProducts($cartProducts);
             $this->cartSummary = $this->createSummary($products);
 
             return $this->doBuild(
@@ -159,7 +189,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
                 $this->getAvailableDeliveryOptions($this->cart),
                 $products,
                 $this->getConsents(),
-                $this->getPromoCodes(),
+                $this->promoCodeProvider->getPromoCodes($this->cart),
                 $this->getRelatedProducts($cartProducts)
             );
         } finally {
@@ -168,6 +198,28 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     }
 
     abstract protected function doBuild(Summary $summary, array $delivery, array $products, array $consents, array $promoCodes, array $relatedProducts);
+
+    /**
+     * @return Product[]
+     */
+    private function createCartProducts(array $products): array
+    {
+        if (!$this->lowestPriceProvider instanceof BatchLowestPriceProviderInterface) {
+            return array_map([$this, 'createCartProduct'], $products);
+        }
+
+        $queries = $this->getLowestPriceQueries($products, static function (array $product): bool {
+            return (bool) $product['reduction_applies'];
+        });
+
+        try {
+            $this->lowestPriceProvider->preparePrices(...$queries);
+
+            return array_map([$this, 'createCartProduct'], $products);
+        } finally {
+            $this->lowestPriceProvider->reset();
+        }
+    }
 
     private function createCartProduct(array $product): Product
     {
@@ -205,8 +257,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         return PriceFactory::create((float) $net, (float) $gross);
     }
 
-    private function getCartProductPromoPrice(array $product): Price
+    private function getCartProductPromoPrice(array $product): ?Price
     {
+        if (!$product['reduction_applies']) {
+            return null;
+        }
+
         $gross = $product['price_with_reduction'] ?? $this->calculateProductPrice(
             (int) $product['id_product'],
             (int) $product['id_product_attribute'],
@@ -228,9 +284,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         return PriceFactory::create((float) $net, (float) $gross);
     }
 
-    private function createProduct(\Product $model, array $product, Quantity $quantity, Price $basePrice, Price $promoPrice, $related = false): Product
+    private function createProduct(\Product $model, array $product, Quantity $quantity, Price $basePrice, ?Price $promoPrice, bool $related = false): Product
     {
-        $combinationId = array_key_exists('id_product_attribute', $product) ? (int) $product['id_product_attribute'] : 0;
+        $combinationId = array_key_exists('id_product_attribute', $product) ? (int) $product['id_product_attribute'] : null;
         $customizationId = array_key_exists('id_customization', $product) ? (int) $product['id_customization'] : 0;
 
         $category = $model->getDefaultCategory();
@@ -241,7 +297,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $imageUrl = $this->getCoverImageUrl($images);
 
         return new Product(
-            sprintf('%d.%d.%d', $model->id, $combinationId, $customizationId),
+            sprintf('%d.%d.%d', $model->id, (int) $combinationId, $customizationId),
             $product['name'],
             $basePrice,
             $quantity,
@@ -251,12 +307,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $link,
             $imageUrl,
             $promoPrice,
-            null,
+            null === $promoPrice ? null : $this->getLowestPrice((int) $model->id, $combinationId),
             $this->getProductAttributes($product),
             $this->getProductVariants($product),
             $this->getProductImages($images),
-            $related ? null : $this->getDeliveryProduct($model, $promoPrice, $quantity, (float) $product['weight']),
-            $related ? $this->getDeliveryRelatedProducts($model, $promoPrice, $quantity) : null
+            $related ? null : $this->getDeliveryProduct($model, $promoPrice ?? $basePrice, $quantity, (float) $product['weight']),
+            $related ? $this->getDeliveryRelatedProducts($model, $promoPrice ?? $basePrice, $quantity) : null
         );
     }
 
@@ -316,25 +372,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             return [];
         }
 
-        $separator = $this->getConfiguration('PS_ATTRIBUTE_ANCHOR_SEPARATOR');
-        $pattern = sprintf('/(?>(?P<attribute>[^:]+:[^:]+)%1$s(?!%1$s([^:%1$s])+:))/', $separator);
-
-        if (!preg_match_all($pattern, $attributes . $separator, $matches)) {
-            return [];
-        }
-
-        $attributes = [];
-
-        foreach ($matches['attribute'] as $attribute) {
-            [$group, $name] = explode(':', $attribute, 2);
-
-            $attributes[] = [
-                'group' => trim($group),
-                'name' => trim($name),
-            ];
-        }
-
-        return $attributes;
+        return $this->getAttributeListParser()->parse($attributes, (int) $this->cart->id_shop);
     }
 
     private function createQuantity(array $product, int $quantity): Quantity
@@ -366,23 +404,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             : \StockAvailable::getQuantityAvailableByProduct($product['id_product'], $product['id_product_attribute']);
 
         return max(0, $availableQuantity);
-    }
-
-    /**
-     * @return PromoCode[]
-     */
-    private function getPromoCodes(): array
-    {
-        $cartRules = $this->cart->getCartRules(\CartRule::FILTER_ACTION_ALL, true, true);
-
-        return array_map([$this, 'createPromoCode'], $cartRules);
-    }
-
-    private function createPromoCode(array $cartRule): PromoCode
-    {
-        $code = $cartRule['code'] ?: $cartRule['name'];
-
-        return new PromoCode($cartRule['name'], $code);
     }
 
     /**
@@ -462,7 +483,21 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             return [];
         }
 
-        return array_map([$this, 'createRelatedProduct'], $relatedProducts);
+        if (!$this->lowestPriceProvider instanceof BatchLowestPriceProviderInterface) {
+            return array_map([$this, 'createRelatedProduct'], $relatedProducts);
+        }
+
+        $queries = $this->getLowestPriceQueries($relatedProducts, static function (array $product): bool {
+            return 0. !== (float) $product['reduction'];
+        });
+
+        try {
+            $this->lowestPriceProvider->preparePrices(...$queries);
+
+            return array_map([$this, 'createRelatedProduct'], $relatedProducts);
+        } finally {
+            $this->lowestPriceProvider->reset();
+        }
     }
 
     private function createRelatedProduct(array $product): Product
@@ -508,8 +543,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         return PriceFactory::create((float) $net, (float) $gross);
     }
 
-    private function getRelatedProductPromoPrice(array $product, int $quantity): Price
+    private function getRelatedProductPromoPrice(array $product, int $quantity): ?Price
     {
+        if (0. === (float) $product['reduction']) {
+            return null;
+        }
+
         $gross = $product['price'] ?? $this->calculateProductPrice(
             (int) $product['id_product'],
             (int) $product['id_product_attribute'],
@@ -909,5 +948,58 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         }
 
         return null;
+    }
+
+    private function getLowestPrice(int $productId, ?int $combinationId = null): ?Price
+    {
+        $query = $this->createLowestPriceQuery($productId, $combinationId);
+
+        return $this->lowestPriceProvider->getPrice($query);
+    }
+
+    private function getLowestPriceQueries(array $products, \Closure $reductionChecker): array
+    {
+        $queries = [];
+
+        foreach ($products as $product) {
+            if (!$reductionChecker($product)) {
+                continue;
+            }
+
+            $productId = (int) $product['id_product'];
+            $combinationId = 0 < $product['id_product_attribute'] ? (int) $product['id_product_attribute'] : null;
+
+            $queries[] = $this->createLowestPriceQuery($productId, $combinationId);
+        }
+
+        return $queries;
+    }
+
+    private function createLowestPriceQuery(int $productId, ?int $combinationId = null): LowestPriceQuery
+    {
+        $context = $this->contextManager->getContext();
+
+        $customer = $context->customer;
+        $customerGroupId = 0 < (int) $customer->id
+            ? (int) $customer->id_default_group
+            : (int) $this->getConfiguration('PS_UNIDENTIFIED_GROUP');
+
+        return new LowestPriceQuery(
+            $productId,
+            (int) $this->cart->id_shop,
+            (int) $this->cart->id_currency,
+            (int) $context->country->id,
+            $customerGroupId,
+            $combinationId
+        );
+    }
+
+    private function getAttributeListParser(): AttributeListParser
+    {
+        return $this->attributeListParser ?? $this->attributeListParser = new AttributeListParser(
+            new PrestaShopConfiguration(new Configuration()),
+            $this->contextManager->getContext(),
+            _PS_VERSION_
+        );
     }
 }

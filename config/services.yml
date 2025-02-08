@@ -1,6 +1,7 @@
 # config page configuration
 imports:
   - { resource: services/common.yml }
+  - { resource: services/common_admin.yml }
 
 services:
   izi\prestashop\CommandBus:
@@ -21,14 +22,6 @@ services:
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@inpost.izi.context'
       - !tagged inpost.izi.config_initializer
-
-  izi\prestashop\View\Asset\AssetManagerInterface: '@izi\prestashop\View\Asset\AdminAssetManager'
-  izi\prestashop\View\Asset\AdminAssetManager:
-    class: izi\prestashop\View\Asset\AdminAssetManager
-    public: false
-    arguments:
-      - '@inpost.izi.module'
-      - '@inpost.izi.context'
 
   izi\prestashop\Form\Type\GeneralConfigurationType:
     class: izi\prestashop\Form\Type\GeneralConfigurationType
@@ -382,10 +375,11 @@ services:
     tags:
       - { name: form.type }
 
-  izi\prestashop\Form\TypeExtension\UnitTypeExtension:
-    class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
+  izi\prestashop\Form\Type\Widget\WidgetSizeChoiceType:
+    class: izi\prestashop\Form\Type\Widget\WidgetSizeChoiceType
+    autowire: true
     tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }
+      - { name: form.type }
 
   izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension:
     class: izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension
@@ -396,6 +390,18 @@ services:
     class: izi\prestashop\Form\TypeExtension\HelpTextExtension
     tags:
       - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
+
+  izi\prestashop\Form\TypeExtension\UnitTypeExtension:
+    class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
+    tags:
+      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }
+
+  izi\prestashop\Form\TypeExtension\VersionCheckingWidgetConfigurationTypeExtension:
+    class: izi\prestashop\Form\TypeExtension\VersionCheckingWidgetConfigurationTypeExtension
+    tags:
+      - { name: form.type_extension, extended_type: izi\prestashop\Form\Type\Widget\WidgetConfigurationType }
+    arguments:
+      - '@izi\prestashop\Configuration\ApiConfiguration'
 
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
@@ -514,3 +520,11 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
+
+  inpost.izi.security.authorization_checker:
+    alias: security.authorization_checker
+    public: false
+
+  inpost.izi.validator:
+    alias: validator
+    public: false

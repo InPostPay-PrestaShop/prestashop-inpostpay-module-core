@@ -15,10 +15,17 @@ use izi\prestashop\View\Widget\Configuration;
 use izi\prestashop\View\Widget\FrameStyle;
 use izi\prestashop\View\Widget\Language;
 use izi\prestashop\View\Widget\Variant;
+use izi\prestashop\View\Widget\WidgetConfigurationInterface;
+use izi\prestashop\View\Widget\WidgetConfigurationResolverInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-final class WidgetConfigurationResolver
+/**
+ * @implements WidgetConfigurationResolverInterface<Configuration>
+ *
+ * @deprecated
+ */
+final class WidgetConfigurationResolver implements WidgetConfigurationResolverInterface
 {
     /**
      * @var ApiConfigurationInterface
@@ -61,7 +68,7 @@ final class WidgetConfigurationResolver
         $this->bus = $bus;
     }
 
-    public function resolve(array $options): ?Configuration
+    public function resolve(array $options): ?WidgetConfigurationInterface
     {
         if (null === $this->configuration->getClientCredentials()) {
             return null;
@@ -222,6 +229,6 @@ final class WidgetConfigurationResolver
 
         $width = (int) $width;
 
-        return Configuration::WIDTH_MIN_PX <= $width && Configuration::WIDTH_MIN_PX >= $width;
+        return Configuration::WIDTH_MIN_PX <= $width && Configuration::WIDTH_MAX_PX >= $width;
     }
 }

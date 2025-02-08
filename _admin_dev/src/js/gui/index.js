@@ -7,6 +7,24 @@ const SELECTORS = {
   previewContents: '.js-inpostizi-btn-preview-content'
 };
 
+let widgetInstance = null;
+
+const initOrRefreshWidget = () => {
+  if (typeof window.handleInpostIziButtons === 'function') {
+    window.handleInpostIziButtons();
+  }
+
+  if (null !== widgetInstance) {
+    widgetInstance.refresh();
+  }
+
+  if (typeof window.inpostizi_merchant_client_id !== 'undefined' && typeof window?.InPostPayWidget?.init === 'function') {
+    widgetInstance = window.InPostPayWidget.init({
+      merchantClientId: window.inpostizi_merchant_client_id,
+    });
+  }
+}
+
 const replaceRelatedContent = (responseHtml, content) => {
   const type = content.getAttribute('data-type');
 
@@ -16,9 +34,7 @@ const replaceRelatedContent = (responseHtml, content) => {
     content.replaceWith(previewRelatedContent);
   }
 
-  if (typeof window.handleInpostIziButtons === 'function') {
-    window.handleInpostIziButtons();
-  }
+  initOrRefreshWidget();
 }
 
 const handeAjaxRequest = (response) => {
@@ -69,6 +85,7 @@ const initChoiceTree = () => {
 
 const initGui = () => {
   initChoiceTree();
+  initOrRefreshWidget();
 }
 
 DOMReady(initGui);

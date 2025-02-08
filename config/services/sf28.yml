@@ -1,6 +1,7 @@
 # PS < 1.7.4 configuration
 imports:
   - { resource: common.yml }
+  - { resource: common_admin.yml }
   - { resource: common_front.yml }
 
 parameters:
@@ -48,6 +49,35 @@ services:
     tags:
       - { name: inpost.izi.service_locator, tag: inpost.izi.basket_event_handler, index_by: event_type, default_index_method: getHandledEventType }
 
+  izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter:
+    class: izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@inpost.izi.form_factory'
+      - '@izi\prestashop\CommandBusInterface'
+
+  izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia:
+    class: izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\View\Asset\AdminAssetManager'
+      - !tagged inpost.izi.admin_assets_provider
+
+  izi\prestashop\Hook\Admin\DisplayBackOfficeHeader:
+    class: izi\prestashop\Hook\Admin\DisplayBackOfficeHeader
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Repository\CartRuleRepositoryInterface'
+      - '@inpost.izi.form_factory'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
   izi\prestashop\Hook\Admin\DisplayAdminOrderLeft:
     class: izi\prestashop\Hook\Admin\DisplayAdminOrderLeft
     public: false
@@ -66,3 +96,35 @@ services:
     autowire: true
     tags:
       - { name: inpost.izi.service_locator, tag: inpost.izi.gui_configuration_dependency, index_by: key }
+
+  izi\prestashop\Form\FormFactoryFactory:
+    class: izi\prestashop\Form\FormFactoryFactory
+    public: false
+    arguments:
+      - '@inpost.izi.validator'
+
+  inpost.izi.form_factory:
+    class: Symfony\Component\Form\FormFactoryInterface
+    factory: [ '@izi\prestashop\Form\FormFactoryFactory', create ]
+    public: false
+    arguments:
+      - '@inpost.izi.form_type_locator'
+      -
+        Symfony\Component\Form\Extension\Core\Type\ChoiceType: ['@izi\prestashop\Form\TypeExtension\ChoicesAsValuesTypeExtension']
+
+  inpost.izi.form_type_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: form.type }
+
+  izi\prestashop\Form\TypeExtension\ChoicesAsValuesTypeExtension:
+    class: izi\prestashop\Form\TypeExtension\ChoicesAsValuesTypeExtension
+    tags:
+      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\ChoiceType }
+
+  inpost.izi.widget_controller_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: inpost.izi.widget_controller_dependency, index_by: key }

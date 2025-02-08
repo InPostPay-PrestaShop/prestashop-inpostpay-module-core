@@ -7,7 +7,7 @@ namespace izi\prestashop\Configuration\DTO;
 use izi\prestashop\Configuration\DTO\Product\ProductRestrictions;
 use izi\prestashop\Configuration\ProductRestrictionsProviderInterface;
 use izi\prestashop\Configuration\WidgetDisplayConfigurationInterface;
-use izi\prestashop\View\Widget\Configuration;
+use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class ProductPageDisplayConfiguration implements WidgetDisplayConfigurationInterface, ProductRestrictionsProviderInterface
@@ -38,7 +38,10 @@ final class ProductPageDisplayConfiguration implements WidgetDisplayConfiguratio
         return $this->displayConfiguration->isDisplayed();
     }
 
-    public function getWidgetConfiguration(): Configuration
+    /**
+     * @return WidgetConfigurationInterface
+     */
+    public function getWidgetConfiguration()
     {
         return $this->displayConfiguration->getWidgetConfiguration();
     }

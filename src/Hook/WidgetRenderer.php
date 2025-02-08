@@ -7,10 +7,13 @@ namespace izi\prestashop\Hook;
 use izi\prestashop\Security\AuthorizationChecker;
 use izi\prestashop\Security\Voter\BindingWidgetVoter;
 use izi\prestashop\View\Templating\RendererInterface;
-use izi\prestashop\View\Widget\Configuration;
+use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
+/**
+ * @deprecated
+ */
 final class WidgetRenderer
 {
     /**
@@ -48,7 +51,7 @@ final class WidgetRenderer
         $this->authorizationChecker = $authorizationChecker;
     }
 
-    public function render(Configuration $configuration, Request $request): string
+    public function render(WidgetConfigurationInterface $configuration, Request $request): string
     {
         if (!$this->authorizationChecker->isGranted(BindingWidgetVoter::VIEW, $request)) {
             return '';
