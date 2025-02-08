@@ -143,6 +143,13 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
         $this->manager->refresh($model);
     }
 
+    public function resetBindingKeysCache(): void
+    {
+        $this->manager->getConnection()->update(InPostIziBasketSession::TABLE_NAME, [
+            'binding_api_key' => null,
+        ], ['order_id' => null]);
+    }
+
     private function doPersist(InPostIziBasketSession $model): void
     {
         try {

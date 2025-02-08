@@ -47,7 +47,7 @@ final class GetBasketBindingKeyHandler implements GetBasketBindingKeyHandlerInte
             throw new \LogicException('Basket session does not support storing binding keys.');
         }
 
-        if (null !== $key = $session->getBindingApiKey()) {
+        if (!$command->isRefresh() && null !== $key = $session->getBindingApiKey()) {
             return new BasketBindingKey($session->getBasketId(), $key);
         }
 

@@ -228,7 +228,7 @@ services:
       - '@izi\prestashop\Configuration\OrdersConfigurationInterface'
       - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
       - '@izi\prestashop\Configuration\ProductConfigurationInterface'
-      - '@izi\prestashop\Cache\ConfigurationCache'
+      - '@izi\prestashop\CacheClearer\CacheClearerInterface'
       - '@inpost.izi.module'
 
   izi\prestashop\BasketApp\BasketAppClientFactory:
@@ -528,3 +528,26 @@ services:
   inpost.izi.validator:
     alias: validator
     public: false
+
+  izi\prestashop\CacheClearer\CacheClearerInterface: '@izi\prestashop\CacheClearer\ChainCacheClearer'
+  izi\prestashop\CacheClearer\ChainCacheClearer:
+    class: izi\prestashop\CacheClearer\ChainCacheClearer
+    public: false
+    arguments:
+      - !tagged inpost.izi.cache_clearer
+
+  inpost.izi.config_cache_clearer:
+    class: izi\prestashop\CacheClearer\Psr16CacheClearer
+    public: false
+    tags:
+      - { name: inpost.izi.cache_clearer }
+    arguments:
+      - '@izi\prestashop\Cache\ConfigurationCache'
+
+  izi\prestashop\CacheClearer\BindingKeysCacheClearer:
+    class: izi\prestashop\CacheClearer\BindingKeysCacheClearer
+    public: false
+    tags:
+      - { name: inpost.izi.cache_clearer }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'

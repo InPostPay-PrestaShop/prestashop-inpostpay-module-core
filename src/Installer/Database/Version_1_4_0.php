@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Installer\Database;
 
+use izi\prestashop\ObjectModel\Entity\InPostIziBasketSession;
+
 final class Version_1_4_0 extends AbstractMigration
 {
-    public const SESSIONS_TABLE = 'inpostizi_basket_session';
+    public const SESSIONS_TABLE = InPostIziBasketSession::TABLE_NAME;
     private const CART_ID_FK = self::SESSIONS_TABLE . '-cart_id';
     private const ORDER_ID_FK = self::SESSIONS_TABLE . '-order_id';
     private const CART_ID_IDX = 'cart_id_unique';
