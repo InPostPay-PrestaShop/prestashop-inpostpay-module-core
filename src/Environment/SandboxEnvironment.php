@@ -14,6 +14,9 @@ final class SandboxEnvironment implements EnvironmentInterface
      */
     private $isWidgetV2;
 
+    /**
+     * @param bool $isWidgetV2 The parameter is deprecated since version 1.11.0. It will have no effect from version 2.0 of the module.
+     */
     public function __construct(bool $isWidgetV2 = false)
     {
         $this->isWidgetV2 = $isWidgetV2;

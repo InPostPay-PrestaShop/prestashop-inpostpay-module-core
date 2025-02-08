@@ -8,6 +8,8 @@ use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 
 class InPostIziBasketSession extends \ObjectModel
 {
+    public const TABLE_NAME = 'inpostizi_basket_session';
+
     /**
      * @var int \Cart ID
      */
@@ -61,7 +63,7 @@ class InPostIziBasketSession extends \ObjectModel
     public $binding_api_key;
 
     public static $definition = [
-        'table' => 'inpostizi_basket_session',
+        'table' => self::TABLE_NAME,
         'primary' => 'id',
         'fields' => [
             'session_id' => ['type' => self::TYPE_INT, 'required' => true],

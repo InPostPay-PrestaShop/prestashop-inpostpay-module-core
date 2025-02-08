@@ -115,7 +115,10 @@ final class WidgetController implements ServiceSubscriberInterface
                 ], 404);
             }
 
-            $command = new GetBasketBindingKeyCommand($this->createBasket());
+            $command = new GetBasketBindingKeyCommand(
+                $this->createBasket(),
+                $request->query->getBoolean('refresh')
+            );
 
             /** @var BasketBindingKey $result */
             $result = $this->bus->handle($command);
@@ -127,7 +130,7 @@ final class WidgetController implements ServiceSubscriberInterface
         }
     }
 
-    public function getOrderConfirmationUrl(Request $request): JsonResponse
+    public function getOrderConfirmationUrl(): JsonResponse
     {
         try {
             $command = new GetOrderConfirmationUrlCommand((string) $this->context->cookie->inpostizi_basket_id);
