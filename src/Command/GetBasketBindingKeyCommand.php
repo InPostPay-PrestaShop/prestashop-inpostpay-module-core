@@ -17,13 +17,27 @@ final class GetBasketBindingKeyCommand
      */
     private $basket;
 
-    public function __construct(BasketInterface $basket)
+    /**
+     * @var bool
+     */
+    private $refresh;
+
+    /**
+     * @param bool $refresh if true, the binding key will be fetched from the API even if it's already stored in the session
+     */
+    public function __construct(BasketInterface $basket, bool $refresh = false)
     {
         $this->basket = $basket;
+        $this->refresh = $refresh;
     }
 
     public function getBasket(): BasketInterface
     {
         return $this->basket;
+    }
+
+    public function isRefresh(): bool
+    {
+        return $this->refresh;
     }
 }

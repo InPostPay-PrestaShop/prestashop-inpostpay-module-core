@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Installer\Database;
 
+use izi\prestashop\ObjectModel\Entity\InPostIziBasketSession;
+
 /**
  * initial DB schema
  */
@@ -17,7 +19,7 @@ final class Version_1_0_0 extends AbstractMigration
     public function up(): void
     {
         $this->connection->executeStatement('
-            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'inpostizi_basket_session` (
+            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . InPostIziBasketSession::TABLE_NAME . '` (
                 id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,
                 session_id TEXT,
                 confirmation_response TEXT,

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Handler\Config;
 
+use izi\prestashop\CacheClearer\CacheClearerInterface;
+use izi\prestashop\CacheClearer\Psr16CacheClearer;
 use izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand;
 use izi\prestashop\Configuration\ApiConfiguration;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
@@ -12,6 +14,7 @@ use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PersistentConfigurationInterface;
+use izi\prestashop\Configuration\ProductConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\Handler\CommandHandlerTrait;
 use Psr\SimpleCache\CacheInterface;
@@ -41,9 +44,9 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
     private $productConfiguration;
 
     /**
-     * @var CacheInterface
+     * @var CacheClearerInterface
      */
-    private $cache;
+    private $cacheClearer;
 
     /**
      * @var \Module
@@ -54,25 +57,41 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
      * @param ApiConfiguration $apiConfiguration
      * @param OrdersConfiguration $ordersConfiguration
      * @param GeneralConfiguration $generalConfiguration
+     * @param ProductConfiguration $productConfiguration
+     * @param CacheClearerInterface $cacheClearer
+     * @param \Module $module
      */
     public function __construct(
         ApiConfigurationInterface $apiConfiguration,
         OrdersConfigurationInterface $ordersConfiguration,
         GeneralConfigurationInterface $generalConfiguration,
         ProductConfigurationInterface $productConfiguration,
-        CacheInterface $cache,
+        $cacheClearer,
         $module
     ) {
         $this->apiConfiguration = $apiConfiguration;
         $this->ordersConfiguration = $ordersConfiguration;
         $this->generalConfiguration = $generalConfiguration;
         $this->productConfiguration = $productConfiguration;
-        $this->cache = $cache;
         $this->module = $module;
+
+        if ($cacheClearer instanceof CacheInterface) {
+            @trigger_error(sprintf('Passing an instance of "%s" as the 5th argument of "%s::__construct()" is deprecated.', CacheInterface::class, __CLASS__), E_USER_DEPRECATED);
+
+            $cacheClearer = new Psr16CacheClearer($cacheClearer);
+        }
+
+        if (!$cacheClearer instanceof CacheClearerInterface) {
+            throw new \InvalidArgumentException(sprintf('Expected $cacheClearer to be an instance of "%s", "%s" given.', CacheClearerInterface::class, get_debug_type($cacheClearer)));
+        }
+
+        $this->cacheClearer = $cacheClearer;
     }
 
     public function __invoke(UpdateGeneralConfigurationCommand $command)
     {
+        $oldApiConfig = $this->apiConfiguration->copy();
+
         $this->apiConfiguration->persist($command->getApiConfiguration());
         $this->ordersConfiguration->persist($command->getOrdersConfiguration());
         $this->generalConfiguration->persist($command->getGeneralConfiguration());
@@ -81,6 +100,17 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
         $this->module->registerHook($command->getGeneralConfiguration()->getProductCardDisplayHook());
         $this->module->registerHook($command->getGeneralConfiguration()->getCheckoutButtonDisplayHook());
 
-        $this->cache->clear();
+        if ($this->didApiConfigChange($oldApiConfig, $command->getApiConfiguration())) {
+            $this->cacheClearer->clear();
+        }
+    }
+
+    private function didApiConfigChange(ApiConfigurationInterface $oldConfiguration, ApiConfigurationInterface $newConfiguration): bool
+    {
+        if ($oldConfiguration->getClientCredentials() !== $newConfiguration->getClientCredentials()) {
+            return true;
+        }
+
+        return $oldConfiguration->getEnvironment() !== $newConfiguration->getEnvironment();
     }
 }
