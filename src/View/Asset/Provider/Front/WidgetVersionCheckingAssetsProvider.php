@@ -30,12 +30,16 @@ final class WidgetVersionCheckingAssetsProvider implements AssetsProviderInterfa
         $this->apiConfiguration = $apiConfiguration;
     }
 
-    public function getAssets(): Assets
+    public function getAssets(): ?Assets
     {
         $assets = $this->provider->getAssets();
 
         if (!$this->isWidgetV2Enabled()) {
             return $assets;
+        }
+
+        if (!$this->hasV2Configuration()) {
+            return null;
         }
 
         return $assets

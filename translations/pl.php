@@ -28,9 +28,6 @@ $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_b2270e0389d0e5acd30d8
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_7f77e3d7178f0b1979d13c101a456450'] = 'Włącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_0ba29c6a1afacf586b03a26162c72274'] = 'Środowisko';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_02a5fb45d7cc2eb4a4913f760b397416'] = 'Wybierz środowisko, na którym chcesz pokazać usługę InPost Pay. Pamiętaj, aby przed przejściem na środowisko produkcyjne upewnić się, że usługa w Twoim sklepie działa prawidłowo.';
-$_MODULE['<{inpostizi}prestashop>apiconfigurationtype_8e45a6c92701abcbd13c62e26c96c12e'] = 'Wersja Widgetu';
-$_MODULE['<{inpostizi}prestashop>apiconfigurationtype_598cdce4451b0d173bd101bf3b94aa37'] = '1.0 (przestarzała)';
-$_MODULE['<{inpostizi}prestashop>apiconfigurationtype_7bf2139d99c4b3bf4965778b46bcfc50'] = '2.0 (rekomendowana)';
 $_MODULE['<{inpostizi}prestashop>cartruleoptionstype_4b77241222efee4f0d7dc4871124c458'] = 'Podlega Dyrektywie Omnibus';
 $_MODULE['<{inpostizi}prestashop>cartruleoptionstype_93cba07454f06a4a960172bbd6e2a435'] = 'Tak';
 $_MODULE['<{inpostizi}prestashop>cartruleoptionstype_bafd7322c6e97d25b6299b5d6fe8920b'] = 'Nie';
@@ -232,6 +229,7 @@ $_MODULE['<{inpostizi}prestashop>admin_template_translations_541127e34a74cf1eb87
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_3747ade9aba396fea40b3f9e0bdc6989'] = 'Instrukcja obsługi zwrotów';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_b886efdff22fe2cb1c6bd9af9e3757aa'] = 'Panel merchanta - podgląd transakcji i obsługa zwrotów';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_9c15669ba55d94ca08b6c4cfaab10a13'] = 'Podgląd przycisku';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_86ba1a30ad954063b3832e6df9056093'] = 'Aby podgląd został wyświetlony, poprawne merchant client ID musi zostać uzupełnione w zakładce \"Konfiguracja\".';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_df4069cdb9787753503ca5dae66919c0'] = 'Pamiętaj by kliknąć przycisk \'Zapisz\' gdy już skonfigurujesz wygląd przycisku';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_0b1d93d523e523fdcf4d395a2a5645d6'] = 'Konfiguracja wtyczki InPost Pay';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_65d508ca1dd3c13922c433eb6e26fd2f'] = 'Zadbaj o poprawną ekspozycję usługi InPost Pay, dzięki czemu:';

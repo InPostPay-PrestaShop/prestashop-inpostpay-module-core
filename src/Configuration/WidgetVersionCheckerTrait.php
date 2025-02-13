@@ -22,10 +22,6 @@ trait WidgetVersionCheckerTrait
             return false;
         }
 
-        if ('' === $this->apiConfiguration->getMerchantClientId()) {
-            return false;
-        }
-
         $environment = $this->apiConfiguration->getEnvironment();
 
         if (!is_callable([$environment, 'getWidgetVersion'])) {
@@ -33,5 +29,10 @@ trait WidgetVersionCheckerTrait
         }
 
         return '2.0' === $environment->getWidgetVersion();
+    }
+
+    private function hasV2Configuration(): bool
+    {
+        return '' !== $this->apiConfiguration->getMerchantClientId() && null !== $this->apiConfiguration->getClientCredentials();
     }
 }

@@ -18,6 +18,7 @@
 {l s='Merchant panel - previewing transactions and handling returns' mod='inpostizi'}
 
 {l s='Button preview' mod='inpostizi'}
+{l s='In order for the widget preview to be displayed, a valid merchant client ID must be provided in the "Configuration" tab.' mod='inpostizi'}
 {l s='Remember to click the \'Save\' button after you finish configuring the button styles' mod='inpostizi'}
 
 {l s='InPost Pay plugin configuration' mod='inpostizi'}

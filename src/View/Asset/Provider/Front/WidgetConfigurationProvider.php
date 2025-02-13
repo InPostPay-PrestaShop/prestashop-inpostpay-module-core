@@ -47,7 +47,7 @@ final class WidgetConfigurationProvider implements AssetsProviderInterface
 
     public function getAssets(): ?Assets
     {
-        if (!$this->isWidgetV2Enabled()) {
+        if (!$this->isWidgetV2Enabled() || !$this->hasV2Configuration()) {
             return null;
         }
 

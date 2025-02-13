@@ -7,7 +7,6 @@ namespace izi\prestashop\Form\Type;
 use izi\prestashop\Configuration\DTO\ApiConfiguration;
 use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -29,13 +28,6 @@ final class ApiConfigurationType extends AbstractType
             ->add('environmentType', EnvironmentChoiceType::class, [
                 'label' => $this->translator->l('Environment', self::TRANSLATION_SOURCE),
                 'help' => $this->translator->l('Select the environment on which you want to show the InPost Pay service. Remember to make sure that the service in your store is working properly before switching to the production environment', self::TRANSLATION_SOURCE),
-            ])
-            ->add('widgetV2', ChoiceType::class, [
-                'label' => $this->translator->l('Widget version', self::TRANSLATION_SOURCE),
-                'choices' => [
-                    $this->translator->l('1.0 (deprecated)', self::TRANSLATION_SOURCE) => false,
-                    $this->translator->l('2.0 (recommended)', self::TRANSLATION_SOURCE) => true,
-                ],
             ])
             ->add('merchantClientId', TextType::class, [
                 'required' => false,

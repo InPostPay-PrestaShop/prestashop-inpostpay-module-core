@@ -141,9 +141,7 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
             $this->getClientCredentials()
         );
 
-        return $configuration
-            ->setWidgetV2($this->isWidgetV2())
-            ->setMerchantClientId($this->getMerchantClientId());
+        return $configuration->setMerchantClientId($this->getMerchantClientId());
     }
 
     public function persist(ApiConfigurationInterface $configuration): void
@@ -191,7 +189,7 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
     private function createEnvironment(): EnvironmentInterface
     {
         $type = $this->getEnvironmentType();
-        $widgetV2 = $this->isWidgetV2() && null !== $this->getMerchantClientId();
+        $widgetV2 = $this->isWidgetV2();
 
         return $this->environmentFactory->createEnvironment($type, $widgetV2);
     }
@@ -217,6 +215,6 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
             return '1.0';
         }
 
-        return $environment->getWidgetVersion();
+        return '2.0';
     }
 }

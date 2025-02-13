@@ -33,10 +33,14 @@ final class WidgetVersionCheckingWidgetParamsProvider implements WidgetParameter
 
     public function getParameters(?string $hookName, array $parameters): array
     {
-        if ($this->isWidgetV2Enabled()) {
-            return $this->v2Provider->getParameters($hookName, $parameters);
+        if (!$this->isWidgetV2Enabled()) {
+            return $this->v1Provider->getParameters($hookName, $parameters);
         }
 
-        return $this->v1Provider->getParameters($hookName, $parameters);
+        if (!$this->hasV2Configuration()) {
+            return [];
+        }
+
+        return $this->v2Provider->getParameters($hookName, $parameters);
     }
 }
