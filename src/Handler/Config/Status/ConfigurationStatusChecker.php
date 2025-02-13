@@ -7,6 +7,7 @@ namespace izi\prestashop\Handler\Config\Status;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
+use izi\prestashop\Configuration\WidgetVersionCheckerTrait;
 use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Validator\InPostApiCredentials;
 use Symfony\Component\Validator\ConstraintViolationInterface;
@@ -14,6 +15,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class ConfigurationStatusChecker implements StatusCheckerInterface
 {
+    use WidgetVersionCheckerTrait;
+
     private const TRANSLATION_SOURCE = 'configurationstatuschecker';
 
     /**
@@ -25,11 +28,6 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
      * @var OrdersConfiguration
      */
     private $ordersConfiguration;
-
-    /**
-     * @var ApiConfigurationInterface
-     */
-    private $apiConfiguration;
 
     /**
      * @var ValidatorInterface
@@ -78,6 +76,12 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
             foreach ($violations as $violation) {
                 yield sprintf($this->translator->l('API access problem: %s', self::TRANSLATION_SOURCE), $violation->getMessage());
             }
+        }
+
+        if (!$this->isWidgetV2Enabled()) {
+            yield 'You are using an outdated version of the InPost Pay Widget. Please provide a merchant client ID in the general settings tab.';
+        } elseif ('' === $this->apiConfiguration->getMerchantClientId()) {
+            yield $this->translator->l('Merchant client ID configuration is missing. The InPost Pay Widget will not be displayed.', self::TRANSLATION_SOURCE);
         }
     }
 

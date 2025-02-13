@@ -160,6 +160,7 @@ $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_341b3a9691b47feef924
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_7cca0b355fe9f13f75ed5a2399a172be'] = 'Żadna metoda płatności nie jest włączona - konfigurację można zmienić w zakładce \"ustawienia\".';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_d64fff9bf53342093407f32d61b278b1'] = 'Dane dostępowe do API nie zostały skonfigurowane.';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_0befa43bc12a10af2a8897889570b8ee'] = 'Problem z dostępem do API: %s';
+$_MODULE['<{inpostizi}prestashop>configurationstatuschecker_a7030a339317fbdb2af045820a465f79'] = 'Merchant client ID nie zostało skonfigurowane. Widget InPost Pay nie będzie wyświetlany.';
 $_MODULE['<{inpostizi}prestashop>deliveryoptionsstatuschecker_3194a4d8bc60ba3e66ddd94f10f32889'] = 'Nie jest dostępna żadna opcja dostawy.';
 $_MODULE['<{inpostizi}prestashop>actionfrontcontrollersetmedia_05e070788d5522addd174a9baa153f9f'] = 'Coś poszło nie tak. Spróbuj ponownie później.';
 $_MODULE['<{inpostizi}prestashop>actiongetpaymentoptions_a9e819aadeb05ca1df49418d8ef8faf2'] = 'Płać z InPost Pay';
