@@ -504,6 +504,12 @@ services:
       - '@izi\prestashop\View\Asset\AssetManagerInterface'
       - InPostIzi
 
+  izi\prestashop\Configuration\Initializer\AnnotationsConfigInitializer:
+    class: izi\prestashop\Configuration\Initializer\AnnotationsConfigInitializer
+    public: false
+    tags:
+      - { name: inpost.izi.config_initializer }
+
   izi\prestashop\Order\Message\ParameterDescriptorInterface: '@izi\prestashop\Order\Message\ParametersExtractor'
 
   inpost.izi.shop_context:
