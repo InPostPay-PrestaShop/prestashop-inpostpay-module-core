@@ -131,13 +131,17 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 
     protected $content_only = true;
 
+    private $outputBuffer = '';
+
     public function postProcess()
     {
         $this->registerErrorHandler();
+        ob_start([$this, 'handleOutput'], 1);
 
         $request = $this->module->getCurrentRequest();
 
         $response = $this->handle($request);
+        Response::closeOutputBuffers(0, false);
         $response->send();
 
         exit;
@@ -402,5 +406,31 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             E_RECOVERABLE_ERROR => LogLevel::CRITICAL,
             E_ERROR => LogLevel::CRITICAL,
         ]);
+    }
+
+    private function handleOutput(string $buffer, int $phase): string
+    {
+        if (PHP_OUTPUT_HANDLER_FINAL & $phase && '' !== $this->outputBuffer) {
+            $this->module->getLogger()->warning('Output buffer content: "{buffer}".', [
+                'buffer' => $this->outputBuffer,
+            ]);
+
+            $this->outputBuffer = '';
+        }
+
+        if ('' === $buffer) {
+            return '';
+        }
+
+        $this->outputBuffer .= $buffer;
+
+        if (PHP_OUTPUT_HANDLER_START & $phase) {
+            $this->module->getLogger()->warning(sprintf(
+                "Output started before sending response.\n[stacktrace]\n%s\n",
+                (new \Exception())->getTraceAsString()
+            ));
+        }
+
+        return $buffer;
     }
 }
