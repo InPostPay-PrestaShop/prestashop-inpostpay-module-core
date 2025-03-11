@@ -7,10 +7,9 @@ use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Configuration\DTO\ConsentLink;
 use izi\prestashop\Configuration\DTO\HtmlStyles;
-use izi\prestashop\View\Widget\Alignment;
-use izi\prestashop\View\Widget\Configuration as WidgetConfiguration;
 use izi\prestashop\View\Widget\FrameStyle;
 use izi\prestashop\View\Widget\Variant;
+use izi\prestashop\View\Widget\WidgetConfiguration;
 
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -24,7 +23,6 @@ class InPostIziUpdater_1_5_0
     use ConfigUpdaterTrait;
 
     private const CART_WIDGET_CONFIG_MAP = [
-        'INPOST_PAY_alignment_cart' => 'alignment',
         'INPOST_PAY_background_cart' => 'darkMode',
         'INPOST_PAY_variant_cart' => 'variant',
         'INPOST_PAY_frame_style_cart' => 'frameStyle',
@@ -46,6 +44,11 @@ class InPostIziUpdater_1_5_0
         'INPOST_PAY_margin_cart_left' => 'marginLeft',
         'INPOST_PAY_margin_cart_right' => 'marginRight',
         'INPOST_PAY_margin_cart_down' => 'marginBottom',
+        'INPOST_PAY_alignment_cart' => 'alignment',
+    ];
+
+    private const PRODUCT_STYLES_CONFIG_MAP = [
+        'INPOST_PAY_alignment_details' => 'alignment',
     ];
 
     /**
@@ -157,7 +160,7 @@ class InPostIziUpdater_1_5_0
 
     private function updateCartWidgetConfigStructure(): bool
     {
-        $configs = $this->getWidgetConfigs(self::CART_WIDGET_CONFIG_MAP, BindingPlace::BasketSummary(), true);
+        $configs = $this->getWidgetConfigs(self::CART_WIDGET_CONFIG_MAP, BindingPlace::BasketSummary());
         $styles = $this->getWidgetStyles(self::CART_STYLES_CONFIG_MAP);
 
         return $this->setJsonConfigValues('INPOST_PAY_CART_WIDGET_CONFIG', $configs)
@@ -168,12 +171,14 @@ class InPostIziUpdater_1_5_0
     private function updateProductWidgetConfigStructure(): bool
     {
         $configs = $this->getWidgetConfigs(self::PRODUCT_WIDGET_CONFIG_MAP, BindingPlace::ProductCard());
+        $styles = $this->getWidgetStyles(self::PRODUCT_STYLES_CONFIG_MAP);
 
         return $this->setJsonConfigValues('INPOST_PAY_PRODUCT_CARD_WIDGET_CONFIG', $configs)
+            && $this->setJsonConfigValues('INPOST_PAY_PRODUCT_HTML_STYLES', $styles)
             && $this->deleteConfigurationByKeys(array_keys(self::PRODUCT_WIDGET_CONFIG_MAP));
     }
 
-    private function getWidgetConfigs(array $map, BindingPlace $bindingPlace, bool $basket = false): array
+    private function getWidgetConfigs(array $map, BindingPlace $bindingPlace): array
     {
         if ([] === $data = $this->getConfigDataByKeys(array_keys($map))) {
             return [];
@@ -190,15 +195,12 @@ class InPostIziUpdater_1_5_0
                     $config[$value] = $data[$key] ?? null;
                 }
 
-                $minWidth = $this->getWidgetWidth((int) $config['minWidthPx']);
                 $maxWidth = $this->getWidgetWidth((int) $config['maxWidthPx']);
 
-                $configs[$shopGroupId][$shopId] = (new WidgetConfiguration($bindingPlace, $basket))
+                $configs[$shopGroupId][$shopId] = (new WidgetConfiguration($bindingPlace))
                     ->setVariant(Variant::tryFrom($config['variant']) ?? Variant::Secondary())
                     ->setDarkMode((bool) $config['darkMode'])
-                    ->setAlignment(Alignment::tryFrom($config['alignment']))
                     ->setFrameStyle(FrameStyle::tryFrom($config['frameStyle']))
-                    ->setMinWidthPx($minWidth)
                     ->setMaxWidthPx($maxWidth);
             }
         }
@@ -223,11 +225,14 @@ class InPostIziUpdater_1_5_0
                     $config[$value] = $data[$key] ?? null;
                 }
 
+                $justifyContent = HtmlStyles::getJustifyContentStyleByAlignment($config['alignment'] ?? null);
+
                 $styles[$shopGroupId][$shopId] = (new HtmlStyles())
-                    ->setMarginTop($config['marginTop'])
-                    ->setMarginLeft($config['marginLeft'])
-                    ->setMarginRight($config['marginRight'])
-                    ->setMarginBottom($config['marginBottom']);
+                    ->setMarginTop($config['marginTop'] ?? null)
+                    ->setMarginLeft($config['marginLeft'] ?? null)
+                    ->setMarginRight($config['marginRight'] ?? null)
+                    ->setMarginBottom($config['marginBottom'] ?? null)
+                    ->setJustifyContent($justifyContent);
             }
         }
 

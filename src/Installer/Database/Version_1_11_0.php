@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Installer\Database;
 
-use izi\prestashop\ObjectModel\Entity\InPostIziBasketSession;
 use izi\prestashop\Repository\CartRuleRepository;
 
 class Version_1_11_0 extends AbstractMigration
@@ -18,7 +17,6 @@ class Version_1_11_0 extends AbstractMigration
 
     public function up(): void
     {
-        $this->addColumn(InPostIziBasketSession::TABLE_NAME, 'binding_api_key', 'VARCHAR(255)');
         $this->createCartRuleOptionsTable();
     }
 

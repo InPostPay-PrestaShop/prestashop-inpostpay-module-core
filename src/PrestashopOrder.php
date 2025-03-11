@@ -2,15 +2,30 @@
 
 namespace izi\prestashop;
 
-use izi\item\order\OrderProduct;
-use izi\item\order\OrderQuantity;
-use izi\item\ProductAttribute;
-use izi\prestashop\BasketApp\BasketAppClientInterface;
+use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
+use izi\prestashop\Common\Currency;
+use izi\prestashop\Common\Customer\AccountInfo;
+use izi\prestashop\Common\Customer\ClientAddress;
+use izi\prestashop\Common\Customer\InvoiceDetails;
+use izi\prestashop\Common\Delivery\DeliveryType;
+use izi\prestashop\Common\Delivery\OptionalService;
+use izi\prestashop\Common\Delivery\ServiceCode;
+use izi\prestashop\Common\Order\Consent;
+use izi\prestashop\Common\Order\Product;
+use izi\prestashop\Common\Order\Quantity;
+use izi\prestashop\Common\PaymentType;
+use izi\prestashop\Common\PhoneNumber;
+use izi\prestashop\Common\Price;
+use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductImage;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
+use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
+use izi\prestashop\MerchantApi\Model\Order\Response\Delivery;
+use izi\prestashop\MerchantApi\Model\Order\Response\Order;
+use izi\prestashop\MerchantApi\Model\Order\Response\OrderDetails;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Order\Address\AddressDataMapper;
 use izi\prestashop\Product\Util\AttributeListParser;
@@ -18,6 +33,9 @@ use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 
 /**
+ * @internal
+ * @deprecated
+ *
  * @todo refactor...
  */
 class PrestashopOrder
@@ -38,6 +56,9 @@ class PrestashopOrder
     private $deliveryDetails;
     private $language;
 
+    /**
+     * @var CreateOrderRequest|null should be required but might not be available if e.g. {@see \PaymentModule::validateOrder()} had thrown an exception
+     */
     private $orderData;
 
     /**
@@ -60,14 +81,16 @@ class PrestashopOrder
      */
     private $attributeListParser;
 
-    public function __construct(\Order $order, string $basketId)
+    public function __construct(\Order $order, string $basketId, ?CreateOrderRequest $orderData = null)
     {
         $this->order = $order;
         $this->basketId = $basketId;
+        $this->orderData = $orderData;
+
         $this->module = \Module::getInstanceByName('inpostizi');
 
         $this->deliveryDetails = new \Address((int) $this->order->id_address_delivery);
-        $this->customer = new \Customer((int) $this->order->id_customer);
+        $this->customer = $this->order->getCustomer();
         $this->language = new \Language((int) $this->order->id_lang);
         $this->productConfiguration = $this->module->get(ProductConfigurationInterface::class);
 
@@ -75,32 +98,33 @@ class PrestashopOrder
         $this->addressDataMapper = new AddressDataMapper();
     }
 
-    public static function getOrder(\Order $order, string $basketId): \izi\item\order\Order
+    public static function getOrder(\Order $order, string $basketId, ?CreateOrderRequest $request = null): Order
     {
-        return (new self($order, $basketId))->mapOrder();
+        return (new self($order, $basketId, $request))->mapOrder();
     }
 
-    public function mapOrder(): \izi\item\order\Order
+    public function mapOrder(): Order
     {
-        $order = new \izi\item\order\Order();
-
-        $order->account_info = $this->mapAccountInfo();
-        $order->invoice_details = $this->mapInvoiceDetails();
-        $order->delivery = $this->mapDelivery();
-        $order->products = $this->mapProducts();
-        $order->order_details = $this->mapOrderDetails();
-        $order->consents = $this->mapConsents();
-
-        return $order;
+        return new Order(
+            $this->mapOrderDetails(),
+            $this->mapAccountInfo(),
+            $this->mapDelivery(),
+            $this->mapProducts(),
+            $this->mapConsents(),
+            $this->mapInvoiceDetails()
+        );
     }
 
-    public function mapConsents()
+    /**
+     * @return Consent[]
+     */
+    public function mapConsents(): array
     {
-        if ($data = $this->getOrderData()) {
-            return $data->consents;
+        if (null !== $this->orderData) {
+            return $this->orderData->getConsents();
         }
 
-        $config = json_decode(\Configuration::get('INPOST_PAY_CONSENTS'), true) ?? [];
+        $config = json_decode($this->getConfiguration('INPOST_PAY_CONSENTS'), true) ?? [];
 
         if ([] === $config) {
             return [];
@@ -111,276 +135,192 @@ class PrestashopOrder
         foreach ($config as $consent) {
             $date = \DateTimeImmutable::createFromFormat(\DateTime::RFC3339, $consent['dateUpdated']);
 
-            $consents[] = [
-                'consent_id' => $consent['link']['id'],
-                'consent_version' => false === $date ? '0' : (string) $date->getTimestamp(),
-                'is_accepted' => $consent['requirementType'] !== ConsentRequirementType::Optional()->value,
-            ];
+            $consents[] = new Consent(
+                $consent['link']['id'],
+                false === $date ? '0' : (string) $date->getTimestamp(),
+                $consent['requirementType'] !== ConsentRequirementType::Optional()->value
+            );
         }
 
         return $consents;
     }
 
-    public function mapAccountInfo()
+    public function mapAccountInfo(): AccountInfo
     {
-        $data = $this->getOrderData();
-
-        if ($data && isset($data->account_info)) {
-            return $data->account_info;
+        if (null !== $this->orderData) {
+            return AccountInfo::fromOrderRequestData($this->orderData->getAccountInfo());
         }
 
-        $accountInfo = new \izi\item\order\AccountInfo();
-
-        $accountInfo->name = $this->customer->firstname;
-        $accountInfo->surname = $this->customer->lastname;
-        $accountInfo->phone_number = $this->mapPhoneNumber();
-        $accountInfo->mail = $this->customer->email;
-        $accountInfo->client_address = $this->mapClientAddress();
-
-        return $accountInfo;
+        return new AccountInfo(
+            (string) $this->customer->firstname,
+            (string) $this->customer->lastname,
+            $this->mapPhoneNumber(),
+            (string) $this->customer->email,
+            $this->mapClientAddress()
+        );
     }
 
-    public function mapProducts()
+    /**
+     * @return Product[]
+     */
+    public function mapProducts(): array
     {
         return array_map([$this, 'createProduct'], $this->order->getProductsDetail());
     }
 
-    public function mapClientAddress()
+    public function mapClientAddress(): ClientAddress
     {
-        $clientAddress = new \izi\item\order\ClientAddress();
-
-        $clientAddress->country_code = \Country::getIsoById($this->deliveryDetails->id_country);
-        $clientAddress->address = $this->deliveryDetails->address1 . ' ' . $this->deliveryDetails->address2;
-        $clientAddress->city = $this->deliveryDetails->city;
-        $clientAddress->postal_code = $this->deliveryDetails->postcode;
-
-        return $clientAddress;
+        return new ClientAddress(
+            (string) \Country::getIsoById($this->deliveryDetails->id_country),
+            $this->deliveryDetails->address1 . ' ' . $this->deliveryDetails->address2,
+            (string) $this->deliveryDetails->city,
+            (string) $this->deliveryDetails->postcode
+        );
     }
 
-    public function mapInvoiceDetails()
+    public function mapInvoiceDetails(): ?InvoiceDetails
     {
-        $data = $this->getOrderData();
-
-        if ($data && isset($data->invoice_details)) {
-            return $data->invoice_details;
+        if (null === $this->orderData) {
+            return null;
         }
 
-        return null;
+        return $this->orderData->getInvoiceDetails();
     }
 
-    public function mapDelivery()
+    public function mapDelivery(): Delivery
     {
-        $data = $this->getOrderData();
-        $delivery = new \izi\item\order\Delivery();
+        if (null !== $this->orderData) {
+            $delivery = $this->orderData->getDelivery();
+            $deliveryType = $delivery->getType();
+            $deliveryCodes = $delivery->getOptionalServiceCodes();
+            $email = $delivery->getEmail() ?? $this->customer->email;
+            $phoneNumber = $delivery->getPhoneNumber() ?? $this->mapPhoneNumber();
+            $deliveryPoint = $delivery->getPoint();
+            $courierNote = $delivery->getCourierNote();
+        } else {
+            $deliveryType = DeliveryType::Courier();
+            $deliveryCodes = [];
+            $email = $this->customer->email;
+            $phoneNumber = $this->mapPhoneNumber();
+            $deliveryPoint = null;
+            $courierNote = $this->deliveryDetails->other;
+        }
 
-        $deliveryCodes = $data && isset($data->delivery->delivery_codes) ? $data->delivery->delivery_codes : [];
+        $deliveryDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
+            ->modify('+2 days')
+            ->setTime(12, 0);
 
-        $serviceNameDictionary = [
-            'PWW' => 'Paczka w Weekend',
-            'COD' => 'Pobranie',
-        ];
-
-        $delivery->delivery_options = array_map(function ($code) use ($serviceNameDictionary) {
-            return [
-                'delivery_name' => $serviceNameDictionary[$code] ?? $code,
-                'delivery_code_value' => $code,
-                'delivery_option_price' => $this->createPrice(0., 0.),
+        $deliveryOptions = array_map(static function (ServiceCode $code): OptionalService {
+            $serviceNameDictionary = [
+                'PWW' => 'Paczka w Weekend',
+                'COD' => 'Pobranie',
             ];
+
+            return new OptionalService(
+                $serviceNameDictionary[$code->value] ?? $code->value,
+                $code,
+                PriceFactory::create(0., 0.) // TODO: get the actually used prices
+            );
         }, $deliveryCodes);
 
-        $delivery->delivery_type = $data && isset($data->delivery->delivery_type) ? $data->delivery->delivery_type : 'COURIER';
-        $delivery->delivery_price = $this->getDeliveryPrice();
-        $delivery->delivery_date = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
-            ->modify('+2 days')
-            ->setTime(12, 0)
-            ->setTimezone(new \DateTimeZone(BasketAppClientInterface::DATETIME_ZONE))
-            ->format(BasketAppClientInterface::DATETIME_FORMAT);
-
-        $delivery->mail = $this->order->getCustomer()->email;
-
-        $delivery->phone_number = $this->addressDataMapper->mapPhoneNumber($this->deliveryDetails);
-        $delivery->delivery_address = $this->addressDataMapper->mapDeliveryAddress($this->deliveryDetails);
-
-        $delivery->courier_note = $this->readComments();
-
-        $deliveryPoint = isset($data->delivery, $data->delivery->delivery_point) ? $data->delivery->delivery_point : ''; // get_post_meta($this->orderId, 'delivery_point', true);
-        if ($deliveryPoint) {
-            $delivery->delivery_point = $deliveryPoint;
-        }
-
-        return $delivery;
+        return new Delivery(
+            $deliveryType,
+            $deliveryDate,
+            $this->getDeliveryPrice(),
+            $deliveryOptions,
+            $email,
+            $phoneNumber,
+            $deliveryPoint,
+            $this->addressDataMapper->mapDeliveryAddress($this->deliveryDetails),
+            $courierNote
+        );
     }
 
-    public function mapDeliveryAddress()
+    public function mapPhoneNumber(): PhoneNumber
     {
-        $deliveryAddress = new \izi\item\order\DeliveryAddress();
-
-        $deliveryAddress->name = $this->customer->firstname . ' ' . $this->customer->lastname;
-        $deliveryAddress->country_code = 'PL';
-        $deliveryAddress->address = $this->deliveryDetails->address1 . ' ' . $this->deliveryDetails->address2;
-        $deliveryAddress->city = $this->deliveryDetails->city;
-        $deliveryAddress->postal_code = $this->deliveryDetails->postcode;
-
-        return $deliveryAddress;
+        return $this->addressDataMapper->mapPhoneNumber($this->deliveryDetails);
     }
 
-    public function mapPhone()
+    private function readComments(): ?string
     {
-        $phone = new \izi\item\order\Phone();
-
-        $trigPhone = $this->readPhone();
-        $phone->country_prefix = $trigPhone[0];
-        $phone->phone = $trigPhone[1];
-
-        return $phone;
-    }
-
-    public function mapPhoneNumber()
-    {
-        $phoneNumber = new \izi\item\order\PhoneNumber();
-
-        $trigPhone = $this->readPhone();
-        $phoneNumber->country_prefix = $trigPhone[0];
-        $phoneNumber->phone = $trigPhone[1];
-
-        return $phoneNumber;
-    }
-
-    public function readPhone()
-    {
-        foreach (['phone', 'phone_mobile'] as $field) {
-            $value = (string) $this->deliveryDetails->{$field};
-
-            if ('' !== $value && preg_match('/^\+\d+ /', $value)) {
-                return explode(' ', $value, 2);
-            }
-        }
-
-        return ['+48', $this->deliveryDetails->phone];
-    }
-
-    private function readComments()
-    {
-        if ($data = $this->getOrderData()) {
-            return $data->order_details->order_comments ?? null;
+        if (null !== $this->orderData) {
+            return $this->orderData->getOrderDetails()->getOrderComments();
         }
 
         return $this->order->getFirstMessage() ?: null;
     }
 
-    public function mapOrderDetails()
+    public function mapOrderDetails(): OrderDetails
     {
-        $orderDetails = new \izi\item\order\OrderDetails();
-
-        $orderDetails->order_comments = $this->readComments();
-        $orderDetails->order_id = $this->order->id;
-        $orderDetails->customer_order_id = $this->order->reference;
-        $orderDetails->pos_id = $this->getConfiguration('INPOST_PAY_pos_id');
-        $orderDetails->order_creation_date = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
-            ->setTimezone(new \DateTimeZone(BasketAppClientInterface::DATETIME_ZONE))
-            ->format(BasketAppClientInterface::DATETIME_FORMAT);
-        $orderDetails->basket_id = $this->basketId;
-
-        $orderDetails->order_merchant_status_description = $this->getStatusDescription($this->order);
-        $orderDetails->order_base_price = $this->readSummaryOrderBasePrice();
-        $orderDetails->order_final_price = $this->readSummaryOrderFinalPrice();
-        $orderDetails->order_discount = $this->getDiscountsTotal();
-        $orderDetails->delivery_references_list = $this->getTrackingNumbers();
-        $orderDetails->currency = 'PLN';
-        $orderDetails->payment_type = $this->readPaymentType();
-
-        return $orderDetails;
+        return new OrderDetails(
+            (string) $this->order->id,
+            (string) $this->getConfiguration('INPOST_PAY_pos_id'),
+            \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add),
+            $this->basketId,
+            (string) $this->getStatusDescription($this->order),
+            $this->readPaymentType(),
+            $this->readSummaryOrderBasePrice(),
+            $this->readSummaryOrderFinalPrice(),
+            Currency::Pln(),
+            $this->getTrackingNumbers(),
+            $this->readComments(),
+            $this->getDiscountsTotal(),
+            $this->order->reference
+        );
     }
 
-    public function readSummaryOrderFinalPrice()
+    public function readSummaryOrderFinalPrice(): Price
     {
-        return $this->createPrice($this->order->total_paid_tax_excl, $this->order->total_paid_tax_incl);
+        return PriceFactory::create(
+            (float) $this->order->total_paid_tax_excl,
+            (float) $this->order->total_paid_tax_incl
+        );
     }
 
-    public function readSummaryOrderBasePrice()
+    public function readSummaryOrderBasePrice(): Price
     {
-        $gross = $this->order->total_paid_tax_incl;
-        $net = $this->order->total_paid_tax_excl;
+        $gross = (float) $this->order->total_paid_tax_incl;
+        $net = (float) $this->order->total_paid_tax_excl;
 
         if (!$this->hasFreeShippingCartRule()) {
             $gross -= $this->order->total_shipping_tax_incl;
             $net -= $this->order->total_shipping_tax_excl;
         }
 
-        return $this->createPrice($net, $gross);
+        return PriceFactory::create($net, $gross);
     }
 
-    public function readPaymentType()
+    public function readPaymentType(): PaymentType
     {
-        $data = $this->getOrderData();
-
-        if (null !== $data && isset($data->order_details->payment_type)) {
-            return $data->order_details->payment_type;
+        if (null === $this->orderData) {
+            return PaymentType::Card();
         }
 
-        return 'BLIK_CODE';
+        return $this->orderData->getOrderDetails()->getPaymentType();
     }
 
     /**
      * @return false|string
      */
-    private function getConfiguration(string $key, ?int $languageId = null)
+    private function getConfiguration(string $key, bool $lang = false)
     {
+        $languageId = $lang ? (int) $this->order->id_lang : null;
+
         return \Configuration::get($key, $languageId, null, $this->order->id_shop);
-    }
-
-    /**
-     * @return \StdClass|null
-     */
-    private function getOrderData()
-    {
-        if (isset($this->orderData)) {
-            return $this->orderData;
-        }
-
-        if (!$data = CartSession::getOrderData($this->order->id)) {
-            $this->orderData = false;
-        } else {
-            $this->orderData = json_decode($data, false);
-        }
-
-        return $this->orderData ?: null;
     }
 
     private function getStatusDescription(\Order $order): string
     {
         $orderStateId = (int) $order->current_state;
-        $config = \Configuration::get('INPOST_PAY_OS_DESCRIPTION_MAP', $order->id_lang, null, $order->id_shop);
+        $config = $this->getConfiguration('INPOST_PAY_OS_DESCRIPTION_MAP', true);
         $map = $config ? json_decode($config, true) : [];
 
         return $map[$orderStateId] ?? (new \OrderState($orderStateId, $order->id_lang))->name;
     }
 
-    private function createPrice(float $net, float $gross): \izi\item\Price
-    {
-        $net = \Tools::ps_round($net, 2);
-        $gross = \Tools::ps_round($gross, 2);
-        $vat = $gross - $net;
-
-        $price = new \izi\item\Price();
-
-        $price->net = $this->formatPrice($net);
-        $price->gross = $this->formatPrice($gross);
-        $price->vat = $this->formatPrice($vat);
-
-        return $price;
-    }
-
-    private function formatPrice(float $price): string
-    {
-        return number_format($price, 2, '.', '');
-    }
-
     private function getTrackingNumbers(): array
     {
-        /** @var \InPostIzi $module */
-        $module = \Module::getInstanceByName('inpostizi');
-        $objectManager = $module->get(ObjectManagerInterface::class);
+        $objectManager = $this->module->get(ObjectManagerInterface::class);
 
         return (new CarrierModuleTrackingNumberProvider($objectManager))->getTrackingNumbers((int) $this->order->id);
     }
@@ -390,49 +330,55 @@ class PrestashopOrder
         return (float) \Tools::math_round($this->order->total_discounts_tax_incl, 2);
     }
 
-    private function createProduct(array $data): OrderProduct
+    private function createProduct(array $data): Product
     {
-        $product = new OrderProduct();
-
-        $product->product_id = sprintf('%d.%d.%d', $data['product_id'], $data['product_attribute_id'], $data['id_customization']);
-        $product->ean = $data['product_ean13'];
-        $product->base_price = $this->createPrice((float) $data['unit_price_tax_excl'], (float) $data['unit_price_tax_incl']);
-        $product->quantity = OrderQuantity::integer((int) $data['product_quantity']);
-
         if (0 >= (int) $data['product_attribute_id'] || false === $pos = strrpos($data['product_name'], '(', -1)) {
-            $product->product_name = $data['product_name'];
+            $productName = $data['product_name'];
+            $attributes = [];
         } else {
-            $product->product_name = trim(substr($data['product_name'], 0, $pos));
-            $product->product_attributes = $this->getProductAttributes(substr($data['product_name'], $pos + 1, -1));
+            $productName = trim(substr($data['product_name'], 0, $pos));
+            $attributes = $this->getProductAttributes(substr($data['product_name'], $pos + 1, -1));
         }
 
         $model = new \Product((int) $data['product_id'], false, $this->order->id_lang, $this->order->id_shop);
 
         if (\Validate::isLoadedObject($model)) {
+            $category = $model->id_category_default;
+            $description = $this->formatDescription((string) $model->description) ?: $this->formatDescription((string) $model->description_short);
+            $link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->order->id_lang, $this->order->id_shop, $data['product_attribute_id']);
+
             $images = $this->imageRetriever->getProductImages([
                 'id_product' => $model->id,
                 'id_product_attribute' => $data['product_attribute_id'],
             ], $this->language);
-            $imageUrl = $this->getCoverImageUrl($images);
 
-            $product->product_category = $model->id_category_default;
-            $product->product_description = $this->formatDescription((string) $model->description) ?: $this->formatDescription((string) $model->description_short);
-            $product->product_link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->order->id_lang, $this->order->id_shop, $data['product_attribute_id']);
-            $product->product_image = $imageUrl;
-            $product->additional_product_images = $this->getProductImages($images);
+            $imageUrl = $this->getCoverImageUrl($images);
+            $additionalImages = $this->getProductImages($images);
+        } else {
+            $category = $description = $link = $imageUrl = null;
+            $additionalImages = [];
         }
 
-        return $product;
+        return new Product(
+            sprintf('%d.%d.%d', $data['product_id'], $data['product_attribute_id'], $data['id_customization']),
+            $productName,
+            PriceFactory::create((float) $data['unit_price_tax_excl'], (float) $data['unit_price_tax_incl']),
+            Quantity::integer((int) $data['product_quantity']),
+            $category,
+            $data['product_ean13'],
+            $description,
+            $link,
+            $imageUrl,
+            $attributes,
+            [],
+            $additionalImages
+        );
     }
 
     private function getProductAttributes(string $attributes): array
     {
         return array_map(static function (array $attribute) {
-            $productAttribute = new ProductAttribute();
-            $productAttribute->attribute_name = $attribute['group'];
-            $productAttribute->attribute_value = $attribute['name'];
-
-            return $productAttribute;
+            return new ProductAttribute($attribute['group'], $attribute['name']);
         }, $this->getAttributeListParser()->parse($attributes, (int) $this->order->id_shop));
     }
 
@@ -467,13 +413,13 @@ class PrestashopOrder
         return $this->freeShipping = false;
     }
 
-    private function getDeliveryPrice(): \izi\item\Price
+    private function getDeliveryPrice(): Price
     {
         if ($this->hasFreeShippingCartRule()) {
-            return $this->createPrice(0., 0.);
+            return PriceFactory::create(0., 0.);
         }
 
-        return $this->createPrice(
+        return PriceFactory::create(
             (float) $this->order->total_shipping_tax_excl,
             (float) $this->order->total_shipping_tax_incl
         );

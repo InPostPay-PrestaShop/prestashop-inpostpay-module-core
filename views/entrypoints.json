@@ -1,13 +1,8 @@
 {
   "entrypoints": {
-    "prestashopizi": {
-      "js": [
-        "../../views/js/front/prestashopizi.7d907de8fe23c06fc908.js"
-      ]
-    },
     "v2": {
       "js": [
-        "../../views/js/front/v2.c368dbf5dfe172b24839.js"
+        "../../views/js/front/v2.93d51cf288491b24d876.js"
       ]
     },
     "product": {

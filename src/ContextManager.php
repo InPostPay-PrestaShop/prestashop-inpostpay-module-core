@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace izi\prestashop;
 
 use izi\prestashop\Common\Currency;
-use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\ObjectModel\Repository\CurrencyRepository;
@@ -29,11 +28,11 @@ final class ContextManager
 
     private $stack = [];
 
-    public function __construct(\Context $context, ObjectManagerInterface $manager, ?PrestaShopConfiguration $configuration = null)
+    public function __construct(\Context $context, ObjectManagerInterface $manager, PrestaShopConfiguration $configuration)
     {
         $this->context = $context;
         $this->manager = $manager;
-        $this->configuration = $configuration ?? new PrestaShopConfiguration(new Configuration());
+        $this->configuration = $configuration;
     }
 
     public function getContext(): \Context

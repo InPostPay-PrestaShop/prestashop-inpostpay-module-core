@@ -8,6 +8,7 @@ use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\Entities\BasketSessionInterface;
 use izi\prestashop\Entities\CartProxy;
+use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\ObjectModel\Entity\InPostIziBasketSession;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Uuid\Uuid;
@@ -16,7 +17,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 /**
  * @implements BasketSessionRepositoryInterface<BasketSession>
  */
-final class BasketSessionRepository implements BasketSessionRepositoryInterface
+final class BasketSessionRepository implements BasketSessionRepositoryInterface, OrderDataRepositoryInterface
 {
     /**
      * @var SerializerInterface
@@ -148,6 +149,15 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
         $this->manager->getConnection()->update(InPostIziBasketSession::TABLE_NAME, [
             'binding_api_key' => null,
         ], ['order_id' => null]);
+    }
+
+    public function getOrderData(string $orderId): ?CreateOrderRequest
+    {
+        if (null === $session = $this->findByOrderId($orderId)) {
+            return null;
+        }
+
+        return $session->getOrderRequest();
     }
 
     private function doPersist(InPostIziBasketSession $model): void

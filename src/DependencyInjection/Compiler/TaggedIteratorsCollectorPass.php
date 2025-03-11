@@ -11,13 +11,6 @@ use Symfony\Component\DependencyInjection\Reference;
 
 final class TaggedIteratorsCollectorPass implements CompilerPassInterface
 {
-    public function __construct(?string $serviceId = null)
-    {
-        if (null !== $serviceId) {
-            @trigger_error(sprintf('Passing $serviceId to %s::__construct() is deprecated. Currently all iterators are collected in a single pass.', __CLASS__), E_USER_DEPRECATED);
-        }
-    }
-
     public function process(ContainerBuilder $container): void
     {
         foreach ($container->getDefinitions() as $definition) {

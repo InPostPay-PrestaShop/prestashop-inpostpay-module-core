@@ -19,7 +19,7 @@ interface DeliveryPriceCalculatorInterface
     public function getAdditionalServicePrice(\Cart $cart, \Carrier $carrier, ServiceOptions $options): Price;
 
     /**
-     * @return float|null gross amount required for free delivery or null if not applicable
+     * @return PriceAmount|null gross amount required for free delivery or null if not applicable
      */
     public function getFreeDeliveryMinAmount(\Cart $cart, \Carrier $carrier): ?PriceAmount;
 }

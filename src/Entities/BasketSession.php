@@ -33,9 +33,19 @@ final class BasketSession implements SwitchableBasketSessionInterface
     private $confirmation;
 
     /**
+     * @var CreateOrderRequest|null
+     */
+    private $orderRequest;
+
+    /**
      * @var callable(): BindingConfirmation|null
      */
     private $confirmationFactory;
+
+    /**
+     * @var callable(): CreateOrderRequest|null
+     */
+    private $orderRequestFactory;
 
     private $basketSwitched = false;
 
@@ -64,6 +74,7 @@ final class BasketSession implements SwitchableBasketSessionInterface
     public static function existing(InPostIziBasketSession $model, BasketInterface $basket, SerializerInterface $serializer): self
     {
         $session = new self($basket, $model);
+
         $session->confirmationFactory = \Closure::bind(function () use ($serializer) {
             if (null === $this->model->confirmation_response) {
                 return null;
@@ -72,6 +83,16 @@ final class BasketSession implements SwitchableBasketSessionInterface
             $value = base64_decode($this->model->confirmation_response);
 
             return $serializer->deserialize($value, BindingConfirmation::class, 'json');
+        }, $session);
+
+        $session->orderRequestFactory = \Closure::bind(function () use ($serializer) {
+            if (null === $this->model->order_details) {
+                return null;
+            }
+
+            $value = base64_decode($this->model->order_details);
+
+            return $serializer->deserialize($value, CreateOrderRequest::class, 'json');
         }, $session);
 
         return $session;
@@ -139,6 +160,8 @@ final class BasketSession implements SwitchableBasketSessionInterface
 
     public function finalize(string $orderId, string $orderConfirmationUrl, CreateOrderRequest $request): void
     {
+        $this->orderRequest = $request;
+
         $this->model->order_id = (int) $orderId;
         $this->model->redirect_url = $orderConfirmationUrl;
         $this->model->order_details = base64_encode(json_encode($request));
@@ -197,5 +220,17 @@ final class BasketSession implements SwitchableBasketSessionInterface
     public function getModel(): InPostIziBasketSession
     {
         return $this->model;
+    }
+
+    /**
+     * @internal
+     */
+    public function getOrderRequest(): ?CreateOrderRequest
+    {
+        if (null === $this->orderRequest && null !== $this->orderRequestFactory) {
+            $this->orderRequest = ($this->orderRequestFactory)();
+        }
+
+        return $this->orderRequest;
     }
 }

@@ -4,45 +4,36 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Controller\Api;
 
-use izi\prestashop\CartSession;
+use izi\prestashop\BasketApp\BasketAppClientInterface;
+use izi\prestashop\MerchantApi\Command\CreateOrderCommand;
+use izi\prestashop\MerchantApi\Command\GetOrderCommand;
 use izi\prestashop\MerchantApi\Command\UpdateOrderCommand;
-use izi\prestashop\MerchantApi\Exception\OrderNotFoundException;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\MerchantApi\Model\Order\Request\OrderEvent;
+use izi\prestashop\MerchantApi\Model\Order\Response\Order;
 use izi\prestashop\MerchantApi\Model\Order\Response\OrderStatusData;
-use izi\prestashop\PrestashopOrder;
-use izi\prestashop\rest\order\Create;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @final
- */
-class OrderController extends AbstractApiController
+final class OrderController extends AbstractApiController
 {
     public function create(Request $request): JsonResponse
     {
         $data = $this->decodeRequest($request, CreateOrderRequest::class);
+        $command = new CreateOrderCommand($data);
 
-        $handler = new Create();
-        $orderId = $handler->handleRequest($data);
-        $order = $this->getOrderById($orderId);
+        /** @var Order $order */
+        $order = $this->bus->handle($command);
 
-        $response = PrestashopOrder::getOrder($order, $data->getOrderDetails()->getBasketId());
-
-        return new JsonResponse($response, 201);
+        return $this->orderResponse($order, 201);
     }
 
     public function get(string $orderId): JsonResponse
     {
-        $order = $this->getOrderById((int) $orderId);
+        /** @var Order $order */
+        $order = $this->bus->handle(new GetOrderCommand($orderId));
 
-        \Shop::setContext(\Shop::CONTEXT_SHOP, (int) $order->id_shop);
-
-        $basketId = CartSession::getBasketIdByCartId((int) $order->id_cart);
-        $response = PrestashopOrder::getOrder($order, $basketId);
-
-        return new JsonResponse($response);
+        return $this->orderResponse($order);
     }
 
     public function update(string $orderId, Request $request): JsonResponse
@@ -56,14 +47,13 @@ class OrderController extends AbstractApiController
         return new JsonResponse($orderStatus);
     }
 
-    private function getOrderById(int $orderId): \Order
+    private function orderResponse(Order $order, int $status = 200): JsonResponse
     {
-        $order = new \Order($orderId);
+        $data = $this->serializer->serialize($order, 'json', [
+            'datetime_format' => BasketAppClientInterface::DATETIME_FORMAT,
+            'datetime_timezone' => BasketAppClientInterface::DATETIME_ZONE,
+        ]);
 
-        if (!\Validate::isLoadedObject($order)) {
-            throw OrderNotFoundException::create();
-        }
-
-        return $order;
+        return JsonResponse::create(null, $status)->setContent($data);
     }
 }

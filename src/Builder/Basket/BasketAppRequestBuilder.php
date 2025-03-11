@@ -9,15 +9,6 @@ use izi\prestashop\Common\Basket\Summary;
 
 final class BasketAppRequestBuilder extends AbstractBasketBuilder implements BasketAppRequestBuilderInterface
 {
-    private $browserId;
-
-    public function setBrowserId(?string $browserId): BasketAppRequestBuilderInterface
-    {
-        $this->browserId = $browserId;
-
-        return $this;
-    }
-
     public function build(): Basket
     {
         return parent::build();
@@ -31,8 +22,7 @@ final class BasketAppRequestBuilder extends AbstractBasketBuilder implements Bas
             $products,
             $consents,
             $promoCodes,
-            $relatedProducts,
-            $this->browserId
+            $relatedProducts
         );
     }
 }

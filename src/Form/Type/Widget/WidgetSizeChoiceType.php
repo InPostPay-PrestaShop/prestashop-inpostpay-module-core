@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type\Widget;
 
 use izi\prestashop\Translation\LegacyTranslator;
-use izi\prestashop\View\Widget\V2\Size;
+use izi\prestashop\View\Widget\Size;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;

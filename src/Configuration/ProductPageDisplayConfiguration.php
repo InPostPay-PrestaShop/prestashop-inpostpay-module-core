@@ -58,10 +58,7 @@ final class ProductPageDisplayConfiguration implements ProductAwareWidgetDisplay
         return 0 === count($violations);
     }
 
-    /**
-     * @return WidgetConfigurationInterface
-     */
-    public function getWidgetConfiguration()
+    public function getWidgetConfiguration(): WidgetConfigurationInterface
     {
         return $this->configuration->getWidgetConfiguration();
     }

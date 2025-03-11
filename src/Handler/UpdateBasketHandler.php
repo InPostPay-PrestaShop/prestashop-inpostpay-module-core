@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace izi\prestashop\Handler;
 
 use izi\prestashop\BasketApp\Basket\BasketsApiClientInterface;
-use izi\prestashop\BasketApp\Basket\V2;
 use izi\prestashop\BasketApp\Exception\BasketExpiredException;
 use izi\prestashop\BasketApp\Exception\BasketNotBoundException;
 use izi\prestashop\BasketApp\Exception\BasketNotFoundException;
@@ -40,10 +39,6 @@ final class UpdateBasketHandler implements UpdateBasketHandlerInterface
 
     public function __construct(BasketSessionRepositoryInterface $sessionRepository, BasketBuilderFactoryInterface $builderFactory, BasketsApiClientInterface $client, LoggerInterface $logger)
     {
-        if (!$client instanceof V2\BasketsApiClientInterface) {
-            @trigger_error(sprintf('Passing a $client that does not implement "%s" to "%s::__construct()" is deprecated.', V2\BasketsApiClientInterface::class, self::class));
-        }
-
         $this->sessionRepository = $sessionRepository;
         $this->builderFactory = $builderFactory;
         $this->client = $client;
@@ -63,7 +58,7 @@ final class UpdateBasketHandler implements UpdateBasketHandlerInterface
             ->build();
 
         try {
-            $this->client->upsertBasket($session->getBasketId(), $basket);
+            $this->client->updateBasket($session->getBasketId(), $basket);
         } catch (BasketNotFoundException|BasketNotBoundException|BasketExpiredException $e) {
             $this->logger->warning('API error "{code}" for cart #{cartId} update, resetting binding status', [
                 'code' => $e->getError()->getCode(),

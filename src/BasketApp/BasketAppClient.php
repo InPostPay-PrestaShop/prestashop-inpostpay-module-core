@@ -5,17 +5,11 @@ declare(strict_types=1);
 namespace izi\prestashop\BasketApp;
 
 use izi\prestashop\BasketApp\Basket\Request\Basket;
-use izi\prestashop\BasketApp\Basket\Request\BindingMethod;
-use izi\prestashop\BasketApp\Basket\Request\BindingRequest;
+use izi\prestashop\BasketApp\Basket\Response\BasketBindingKeyResponse;
 use izi\prestashop\BasketApp\Basket\Response\BasketBindingResponse;
-use izi\prestashop\BasketApp\Basket\Response\QrCode;
-use izi\prestashop\BasketApp\Basket\Response\UpsertBasketResponse;
-use izi\prestashop\BasketApp\Basket\V2\BasketsApiClientInterface;
-use izi\prestashop\BasketApp\Basket\V2\Response\BasketBindingKeyResponse;
-use izi\prestashop\BasketApp\Basket\V2\Response\UpdateBasketResponse;
+use izi\prestashop\BasketApp\Basket\Response\UpdateBasketResponse;
 use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
-use izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface;
 use izi\prestashop\BasketApp\Payment\Response\AvailablePaymentOptions;
 use izi\prestashop\BasketApp\Signature\Response\SigningKey;
 use izi\prestashop\BasketApp\Signature\Response\SigningKeys;
@@ -33,7 +27,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-final class BasketAppClient implements BasketAppClientInterface, PaymentsApiClientInterface, BasketsApiClientInterface
+final class BasketAppClient implements BasketAppClientInterface
 {
     /**
      * @var ClientInterface
@@ -85,17 +79,6 @@ final class BasketAppClient implements BasketAppClientInterface, PaymentsApiClie
         return $this->deserialize($response, BasketBindingKeyResponse::class);
     }
 
-    /**
-     * @deprecated
-     */
-    public function upsertBasket(string $basketId, Basket $basket): UpsertBasketResponse
-    {
-        $request = $this->createRequest('PUT', sprintf('/v1/izi/basket/%s', $basketId), $basket);
-        $response = $this->sendRequest($request);
-
-        return $this->deserialize($response, UpsertBasketResponse::class);
-    }
-
     public function deleteBasketBinding(string $basketId, bool $orderCompleted = false): void
     {
         $uri = sprintf('/v1/izi/basket/%s/binding', $basketId);
@@ -105,34 +88,6 @@ final class BasketAppClient implements BasketAppClientInterface, PaymentsApiClie
 
         $request = $this->createRequest('DELETE', $uri);
         $this->sendRequest($request, 204);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function bindBasketsByPhoneNumber(string $basketId, BindingRequest $bindingRequest): void
-    {
-        if (BindingMethod::Phone() !== $bindingMethod = $bindingRequest->getMethod()) {
-            throw new \DomainException(sprintf('Binding method expected to be "%s", "%s" given.', BindingMethod::Phone()->value, $bindingMethod->value));
-        }
-
-        $request = $this->createRequest('POST', sprintf('/v1/izi/basket/%s/binding', $basketId), $bindingRequest);
-        $this->sendRequest($request, 202);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function bindBasketsByDeepLink(string $basketId, BindingRequest $bindingRequest): QrCode
-    {
-        if (BindingMethod::DeepLink() !== $bindingMethod = $bindingRequest->getMethod()) {
-            throw new \DomainException(sprintf('Binding method expected to be "%s", "%s" given.', BindingMethod::DeepLink()->value, $bindingMethod->value));
-        }
-
-        $request = $this->createRequest('POST', sprintf('/v1/izi/basket/%s/binding', $basketId), $bindingRequest);
-        $response = $this->sendRequest($request);
-
-        return $this->deserialize($response, QrCode::class);
     }
 
     public function getBasketBinding(string $basketId, ?string $browserId = null): BasketBindingResponse
@@ -146,15 +101,6 @@ final class BasketAppClient implements BasketAppClientInterface, PaymentsApiClie
         $response = $this->sendRequest($request);
 
         return $this->deserialize($response, BasketBindingResponse::class);
-    }
-
-    /**
-     * @deprecated
-     */
-    public function deleteBrowserBinding(string $browserId): void
-    {
-        $request = $this->createRequest('DELETE', sprintf('/v1/izi/browser/%s/binding', $browserId));
-        $this->sendRequest($request, 204);
     }
 
     public function updateOrder(string $orderId, OrderEvent $event): void

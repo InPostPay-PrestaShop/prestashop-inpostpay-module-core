@@ -7,28 +7,24 @@ namespace izi\prestashop\Environment;
 final class EnvironmentFactory implements EnvironmentFactoryInterface
 {
     /**
-     * @var array<string, array<string, EnvironmentInterface>> environments by name and widget version
+     * @var array<string, EnvironmentInterface> environments by type name
      */
     private static $environments = [];
 
-    /**
-     * @param bool $widgetV2 The parameter is deprecated since version 1.11.0. It will have no effect from version 3 of the module.
-     */
-    public function createEnvironment(EnvironmentType $type, bool $widgetV2 = false): EnvironmentInterface
+    public function createEnvironment(EnvironmentType $type): EnvironmentInterface
     {
         $name = $type->name;
-        $version = $widgetV2 ? 'v2' : 'v1';
 
-        return self::$environments[$name][$version] ?? (self::$environments[$name][$version] = $this->doCreate($type, $widgetV2));
+        return self::$environments[$name] ?? (self::$environments[$name] = $this->doCreate($type));
     }
 
-    private function doCreate(EnvironmentType $type, bool $widgetV2 = false): EnvironmentInterface
+    private function doCreate(EnvironmentType $type): EnvironmentInterface
     {
         switch ($type) {
             case EnvironmentType::Production():
-                return new ProductionEnvironment($widgetV2);
+                return new ProductionEnvironment();
             case EnvironmentType::Sandbox():
-                return new SandboxEnvironment($widgetV2);
+                return new SandboxEnvironment();
             case EnvironmentType::Uat():
                 if (class_exists(UatEnvironment::class)) {
                     return new UatEnvironment();

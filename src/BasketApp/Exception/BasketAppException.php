@@ -16,7 +16,6 @@ class BasketAppException extends \RuntimeException
         ForbiddenException::ERROR_CODE => ForbiddenException::class,
         ResourceNotFoundException::ERROR_CODE => ResourceNotFoundException::class,
         BasketNotFoundException::ERROR_CODE => BasketNotFoundException::class,
-        BrowserNotFoundException::ERROR_CODE => BrowserNotFoundException::class,
         PublicKeyNotFoundException::ERROR_CODE => PublicKeyNotFoundException::class,
         OrderNotFoundException::ERROR_CODE => OrderNotFoundException::class,
         MerchantDisabledException::ERROR_CODE => MerchantDisabledException::class,

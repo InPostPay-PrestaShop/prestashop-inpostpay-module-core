@@ -51,7 +51,7 @@ final class GuiConfigurationType extends AbstractType
                     return;
                 }
 
-                $productConfiguration = GuiConfiguration::getDisplayConfig($data, $bindingPlace = BindingPlace::ProductCard());
+                $productConfiguration = $data->getDisplayConfiguration($bindingPlace = BindingPlace::ProductCard());
 
                 if (!$productConfiguration instanceof ProductRestrictionsProviderInterface) {
                     return;

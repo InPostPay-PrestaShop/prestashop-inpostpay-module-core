@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Handler;
 
-use izi\prestashop\BasketApp\Basket\V2\BasketsApiClientInterface;
+use izi\prestashop\BasketApp\Basket\BasketsApiClientInterface;
 use izi\prestashop\Command\GetBasketBindingKeyCommand;
 use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\Entities\BasketSession;
@@ -41,10 +41,6 @@ final class GetBasketBindingKeyHandler implements GetBasketBindingKeyHandlerInte
 
         if (null === $session = $this->repository->findByEntityId($basket->getId())) {
             $session = $this->createNewSession($basket);
-        }
-
-        if (!is_callable([$session, 'getBindingApiKey'])) {
-            throw new \LogicException('Basket session does not support storing binding keys.');
         }
 
         if (!$command->isRefresh() && null !== $key = $session->getBindingApiKey()) {

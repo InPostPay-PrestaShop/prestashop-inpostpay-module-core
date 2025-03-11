@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
-use izi\prestashop\Environment\EnvironmentFactory;
 use izi\prestashop\Environment\EnvironmentFactoryInterface;
 use izi\prestashop\Environment\EnvironmentInterface;
 use izi\prestashop\Environment\EnvironmentType;
@@ -26,7 +25,6 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
 
     private const ENVIRONMENT_TYPE = 'INPOST_PAY_environment';
     private const OAUTH2_CLIENT_ID = 'INPOST_PAY_client_id';
-    private const WIDGET_VERSION = 'INPOST_PAY_WIDGET_VERSION';
     private const MERCHANT_CLIENT_ID = 'INPOST_PAY_MERCHANT_CLIENT_ID';
 
     /**
@@ -38,6 +36,11 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
      * @var SerializerInterface
      */
     private $serializer;
+
+    /**
+     * @var EnvironmentFactoryInterface
+     */
+    private $environmentFactory;
 
     /**
      * @var EnvironmentInterface|null
@@ -54,26 +57,11 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
      */
     private $accessToken;
 
-    /**
-     * @var EnvironmentFactoryInterface|null
-     */
-    private $environmentFactory;
-
-    public function __construct(ConfigurationInterface $configuration, SerializerInterface $serializer, ?EnvironmentFactoryInterface $environmentFactory = null)
+    public function __construct(ConfigurationInterface $configuration, SerializerInterface $serializer, EnvironmentFactoryInterface $environmentFactory)
     {
         $this->configuration = $configuration;
         $this->serializer = $serializer;
-        $this->environmentFactory = $environmentFactory ?? new EnvironmentFactory();
-    }
-
-    /**
-     * @internal
-     */
-    public function getEnvironmentType(): EnvironmentType
-    {
-        $value = (int) $this->configuration->get(self::ENVIRONMENT_TYPE);
-
-        return EnvironmentType::tryFrom($value) ?? EnvironmentType::Production();
+        $this->environmentFactory = $environmentFactory;
     }
 
     public function getEnvironment(): EnvironmentInterface
@@ -81,9 +69,11 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
         return $this->environment ?? $this->environment = $this->createEnvironment();
     }
 
-    public function getMerchantClientId(): string
+    public function getMerchantClientId(): ?string
     {
-        return (string) $this->configuration->get(self::MERCHANT_CLIENT_ID);
+        $value = $this->configuration->get(self::MERCHANT_CLIENT_ID);
+
+        return $value ? (string) $value : null;
     }
 
     public function getClientCredentials(): ?ClientCredentialsInterface
@@ -146,28 +136,25 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
 
     public function persist(ApiConfigurationInterface $configuration): void
     {
-        if (is_callable([$configuration, 'getMerchantClientId'])) {
-            $merchantClientId = $configuration->getMerchantClientId();
-        } else {
-            @trigger_error(sprintf('Not implementing the "getMerchantClientId()" method in "%s" is deprecated.', get_class($configuration)), \E_USER_DEPRECATED);
-
-            $merchantClientId = null;
-        }
+        $this->configuration->set(self::MERCHANT_CLIENT_ID, $configuration->getMerchantClientId());
 
         $this->setEnvironment($configuration);
-        $this->configuration->set(self::MERCHANT_CLIENT_ID, $merchantClientId);
         $this->setClientCredentials($configuration->getClientCredentials());
         $this->deleteToken();
     }
 
+    private function getEnvironmentType(): EnvironmentType
+    {
+        $value = (int) $this->configuration->get(self::ENVIRONMENT_TYPE);
+
+        return EnvironmentType::tryFrom($value) ?? EnvironmentType::Production();
+    }
+
     private function setEnvironment(ApiConfigurationInterface $configuration): void
     {
-        $type = $this->resolveEnvironmentType($configuration);
-        $widgetVersion = $this->resolveWidgetVersion($configuration);
-
-        $this->configuration->set(self::ENVIRONMENT_TYPE, $type->value);
-        $this->configuration->set(self::WIDGET_VERSION, $widgetVersion);
-        $this->environment = $this->createEnvironment();
+        $environment = $configuration->getEnvironment();
+        $this->configuration->set(self::ENVIRONMENT_TYPE, $environment->getType()->value);
+        $this->environment = $environment;
     }
 
     private function setClientCredentials(?ClientCredentialsInterface $credentials = null): void
@@ -177,44 +164,10 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
         $this->clientCredentials = $credentials;
     }
 
-    private function isWidgetV2(): bool
-    {
-        if (!$this->configuration->has(self::WIDGET_VERSION)) {
-            return true;
-        }
-
-        return '2.0' === $this->configuration->get(self::WIDGET_VERSION);
-    }
-
     private function createEnvironment(): EnvironmentInterface
     {
         $type = $this->getEnvironmentType();
-        $widgetV2 = $this->isWidgetV2();
 
-        return $this->environmentFactory->createEnvironment($type, $widgetV2);
-    }
-
-    private function resolveEnvironmentType(ApiConfigurationInterface $configuration): EnvironmentType
-    {
-        $environment = $configuration->getEnvironment();
-
-        if (!is_callable([$environment, 'getType'])) {
-            @trigger_error(sprintf('Not implementing the "getType()" method in "%s" is deprecated.', get_class($environment)), E_USER_DEPRECATED);
-
-            return $configuration->getEnvironmentType();
-        }
-
-        return $environment->getType();
-    }
-
-    private function resolveWidgetVersion(ApiConfigurationInterface $configuration): string
-    {
-        $environment = $configuration->getEnvironment();
-
-        if (!is_callable([$environment, 'getWidgetVersion'])) {
-            return '1.0';
-        }
-
-        return '2.0';
+        return $this->environmentFactory->createEnvironment($type);
     }
 }

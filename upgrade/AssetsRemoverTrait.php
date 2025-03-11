@@ -4,24 +4,16 @@ declare(strict_types=1);
 
 namespace InPost\Izi\Upgrade;
 
-use Symfony\Component\Filesystem\Filesystem;
+require_once __DIR__ . '/FileRemoverTrait.php';
 
 trait AssetsRemoverTrait
 {
-    /**
-     * @var \Module
-     */
-    private $module;
+    use FileRemoverTrait;
 
     private function removeStaleAssets(array $paths): bool
     {
-        $basePath = sprintf('%s/views', rtrim($this->module->getLocalPath(), '/'));
-        $files = array_map(static function (string $path) use ($basePath): string {
-            return sprintf('%s/%s', $basePath, $path);
-        }, $paths);
-
-        (new Filesystem())->remove($files);
-
-        return true;
+        return $this->removeFiles(array_map(static function (string $path): string {
+            return 'views/' . $path;
+        }, $paths));
     }
 }

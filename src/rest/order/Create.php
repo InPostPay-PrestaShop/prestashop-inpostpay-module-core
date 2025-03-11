@@ -2,7 +2,6 @@
 
 namespace izi\prestashop\rest\order;
 
-use izi\prestashop\CartSession;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Common\Customer\InvoiceDetails;
 use izi\prestashop\Common\Customer\LegalForm;
@@ -10,12 +9,12 @@ use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
-use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
-use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
+use izi\prestashop\Entities\BasketSession;
+use izi\prestashop\Entities\BasketSessionInterface;
 use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
@@ -26,9 +25,18 @@ use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\MerchantApi\Model\Order\Request\Delivery;
 use izi\prestashop\MerchantApi\Model\Order\Request\DeliveryAddress;
 use izi\prestashop\ObjectModel\Exception\InvalidDataException;
+use izi\prestashop\ObjectModel\ObjectManagerInterface;
+use izi\prestashop\Repository\BasketSessionRepository;
+use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\Serializer\SerializerFactory;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
 
+/**
+ * @internal
+ * @deprecated
+ *
+ * @todo refactor
+ */
 class Create
 {
     private const TRANSLATION_SOURCE = 'create';
@@ -63,47 +71,59 @@ class Create
      */
     private $ordersConfiguration;
 
-    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null)
+    /**
+     * @var BasketSessionRepositoryInterface<BasketSession>
+     */
+    private $repository;
+
+    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null, ?BasketSessionRepositoryInterface $repository = null)
     {
         $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
         $this->module = $module ?? \Module::getInstanceByName('inpostizi');
         $this->shippingConfiguration = $shippingConfiguration ?? $this->module->get(ShippingConfigurationInterface::class);
         $this->bus = $bus ?? $this->module->get(CommandBusInterface::class);
-        $this->ordersConfiguration = new OrdersConfiguration(new Configuration());
+        $this->ordersConfiguration = $this->module->get(OrdersConfigurationInterface::class);
+        $this->repository = $repository ?? new BasketSessionRepository(SerializerFactory::create(), $this->module->get(ObjectManagerInterface::class));
     }
 
     /**
-     * @param object $data
-     *
      * @return int order identifier
      */
-    public function handleRequest($data): int
+    public function handleRequest(CreateOrderRequest $request): int
     {
-        $request = $this->normalizeRequest($data);
+        $session = $this->getSession($request->getOrderDetails()->getBasketId());
 
-        $cart = $this->getCart($request->getOrderDetails()->getBasketId());
-
-        if ($order = $this->getOrderByCart($cart)) {
-            if ('inpostizi' !== $order->module) {
-                throw new CannotCreateOrderException($this->module->l('There already exists an order for this basket.', self::TRANSLATION_SOURCE));
-            }
-
-            return $order->id;
+        if (null !== $orderId = $session->getOrderId()) {
+            return (int) $orderId;
         }
 
-        return $this->createOrder($cart, $request);
+        $cart = $session->getBasket()->getEntity();
+
+        if (null === $order = $this->getOrderByCart($cart)) {
+            return $this->createOrder($session, $request);
+        }
+
+        if ('inpostizi' !== $order->module) {
+            throw new CannotCreateOrderException($this->module->l('There already exists an order for this basket.', self::TRANSLATION_SOURCE));
+        }
+
+        if (null === $session->getOrderId()) {
+            $this->finalizeSession($session, $request, (int) $order->id);
+        }
+
+        return (int) $order->id;
     }
 
-    private function getCart(string $basketId): \Cart
+    private function getSession(string $basketId): BasketSession
     {
-        $cartId = CartSession::getCartIdByBasketId($basketId);
+        $session = $this->repository->findByBasketId($basketId);
 
-        if (!$cartId || !\Validate::isLoadedObject($cart = new \Cart($cartId))) {
+        if (null === $session) {
             throw BasketNotFoundException::create();
         }
 
-        return $cart;
+        return $session;
     }
 
     private function getOrderByCart(\Cart $cart): ?\OrderCore
@@ -117,8 +137,13 @@ class Create
         return $orderId ? new \Order($orderId) : null;
     }
 
-    private function createOrder(\Cart $cart, CreateOrderRequest $request): int
+    /**
+     * @param BasketSession $session
+     */
+    private function createOrder(BasketSessionInterface $session, CreateOrderRequest $request): int
     {
+        $cart = $session->getBasket()->getEntity();
+
         $deliveryType = $request->getDelivery()->getType();
         $serviceCodes = $request->getDelivery()->getOptionalServiceCodes();
 
@@ -146,7 +171,7 @@ class Create
 
         $this->module->validateOrder(
             $cart->id,
-            (int) OrdersConfiguration::resolveInitialStatusId($this->ordersConfiguration, $paymentType, $shopId),
+            (int) $this->ordersConfiguration->getInitialStatusId($paymentType, $shopId),
             $cart->getOrderTotal(),
             $this->module->displayName,
             null,
@@ -156,21 +181,12 @@ class Create
             $cart->secure_key
         );
 
-        $link = \Context::getContext()->link->getPageLink('order-confirmation', null, $cart->id_lang, [
-            'id_cart' => $cart->id,
-            'id_module' => $this->module->id,
-            'id_order' => $this->module->currentOrder,
-            'key' => $cart->secure_key,
-        ]);
+        $orderId = (int) $this->module->currentOrder;
 
-        $basketId = $request->getOrderDetails()->getBasketId();
-
-        CartSession::setRedirectUrl($basketId, $link);
-        CartSession::setOrderData($basketId, $this->module->currentOrder, json_encode($request));
-
+        $this->finalizeSession($session, $request, $orderId);
         $this->saveCarrierModuleData($cart->id, $request->getDelivery());
 
-        return $this->module->currentOrder;
+        return $orderId;
     }
 
     private function findOrCreateAddresses(\Customer $customer, CreateOrderRequest $request): array
@@ -673,12 +689,24 @@ class Create
         throw new CannotCreateOrderException($this->module->l('The selected payment method is not available.', self::TRANSLATION_SOURCE));
     }
 
-    private function normalizeRequest($request): CreateOrderRequest
+    /**
+     * @param BasketSession $session
+     */
+    private function finalizeSession(BasketSessionInterface $session, CreateOrderRequest $request, int $orderId): void
     {
-        if ($request instanceof CreateOrderRequest) {
-            return $request;
-        }
+        $orderConfirmationUrl = $this->getOrderConfirmationUrl($session->getBasket()->getEntity(), $orderId);
 
-        return SerializerFactory::create()->deserialize(json_encode($request), CreateOrderRequest::class, 'json');
+        $session->finalize((string) $orderId, $orderConfirmationUrl, $request);
+        $this->repository->persist($session);
+    }
+
+    private function getOrderConfirmationUrl(\Cart $cart, int $orderId): string
+    {
+        return \Context::getContext()->link->getPageLink('order-confirmation', null, $cart->id_lang, [
+            'id_cart' => $cart->id,
+            'id_module' => $this->module->id,
+            'id_order' => $orderId,
+            'key' => $cart->secure_key,
+        ]);
     }
 }

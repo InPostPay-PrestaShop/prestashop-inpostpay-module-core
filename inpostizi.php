@@ -10,12 +10,8 @@ use izi\prestashop\DependencyInjection\ContainerFactory;
 use izi\prestashop\DependencyInjection\Exception\ContainerNotFoundException;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
-use izi\prestashop\Hook\Widget;
-use izi\prestashop\Hook\WidgetConfigurationResolver;
-use izi\prestashop\Hook\WidgetV1ParametersProvider;
 use izi\prestashop\Installer\DatabaseInstaller;
 use izi\prestashop\Module\Exception\ModuleErrorInterface;
-use izi\prestashop\View\Templating\SmartyRenderer;
 use PrestaShop\PrestaShop\Adapter\ContainerBuilder as PrestaShopContainerBuilder;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
@@ -303,7 +299,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     }
 
     /**
-     * @param string $hookName
+     * @param string|null $hookName
      *
      * @return array
      */
@@ -554,24 +550,6 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this->widget;
         }
 
-        try {
-            return $this->widget = $this->get('inpost.izi.widget');
-        } catch (ServiceNotFoundException $e) {
-            return $this->widget = $this->createWidget();
-        }
-    }
-
-    /**
-     * @return Widget
-     */
-    private function createWidget()
-    {
-        $renderer = new SmartyRenderer($this->context->smarty);
-        $paramsProvider = WidgetV1ParametersProvider::create(
-            $this->get(WidgetConfigurationResolver::class),
-            $this->context
-        );
-
-        return new Widget($renderer, $paramsProvider);
+        return $this->widget = $this->get('inpost.izi.widget');
     }
 }

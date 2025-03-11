@@ -36,35 +36,6 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             'methods' => ['GET'],
             'controller' => [WidgetController::class, 'getOrderConfirmationUrl'],
         ],
-        [
-            'path' => '/inpost/v1/izi/merchant/basket/get/link',
-            'controller' => [WidgetController::class, 'getDeepLink'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/basket/confirmation',
-            'controller' => [WidgetController::class, 'getIsBound'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/basket/delete/binding',
-            'methods' => ['DELETE'],
-            'controller' => [WidgetController::class, 'deleteBinding'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/order/confirmation/get',
-            'controller' => [WidgetController::class, 'getOrderComplete'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/widget/get/{hook}/{productId}',
-            'prefix' => '/inpost/v1/izi/merchant/widget/get',
-            'regex' => '#^/inpost/v1/izi/merchant/widget/get/(?<hook>\w+)/(?<productId>\d+)$#',
-            'controller' => [WidgetController::class, 'getWidgetHook'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/basket/post/binding/{prefix}/{number}',
-            'prefix' => '/inpost/v1/izi/merchant/basket/post/binding',
-            'regex' => '#^/inpost/v1/izi/merchant/basket/post/binding(?:/(?<prefix>.+?)(?:/(?<number>.+?))?)?$#',
-            'controller' => [WidgetController::class, 'getPayData'],
-        ],
     ];
 
     private const API_ROUTES = [

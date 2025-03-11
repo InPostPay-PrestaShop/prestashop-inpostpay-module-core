@@ -9,7 +9,7 @@ use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 final class Widget implements WidgetInterface
 {
-    public const DEFAULT_TEMPLATE = 'module:inpostizi/views/templates/hook/widget.tpl';
+    public const DEFAULT_TEMPLATE = 'module:inpostizi/views/templates/front/widget.tpl';
 
     /**
      * @var RendererInterface

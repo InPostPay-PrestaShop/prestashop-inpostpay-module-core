@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
