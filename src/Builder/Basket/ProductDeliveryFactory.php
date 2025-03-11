@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Builder\Basket;
 
-use izi\prestashop\Common\Basket\DeliveryOption;
 use izi\prestashop\Common\Basket\Quantity;
 use izi\prestashop\Common\Basket\Summary;
 use izi\prestashop\Common\Delivery\DeliveryType;

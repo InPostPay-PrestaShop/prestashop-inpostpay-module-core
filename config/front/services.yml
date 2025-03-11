@@ -13,7 +13,6 @@ services:
     arguments:
       - actionObjectCartDeleteBefore: '@izi\prestashop\Hook\Common\ActionCartDeleteBefore'
         actionObjectCartUpdateAfter: '@izi\prestashop\Hook\Common\ActionCartUpdateAfter'
-        actionCartSave: '@izi\prestashop\Hook\Common\ActionCartSave'
         actionObjectInPostShipmentModelAddAfter: '@izi\prestashop\Hook\Common\ActionShipmentAddAfter'
         actionObjectInPostShipmentModelUpdateBefore: '@izi\prestashop\Hook\Common\ActionShipmentUpdateBefore'
         actionObjectInPostShipmentModelUpdateAfter: '@izi\prestashop\Hook\Common\ActionShipmentUpdateAfter'
@@ -55,23 +54,19 @@ services:
     class: Symfony\Component\DependencyInjection\ServiceLocator
     tags: [ container.service_locator ]
     arguments:
-      - izi\prestashop\Command\BindBasketCommand: '@izi\prestashop\Handler\BindBasketHandlerInterface'
-        izi\prestashop\Command\GenerateDeepLinkCommand: '@izi\prestashop\Handler\GenerateDeepLinkHandlerInterface'
-        izi\prestashop\Command\UnbindBasketCommand: '@izi\prestashop\Handler\UnbindBasketHandlerInterface'
+      - izi\prestashop\Command\UnbindBasketCommand: '@izi\prestashop\Handler\UnbindBasketHandlerInterface'
         izi\prestashop\Command\UpdateOrderTrackingNumbersCommand: '@izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface'
         izi\prestashop\Command\UpdateOrderStatusCommand: '@izi\prestashop\Handler\UpdateOrderStatusHandlerInterface'
         izi\prestashop\Command\UpdateOrderAddressDeliveryCommand: '@izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface'
-        izi\prestashop\Command\GetClientDetailsCommand: '@izi\prestashop\Handler\GetClientDetailsHandlerInterface'
         izi\prestashop\Command\UpdateBasketCommand: '@izi\prestashop\Handler\UpdateBasketHandlerInterface'
-        izi\prestashop\Command\GetBindingConfirmationCommand: '@izi\prestashop\Handler\GetBindingConfirmationHandlerInterface'
-        izi\prestashop\Command\GetProductWidgetCommand: '@izi\prestashop\Handler\GetProductWidgetHandlerInterface'
-        izi\prestashop\Command\GetOrderEventsCommand: '@izi\prestashop\Handler\GetOrderEventsHandlerInterface'
         izi\prestashop\Command\GetBasketBindingKeyCommand: '@izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface'
         izi\prestashop\Command\GetOrderConfirmationUrlCommand: '@izi\prestashop\Handler\GetOrderConfirmationUrlHandlerInterface'
         izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand: '@izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface'
         izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand: '@izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface'
         izi\prestashop\MerchantApi\Command\GetBasketCommand: '@izi\prestashop\MerchantApi\Handler\GetBasketHandlerInterface'
         izi\prestashop\MerchantApi\Command\UpdateBasketCommand: '@izi\prestashop\MerchantApi\Handler\UpdateBasketHandlerInterface'
+        izi\prestashop\MerchantApi\Command\CreateOrderCommand: '@izi\prestashop\MerchantApi\Handler\CreateOrderHandlerInterface'
+        izi\prestashop\MerchantApi\Command\GetOrderCommand: '@izi\prestashop\MerchantApi\Handler\GetOrderHandlerInterface'
         izi\prestashop\MerchantApi\Command\UpdateOrderCommand: '@izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface'
         izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand: '@izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface'
 
@@ -99,5 +94,3 @@ services:
     tags: [ container.service_locator ]
     arguments:
       - Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface: '@inpost.izi.security.authorization_checker'
-        Symfony\Component\Serializer\Normalizer\DenormalizerInterface: '@inpost.izi.serializer'
-        Psr\Clock\ClockInterface: '@inpost.izi.clock'

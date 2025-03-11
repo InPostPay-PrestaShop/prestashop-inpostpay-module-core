@@ -13,13 +13,6 @@ use izi\prestashop\Common\PromoCode;
 final class Basket implements \JsonSerializable
 {
     /**
-     * @var string|null
-     *
-     * @deprecated
-     */
-    private $browser_id;
-
-    /**
      * @var Summary
      */
     private $summary;
@@ -56,23 +49,14 @@ final class Basket implements \JsonSerializable
      * @param Product[] $related_products
      * @param Consent[] $consents
      */
-    public function __construct(Summary $summary, array $delivery, array $products, array $consents, array $promo_codes = [], array $related_products = [], ?string $browser_id = null)
+    public function __construct(Summary $summary, array $delivery, array $products, array $consents, array $promo_codes = [], array $related_products = [])
     {
-        $this->browser_id = $browser_id;
         $this->summary = $summary;
         $this->delivery = $delivery;
         $this->promo_codes = $promo_codes;
         $this->products = $products;
         $this->related_products = $related_products;
         $this->consents = $consents;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getBrowserId(): ?string
-    {
-        return $this->browser_id;
     }
 
     public function getSummary(): Summary
@@ -125,11 +109,6 @@ final class Basket implements \JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        $vars = get_object_vars($this);
-        if (null === $vars['browser_id']) {
-            unset($vars['browser_id']);
-        }
-
-        return $vars;
+        return get_object_vars($this);
     }
 }

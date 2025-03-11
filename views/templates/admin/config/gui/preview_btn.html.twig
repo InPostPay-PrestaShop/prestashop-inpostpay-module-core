@@ -1,19 +1,6 @@
-{% if form.vars.for_v2 %}
-  {% set btnConfig = btnConfig.asV2Configuration %}
-
-  <inpost-izi-button
-    {% for attr, value in btnConfig %}
-      {{ attr }}="{{ value }}"
-    {% endfor %}
-  >
-  </inpost-izi-button>
-{% else %}
-  <inpost-izi-button
-    language="pl"
-    {% for attr, value in btnConfig %}
-      {{ attr }}="{{ value }}"
-    {% endfor %}
-    bindinginprogress="false"
-    baskedlinked="false">
-  </inpost-izi-button>
-{% endif %}
+<inpost-izi-button
+  {% for attr, value in btnConfig %}
+    {{ attr }}="{{ value }}"
+  {% endfor %}
+>
+</inpost-izi-button>

@@ -25,17 +25,4 @@ final class UatEnvironment implements EnvironmentInterface
     {
         return 'https://izi-uat.inpost.pl/inpostizi.js';
     }
-
-    public function getDeepLinkUri(): string
-    {
-        return 'inpostuat://izilink';
-    }
-
-    /**
-     * @internal
-     */
-    public function getWidgetVersion(): string
-    {
-        return '1.0';
-    }
 }

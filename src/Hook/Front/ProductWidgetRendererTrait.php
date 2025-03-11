@@ -6,18 +6,13 @@ namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
-use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
-use izi\prestashop\Configuration\WidgetVersionCheckerTrait;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 trait ProductWidgetRendererTrait
 {
-    use WidgetVersionCheckerTrait;
-
     /**
      * @var GuiConfigurationInterface
      */
@@ -56,18 +51,18 @@ trait ProductWidgetRendererTrait
             return '';
         }
 
-        $productWidget = GuiConfiguration::getDisplayConfig($this->configuration, BindingPlace::ProductCard());
+        $configuration = $this->configuration->getDisplayConfiguration(BindingPlace::ProductCard());
 
-        if (!$productWidget->isDisplayed($product)) {
+        if (!$configuration->isDisplayed($product)) {
             return '';
         }
 
-        $configuration = $productWidget
+        $widgetConfig = $configuration
             ->getWidgetConfiguration()
             ->setProductId((string) $productId);
 
         return $this->module->renderWidget($hookName, [
-            'config' => $configuration,
+            'config' => $widgetConfig,
             'request' => $parameters['request'] ?? null,
             'cart' => $parameters['cart'] ?? null,
         ]);
@@ -107,26 +102,14 @@ trait ProductWidgetRendererTrait
 
     private function getHtmlStyles(): array
     {
-        $productWidget = GuiConfiguration::getDisplayConfig($this->configuration, BindingPlace::ProductCard());
-        $styles = $productWidget->getHtmlStyles();
+        $styles = $this->configuration
+            ->getDisplayConfiguration(BindingPlace::ProductCard())
+            ->getHtmlStyles();
 
         if ($styles instanceof \Traversable) {
             $styles = iterator_to_array($styles);
         }
 
         return $styles;
-    }
-
-    private function shouldRenderCacheableHookContent(?Request $request): bool
-    {
-        if (!$this->generalConfiguration->isFullPageCacheModuleInUse()) {
-            return false;
-        }
-
-        if (isset($this->apiConfiguration) && $this->isWidgetV2Enabled()) {
-            return false;
-        }
-
-        return null === $request || !$request->isXmlHttpRequest();
     }
 }

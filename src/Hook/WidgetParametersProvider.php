@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook;
 
 use izi\prestashop\Common\BindingPlace;
+use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\Security\Voter\BindingWidgetVoter;
 use izi\prestashop\Validator\Cart\Bindable;
@@ -15,6 +16,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class WidgetParametersProvider implements WidgetParametersProviderInterface
 {
+    /**
+     * @var ApiConfigurationInterface
+     */
+    private $configuration;
+
     /**
      * @var AuthorizationCheckerInterface
      */
@@ -35,8 +41,9 @@ final class WidgetParametersProvider implements WidgetParametersProviderInterfac
      */
     private $validator;
 
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, WidgetConfigurationResolverInterface $resolver, BasketSessionRepositoryInterface $repository, ValidatorInterface $validator)
+    public function __construct(ApiConfigurationInterface $configuration, AuthorizationCheckerInterface $authorizationChecker, WidgetConfigurationResolverInterface $resolver, BasketSessionRepositoryInterface $repository, ValidatorInterface $validator)
     {
+        $this->configuration = $configuration;
         $this->authorizationChecker = $authorizationChecker;
         $this->resolver = $resolver;
         $this->repository = $repository;
@@ -45,6 +52,10 @@ final class WidgetParametersProvider implements WidgetParametersProviderInterfac
 
     public function getParameters(?string $hookName, array $parameters): array
     {
+        if (!$this->hasRequiredConfiguration()) {
+            return [];
+        }
+
         $request = $parameters['request'] ?? null;
 
         if (!$request instanceof Request) {
@@ -55,25 +66,26 @@ final class WidgetParametersProvider implements WidgetParametersProviderInterfac
             return [];
         }
 
-        if (null === $configuration = $this->resolver->resolve($parameters)) {
-            @trigger_error(sprintf('Returning null in "%s::resolve() is deprecated.', get_class($this->resolver)), E_USER_DEPRECATED);
-
-            return [];
-        }
-
         $cart = $parameters['cart'] ?? null;
 
         if (!$cart instanceof \Cart) {
             throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
         }
 
-        if (!$this->isBindable($cart, $configuration->getBindingPlace())) {
+        $widgetConfiguration = $this->resolver->resolve($parameters);
+
+        if (!$this->isBindable($cart, $widgetConfiguration->getBindingPlace())) {
             return [];
         }
 
         return [
-            'attributes' => $configuration,
+            'attributes' => $widgetConfiguration,
         ];
+    }
+
+    private function hasRequiredConfiguration(): bool
+    {
+        return null !== $this->configuration->getClientCredentials() && null !== $this->configuration->getMerchantClientId();
     }
 
     private function isBindable(\Cart $cart, BindingPlace $bindingPlace): bool

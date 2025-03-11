@@ -12,7 +12,6 @@ preludeFront
     'js/front/*.js.map',
     'css/front/*.css.map',
   ])
-  .addEntry('prestashopizi', ['./src/front/js/v1/index.js'])
   .addEntry('v2', ['./src/front/js/v2/index.js'])
   .addStyleEntry('product', ['./src/front/css/product.scss'])
   .setPublicPath('../../views/')

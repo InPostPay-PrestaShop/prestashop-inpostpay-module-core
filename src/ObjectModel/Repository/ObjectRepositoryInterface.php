@@ -19,12 +19,12 @@ interface ObjectRepositoryInterface
     /**
      * @return T|null
      */
-    public function find(int $id, ?int $languageId = null/*, ?int $shopId = null*/): ?\ObjectModel;
+    public function find(int $id, ?int $languageId = null, ?int $shopId = null): ?\ObjectModel;
 
     /**
      * @return T[]
      */
-    public function findAll(?int $languageId = null/*, ?int $shopId = null*/): array;
+    public function findAll(?int $languageId = null, ?int $shopId = null): array;
 
     /**
      * @return T|null
@@ -39,5 +39,5 @@ interface ObjectRepositoryInterface
     /**
      * @return QueryBuilder<T>
      */
-    public function createQueryBuilder(string $alias/*, ?int $languageId = null, ?int $shopId = null*/): QueryBuilder;
+    public function createQueryBuilder(string $alias, ?int $languageId = null, ?int $shopId = null): QueryBuilder;
 }

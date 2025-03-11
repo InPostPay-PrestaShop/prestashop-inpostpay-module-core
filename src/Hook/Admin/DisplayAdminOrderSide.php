@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Admin;
 
-use izi\prestashop\CartSession;
+use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
+use izi\prestashop\Repository\OrderDataRepositoryInterface;
 use izi\prestashop\View\Templating\RendererInterface;
 
 final class DisplayAdminOrderSide implements PrestaShopVersionAwareHookInterface
@@ -18,9 +19,15 @@ final class DisplayAdminOrderSide implements PrestaShopVersionAwareHookInterface
      */
     private $renderer;
 
-    public function __construct(RendererInterface $renderer)
+    /**
+     * @var OrderDataRepositoryInterface
+     */
+    private $repository;
+
+    public function __construct(RendererInterface $renderer, OrderDataRepositoryInterface $repository)
     {
         $this->renderer = $renderer;
+        $this->repository = $repository;
     }
 
     public static function getHookName(): string
@@ -38,15 +45,15 @@ final class DisplayAdminOrderSide implements PrestaShopVersionAwareHookInterface
      */
     public function execute(array $parameters): string
     {
-        if (!$orderData = CartSession::getOrderData($parameters['id_order'])) {
+        if (null === $data = $this->repository->getOrderData((string) $parameters['id_order'])) {
             return '';
         }
 
-        $orderData = json_decode($orderData, false);
+        $isApmDelivery = DeliveryType::Apm() === $data->getDelivery()->getType();
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/backend.tpl', [
-            'delivery' => 'APM' === $orderData->delivery->delivery_type ? 'Paczkomat' : 'Kurier',
-            'apm' => 'APM' === $orderData->delivery->delivery_type ? $orderData->delivery->delivery_point : '',
+        return $this->renderer->render('module:inpostizi/views/templates/hook/admin/order_details.tpl', [
+            'delivery' => $isApmDelivery ? 'Paczkomat' : 'Kurier',
+            'apm' => $isApmDelivery ? $data->getDelivery()->getPoint() : '',
         ]);
     }
 }

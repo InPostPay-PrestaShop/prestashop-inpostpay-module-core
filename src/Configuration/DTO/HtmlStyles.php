@@ -43,6 +43,23 @@ final class HtmlStyles implements \IteratorAggregate, \JsonSerializable
      */
     private $justifyContent;
 
+    /**
+     * @internal
+     */
+    public static function getJustifyContentStyleByAlignment(string $alignment): ?string
+    {
+        switch ($alignment) {
+            case 'left':
+                return 'start';
+            case 'center':
+                return 'center';
+            case 'right':
+                return 'end';
+            default:
+                return null;
+        }
+    }
+
     public function getMarginLeft(): ?int
     {
         return $this->marginLeft;

@@ -22,15 +22,13 @@ use izi\prestashop\Common\Product\DeliveryRelatedProducts;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductImage;
 use izi\prestashop\Common\Product\ProductVariant;
-use izi\prestashop\Common\PromoCode;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
-use izi\prestashop\Configuration\OrdersConfiguration;
+use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ContextManager;
-use izi\prestashop\Database\Connection;
 use izi\prestashop\Product\Price\BatchLowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceQuery;
@@ -38,8 +36,6 @@ use izi\prestashop\Product\Price\NullLowestPriceProvider;
 use izi\prestashop\Product\Util\AttributeListParser;
 use izi\prestashop\PromoCode\CartRulePromoCodeProvider;
 use izi\prestashop\PromoCode\PromoCodeProviderInterface;
-use izi\prestashop\Repository\CartRuleRepository;
-use izi\prestashop\Repository\CartRuleRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Core\Cart\Calculator;
 
@@ -654,9 +650,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getPaymentOptions(): array
     {
-        $configuration = new OrdersConfiguration(new Configuration());
+        /** @var \InPostIzi $module */
+        $module = \Module::getInstanceByName('inpostizi');
+        $configuration = $module->get(OrdersConfigurationInterface::class);
 
-        return OrdersConfiguration::normalizeAvailablePaymentOptions($configuration, (int) $this->cart->id_shop);
+        return array_values($configuration->getAvailablePaymentOptions((int) $this->cart->id_shop));
     }
 
     private function calculateProductPrice(int $productId, ?int $combinationId = null, bool $withTax = true, bool $withReduction = true, int $quantity = 1, ?int $customizationId = null): ?float

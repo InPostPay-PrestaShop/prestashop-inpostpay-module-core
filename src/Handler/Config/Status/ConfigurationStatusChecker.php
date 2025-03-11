@@ -7,7 +7,6 @@ namespace izi\prestashop\Handler\Config\Status;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
-use izi\prestashop\Configuration\WidgetVersionCheckerTrait;
 use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Validator\InPostApiCredentials;
 use Symfony\Component\Validator\ConstraintViolationInterface;
@@ -15,8 +14,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class ConfigurationStatusChecker implements StatusCheckerInterface
 {
-    use WidgetVersionCheckerTrait;
-
     private const TRANSLATION_SOURCE = 'configurationstatuschecker';
 
     /**
@@ -28,6 +25,11 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
      * @var OrdersConfiguration
      */
     private $ordersConfiguration;
+
+    /**
+     * @var ApiConfigurationInterface
+     */
+    private $apiConfiguration;
 
     /**
      * @var ValidatorInterface
@@ -78,15 +80,13 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
             }
         }
 
-        if (!$this->isWidgetV2Enabled()) {
-            yield 'You are using an outdated version of the InPost Pay Widget. Please provide a merchant client ID in the general settings tab.';
-        } elseif ('' === $this->apiConfiguration->getMerchantClientId()) {
+        if (null === $this->apiConfiguration->getMerchantClientId()) {
             yield $this->translator->l('Merchant client ID configuration is missing. The InPost Pay Widget will not be displayed.', self::TRANSLATION_SOURCE);
         }
     }
 
     private function isAnyPaymentOptionAvailable(): bool
     {
-        return [] !== OrdersConfiguration::normalizeAvailablePaymentOptions($this->ordersConfiguration);
+        return [] !== $this->ordersConfiguration->getAvailablePaymentOptions();
     }
 }

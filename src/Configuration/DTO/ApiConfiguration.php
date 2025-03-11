@@ -44,7 +44,7 @@ final class ApiConfiguration implements ApiConfigurationInterface
     {
         $type = $this->getEnvironmentType();
 
-        return (new EnvironmentFactory())->createEnvironment($type, true);
+        return (new EnvironmentFactory())->createEnvironment($type);
     }
 
     public function getEnvironmentType(): EnvironmentType
@@ -71,9 +71,9 @@ final class ApiConfiguration implements ApiConfigurationInterface
         return $this;
     }
 
-    public function getMerchantClientId(): string
+    public function getMerchantClientId(): ?string
     {
-        return (string) $this->merchantClientId;
+        return $this->merchantClientId;
     }
 
     public function setMerchantClientId(?string $merchantClientId): ApiConfiguration

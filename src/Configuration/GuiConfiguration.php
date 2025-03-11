@@ -16,7 +16,7 @@ use izi\prestashop\Validator\Product\NotFromRestrictedManufacturer;
 use izi\prestashop\Validator\Product\NotInRestrictedCategory;
 use izi\prestashop\Validator\Product\NotOfType;
 use izi\prestashop\Validator\Product\NotWithRestrictedAttributes;
-use izi\prestashop\View\Widget\Configuration;
+use izi\prestashop\View\Widget\WidgetConfiguration;
 use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
 use Psr\Container\ContainerInterface;
@@ -109,52 +109,13 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         ];
     }
 
-    /**
-     * @internal
-     */
-    public static function getDisplayConfig(GuiConfigurationInterface $configuration, BindingPlace $bindingPlace): WidgetDisplayConfigurationInterface
-    {
-        if (is_callable([$configuration, 'getDisplayConfiguration'])) {
-            return $configuration->getDisplayConfiguration($bindingPlace);
-        }
-
-        @trigger_error(sprintf('Not implementing the "getDisplayConfiguration()" method in "%s" is deprecated.', get_class($configuration)), E_USER_DEPRECATED);
-
-        if (!$bindingPlace->canDisplayBindingWidget()) {
-            throw new \LogicException(sprintf('Binding widget cannot be displayed in "%s".', $bindingPlace->value));
-        }
-
-        switch ($bindingPlace) {
-            case BindingPlace::ProductCard():
-                return $configuration->getProductWidgetDisplayConfiguration();
-            case BindingPlace::BasketSummary():
-                return $configuration->getCartWidgetDisplayConfiguration();
-            case BindingPlace::LoginPage():
-                return $configuration->getLoginPageWidgetDisplayConfiguration();
-            case BindingPlace::RegisterFormPage():
-                return $configuration->getRegisterFormPageWidgetDisplayConfiguration();
-            case BindingPlace::CheckoutPage():
-                return $configuration->getCheckoutPageWidgetDisplayConfiguration();
-            case BindingPlace::MiniCartPage():
-                return $configuration->getMiniCartPageWidgetDisplayConfiguration();
-            case BindingPlace::OrderCreate():
-                if (is_callable([$configuration, 'getCheckoutWidgetConfiguration'])) {
-                    return $configuration->getCheckoutWidgetConfiguration();
-                }
-
-                // no break
-            default:
-                throw new \DomainException('Unsupported binding place.');
-        }
-    }
-
     public static function getConfigurableBindingPlaces(): array
     {
         return array_slice(self::getSupportedBindingPlaces(), 0, -1); // all supported except "ORDER_CREATE"
     }
 
     /**
-     * @return WidgetDisplayConfigurationInterface<Configuration>
+     * @return WidgetDisplayConfigurationInterface<WidgetConfiguration>
      */
     public function getDisplayConfiguration(BindingPlace $bindingPlace): WidgetDisplayConfigurationInterface
     {
@@ -163,7 +124,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         }
 
         if (!in_array($bindingPlace, self::getSupportedBindingPlaces(), true)) {
-            throw new \DomainException('Unsupported binding place.');
+            throw new \DomainException(sprintf('Unsupported binding place: "%s".', $bindingPlace->value));
         }
 
         if (BindingPlace::OrderCreate() === $bindingPlace) {
@@ -186,62 +147,6 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             $this->container->get('validator'),
             $this->getProductValidationConstraints()
         );
-    }
-
-    /**
-     * @deprecated use {@see getDisplayConfiguration()} instead
-     */
-    public function getCheckoutWidgetConfiguration(): Configuration
-    {
-        return $this->getDisplayConfiguration(BindingPlace::OrderCreate())->getWidgetConfiguration();
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getCartWidgetDisplayConfiguration(): WidgetDisplayConfiguration
-    {
-        return clone $this->getDisplayConfigurationByBindingPlace(BindingPlace::BasketSummary());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getProductWidgetDisplayConfiguration(): WidgetDisplayConfiguration
-    {
-        return clone $this->getDisplayConfigurationByBindingPlace(BindingPlace::ProductCard());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getLoginPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
-    {
-        return clone $this->getDisplayConfigurationByBindingPlace(BindingPlace::LoginPage());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
-    {
-        return clone $this->getDisplayConfigurationByBindingPlace(BindingPlace::RegisterFormPage());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
-    {
-        return clone $this->getDisplayConfigurationByBindingPlace(BindingPlace::CheckoutPage());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfiguration
-    {
-        return clone $this->getDisplayConfigurationByBindingPlace(BindingPlace::MiniCartPage());
     }
 
     public function copy(): GuiConfigurationInterface
@@ -267,22 +172,14 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
     public function persist(GuiConfigurationInterface $configuration): void
     {
         $configurablePlaces = self::getConfigurableBindingPlaces();
-
-        if (is_callable([$configuration, 'getSupportedBindingPlaces'])) {
-            $bindingPlaces = $configuration::getSupportedBindingPlaces();
-        } else {
-            @trigger_error(sprintf('Not implementing the "getSupportedBindingPlaces()" method in "%s" is deprecated.', get_class($configuration)), E_USER_DEPRECATED);
-            $bindingPlaces = $configurablePlaces;
-        }
-
         $productRestrictions = null;
 
-        foreach ($bindingPlaces as $bindingPlace) {
+        foreach ($configuration->getSupportedBindingPlaces() as $bindingPlace) {
             if (!in_array($bindingPlace, $configurablePlaces, true)) {
                 continue;
             }
 
-            $displayConfiguration = self::getDisplayConfig($configuration, $bindingPlace);
+            $displayConfiguration = $configuration->getDisplayConfiguration($bindingPlace);
 
             if ($displayConfiguration instanceof ProductRestrictionsProviderInterface && BindingPlace::ProductCard() === $bindingPlace) {
                 $productRestrictions = $displayConfiguration->getProductRestrictions() ?? new ProductRestrictions();
@@ -342,11 +239,11 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         return new WidgetDisplayConfiguration($configuration, $displayed, $htmlStyles);
     }
 
-    private function loadWidgetConfiguration(BindingPlace $bindingPlace): ?Configuration
+    private function loadWidgetConfiguration(BindingPlace $bindingPlace): ?WidgetConfiguration
     {
         $value = $this->configuration->get($this->getConfigurationWidgetConfigKey($bindingPlace));
 
-        if (null !== $value && $config = $this->deserialize($value, Configuration::class)) {
+        if (null !== $value && $config = $this->deserialize($value, WidgetConfiguration::class)) {
             return $config;
         }
 

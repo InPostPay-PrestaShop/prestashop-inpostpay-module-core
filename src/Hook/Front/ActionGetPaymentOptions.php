@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Payment\PaymentCurrencyChecker;
@@ -71,7 +72,7 @@ final class ActionGetPaymentOptions implements HookInterface
         }
 
         $widget = $this->paymentModule->renderWidget(self::HOOK_NAME, [
-            'config' => $this->configuration->getCheckoutWidgetConfiguration(),
+            'config' => $this->configuration->getDisplayConfiguration(BindingPlace::OrderCreate()),
             'request' => $parameters['request'] ?? null,
         ]);
 
@@ -86,7 +87,7 @@ final class ActionGetPaymentOptions implements HookInterface
 
     private function createPaymentOption(string $widget): PaymentOption
     {
-        $additionalInfo = $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
+        $additionalInfo = $this->renderer->render('module:inpostizi/views/templates/front/buttonWidget.tpl', [
             'widget' => $widget,
             'styles' => [],
         ]);

@@ -16,7 +16,7 @@ services:
       - '@izi\prestashop\View\Asset\FrontAssetManager'
       - '@inpost.izi.security.authorization_checker'
       - !tagged inpost.izi.front_assets_provider
-      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
 
   izi\prestashop\Hook\Front\ActionGetPaymentOptions:
     class: izi\prestashop\Hook\Front\ActionGetPaymentOptions
@@ -70,7 +70,6 @@ services:
       - '@izi\prestashop\View\Templating\RendererInterface'
       - '@inpost.izi.context'
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
 
   izi\prestashop\Hook\Front\DisplayProductAdditionalInfo:
     class: izi\prestashop\Hook\Front\DisplayProductAdditionalInfo
@@ -85,7 +84,6 @@ services:
       - '@izi\prestashop\View\Templating\RendererInterface'
       - '@inpost.izi.context'
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
 
   izi\prestashop\Hook\Front\DisplayShoppingCart:
     class: izi\prestashop\Hook\Front\DisplayShoppingCart
@@ -175,21 +173,8 @@ services:
     arguments:
       - '@inpost.izi.module'
       - '@inpost.izi.context'
-      - null
-      - null
       - '@izi\prestashop\CommandBus'
-    calls:
-      - method: setContainer
-        arguments:
-          - '@?inpost.izi.widget_controller_locator'
-
-  izi\prestashop\Controller\WidgetVersionCheckingWidgetController:
-    class: izi\prestashop\Controller\WidgetVersionCheckingWidgetController
-    public: false
-    decorates: izi\prestashop\Controller\WidgetController
-    arguments:
-      - '@izi\prestashop\Controller\WidgetVersionCheckingWidgetController.inner'
-      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - '@inpost.izi.widget_controller_locator'
 
   izi\prestashop\Controller\Api\BasketController:
     class: izi\prestashop\Controller\Api\BasketController
@@ -205,62 +190,6 @@ services:
       - '@inpost.izi.serializer'
       - '@izi\prestashop\CommandBus'
 
-  izi\prestashop\Handler\BindBasketHandlerInterface: '@izi\prestashop\Handler\BindBasketHandler'
-  izi\prestashop\Handler\BindBasketHandler:
-    class: izi\prestashop\Handler\BindBasketHandler
-    public: false
-    tags:
-      - { name: inpost.izi.command_handler }
-    arguments:
-      - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
-      - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
-
-  izi\prestashop\Handler\GenerateDeepLinkHandlerInterface: '@izi\prestashop\Handler\GenerateDeepLinkHandler'
-  izi\prestashop\Handler\GenerateDeepLinkHandler:
-    class: izi\prestashop\Handler\GenerateDeepLinkHandler
-    public: false
-    tags:
-      - { name: inpost.izi.command_handler }
-    arguments:
-      - '@inpost.izi.environment'
-      - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
-
-  izi\prestashop\Handler\GetBindingConfirmationHandlerInterface: '@izi\prestashop\Handler\GetBindingConfirmationHandler'
-  izi\prestashop\Handler\GetBindingConfirmationHandler:
-    class: izi\prestashop\Handler\GetBindingConfirmationHandler
-    public: false
-    tags:
-      - { name: inpost.izi.command_handler }
-    arguments:
-      - '@izi\prestashop\Repository\BasketSessionRepository'
-
-  izi\prestashop\Handler\GetOrderEventsHandlerInterface: '@izi\prestashop\Handler\GetOrderEventsHandler'
-  izi\prestashop\Handler\GetOrderEventsHandler:
-    class: izi\prestashop\Handler\GetOrderEventsHandler
-    public: false
-    tags:
-      - { name: inpost.izi.command_handler }
-    arguments:
-      - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@inpost.izi.context'
-      - '@izi\prestashop\ObjectModel\ObjectManager'
-
-  izi\prestashop\Handler\GetProductWidgetHandlerInterface: '@izi\prestashop\Handler\GetProductWidgetHandler'
-  izi\prestashop\Handler\GetProductWidgetHandler:
-    class: izi\prestashop\Handler\GetProductWidgetHandler
-    public: false
-    tags:
-      - { name: inpost.izi.command_handler }
-    arguments:
-      - '@izi\prestashop\Configuration\GuiConfigurationInterface'
-      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
-      - '@inpost.izi.module'
-      - '@inpost.izi.context'
-      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
-      - '@izi\prestashop\Repository\BasketSessionRepository'
-
   izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface: '@izi\prestashop\Handler\GetBasketBindingKeyHandler'
   izi\prestashop\Handler\GetBasketBindingKeyHandler:
     class: izi\prestashop\Handler\GetBasketBindingKeyHandler
@@ -269,7 +198,7 @@ services:
       - { name: inpost.izi.command_handler }
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\Basket\V2\BasketsApiClientInterface'
+      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
 
   izi\prestashop\Handler\GetOrderConfirmationUrlHandlerInterface: '@izi\prestashop\Handler\GetOrderConfirmationUrlHandler'
   izi\prestashop\Handler\GetOrderConfirmationUrlHandler:
@@ -320,6 +249,26 @@ services:
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler'
       - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
+
+  izi\prestashop\MerchantApi\Handler\CreateOrderHandlerInterface: '@izi\prestashop\MerchantApi\Handler\CreateOrderHandler'
+  izi\prestashop\MerchantApi\Handler\CreateOrderHandler:
+    class: izi\prestashop\MerchantApi\Handler\CreateOrderHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\CommandBusInterface'
+
+  izi\prestashop\MerchantApi\Handler\GetOrderHandlerInterface: '@izi\prestashop\MerchantApi\Handler\GetOrderHandler'
+  izi\prestashop\MerchantApi\Handler\GetOrderHandler:
+    class: izi\prestashop\MerchantApi\Handler\GetOrderHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@inpost.izi.object_model.order_repository'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
 
   izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface: '@izi\prestashop\MerchantApi\Handler\UpdateOrderHandler'
   izi\prestashop\MerchantApi\Handler\UpdateOrderHandler:
@@ -387,7 +336,7 @@ services:
 
   izi\prestashop\MerchantApi\Firewall\MerchantApiAuthenticator:
     class: izi\prestashop\MerchantApi\Firewall\MerchantApiAuthenticator
-    public: true
+    public: true # todo: make private after refactoring the front controller
     arguments:
       - '@izi\prestashop\MerchantApi\Firewall\SigningKeysService'
       - '@inpost.izi.clock'
@@ -452,14 +401,6 @@ services:
       - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
       - '@izi\prestashop\Repository\BasketSessionRepository'
 
-  izi\prestashop\View\Asset\Provider\Front\WidgetVersionCheckingAssetsProvider:
-    class: izi\prestashop\View\Asset\Provider\Front\WidgetVersionCheckingAssetsProvider
-    public: false
-    decorates: izi\prestashop\View\Asset\Provider\Front\CommonAssetsProvider
-    arguments:
-      - '@izi\prestashop\View\Asset\Provider\Front\WidgetVersionCheckingAssetsProvider.inner'
-      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
-
   inpost.izi.validator:
     class: Symfony\Component\Validator\Validator\ValidatorInterface
     public: false
@@ -498,14 +439,6 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
       - '@?inpost.izi.gui_configuration_locator'
-
-  izi\prestashop\Configuration\WidgetVersionCheckingGuiConfiguration:
-    class: izi\prestashop\Configuration\WidgetVersionCheckingGuiConfiguration
-    public: false
-    decorates: izi\prestashop\Configuration\GuiConfiguration
-    arguments:
-      - '@izi\prestashop\Configuration\WidgetVersionCheckingGuiConfiguration.inner'
-      - '@izi\prestashop\Configuration\ApiConfiguration'
 
   izi\prestashop\Order\ContextCustomerUpdater:
     class: izi\prestashop\Order\ContextCustomerUpdater

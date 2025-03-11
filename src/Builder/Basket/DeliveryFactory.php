@@ -6,8 +6,8 @@ namespace izi\prestashop\Builder\Basket;
 
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\DeliveryOption;
-use izi\prestashop\Common\Basket\OptionalService;
 use izi\prestashop\Common\Delivery\DeliveryType;
+use izi\prestashop\Common\Delivery\OptionalService;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;

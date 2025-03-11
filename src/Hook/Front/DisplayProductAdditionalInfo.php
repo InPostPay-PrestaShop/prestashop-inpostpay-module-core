@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Hook\AliasedHookInterface;
@@ -27,22 +26,14 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
      */
     private $renderer;
 
-    public function __construct(
-        GuiConfigurationInterface $configuration,
-        GeneralConfigurationInterface $generalConfiguration,
-        WidgetInterface $module,
-        RendererInterface $renderer,
-        \Context $context,
-        BasketSessionRepositoryInterface $basketSessionRepository,
-        ?ApiConfigurationInterface $apiConfiguration = null
-    ) {
+    public function __construct(GuiConfigurationInterface $configuration, GeneralConfigurationInterface $generalConfiguration, WidgetInterface $module, RendererInterface $renderer, \Context $context, BasketSessionRepositoryInterface $basketSessionRepository)
+    {
         $this->configuration = $configuration;
         $this->generalConfiguration = $generalConfiguration;
         $this->module = $module;
         $this->renderer = $renderer;
         $this->context = $context;
         $this->basketSessionRepository = $basketSessionRepository;
-        $this->apiConfiguration = $apiConfiguration;
     }
 
     public static function getHookName(): string
@@ -73,11 +64,8 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
             return '';
         }
 
-        $refresh = $this->shouldRenderCacheableHookContent($parameters['request'] ?? null);
-
-        return $this->renderer->render('module:inpostizi/views/templates/hook/productButtonWidget.tpl', [
-            'widget' => $refresh ? '' : $this->renderWidget($product, $parameters, self::HOOK_NAME),
-            'refresh' => $refresh,
+        return $this->renderer->render('module:inpostizi/views/templates/front/productButtonWidget.tpl', [
+            'widget' => $this->renderWidget($product, $parameters, self::HOOK_NAME),
             'styles' => $this->getHtmlStyles(),
             'hookName' => self::HOOK_NAME,
             'idProduct' => $product['id_product'],

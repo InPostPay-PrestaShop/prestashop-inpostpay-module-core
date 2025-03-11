@@ -70,54 +70,6 @@ final class GuiConfiguration implements GuiConfigurationInterface, \ArrayAccess
         return $this->displayConfigurations;
     }
 
-    /**
-     * @deprecated
-     */
-    public function getCartWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
-    {
-        return $this->getDisplayConfiguration(BindingPlace::BasketSummary());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getProductWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
-    {
-        return $this->getDisplayConfiguration(BindingPlace::ProductCard());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getLoginPageWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
-    {
-        return $this->getDisplayConfiguration(BindingPlace::LoginPage());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getRegisterFormPageWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
-    {
-        return $this->getDisplayConfiguration(BindingPlace::RegisterFormPage());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getCheckoutPageWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
-    {
-        return $this->getDisplayConfiguration(BindingPlace::CheckoutPage());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getMiniCartPageWidgetDisplayConfiguration(): WidgetDisplayConfigurationInterface
-    {
-        return $this->getDisplayConfiguration(BindingPlace::MiniCartPage());
-    }
-
     public function offsetExists($offset): bool
     {
         $supportedBindingPlaces = self::getSupportedBindingPlaces();

@@ -38,10 +38,7 @@ final class ProductPageDisplayConfiguration implements WidgetDisplayConfiguratio
         return $this->displayConfiguration->isDisplayed();
     }
 
-    /**
-     * @return WidgetConfigurationInterface
-     */
-    public function getWidgetConfiguration()
+    public function getWidgetConfiguration(): WidgetConfigurationInterface
     {
         return $this->displayConfiguration->getWidgetConfiguration();
     }

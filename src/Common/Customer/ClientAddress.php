@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Common\Customer;
 
+use izi\prestashop\MerchantApi\Model\Order\Request\ClientAddress as OrderRequestClientAddress;
+
 final class ClientAddress implements \JsonSerializable
 {
     /**
@@ -32,6 +34,11 @@ final class ClientAddress implements \JsonSerializable
         $this->address = $address;
         $this->city = $city;
         $this->postal_code = $postal_code;
+    }
+
+    public static function fromOrderRequestData(OrderRequestClientAddress $address): self
+    {
+        return new self($address->getCountryCode(), $address->getAddress(), $address->getCity(), $address->getPostalCode());
     }
 
     public function getCountryCode(): string

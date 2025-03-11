@@ -11,6 +11,8 @@ use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -44,12 +46,24 @@ final class WidgetDisplayConfigurationType extends AbstractType
                 'label' => $this->translator->l('Displayed', self::TRANSLATION_SOURCE),
                 'help' => $this->translator->l('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', self::TRANSLATION_SOURCE),
             ])
-            ->add('widgetConfiguration', WidgetConfigurationType::class, [
-                'label' => false,
-            ])
             ->add('htmlStyles', HtmlStylesType::class, [
                 'label' => false,
+            ])
+            ->addEventListener(FormEvents::PRE_SET_DATA, static function (FormEvent $event) {
+                $data = $event->getData();
+                $event->getForm()->add('widgetConfiguration', WidgetConfigurationType::class, [
+                    'label' => false,
+                    'preview_container_styles' => $data instanceof WidgetDisplayConfiguration ? $data->getHtmlStyles() : [],
+                ]);
+            });
+
+        $builder->get('htmlStyles')->addEventListener(FormEvents::POST_SUBMIT, static function (FormEvent $event) {
+            $data = $event->getData();
+            $event->getForm()->getParent()->add('widgetConfiguration', WidgetConfigurationType::class, [
+                'label' => false,
+                'preview_container_styles' => $data ?? [],
             ]);
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void

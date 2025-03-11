@@ -10,9 +10,7 @@ use Psr\Container\ContainerInterface;
 
 final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInterface
 {
-    private const DEPRECATED_HOOKS = [
-        Common\ActionCartSave::HOOK_NAME,
-    ];
+    private const DEPRECATED_HOOKS = [];
 
     /**
      * @var ContainerInterface
@@ -62,9 +60,6 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Front\DisplayCheckoutSummaryTop::HOOK_NAME => '?' . Front\DisplayCheckoutSummaryTop::class,
             Front\DisplayIziCartPreviewButton::HOOK_NAME => '?' . Front\DisplayIziCartPreviewButton::class,
             Front\DisplayIziCheckoutButton::HOOK_NAME => '?' . Front\DisplayIziCheckoutButton::class,
-
-            // no longer used
-            Common\ActionCartSave::HOOK_NAME => '?' . Common\ActionCartSave::class,
         ];
     }
 

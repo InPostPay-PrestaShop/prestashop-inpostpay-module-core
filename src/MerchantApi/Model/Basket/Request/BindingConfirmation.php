@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace izi\prestashop\MerchantApi\Model\Basket\Request;
 
 use izi\prestashop\BasketApp\Basket\Response\BasketBindingResponse;
-use izi\prestashop\BasketApp\Basket\Response\UpsertBasketResponse;
 use izi\prestashop\Common\PhoneNumber;
 
 final class BindingConfirmation implements \JsonSerializable, \Stringable
@@ -65,18 +64,6 @@ final class BindingConfirmation implements \JsonSerializable, \Stringable
         return self::success($binding, $browserId);
     }
 
-    /**
-     * @deprecated
-     */
-    public static function fromTrustedBrowserUpsertBasketResponse(string $browserId, BasketBindingResponse $binding, UpsertBasketResponse $response): self
-    {
-        if (!$binding->isBrowserTrusted()) {
-            throw new \DomainException('Browser is not trusted.');
-        }
-
-        return self::success($binding, $browserId, $response->getInPostBasketId());
-    }
-
     public function getStatus(): BindingStatus
     {
         return $this->status;
@@ -122,7 +109,7 @@ final class BindingConfirmation implements \JsonSerializable, \Stringable
         return json_encode($this);
     }
 
-    private static function success(BasketBindingResponse $binding, ?string $browserId = null, ?string $inPostBasketId = null): self
+    private static function success(BasketBindingResponse $binding, ?string $browserId = null): self
     {
         if (null === $clientDetails = $binding->getClientDetails()) {
             throw new \UnexpectedValueException('Client details are missing in the binding data.');
@@ -132,7 +119,7 @@ final class BindingConfirmation implements \JsonSerializable, \Stringable
 
         return new self(
             BindingStatus::Success(),
-            $inPostBasketId ?? $binding->getInPostBasketId(),
+            $binding->getInPostBasketId(),
             $clientDetails->getPhoneNumber(),
             $browser,
             $clientDetails->getMaskedPhoneNumber(),

@@ -43,12 +43,12 @@ final class BindingPlace extends StringEnum
 
     public function requiresExistingBasket(): bool
     {
-        return BindingPlace::ProductCard() !== $this;
+        return self::ProductCard() !== $this;
     }
 
     public function canDisplayBindingWidget(): bool
     {
-        return $this !== self::ThankYouPage();
+        return self::ThankYouPage() !== $this;
     }
 
     public function trans(LegacyTranslator $translator): string

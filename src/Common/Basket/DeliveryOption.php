@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Common\Basket;
 
 use izi\prestashop\Common\Delivery\DeliveryType;
+use izi\prestashop\Common\Delivery\OptionalService;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Common\PriceAmount;
 

@@ -5,8 +5,7 @@
             "classes"
         ],
         "psr-4": {
-            "izi\\prestashop\\": "src/",
-            "izi\\": "lib/"
+            "izi\\prestashop\\": "src/"
         },
         "exclude-from-classmap": [
             "src/Environment/UatEnvironment.php"

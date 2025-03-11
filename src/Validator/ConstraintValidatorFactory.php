@@ -42,10 +42,10 @@ final class ConstraintValidatorFactory implements ConstraintValidatorFactoryInte
     {
         $name = $constraint->validatedBy();
 
-        return $this->validators[$name] ?? $this->validators[$name] = $this->create($name);
+        return $this->validators[$name] ?? $this->validators[$name] = $this->create($name, $constraint);
     }
 
-    private function create(string $name): ConstraintValidatorInterface
+    private function create(string $name, Constraint $constraint): ConstraintValidatorInterface
     {
         $serviceId = strtolower($name); // Sf 2.8 normalizes all service ids by converting them to lowercase
 
