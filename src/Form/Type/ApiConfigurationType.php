@@ -30,7 +30,6 @@ final class ApiConfigurationType extends AbstractType
                 'help' => $this->translator->l('Select the environment on which you want to show the InPost Pay service. Remember to make sure that the service in your store is working properly before switching to the production environment', self::TRANSLATION_SOURCE),
             ])
             ->add('merchantClientId', TextType::class, [
-                'required' => false,
                 'label' => $this->translator->l('Merchant client ID', self::TRANSLATION_SOURCE),
             ])
             ->add('clientCredentials', ClientCredentialsType::class, [
