@@ -30,7 +30,7 @@ final class ApiConfiguration implements ApiConfigurationInterface
     /**
      * @var string|null
      *
-     * @Assert\Length(min="1", minMessage="This value should not be blank.")
+     * @Assert\NotBlank()
      */
     private $merchantClientId;
 
@@ -76,7 +76,7 @@ final class ApiConfiguration implements ApiConfigurationInterface
         return $this->merchantClientId;
     }
 
-    public function setMerchantClientId(?string $merchantClientId): ApiConfiguration
+    public function setMerchantClientId(?string $merchantClientId): self
     {
         $this->merchantClientId = $merchantClientId;
 
