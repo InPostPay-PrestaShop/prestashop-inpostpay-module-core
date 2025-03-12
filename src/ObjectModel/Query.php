@@ -6,6 +6,8 @@ namespace izi\prestashop\ObjectModel;
 
 /**
  * @template T of \ObjectModel
+ *
+ * @experimental
  */
 class Query
 {
