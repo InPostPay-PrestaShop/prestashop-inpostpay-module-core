@@ -6,7 +6,7 @@ namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
-use izi\prestashop\Hook\AliasedHookInterface;
+use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -14,12 +14,11 @@ use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-final class DisplayProductAdditionalInfo implements AliasedHookInterface
+final class DisplayProductAdditionalInfo implements PrestaShopVersionAwareHookInterface
 {
     use ProductWidgetRendererTrait;
 
     public const HOOK_NAME = 'displayProductAdditionalInfo';
-    private const HOOK_ALIAS = 'displayProductButtons';
 
     /**
      * @var RendererInterface
@@ -41,12 +40,9 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
         return self::HOOK_NAME;
     }
 
-    public static function getAliases(): array
+    public static function getVersionRange(): VersionRange
     {
-        return [
-            self::HOOK_ALIAS => new VersionRange('1.7.0', '1.7.1'),
-            self::HOOK_NAME => new VersionRange('1.7.1', '1.7.6'),
-        ];
+        return new VersionRange(null, '1.7.6');
     }
 
     /**

@@ -1,9 +1,6 @@
 {
     "name": "inpost-izi-prestashop/inpostizi",
     "autoload": {
-        "classmap": [
-            "classes"
-        ],
         "psr-4": {
             "izi\\prestashop\\": "src/"
         },
