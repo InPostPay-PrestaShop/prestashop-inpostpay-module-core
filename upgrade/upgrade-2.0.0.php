@@ -70,10 +70,12 @@ class InPostIziUpdater_2_0_0
         izi\prestashop\Form\Type\Widget\WidgetAlignmentChoiceType::class,
         izi\prestashop\CartSession::class,
         izi\prestashop\Environment\UatEnvironment::class,
+        izi\prestashop\Twig\Loader\TemplateNameMappingLoaderDecoratorTrait::class,
     ];
 
     private const FILES_TO_REMOVE = [
         'lib/',
+        'classes/',
         'controllers/front/cart.php',
         'views/templates/hook/buttonWidget.tpl',
         'views/templates/hook/productButtonWidget.tpl',
@@ -190,6 +192,14 @@ class InPostIziUpdater_2_0_0
  */
 function upgrade_module_2_0_0(Module $module): bool
 {
+    if (Tools::version_compare(_PS_VERSION_, '1.7.1')) {
+        try {
+            $module->uninstall();
+        } finally {
+            return false;
+        }
+    }
+
     $db = Db::getInstance();
     $dbInstaller = new DatabaseInstaller(new Configuration($db), [
         new Version_2_0_0(new Connection($db)),

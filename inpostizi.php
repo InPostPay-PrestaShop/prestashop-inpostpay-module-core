@@ -70,7 +70,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $this->tab = 'payments_gateways';
 
         $this->ps_versions_compliancy = [
-            'min' => '1.7.0.0',
+            'min' => '1.7.1.0',
             'max' => '8.2.99',
         ];
 
@@ -406,12 +406,6 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             $container->addCompilerPass(new TaggedIteratorsCollectorPass());
             AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
         };
-
-        if (Tools::version_compare(_PS_VERSION_, '1.7.1')) {
-            yield static function (ContainerBuilder $container) {
-                $container->setParameter('inpost.izi.basket_session_model_class', InPostIziBasketSession::class);
-            };
-        }
     }
 
     /**

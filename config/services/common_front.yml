@@ -76,7 +76,6 @@ services:
     public: false
     tags:
       - { name: inpost.izi.hook }
-      - { name: inpost.izi.hook, hook_name: displayProductButtons }
     arguments:
       - '@izi\prestashop\Configuration\GuiConfiguration'
       - '@izi\prestashop\Configuration\GeneralConfiguration'

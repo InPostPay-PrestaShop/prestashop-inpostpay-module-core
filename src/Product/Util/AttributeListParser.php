@@ -72,10 +72,6 @@ final class AttributeListParser
 
     private function getSeparator(?int $shopId): string
     {
-        if (\Tools::version_compare($this->psVersion, '1.7.0.5')) {
-            return ', ';
-        }
-
         $separator = $this->configuration->getAttributesSeparator($shopId);
 
         if ('-' === $separator && \Tools::version_compare($this->psVersion, '1.7.8', '>=')) {

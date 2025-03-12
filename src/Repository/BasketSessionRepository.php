@@ -29,27 +29,14 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
      */
     private $manager;
 
-    /**
-     * @var class-string<InPostIziBasketSession>
-     */
-    private $modelClass;
-
     private $sessionsByCartId = [];
     private $sessionsByBasketId = [];
     private $sessionsByOrderId = [];
 
-    /**
-     * @param class-string<InPostIziBasketSession> $modelClass
-     */
-    public function __construct(SerializerInterface $serializer, ObjectManagerInterface $manager, string $modelClass = InPostIziBasketSession::class)
+    public function __construct(SerializerInterface $serializer, ObjectManagerInterface $manager)
     {
-        if (!is_a($modelClass, InPostIziBasketSession::class, true)) {
-            throw new \DomainException(sprintf('%s is not a %s.', $modelClass, InPostIziBasketSession::class));
-        }
-
         $this->serializer = $serializer;
         $this->manager = $manager;
-        $this->modelClass = $modelClass;
     }
 
     public function findByBasketId(string $basketId): ?BasketSessionInterface
@@ -59,7 +46,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
         }
 
         $model = $this->manager
-            ->getRepository($this->modelClass)
+            ->getRepository(InPostIziBasketSession::class)
             ->findOneBy(['cart_id' => $basketId]);
 
         if (null === $model) {
@@ -80,7 +67,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
         }
 
         $model = $this->manager
-            ->getRepository($this->modelClass)
+            ->getRepository(InPostIziBasketSession::class)
             ->findOneBy(['session_id' => $cartId]);
 
         if (null === $model) {
@@ -101,7 +88,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
         }
 
         $model = $this->manager
-            ->getRepository($this->modelClass)
+            ->getRepository(InPostIziBasketSession::class)
             ->findOneBy(['order_id' => $orderId]);
 
         if (null === $model) {
@@ -113,7 +100,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
 
     public function createNewSession(BasketInterface $basket): BasketSessionInterface
     {
-        return BasketSession::new($basket, Uuid::v4(), $this->modelClass);
+        return BasketSession::new($basket, Uuid::v4());
     }
 
     public function persist(BasketSessionInterface $session): void
