@@ -589,6 +589,15 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\Event\EventDispatcherInterface'
 
+  izi\prestashop\Hook\Common\ActionEmailSendBefore:
+    class: izi\prestashop\Hook\Common\ActionEmailSendBefore
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Mail\Resolver\OrderMailRecipientResolver'
+
+
   izi\prestashop\Hook\Common\ActionShipmentAddAfter:
     class: izi\prestashop\Hook\Common\ActionShipmentAddAfter
     public: false
@@ -621,6 +630,7 @@ services:
     arguments:
       - '@inpost.izi.module'
       - '@izi\prestashop\CommandBusInterface'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
 
   izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate:
     class: izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate
@@ -1141,3 +1151,10 @@ services:
       - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
       - '@izi\prestashop\CommandBusInterface'
       - '@inpost.izi.general_logger'
+
+  izi\prestashop\Mail\Resolver\OrderMailRecipientResolver:
+    class: izi\prestashop\Mail\Resolver\OrderMailRecipientResolver
+    arguments:
+      - '@izi\prestashop\Repository\OrderDataRepositoryInterface'
+      - '@inpost.izi.object_model.order_repository'
+

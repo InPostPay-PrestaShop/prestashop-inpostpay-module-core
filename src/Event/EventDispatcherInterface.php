@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Event;
 
+/**
+ * @method addListener(string $eventName, callable $listener, int $priority = 0)
+ */
 interface EventDispatcherInterface
 {
     /**
