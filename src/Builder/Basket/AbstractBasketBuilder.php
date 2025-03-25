@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Builder\Basket;
 
 use izi\prestashop\Builder\PriceFactory;
+use izi\prestashop\Common\Basket\AvailablePromotion;
 use izi\prestashop\Common\Basket\Consent;
 use izi\prestashop\Common\Basket\ConsentLink;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
@@ -21,6 +22,7 @@ use izi\prestashop\Common\Product\DeliveryProduct;
 use izi\prestashop\Common\Product\DeliveryRelatedProducts;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductVariant;
+use izi\prestashop\Common\PromoCode;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
@@ -36,7 +38,9 @@ use izi\prestashop\Product\Price\NullLowestPriceProvider;
 use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Product\Util\AttributeListParser;
 use izi\prestashop\Product\Util\DescriptionFormatter;
+use izi\prestashop\PromoCode\AvailablePromotionsProviderInterface;
 use izi\prestashop\PromoCode\CartRulePromoCodeProvider;
+use izi\prestashop\PromoCode\NullAvailablePromotionsProvider;
 use izi\prestashop\PromoCode\PromoCodeProviderInterface;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Core\Cart\Calculator;
@@ -92,6 +96,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $promoCodeProvider;
 
     /**
+     * @var AvailablePromotionsProviderInterface
+     */
+    private $availablePromotionsProvider;
+
+    /**
      * @var AttributeListParser
      */
     private $attributeListParser;
@@ -135,7 +144,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         ProductDeliveryFactory $deliveryRelatedProductFactory,
         ?ImageRetriever $imageRetriever = null,
         ?LowestPriceProviderInterface $lowestPriceProvider = null,
-        ?PromoCodeProviderInterface $promoCodeProvider = null
+        ?PromoCodeProviderInterface $promoCodeProvider = null,
+        ?AvailablePromotionsProviderInterface $availablePromotionsProvider = null
     ) {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
@@ -146,6 +156,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $this->imageRetriever = $imageRetriever;
         $this->lowestPriceProvider = $lowestPriceProvider ?? new NullLowestPriceProvider();
         $this->promoCodeProvider = $promoCodeProvider ?? CartRulePromoCodeProvider::create();
+        $this->availablePromotionsProvider = $availablePromotionsProvider ?? new NullAvailablePromotionsProvider();
     }
 
     /**
@@ -192,15 +203,24 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
                 $this->getAvailableDeliveryOptions($this->cart),
                 $products,
                 $this->getConsents(),
-                $this->promoCodeProvider->getPromoCodes($this->cart),
-                $this->getRelatedProducts($cartProducts)
+                array_values($this->promoCodeProvider->getPromoCodes($this->cart)),
+                $this->getRelatedProducts($cartProducts),
+                array_values($this->availablePromotionsProvider->getAvailablePromotions($this->cart))
             );
         } finally {
             $this->contextManager->restoreContext();
         }
     }
 
-    abstract protected function doBuild(Summary $summary, array $delivery, array $products, array $consents, array $promoCodes, array $relatedProducts);
+    /**
+     * @param DeliveryOption[] $delivery
+     * @param Product[] $products
+     * @param Consent[] $consents
+     * @param PromoCode[] $promoCodes
+     * @param Product[] $relatedProducts
+     * @param AvailablePromotion[] $availablePromotions
+     */
+    abstract protected function doBuild(Summary $summary, array $delivery, array $products, array $consents, array $promoCodes, array $relatedProducts/*, array $availablePromotions = []*/);
 
     /**
      * @return Product[]
@@ -803,7 +823,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getAvailableDeliveryOptions(\Cart $cart): array
     {
         if (null === $this->availableDeliveryOptions) {
-            $this->availableDeliveryOptions = $this->deliveryFactory->getAvailableDeliveryOptions($cart);
+            $this->availableDeliveryOptions = array_values($this->deliveryFactory->getAvailableDeliveryOptions($cart));
         }
 
         return $this->availableDeliveryOptions;

@@ -29,4 +29,6 @@ services:
     class: izi\prestashop\Form\Type\CartRuleOptionsType
     tags:
       - { name: form.type }
-    autowire: true
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'

@@ -5,21 +5,32 @@ declare(strict_types=1);
 namespace izi\prestashop\PromoCode;
 
 use izi\prestashop\Common\PromoCode;
-use izi\prestashop\Configuration\Adapter\Configuration;
-use izi\prestashop\Database\Connection;
-use izi\prestashop\Repository\CartRuleRepository;
 use izi\prestashop\Repository\CartRuleRepositoryInterface;
 
+/**
+ * @final
+ */
 class CartRulePromoCodeProvider implements PromoCodeProviderInterface
 {
     /**
-     * @var CartRuleRepositoryInterface
+     * @var CartRuleOptionsRepositoryInterface|CartRuleRepositoryInterface
      */
-    private $cartRuleRepository;
+    private $repository;
 
-    public function __construct(CartRuleRepositoryInterface $cartRuleRepository)
+    /**
+     * @param CartRuleOptionsRepositoryInterface $cartRuleRepository
+     */
+    public function __construct($cartRuleRepository)
     {
-        $this->cartRuleRepository = $cartRuleRepository;
+        if (!$cartRuleRepository instanceof CartRuleOptionsRepositoryInterface) {
+            if (!$cartRuleRepository instanceof CartRuleRepositoryInterface) {
+                throw new \InvalidArgumentException(sprintf('Expected an instance of "%s" or "%s", "%s" given.', CartRuleOptionsRepositoryInterface::class, CartRuleRepositoryInterface::class, get_debug_type($cartRuleRepository)));
+            }
+
+            @trigger_error(sprintf('"%s" is deprecated since 2.1.0, use "%s" instead.', CartRuleRepositoryInterface::class, CartRuleOptionsRepositoryInterface::class), E_USER_DEPRECATED);
+        }
+
+        $this->repository = $cartRuleRepository;
     }
 
     /**
@@ -27,9 +38,9 @@ class CartRulePromoCodeProvider implements PromoCodeProviderInterface
      */
     public static function create(): self
     {
-        $db = \Db::getInstance();
+        $repository = CartRuleOptionsRepository::create();
 
-        return new self(new CartRuleRepository(new Connection($db), new Configuration($db)));
+        return new self($repository);
     }
 
     public function getPromoCodes(\Cart $cart): array
@@ -49,7 +60,7 @@ class CartRulePromoCodeProvider implements PromoCodeProviderInterface
 
     private function getRegulationType(array $cartRule): ?string
     {
-        if ($this->cartRuleRepository->isOmnibus((int) $cartRule['id_cart_rule'])) {
+        if ($this->repository->isOmnibus((int) $cartRule['id_cart_rule'])) {
             return PromoCode::REGULATION_TYPE_OMNIBUS;
         }
 

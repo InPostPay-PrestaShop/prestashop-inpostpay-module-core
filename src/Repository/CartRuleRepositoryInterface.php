@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Repository;
 
+use izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface;
+
+/**
+ * @deprecated use {@see CartRuleOptionsRepositoryInterface} instead
+ */
 interface CartRuleRepositoryInterface
 {
     /**

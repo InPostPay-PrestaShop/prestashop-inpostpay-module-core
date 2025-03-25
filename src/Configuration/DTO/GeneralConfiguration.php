@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
+use izi\prestashop\Configuration\PromoCodesConfigurationInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-final class GeneralConfiguration implements GeneralConfigurationInterface
+final class GeneralConfiguration implements GeneralConfigurationInterface, PromoCodesConfigurationInterface
 {
     /**
      * @var bool
@@ -46,6 +47,13 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
      * @var bool
      */
     private $fullPageCacheModuleInUse;
+
+    /**
+     * @var int|null ID of {@see \CMS}
+     *
+     * @Assert\GreaterThan(0)
+     */
+    private $defaultPromoDetailsPageId;
 
     public function __construct(
         bool $enabledForEveryone = false,
@@ -131,6 +139,23 @@ final class GeneralConfiguration implements GeneralConfigurationInterface
     public function setFullPageCacheModuleInUse(bool $fullPageCacheModuleInUse): GeneralConfiguration
     {
         $this->fullPageCacheModuleInUse = $fullPageCacheModuleInUse;
+
+        return $this;
+    }
+
+    public function getDefaultPromoDetailsPageId(?int $shopId = null): ?int
+    {
+        return $this->defaultPromoDetailsPageId;
+    }
+
+    /**
+     * @param int|null $cmsId ID of {@see \CMS}
+     *
+     * @return $this
+     */
+    public function setDefaultPromoDetailsPageId(?int $cmsId): self
+    {
+        $this->defaultPromoDetailsPageId = $cmsId;
 
         return $this;
     }

@@ -116,6 +116,21 @@ final class GeneralConfigurationType extends AbstractType
                     'placeholder' => $this->translator->l('unlimited', self::TRANSLATION_SOURCE),
                     'min' => 0,
                 ],
+            ])
+            ->add('defaultPromoDetailsPageId', ObjectModelType::class, [
+                'property_path' => 'generalConfiguration.defaultPromoDetailsPageId',
+                'required' => false,
+                'class' => \CMS::class,
+                'input' => 'id',
+                'choice_label' => static function (\CMS $page): string {
+                    return (string) $page->meta_title;
+                },
+                'label' => $this->translator->l('Default promotion details page', self::TRANSLATION_SOURCE),
+                'placeholder' => '--',
+                'help' => nl2br(implode("\n", [
+                    $this->translator->l('The page to use as the promotion details link for highlighted discounts if no specific page is configured for the cart rule.', self::TRANSLATION_SOURCE),
+                    $this->translator->l('If neither the default value nor the cart rule specific value is configured, the available promotion data will not be passed to the mobile app.', CartRuleOptionsType::TRANSLATION_SOURCE),
+                ])),
             ]);
 
         if (null === $this->eventDispatcher) {

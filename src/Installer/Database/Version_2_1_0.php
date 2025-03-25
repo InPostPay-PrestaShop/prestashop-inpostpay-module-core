@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Installer\Database;
 
 use izi\prestashop\HotProduct\HotProductRepository;
+use izi\prestashop\PromoCode\CartRuleOptionsRepository;
 
 class Version_2_1_0 extends AbstractMigration
 {
@@ -16,6 +17,7 @@ class Version_2_1_0 extends AbstractMigration
     public function up(): void
     {
         $this->createHotProductsTable();
+        $this->updateCartRuleOptionsTable();
     }
 
     private function createHotProductsTable(): void
@@ -54,6 +56,14 @@ class Version_2_1_0 extends AbstractMigration
 
         $this->addForeignKey(HotProductRepository::TABLE_NAME, 'shop', ['shop_id'], ['id_shop'], 'inpostizi_hot_product-shop_id', [
             'onDelete' => 'CASCADE',
+        ]);
+    }
+
+    private function updateCartRuleOptionsTable(): void
+    {
+        $this->addColumn(CartRuleOptionsRepository::TABLE_NAME, 'details_cms_id', 'int(10) unsigned');
+        $this->addForeignKey(CartRuleOptionsRepository::TABLE_NAME, 'cms', ['details_cms_id'], ['id_cms'], CartRuleOptionsRepository::TABLE_NAME . '-details_cms_id', [
+            'onDelete' => 'SET NULL',
         ]);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Model\Basket\Response;
 
+use izi\prestashop\Common\Basket\AvailablePromotion;
 use izi\prestashop\Common\Basket\Consent;
 use izi\prestashop\Common\Basket\DeliveryOption;
 use izi\prestashop\Common\Basket\Product;
@@ -45,6 +46,11 @@ trait BasketTrait
      */
     private $consents;
 
+    /**
+     * @var AvailablePromotion[]
+     */
+    private $promotions_available;
+
     public function getSummary(): Summary
     {
         return $this->summary;
@@ -58,26 +64,49 @@ trait BasketTrait
         return $this->delivery;
     }
 
+    /**
+     * @return PromoCode[]
+     */
     public function getPromoCodes(): array
     {
         return $this->promo_codes;
     }
 
+    /**
+     * @return Product[]
+     */
     public function getProducts(): array
     {
         return $this->products;
     }
 
+    /**
+     * @return Product[]
+     */
     public function getRelatedProducts(): array
     {
         return $this->related_products;
     }
 
+    /**
+     * @return Consent[]
+     */
     public function getConsents(): array
     {
         return $this->consents;
     }
 
+    /**
+     * @return AvailablePromotion[]
+     */
+    public function getAvailablePromotions(): array
+    {
+        return $this->promotions_available;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function jsonSerialize(): array
     {
         return get_object_vars($this);
