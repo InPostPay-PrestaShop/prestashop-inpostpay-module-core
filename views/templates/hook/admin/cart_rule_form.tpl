@@ -1,5 +1,13 @@
 {function inpostizi_form_label}
-  <label for="{$form->vars.id}" class="control-label col-lg-3">{$form->vars.label}</label>
+  <label for="{$form->vars.id}" class="control-label col-lg-3">
+    {if !empty($form->vars.help)}
+      <span class="label-tooltip" title="{$form->vars.help}">
+        {$form->vars.label}
+      </span>
+    {else}
+      {$form->vars.label}
+    {/if}
+  </label>
 {/function}
 
 {function inpostizi_switch_widget}
@@ -21,11 +29,37 @@
   </div>
 {/function}
 
+{function inpostizi_choice_widget}
+  <div class="col-lg-9">
+    <select
+      name="{$form->vars.full_name}"
+      id="{$form->vars.id}"
+    >
+      {if isset($form->vars.placeholder)}
+        <option value=""{if $form->vars.required && !$form->vars.value} selected="selected"{/if}>
+          {$form->vars.placeholder}
+        </option>
+      {/if}
+
+      {foreach $form->vars.choices as $choice}
+        <option value="{$choice->value}"{if $form->vars.value === $choice->value} selected="selected"{/if}>
+          {$choice->label}
+        </option>
+      {/foreach}
+    </select>
+  </div>
+{/function}
+
 <template id="inpostizi_form_tab">
   <div id="cart_rule_{$form->vars.id}" class="panel cart_rule_tab" style="display: none">
     <div class="form-group">
       {inpostizi_form_label form=$form.omnibus}
       {inpostizi_switch_widget form=$form.omnibus}
+    </div>
+
+    <div class="form-group">
+      {inpostizi_form_label form=$form.promoDetailsPageId}
+      {inpostizi_choice_widget form=$form.promoDetailsPageId}
     </div>
   </div>
 </template>

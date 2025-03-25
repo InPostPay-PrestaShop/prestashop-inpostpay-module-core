@@ -33,6 +33,12 @@
         <div class="card-body panel-body form-wrapper px-sm-4 px-3 pt-4 pb-3">
           {% include '@Modules/inpostizi/views/templates/admin/config/general/products.html.twig' %}
 
+          <div class="row mt-3">
+            <div class="col-xl-3 col-md-4 mt-2">
+              {{ form_row(form.defaultPromoDetailsPageId) }}
+            </div>
+          </div>
+
           {{ form_rest(form) }}
         </div>
 

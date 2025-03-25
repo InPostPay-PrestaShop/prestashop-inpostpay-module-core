@@ -7,6 +7,8 @@ namespace izi\prestashop\Hook\Admin;
 use izi\prestashop\Command\Config\UpdateCartRuleOptionsCommand;
 use izi\prestashop\Form\Type\CartRuleOptionsType;
 use izi\prestashop\Hook\HookInterface;
+use izi\prestashop\PromoCode\CartRuleOptionsRepository;
+use izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface;
 use izi\prestashop\Repository\CartRuleRepositoryInterface;
 use izi\prestashop\View\Templating\RendererInterface;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -22,7 +24,7 @@ final class DisplayBackOfficeHeader implements HookInterface
     private $context;
 
     /**
-     * @var CartRuleRepositoryInterface
+     * @var CartRuleOptionsRepositoryInterface
      */
     private $repository;
 
@@ -36,12 +38,28 @@ final class DisplayBackOfficeHeader implements HookInterface
      */
     private $renderer;
 
+    /**
+     * @var CartRuleRepositoryInterface|null
+     */
+    private $originalRepository;
+
+    /**
+     * @param CartRuleOptionsRepositoryInterface|CartRuleRepositoryInterface $repository
+     */
     public function __construct(\Context $context, CartRuleRepositoryInterface $repository, FormFactoryInterface $formFactory, RendererInterface $renderer)
     {
         $this->context = $context;
-        $this->repository = $repository;
         $this->formFactory = $formFactory;
         $this->renderer = $renderer;
+
+        if (!$repository instanceof CartRuleOptionsRepositoryInterface) {
+            @trigger_error(sprintf('Passing a $repository that does not implement "%s" to "%s()" is deprecated since 2.1.0.', CartRuleOptionsRepositoryInterface::class, __METHOD__), E_USER_DEPRECATED);
+
+            $this->repository = CartRuleOptionsRepository::create();
+            $this->originalRepository = $repository;
+        } else {
+            $this->repository = $repository;
+        }
     }
 
     public static function getHookName(): string
@@ -89,8 +107,21 @@ final class DisplayBackOfficeHeader implements HookInterface
             ];
         }
 
-        $isOmnibus = $this->repository->isOmnibus($cartRuleId);
+        $command = $this->createUpdateOptionsCommand($cartRuleId);
 
-        return new UpdateCartRuleOptionsCommand($cartRuleId, $isOmnibus);
+        if (null !== $this->originalRepository) {
+            $command->setOmnibus($this->originalRepository->isOmnibus($cartRuleId));
+        }
+
+        return $command;
+    }
+
+    private function createUpdateOptionsCommand(int $cartRuleId): UpdateCartRuleOptionsCommand
+    {
+        if (null === $options = $this->repository->find($cartRuleId)) {
+            return new UpdateCartRuleOptionsCommand($cartRuleId);
+        }
+
+        return UpdateCartRuleOptionsCommand::for($options);
     }
 }

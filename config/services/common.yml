@@ -143,6 +143,8 @@ services:
       - '@inpost.izi.serializer'
 
   izi\prestashop\Configuration\GeneralConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
+  izi\prestashop\Configuration\PromoCodesConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
+
   izi\prestashop\Configuration\GeneralConfiguration:
     class: izi\prestashop\Configuration\GeneralConfiguration
     public: false
@@ -533,13 +535,23 @@ services:
     arguments:
       - '@izi\prestashop\Database\Connection'
 
-  izi\prestashop\Repository\CartRuleRepositoryInterface: '@izi\prestashop\Repository\CartRuleRepository'
+  izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface: '@izi\prestashop\PromoCode\CartRuleOptionsRepository'
+  izi\prestashop\Repository\CartRuleRepositoryInterface: '@izi\prestashop\PromoCode\CartRuleOptionsRepository'
+
+  izi\prestashop\PromoCode\CartRuleOptionsRepository:
+    class: izi\prestashop\PromoCode\CartRuleOptionsRepository
+    public: false
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
   izi\prestashop\Repository\CartRuleRepository:
     class: izi\prestashop\Repository\CartRuleRepository
     public: false
     arguments:
       - '@izi\prestashop\Database\Connection'
       - '@izi\prestashop\Configuration\Adapter\Configuration'
+    deprecated: The "%service_id%" service is deprecated since version 2.1, use "izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface" instead.
 
   izi\prestashop\HotProduct\HotProductRepositoryInterface: '@izi\prestashop\HotProduct\HotProductRepository'
   izi\prestashop\HotProduct\HotProductRepository:
@@ -825,6 +837,8 @@ services:
       - '@izi\prestashop\Builder\Basket\DeliveryFactory'
       - '@izi\prestashop\Builder\Basket\ProductDeliveryFactory'
       - '@izi\prestashop\Product\Price\LowestPriceProviderInterface'
+      - '@izi\prestashop\PromoCode\PromoCodeProviderInterface'
+      - '@izi\prestashop\PromoCode\AvailablePromotionsProviderInterface'
 
   izi\prestashop\Cache\ConfigurationCache:
     class: izi\prestashop\Cache\ConfigurationCache
@@ -1013,6 +1027,23 @@ services:
     class: izi\prestashop\Product\Price\LowestPriceProviderInterface
     public: false
     factory: [ '@izi\prestashop\Product\Price\LowestPriceProviderFactory', create ]
+
+  izi\prestashop\PromoCode\PromoCodeProviderInterface: '@izi\prestashop\PromoCode\CartRulePromoCodeProvider'
+  izi\prestashop\PromoCode\CartRulePromoCodeProvider:
+    class: izi\prestashop\PromoCode\CartRulePromoCodeProvider
+    public: false
+    arguments:
+      - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
+
+  izi\prestashop\PromoCode\AvailablePromotionsProviderInterface: '@izi\prestashop\PromoCode\AvailableCartRulesProvider'
+  izi\prestashop\PromoCode\AvailableCartRulesProvider:
+    class: izi\prestashop\PromoCode\AvailableCartRulesProvider
+    public: false
+    arguments:
+      - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
+      - '@izi\prestashop\Configuration\PromoCodesConfigurationInterface'
+      - '@izi\prestashop\ObjectModel\Repository\CmsPageRepository'
+      - '@inpost.izi.context'
 
   inpost.izi.request_stack:
     class: Symfony\Component\HttpFoundation\RequestStack

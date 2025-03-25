@@ -13,7 +13,9 @@ use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\Module\ModuleRepository;
 use izi\prestashop\Product\Price\LowestPriceProviderFactory;
 use izi\prestashop\Product\Price\LowestPriceProviderInterface;
+use izi\prestashop\PromoCode\AvailablePromotionsProviderInterface;
 use izi\prestashop\PromoCode\CartRulePromoCodeProvider;
+use izi\prestashop\PromoCode\NullAvailablePromotionsProvider;
 use izi\prestashop\PromoCode\PromoCodeProviderInterface;
 use Psr\Clock\ClockInterface;
 use Psr\Log\NullLogger;
@@ -60,6 +62,11 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
      */
     private $promoCodeProvider;
 
+    /**
+     * @var AvailablePromotionsProviderInterface
+     */
+    private $availablePromotionsProvider;
+
     public function __construct(
         ClockInterface $clock,
         ContextManager $contextManager,
@@ -68,7 +75,8 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
         DeliveryFactory $deliveryFactory,
         ProductDeliveryFactory $deliveryRelatedProductFactory,
         ?LowestPriceProviderInterface $lowestPriceProvider = null,
-        ?PromoCodeProviderInterface $promoCodeProvider = null
+        ?PromoCodeProviderInterface $promoCodeProvider = null,
+        ?AvailablePromotionsProviderInterface $availablePromotionsProvider = null
     ) {
         $this->clock = $clock;
         $this->contextManager = $contextManager;
@@ -78,6 +86,7 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
         $this->deliveryRelatedProductFactory = $deliveryRelatedProductFactory;
         $this->lowestPriceProvider = $lowestPriceProvider ?? $this->createLowestPriceProvider();
         $this->promoCodeProvider = $promoCodeProvider ?? CartRulePromoCodeProvider::create();
+        $this->availablePromotionsProvider = $availablePromotionsProvider ?? new NullAvailablePromotionsProvider();
     }
 
     public function createRequestBuilder(BasketInterface $basket): RequestBuilder
@@ -93,7 +102,8 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
             $this->deliveryRelatedProductFactory,
             null,
             $this->lowestPriceProvider,
-            $this->promoCodeProvider
+            $this->promoCodeProvider,
+            $this->availablePromotionsProvider
         );
 
         return $builder->setExpirationDate($this->getExpirationDate());
@@ -112,7 +122,8 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
             $this->deliveryRelatedProductFactory,
             null,
             $this->lowestPriceProvider,
-            $this->promoCodeProvider
+            $this->promoCodeProvider,
+            $this->availablePromotionsProvider
         );
 
         return $builder->setExpirationDate($this->getExpirationDate());

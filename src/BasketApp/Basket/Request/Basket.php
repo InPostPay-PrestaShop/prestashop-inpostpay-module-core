@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\BasketApp\Basket\Request;
 
+use izi\prestashop\Common\Basket\AvailablePromotion;
 use izi\prestashop\Common\Basket\Consent;
 use izi\prestashop\Common\Basket\DeliveryOption;
 use izi\prestashop\Common\Basket\Product;
@@ -43,13 +44,19 @@ final class Basket implements \JsonSerializable
     private $consents;
 
     /**
+     * @var AvailablePromotion[]
+     */
+    private $promotions_available;
+
+    /**
      * @param DeliveryOption[] $delivery
      * @param PromoCode[] $promo_codes
      * @param Product[] $products
      * @param Product[] $related_products
      * @param Consent[] $consents
+     * @param AvailablePromotion[] $promotions_available
      */
-    public function __construct(Summary $summary, array $delivery, array $products, array $consents, array $promo_codes = [], array $related_products = [])
+    public function __construct(Summary $summary, array $delivery, array $products, array $consents, array $promo_codes = [], array $related_products = [], array $promotions_available = [])
     {
         $this->summary = $summary;
         $this->delivery = $delivery;
@@ -57,6 +64,7 @@ final class Basket implements \JsonSerializable
         $this->products = $products;
         $this->related_products = $related_products;
         $this->consents = $consents;
+        $this->promotions_available = $promotions_available;
     }
 
     public function getSummary(): Summary
@@ -102,6 +110,14 @@ final class Basket implements \JsonSerializable
     public function getConsents(): array
     {
         return $this->consents;
+    }
+
+    /**
+     * @return AvailablePromotion[]
+     */
+    public function getPromotionsAvailable(): array
+    {
+        return $this->promotions_available;
     }
 
     /**

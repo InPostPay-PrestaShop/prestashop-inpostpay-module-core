@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Model\Basket\Response;
 
+use izi\prestashop\Common\Basket\AvailablePromotion;
 use izi\prestashop\Common\Basket\Consent;
 use izi\prestashop\Common\Basket\DeliveryOption;
 use izi\prestashop\Common\Basket\Product;
@@ -21,12 +22,13 @@ final class IdentifiableBasket implements \JsonSerializable
 
     /**
      * @param DeliveryOption[] $delivery
+     * @param Consent[] $consents
      * @param PromoCode[] $promo_codes
      * @param Product[] $products
      * @param Product[] $related_products
-     * @param Consent[] $consents
+     * @param AvailablePromotion[] $promotions_available
      */
-    public function __construct(string $basket_id, Summary $summary, array $delivery, array $products, array $consents, array $promo_codes = [], array $related_products = [])
+    public function __construct(string $basket_id, Summary $summary, array $delivery, array $products, array $consents, array $promo_codes = [], array $related_products = [], array $promotions_available = [])
     {
         $this->basket_id = $basket_id;
         $this->summary = $summary;
@@ -35,6 +37,7 @@ final class IdentifiableBasket implements \JsonSerializable
         $this->products = $products;
         $this->related_products = $related_products;
         $this->consents = $consents;
+        $this->promotions_available = $promotions_available;
     }
 
     public function getId(): string

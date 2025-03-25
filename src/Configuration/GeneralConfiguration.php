@@ -9,9 +9,9 @@ use izi\prestashop\Hook\Front\DisplayProductActions;
 use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
 
 /**
- * @implements PersistentConfigurationInterface<GeneralConfigurationInterface>
+ * @implements PersistentConfigurationInterface<GeneralConfigurationInterface&PromoCodesConfigurationInterface>
  */
-final class GeneralConfiguration implements GeneralConfigurationInterface, PersistentConfigurationInterface
+final class GeneralConfiguration implements GeneralConfigurationInterface, PromoCodesConfigurationInterface, PersistentConfigurationInterface
 {
     private const ENABLE_FOR_EVERYONE = 'INPOST_PAY_show_izi';
     private const MAX_SUGGESTED_PRODUCTS = 'INPOST_PAY_related_count';
@@ -19,6 +19,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
     private const PRODUCT_CARD_DISPLAY_HOOK = 'INPOST_PAY_PRODUCT_CARD_DISPLAY_HOOK';
     private const CHECKOUT_BUTTON_DISPLAY_HOOK = 'INPOST_PAY_CHECKOUT_DISPLAY_HOOK';
     private const FULL_PAGE_CACHE_MODULE_IN_USE = 'INPOST_PAY_FULL_PAGE_CACHE_MODULE_IN_USE';
+    private const DEFAULT_PROMOTION_DETAILS_PAGE_ID = 'INPOST_PAY_DEFAULT_PROMO_DETAILS_CMS_ID';
 
     /**
      * @var ShopAwareConfigurationInterface
@@ -78,9 +79,19 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
         return (bool) $this->configuration->get(self::FULL_PAGE_CACHE_MODULE_IN_USE);
     }
 
+    public function getDefaultPromoDetailsPageId(?int $shopId = null): ?int
+    {
+        $value = $this->configuration->get(self::DEFAULT_PROMOTION_DETAILS_PAGE_ID, $shopId);
+
+        return null === $value ? null : (int) $value;
+    }
+
+    /**
+     * @return GeneralConfigurationInterface&PromoCodesConfigurationInterface
+     */
     public function copy(): GeneralConfigurationInterface
     {
-        return new DTO\GeneralConfiguration(
+        $configuration = new DTO\GeneralConfiguration(
             $this->isEnabledForEveryone(),
             $this->getMaxSuggestedProducts(),
             $this->getThankYouDisplayHook(),
@@ -88,6 +99,8 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
             $this->getCheckoutButtonDisplayHook(),
             $this->isFullPageCacheModuleInUse()
         );
+
+        return $configuration->setDefaultPromoDetailsPageId($this->getDefaultPromoDetailsPageId());
     }
 
     public function persist(GeneralConfigurationInterface $configuration): void
@@ -98,5 +111,9 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Persi
         $this->configuration->set(self::PRODUCT_CARD_DISPLAY_HOOK, $configuration->getProductCardDisplayHook());
         $this->configuration->set(self::CHECKOUT_BUTTON_DISPLAY_HOOK, $configuration->getCheckoutButtonDisplayHook());
         $this->configuration->set(self::FULL_PAGE_CACHE_MODULE_IN_USE, $configuration->isFullPageCacheModuleInUse());
+
+        if ($configuration instanceof PromoCodesConfigurationInterface) {
+            $this->configuration->set(self::DEFAULT_PROMOTION_DETAILS_PAGE_ID, $configuration->getDefaultPromoDetailsPageId());
+        }
     }
 }

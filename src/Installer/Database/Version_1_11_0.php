@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Installer\Database;
 
-use izi\prestashop\Repository\CartRuleRepository;
+use izi\prestashop\PromoCode\CartRuleOptionsRepository;
 
 class Version_1_11_0 extends AbstractMigration
 {
-    private const CART_RULE_ID_FK = CartRuleRepository::TABLE_NAME . '-cart_rule_id';
+    private const CART_RULE_ID_FK = CartRuleOptionsRepository::TABLE_NAME . '-cart_rule_id';
 
     public function getVersion(): string
     {
@@ -23,7 +23,7 @@ class Version_1_11_0 extends AbstractMigration
     private function createCartRuleOptionsTable(): void
     {
         $this->connection->executeStatement('
-            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . CartRuleRepository::TABLE_NAME . '` (
+            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . CartRuleOptionsRepository::TABLE_NAME . '` (
                 `id_cart_rule` INT(10) UNSIGNED NOT NULL,
                 `is_omnibus` TINYINT(1) NOT NULL DEFAULT 0,
                 PRIMARY KEY (`id_cart_rule`)
@@ -33,7 +33,7 @@ class Version_1_11_0 extends AbstractMigration
             COLLATE = utf8_general_ci
         ');
 
-        $this->addForeignKey(CartRuleRepository::TABLE_NAME, 'cart_rule', ['id_cart_rule'], ['id_cart_rule'], self::CART_RULE_ID_FK, [
+        $this->addForeignKey(CartRuleOptionsRepository::TABLE_NAME, 'cart_rule', ['id_cart_rule'], ['id_cart_rule'], self::CART_RULE_ID_FK, [
             'onDelete' => 'CASCADE',
         ]);
     }

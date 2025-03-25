@@ -25,10 +25,26 @@ class InPostIziUpdater_2_1_0
      */
     private $installer;
 
-    public function __construct(Module $module, DatabaseInstaller $installer)
+    /**
+     * @var Db
+     */
+    private $db;
+
+    public function __construct(Module $module, DatabaseInstaller $installer, Db $db)
     {
         $this->module = $module;
         $this->installer = $installer;
+        $this->db = $db;
+    }
+
+    public static function create(Module $module): self
+    {
+        $db = Db::getInstance();
+        $dbInstaller = new DatabaseInstaller(new Configuration($db), [
+            new Version_2_1_0(new Connection($db)),
+        ]);
+
+        return new self($module, $dbInstaller, $db);
     }
 
     public function upgrade(): bool
@@ -36,7 +52,8 @@ class InPostIziUpdater_2_1_0
         CacheClearer::getInstance()->clear();
         $this->installer->install($this->module);
 
-        return $this->registerHooks();
+        return $this->registerHooks()
+            && $this->renameCartRulesConfigKey();
     }
 
     private function registerHooks(): bool
@@ -56,6 +73,13 @@ class InPostIziUpdater_2_1_0
             ProductHooks\ActionUpdateQuantity::HOOK_NAME,
         ]);
     }
+
+    private function renameCartRulesConfigKey(): bool
+    {
+        return $this->db->update('configuration', [
+            'name' => 'INPOST_PAY_HAS_OMNIBUS_CART_RULES',
+        ], 'name = "INPOST_PAY_OMNIBUS_CART_RULE_ID"');
+    }
 }
 
 /**
@@ -63,10 +87,5 @@ class InPostIziUpdater_2_1_0
  */
 function upgrade_module_2_1_0(Module $module): bool
 {
-    $db = Db::getInstance();
-    $dbInstaller = new DatabaseInstaller(new Configuration($db), [
-        new Version_2_1_0(new Connection($db)),
-    ]);
-
-    return (new InPostIziUpdater_2_1_0($module, $dbInstaller))->upgrade();
+    return InPostIziUpdater_2_1_0::create($module)->upgrade();
 }
