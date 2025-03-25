@@ -47,6 +47,20 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\ActionObjectOrderUpdateBefore::HOOK_NAME => Common\ActionObjectOrderUpdateBefore::class,
             Common\ActionObjectOrderUpdateAfter::HOOK_NAME => Common\ActionObjectOrderUpdateAfter::class,
 
+            // products
+            Common\Product\ActionProductDeleteBefore::HOOK_NAME => Common\Product\ActionProductDeleteBefore::class,
+            Common\Product\ActionProductDeleteAfter::HOOK_NAME => Common\Product\ActionProductDeleteAfter::class,
+            Common\Product\ActionProductUpdateAfter::HOOK_NAME => Common\Product\ActionProductUpdateAfter::class,
+            Common\Product\ActionCombinationDeleteBefore::HOOK_NAME => Common\Product\ActionCombinationDeleteBefore::class,
+            Common\Product\ActionCombinationDeleteAfter::HOOK_NAME => Common\Product\ActionCombinationDeleteAfter::class,
+            Common\Product\ActionCombinationUpdateAfter::HOOK_NAME => Common\Product\ActionCombinationUpdateAfter::class,
+            Common\Product\ActionImageAddAfter::HOOK_NAME => Common\Product\ActionImageAddAfter::class,
+            Common\Product\ActionImageDeleteAfter::HOOK_NAME => Common\Product\ActionImageDeleteAfter::class,
+            Common\Product\ActionSpecificPriceAddAfter::HOOK_NAME => Common\Product\ActionSpecificPriceAddAfter::class,
+            Common\Product\ActionSpecificPriceUpdateAfter::HOOK_NAME => Common\Product\ActionSpecificPriceUpdateAfter::class,
+            Common\Product\ActionSpecificPriceDeleteAfter::HOOK_NAME => Common\Product\ActionSpecificPriceDeleteAfter::class,
+            Common\Product\ActionUpdateQuantity::HOOK_NAME => Common\Product\ActionUpdateQuantity::class,
+
             Front\ActionCartControllerAjaxUpdateResponse::HOOK_NAME => '?' . Front\ActionCartControllerAjaxUpdateResponse::class,
             Front\ActionFrontControllerSetMedia::HOOK_NAME => '?' . Front\ActionFrontControllerSetMedia::class,
             Front\DisplayOrderConfirmation::HOOK_NAME => '?' . Front\DisplayOrderConfirmation::class,

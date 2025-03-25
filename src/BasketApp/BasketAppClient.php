@@ -11,14 +11,20 @@ use izi\prestashop\BasketApp\Basket\Response\UpdateBasketResponse;
 use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
 use izi\prestashop\BasketApp\Payment\Response\AvailablePaymentOptions;
+use izi\prestashop\BasketApp\Product\ProductsApiClientInterface;
+use izi\prestashop\BasketApp\Product\Request\CreateProductsRequest;
+use izi\prestashop\BasketApp\Product\Response\CreateProductsResponse;
+use izi\prestashop\BasketApp\Product\Response\Product as ResponseProduct;
 use izi\prestashop\BasketApp\Signature\Response\SigningKey;
 use izi\prestashop\BasketApp\Signature\Response\SigningKeys;
 use izi\prestashop\Common\Error\Error;
+use izi\prestashop\Common\HotProduct\Product;
 use izi\prestashop\Environment\ProductionEnvironment;
 use izi\prestashop\Http\Exception\ClientException;
 use izi\prestashop\Http\Exception\RedirectionException;
 use izi\prestashop\Http\Exception\ServerException;
 use izi\prestashop\Http\Util\UriResolver;
+use izi\prestashop\Serializer\Normalizer\BasketAppPaginationPageDenormalizer;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Http\Message\RequestInterface;
@@ -27,7 +33,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-final class BasketAppClient implements BasketAppClientInterface
+final class BasketAppClient implements BasketAppClientInterface, ProductsApiClientInterface
 {
     /**
      * @var ClientInterface
@@ -134,6 +140,82 @@ final class BasketAppClient implements BasketAppClientInterface
         return $this->deserialize($response, AvailablePaymentOptions::class);
     }
 
+    public function createProducts(CreateProductsRequest $products): CreateProductsResponse
+    {
+        $request = $this->createRequest('POST', '/v1/izi/products', $products);
+        $response = $this->sendRequest($request, 201);
+
+        return $this->deserialize($response, CreateProductsResponse::class);
+    }
+
+    /**
+     * @param string[] $productIds
+     *
+     * @return PaginationPage<ResponseProduct>
+     */
+    public function getProductsPage(array $productIds = [], ?int $pageSize = null, ?int $pageIndex = null): PaginationPage
+    {
+        $params = [];
+
+        if (null !== $pageIndex) {
+            $params['page_index'] = $pageIndex;
+        }
+
+        if (null !== $pageSize) {
+            $params['page_size'] = $pageSize;
+        }
+
+        if ([] !== $productIds) {
+            $params['product_ids'] = implode(',', $productIds);
+        }
+
+        $uri = '/v1/izi/products';
+        if ([] !== $params) {
+            $uri .= '?' . self::buildQuery($params);
+        }
+
+        $request = $this->createRequest('GET', $uri);
+        $response = $this->sendRequest($request);
+
+        return $this->deserialize($response, PaginationPage::class, [
+            BasketAppPaginationPageDenormalizer::ITEM_TYPE_KEY => ResponseProduct::class,
+        ]);
+    }
+
+    /**
+     * @param string[] $productIds
+     *
+     * @return \Generator<ResponseProduct>
+     */
+    public function getProducts(array $productIds = [], ?int $pageSize = null): \Traversable
+    {
+        $pageIndex = 0;
+
+        do {
+            $page = $this->getProductsPage($productIds, $pageSize, $pageIndex++);
+            $pageSize = $page->getPageSize();
+            $totalCount = $page->getTotalCount();
+
+            foreach ($page as $product) {
+                yield $product;
+            }
+        } while ($totalCount > $pageSize * $pageIndex);
+    }
+
+    public function updateProduct(string $productId, Product $product): ResponseProduct
+    {
+        $request = $this->createRequest('PUT', sprintf('/v1/izi/product/%s', $productId), $product);
+        $response = $this->sendRequest($request);
+
+        return $this->deserialize($response, ResponseProduct::class);
+    }
+
+    public function deleteProduct(string $productId): void
+    {
+        $request = $this->createRequest('DELETE', sprintf('/v1/izi/product/%s', $productId));
+        $this->sendRequest($request, 204);
+    }
+
     private function createRequest(string $method, string $uri, $payload = null): RequestInterface
     {
         $uri = UriResolver::resolve($uri, $this->baseUri);
@@ -181,11 +263,9 @@ final class BasketAppClient implements BasketAppClientInterface
      *
      * @return T
      */
-    private function deserialize(ResponseInterface $response, string $class)
+    private function deserialize(ResponseInterface $response, string $class, array $context = [])
     {
-        return $this->serializer->deserialize((string) $response->getBody(), $class, 'json', [
-            'datetime_format' => self::DATETIME_FORMAT,
-        ]);
+        return $this->serializer->deserialize((string) $response->getBody(), $class, 'json', $context);
     }
 
     private function handleUnsuccessfulResponse(RequestInterface $request, ResponseInterface $response): void

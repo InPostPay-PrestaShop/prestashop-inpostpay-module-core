@@ -198,11 +198,11 @@ final class ConfigurationCache implements CacheInterface
     {
         $expiry = $this->getExpiry($ttl);
 
-        if (is_scalar($value)) {
-            $class = null;
-        } else {
+        if (is_object($value)) {
             $class = get_class($value);
             $value = $this->serializeValue($value);
+        } else {
+            $class = null;
         }
 
         return [

@@ -28,12 +28,14 @@ class GuzzleClientFactory implements ClientFactoryInterface
 
         if (is_subclass_of(Client::class, ClientInterface::class)) {
             return new Client([
+                'connect_timeout' => 3.,
                 'timeout' => $this->timeout,
             ]);
         }
 
         $client = new Client([
             'defaults' => [
+                'connect_timeout' => 3.,
                 'timeout' => $this->timeout,
             ],
         ]);

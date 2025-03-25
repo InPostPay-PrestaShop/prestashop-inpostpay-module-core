@@ -1,0 +1,20 @@
+{% use '@PrestaShop/Admin/TwigTemplateForm/bootstrap_4_horizontal_layout.html.twig' %}
+
+{%- block form_widget_simple -%}
+  {%- set type = type|default('text') -%}
+  <input type="{{ type }}" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+  {{ include("@Twig/form_max_length.html.twig", {"attr": attr}, ignore_missing = true) }}
+{%- endblock form_widget_simple -%}
+
+{% block date_picker_widget %}
+  {% spaceless %}
+    <div class="input-group">
+      <input type="text" class="form-control js-hot-products-datepicker-input" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+      <div class="input-group-append input-group-addon">
+        <div class="input-group-text">
+          <i class="material-icons">date_range</i>
+        </div>
+      </div>
+    </div>
+  {% endspaceless %}
+{% endblock date_picker_widget %}

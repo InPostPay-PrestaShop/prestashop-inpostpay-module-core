@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Handler\Basket;
 
+use izi\prestashop\Cart\Util\ProductHelper;
 use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Entities\BasketInterface;
+use izi\prestashop\MerchantApi\Exception\MalformedRequestException;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
+use izi\prestashop\Product\ReferenceId;
 use Psr\Log\LoggerInterface;
 
 final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
@@ -61,7 +64,13 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
         }
 
         foreach ($event->getQuantityEventData() as $data) {
-            [$productId, $combinationId, $customizationId] = array_map('intval', explode('.', $data->getProductId()));
+            if (null === $referenceId = ReferenceId::fromString($data->getProductId())) {
+                throw MalformedRequestException::create();
+            }
+
+            $productId = $referenceId->getProductId();
+            $combinationId = (int) $referenceId->getCombinationId();
+            $customizationId = (int) $referenceId->getCustomizationId();
             $quantity = (int) $data->getQuantity()->getQuantity();
 
             if (null !== $error = $this->updateCartQuantity($cart, $productId, $combinationId, $customizationId, $quantity)) {
@@ -72,9 +81,10 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
         return null;
     }
 
+    /* @TODO: refactor to use {@see IncrementCartQuantityHandler} */
     private function updateCartQuantity(\Cart $cart, int $productId, int $combinationId, int $customizationId, int $quantity): ?string
     {
-        $currentQuantity = $this->getCurrentQuantity($cart, $productId, $combinationId, $customizationId);
+        $currentQuantity = ProductHelper::getCartQuantity($cart, $productId, $combinationId, $customizationId);
 
         if (0 === $currentQuantity) {
             return 0 >= $quantity ? null : $this->module->l('Product is no longer in your cart.', self::TRANSLATION_SOURCE);
@@ -127,21 +137,6 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
         }
 
         return null;
-    }
-
-    private function getCurrentQuantity(\Cart $cart, int $productId, int $combinationId, int $customizationId): int
-    {
-        foreach ($cart->getProducts() as $product) {
-            if (
-                $productId === (int) $product['id_product']
-                && $combinationId === (int) $product['id_product_attribute']
-                && $customizationId === (int) $product['id_customization']
-            ) {
-                return (int) $product['cart_quantity'];
-            }
-        }
-
-        return 0;
     }
 
     private function deleteProduct(\Cart $cart, int $productId, int $combinationId, int $customizationId): ?string

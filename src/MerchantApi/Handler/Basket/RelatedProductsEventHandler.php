@@ -4,18 +4,20 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Handler\Basket;
 
+use izi\prestashop\Cart\Exception\ProductAlreadyInCartException;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\MerchantApi\Command\Basket\AddProductToCartCommand;
 use izi\prestashop\MerchantApi\Exception\CannotAddProductException;
-use izi\prestashop\MerchantApi\Exception\ProductAlreadyInCartException;
+use izi\prestashop\MerchantApi\Exception\MalformedRequestException;
 use izi\prestashop\MerchantApi\Exception\ProductNotFoundException;
 use izi\prestashop\MerchantApi\Exception\ProductOutOfStockException;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
 use izi\prestashop\MerchantApi\Model\Basket\Request\RelatedProductData;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
+use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Translation\LegacyTranslator;
 use Psr\Log\LoggerInterface;
 
@@ -95,7 +97,18 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
 
     private function addRelatedProduct(\Cart $cart, RelatedProductData $relatedProduct): void
     {
-        [$productId, $combinationId] = array_map('intval', explode('.', $relatedProduct->getProductId()));
+        $referenceId = ReferenceId::fromString($relatedProduct->getProductId());
+
+        if (null === $referenceId) {
+            throw ProductNotFoundException::create();
+        }
+
+        if ($referenceId->hasCustomization()) {
+            throw new MalformedRequestException('Adding customizable products is not supported for related products.');
+        }
+
+        $productId = $referenceId->getProductId();
+        $combinationId = $referenceId->getCombinationId();
         $quantity = (int) $relatedProduct->getQuantity()->getQuantity();
 
         $this->bus->handle(new AddProductToCartCommand($cart, $productId, $combinationId, $quantity));
@@ -108,7 +121,6 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
         $handler = new AddProductToCartHandler(
             $context,
             $manager->getRepository(\Product::class),
-            $manager->getRepository(\Combination::class),
             new LegacyTranslator($module->name),
             $logger
         );

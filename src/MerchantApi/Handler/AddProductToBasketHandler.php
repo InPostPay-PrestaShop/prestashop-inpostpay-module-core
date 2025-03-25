@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\MerchantApi\Handler;
 
 use izi\prestashop\Builder\Basket\BasketBuilderFactoryInterface;
+use izi\prestashop\Cart\Exception\ProductAlreadyInCartException;
+use izi\prestashop\Cart\Util\ProductHelper;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\ContextManager;
 use izi\prestashop\Entities\BasketSession;
@@ -15,12 +17,16 @@ use izi\prestashop\Handler\CommandHandlerTrait;
 use izi\prestashop\MerchantApi\Command\AddProductToBasketCommand;
 use izi\prestashop\MerchantApi\Command\Basket\AddProductToCartCommand;
 use izi\prestashop\MerchantApi\Command\Basket\CreateCartCommand;
+use izi\prestashop\MerchantApi\Command\Basket\IncrementCartQuantityCommand;
 use izi\prestashop\MerchantApi\Event\CartUpdatedEvent;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
+use izi\prestashop\MerchantApi\Exception\MalformedRequestException;
 use izi\prestashop\MerchantApi\Exception\OrderExistsException;
+use izi\prestashop\MerchantApi\Exception\ProductNotFoundException;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
 use izi\prestashop\MerchantApi\Model\Basket\Response\IdentifiableBasket;
+use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 
 final class AddProductToBasketHandler implements AddProductToBasketHandlerInterface
@@ -66,19 +72,38 @@ final class AddProductToBasketHandler implements AddProductToBasketHandlerInterf
         $basketId = $command->getRequest()->getBasketId();
         $session = $this->findOrCreateSession($basketId);
 
-        if (!str_contains($productId = $command->getProductId(), '.')) {
-            $productId = (int) $productId;
-            $combinationId = null;
-        } else {
-            [$productId, $combinationId] = array_map('intval', explode('.', $productId));
+        $referenceId = ReferenceId::fromString($command->getProductId());
+
+        if (null === $referenceId) {
+            throw ProductNotFoundException::create();
         }
 
+        if ($referenceId->hasCustomization()) {
+            throw new MalformedRequestException('Adding customizable products is not supported.');
+        }
+
+        $productId = $referenceId->getProductId();
+        $combinationId = $referenceId->getCombinationId();
+
         $cart = $session->getBasket()->getEntity();
+
+        if (ProductHelper::isInCart($cart, $productId, (int) $combinationId)) {
+            $command = new IncrementCartQuantityCommand($cart, $productId, (int) $combinationId);
+        } else {
+            $command = new AddProductToCartCommand($cart, $productId, $combinationId);
+        }
 
         try {
             $this->contextManager->changeContext($cart);
 
-            $this->bus->handle(new AddProductToCartCommand($cart, $productId, $combinationId));
+            try {
+                $this->bus->handle($command);
+            } catch (ProductAlreadyInCartException $e) {
+                assert($command instanceof AddProductToCartCommand && null === $combinationId);
+                $cartProduct = $e->getProduct();
+                $this->bus->handle(new IncrementCartQuantityCommand($cart, $productId, (int) $cartProduct['id_product_attribute']));
+            }
+
             $this->dispatcher->dispatch(new CartUpdatedEvent($cart));
             $this->updateSession($session);
 
@@ -129,18 +154,9 @@ final class AddProductToBasketHandler implements AddProductToBasketHandlerInterf
 
     private function buildResponse(BasketSessionInterface $session): IdentifiableBasket
     {
-        $basket = $this->basketBuilderFactory
+        return $this->basketBuilderFactory
             ->createResponseBuilder($session->getBasket())
-            ->build();
-
-        return new IdentifiableBasket(
-            $session->getBasketId(),
-            $basket->getSummary(),
-            $basket->getDelivery(),
-            $basket->getProducts(),
-            $basket->getConsents(),
-            $basket->getPromoCodes(),
-            $basket->getRelatedProducts()
-        );
+            ->build()
+            ->asIdentifiable($session->getBasketId());
     }
 }

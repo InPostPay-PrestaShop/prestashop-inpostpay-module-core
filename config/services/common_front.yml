@@ -189,6 +189,13 @@ services:
       - '@inpost.izi.serializer'
       - '@izi\prestashop\CommandBus'
 
+  izi\prestashop\Controller\Api\ProductController:
+    class: izi\prestashop\Controller\Api\ProductController
+    public: true
+    arguments:
+      - '@inpost.izi.serializer'
+      - '@izi\prestashop\CommandBus'
+
   izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface: '@izi\prestashop\Handler\GetBasketBindingKeyHandler'
   izi\prestashop\Handler\GetBasketBindingKeyHandler:
     class: izi\prestashop\Handler\GetBasketBindingKeyHandler
@@ -248,6 +255,19 @@ services:
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler'
       - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
+
+  izi\prestashop\MerchantApi\Handler\GetProductsHandlerInterface: '@izi\prestashop\MerchantApi\Handler\GetProductsHandler'
+  izi\prestashop\MerchantApi\Handler\GetProductsHandler:
+    class: izi\prestashop\MerchantApi\Handler\GetProductsHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\HotProduct\HotProductDataMapperInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+      - '@izi\prestashop\Cache\ConfigurationCache'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
 
   izi\prestashop\MerchantApi\Handler\AddProductToBasketHandlerInterface: '@izi\prestashop\MerchantApi\Handler\AddProductToBasketHandler'
   izi\prestashop\MerchantApi\Handler\AddProductToBasketHandler:
@@ -325,7 +345,17 @@ services:
     arguments:
       - '@inpost.izi.context'
       - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
-      - '@inpost.izi.object_model.combination_repository'
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandlerInterface: '@izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandler'
+  izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandler:
+    class: izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@inpost.izi.general_logger'
 

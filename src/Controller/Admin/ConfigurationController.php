@@ -14,11 +14,9 @@ use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Configuration\AdvancedConfiguration;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
-use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
-use izi\prestashop\Configuration\Initializer\ConfigurationInitializerInterface;
 use izi\prestashop\Configuration\ShippingConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Form\Type\AdvancedConfigurationType;
@@ -26,7 +24,6 @@ use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
 use izi\prestashop\Form\Type\GuiConfigurationType;
 use izi\prestashop\Form\Type\ShippingConfigurationType;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,44 +34,12 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * @Route(path="config")
  */
-final class ConfigurationController extends AbstractController
+final class ConfigurationController extends AbstractConfigurationController
 {
-    private const TRANSLATION_SOURCE = 'configurationcontroller';
-
     /**
-     * @var LegacyTranslator
+     * @internal
      */
-    private $translator;
-
-    /**
-     * @var \Context
-     */
-    private $context;
-
-    /**
-     * @var ApiConfigurationInterface
-     */
-    private $apiConfiguration;
-
-    /**
-     * @var bool
-     */
-    private $debug;
-
-    /**
-     * @param iterable<ConfigurationInitializerInterface> $configInitializers
-     */
-    public function __construct(LegacyTranslator $translator, \Context $context, iterable $configInitializers, ApiConfigurationInterface $apiConfiguration, bool $debug = false)
-    {
-        $this->translator = $translator;
-        $this->context = $context;
-        $this->apiConfiguration = $apiConfiguration;
-        $this->debug = $debug;
-
-        foreach ($configInitializers as $initializer) {
-            $initializer->init();
-        }
-    }
+    public const TRANSLATION_SOURCE = 'configurationcontroller';
 
     /**
      * @Route(path="/general", name="admin_inpost_izi_config_general", methods={"GET", "POST"})
@@ -93,9 +58,9 @@ final class ConfigurationController extends AbstractController
                 $bus->handle($form->getData());
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('admin_inpost_izi_config_general', $request->query->all());
-            } catch (\Exception $e) {
-                $this->handleException($e);
+                return $this->redirectToRoute('admin_inpost_izi_config_general');
+            } catch (\Throwable $e) {
+                $this->handleError($e, $request);
             }
         }
 
@@ -103,7 +68,6 @@ final class ConfigurationController extends AbstractController
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('Configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
-            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
         ]);
     }
 
@@ -124,9 +88,9 @@ final class ConfigurationController extends AbstractController
                 $bus->handle($form->getData());
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('admin_inpost_izi_config_consents', $request->query->all());
-            } catch (\Exception $e) {
-                $this->handleException($e);
+                return $this->redirectToRoute('admin_inpost_izi_config_consents');
+            } catch (\Throwable $e) {
+                $this->handleError($e, $request);
             }
         }
 
@@ -134,7 +98,6 @@ final class ConfigurationController extends AbstractController
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('Consents', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
-            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
         ]);
     }
 
@@ -157,9 +120,9 @@ final class ConfigurationController extends AbstractController
                 $bus->handle($command);
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('admin_inpost_izi_config_gui', $request->query->all());
-            } catch (\Exception $e) {
-                $this->handleException($e);
+                return $this->redirectToRoute('admin_inpost_izi_config_gui');
+            } catch (\Throwable $e) {
+                $this->handleError($e, $request);
             }
         }
 
@@ -167,7 +130,6 @@ final class ConfigurationController extends AbstractController
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('GUI configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
-            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
             'widget_js_uri' => $this->apiConfiguration->getEnvironment()->getWidgetJavaScriptUri(),
             'merchant_client_id' => $this->apiConfiguration->getMerchantClientId(),
         ]);
@@ -192,9 +154,9 @@ final class ConfigurationController extends AbstractController
                 $bus->handle($command);
                 $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
 
-                return $this->redirectToRoute('admin_inpost_izi_config_shipping', $request->query->all());
-            } catch (\Exception $e) {
-                $this->handleException($e);
+                return $this->redirectToRoute('admin_inpost_izi_config_shipping');
+            } catch (\Throwable $e) {
+                $this->handleError($e, $request);
             }
         }
 
@@ -202,7 +164,6 @@ final class ConfigurationController extends AbstractController
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('Shipping configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
-            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
         ]);
     }
 
@@ -224,7 +185,6 @@ final class ConfigurationController extends AbstractController
             'headerTabContent' => $this->renderNav($request),
             'form' => $form->createView(),
             'status' => $bus->handle(new CheckStatusCommand()),
-            'is_legacy_admin_page' => $this->isLegacyAdminPage(),
         ]);
     }
 
@@ -235,7 +195,7 @@ final class ConfigurationController extends AbstractController
      */
     public function supportSave(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
-        if (!$this->checkAccess(false)) {
+        if (!$this->isGranted(self::getConfigAuthorizationRole())) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Access Denied.',
@@ -294,75 +254,5 @@ final class ConfigurationController extends AbstractController
         ]);
 
         return $response;
-    }
-
-    private function renderNav(Request $request): string
-    {
-        $pages = [
-            'general' => [
-                'route' => 'admin_inpost_izi_config_general',
-                'title' => $this->translator->l('Configuration', self::TRANSLATION_SOURCE),
-            ],
-            'consents' => [
-                'route' => 'admin_inpost_izi_config_consents',
-                'title' => $this->translator->l('Consents', self::TRANSLATION_SOURCE),
-            ],
-            'shipping' => [
-                'route' => 'admin_inpost_izi_config_shipping',
-                'title' => $this->translator->l('Shipping configuration', self::TRANSLATION_SOURCE),
-            ],
-            'gui' => [
-                'route' => 'admin_inpost_izi_config_gui',
-                'title' => $this->translator->l('GUI configuration', self::TRANSLATION_SOURCE),
-            ],
-            'support' => [
-                'route' => 'admin_inpost_izi_config_support',
-                'title' => $this->translator->l('Support', self::TRANSLATION_SOURCE),
-            ],
-        ];
-
-        return $this->renderView('@Modules/inpostizi/views/templates/admin/config/nav.html.twig', [
-            'nav_items' => array_map(function (array $page) use ($request): array {
-                return [
-                    'url' => $this->generateUrl($page['route'], $request->query->all()),
-                    'label' => $page['title'],
-                    'active' => $page['route'] === $request->attributes->get('_route'),
-                ];
-            }, $pages),
-        ]);
-    }
-
-    private function isLegacyAdminPage(): bool
-    {
-        return version_compare(_PS_VERSION_, '1.7.4.0', '<');
-    }
-
-    private function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
-    {
-        return $this->context->getTranslator()->trans($id, $parameters, $domain, $locale);
-    }
-
-    private function handleException(\Exception $e): void
-    {
-        if ($this->debug) {
-            throw $e;
-        }
-
-        $this->addFlash('error', $this->trans('An unexpected error occurred. [%type% code %code%]', [
-            '%type%' => get_class($e),
-            '%code%' => $e->getCode(),
-        ], 'Admin.Notifications.Error'));
-    }
-
-    private function checkAccess(bool $throw = true): bool
-    {
-        $moduleId = \Module::getModuleIdByName('inpostizi');
-        $hasAccess = \Module::getPermissionStatic($moduleId, 'configure');
-
-        if ($throw && !$hasAccess) {
-            throw $this->createAccessDeniedException();
-        }
-
-        return $hasAccess;
     }
 }
