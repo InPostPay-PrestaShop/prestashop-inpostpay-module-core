@@ -55,4 +55,44 @@ class QueryBuilder extends \DbQuery
     {
         return new Query($this->manager, $this->class, parent::build(), $this->languageId);
     }
+
+    /**
+     * @param string|string[] $select
+     *
+     * @return $this
+     */
+    public function setSelect($select): self
+    {
+        $this->query['select'] = [];
+
+        if (!is_array($select)) {
+            $select = [$select];
+        }
+
+        foreach ($select as $fields) {
+            $this->select($fields);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string|string[] $orderBy
+     *
+     * @return $this
+     */
+    public function setOrderBy($orderBy): self
+    {
+        $this->query['order'] = [];
+
+        if (!is_array($orderBy)) {
+            $orderBy = [$orderBy];
+        }
+
+        foreach ($orderBy as $fields) {
+            $this->orderBy($fields);
+        }
+
+        return $this;
+    }
 }

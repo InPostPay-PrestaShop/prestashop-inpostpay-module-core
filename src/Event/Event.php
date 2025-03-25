@@ -7,12 +7,13 @@ namespace izi\prestashop\Event;
 use Symfony\Component\EventDispatcher\Event as LegacyEvent;
 use Symfony\Contracts\EventDispatcher\Event as BaseEvent;
 
-if (class_exists(Event::class)) {
-    class Event extends BaseEvent
+if (class_exists(LegacyEvent::class)) {
+    class Event extends LegacyEvent
     {
     }
+
 } else {
-    class Event extends LegacyEvent
+    class Event extends BaseEvent
     {
     }
 }

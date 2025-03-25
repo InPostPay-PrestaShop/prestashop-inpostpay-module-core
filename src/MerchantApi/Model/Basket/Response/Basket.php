@@ -10,37 +10,9 @@ use izi\prestashop\Common\Basket\Product;
 use izi\prestashop\Common\Basket\Summary;
 use izi\prestashop\Common\PromoCode;
 
-class Basket implements \JsonSerializable
+final class Basket implements \JsonSerializable
 {
-    /**
-     * @var Summary
-     */
-    private $summary;
-
-    /**
-     * @var DeliveryOption[]
-     */
-    private $delivery;
-
-    /**
-     * @var PromoCode[]
-     */
-    private $promo_codes;
-
-    /**
-     * @var Product[]
-     */
-    private $products;
-
-    /**
-     * @var Product[]
-     */
-    private $related_products;
-
-    /**
-     * @var Consent[]
-     */
-    private $consents;
+    use BasketTrait;
 
     /**
      * @param DeliveryOption[] $delivery
@@ -59,41 +31,16 @@ class Basket implements \JsonSerializable
         $this->consents = $consents;
     }
 
-    public function getSummary(): Summary
+    public function asIdentifiable(string $id): IdentifiableBasket
     {
-        return $this->summary;
-    }
-
-    /**
-     * @return DeliveryOption[]
-     */
-    public function getDelivery(): array
-    {
-        return $this->delivery;
-    }
-
-    public function getPromoCodes(): array
-    {
-        return $this->promo_codes;
-    }
-
-    public function getProducts(): array
-    {
-        return $this->products;
-    }
-
-    public function getRelatedProducts(): array
-    {
-        return $this->related_products;
-    }
-
-    public function getConsents(): array
-    {
-        return $this->consents;
-    }
-
-    public function jsonSerialize(): array
-    {
-        return get_object_vars($this);
+        return new IdentifiableBasket(
+            $id,
+            $this->summary,
+            $this->delivery,
+            $this->products,
+            $this->consents,
+            $this->promo_codes,
+            $this->related_products
+        );
     }
 }

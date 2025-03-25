@@ -11,6 +11,9 @@ parameters:
       remove_used_context_fields: true
     include_stacktraces: true
 
+  inpost.izi.basket_app_logger_options:
+    max_response_body_size: 1000
+
 services:
   inpost.izi.module:
     class: InPostIzi
@@ -79,6 +82,7 @@ services:
     arguments:
       - '@inpost.izi.http_client.basket_app.logging.inner'
       - '@inpost.izi.basket_app_logger'
+      - '%inpost.izi.basket_app_logger_options%'
 
   inpost.izi.http_client.basket_app.module_version_info_providing:
     class: izi\prestashop\Http\Client\ModuleVersionInfoProvidingClient
@@ -106,6 +110,7 @@ services:
   izi\prestashop\BasketApp\Order\OrdersApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
   izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
   izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+  izi\prestashop\BasketApp\Product\ProductsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
 
   izi\prestashop\Order\Address\AddressDataMapper:
     class: izi\prestashop\Order\Address\AddressDataMapper
@@ -405,6 +410,15 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+
+  izi\prestashop\ObjectModel\Repository\CombinationRepository:
+    class: izi\prestashop\ObjectModel\Repository\CombinationRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Combination }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   izi\prestashop\ObjectModel\Repository\ConfigurationRepository:
     class: izi\prestashop\ObjectModel\Repository\ConfigurationRepository
     public: false
@@ -437,6 +451,15 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  inpost.izi.object_model.language_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Language }
+    arguments:
+      - Language
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   inpost.izi.object_model.order_repository:
     class: izi\prestashop\ObjectModel\Repository\ObjectRepository
     public: false
@@ -464,6 +487,15 @@ services:
       - Cart
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  inpost.izi.object_model.country_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Country }
+    arguments:
+      - Country
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   inpost.izi.object_model.address_repository:
     class: izi\prestashop\ObjectModel\Repository\ObjectRepository
     public: false
@@ -473,13 +505,13 @@ services:
       - Address
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
-  inpost.izi.object_model.combination_repository:
+  inpost.izi.object_model.shop_repository:
     class: izi\prestashop\ObjectModel\Repository\ObjectRepository
     public: false
     tags:
-      - { name: inpost.izi.model_repository, model_class: Combination }
+      - { name: inpost.izi.model_repository, model_class: Shop }
     arguments:
-      - Combination
+      - Shop
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
   izi\prestashop\Repository\OrderDataRepositoryInterface: '@izi\prestashop\Repository\BasketSessionRepository'
@@ -508,6 +540,14 @@ services:
     arguments:
       - '@izi\prestashop\Database\Connection'
       - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  izi\prestashop\HotProduct\HotProductRepositoryInterface: '@izi\prestashop\HotProduct\HotProductRepository'
+  izi\prestashop\HotProduct\HotProductRepository:
+    class: izi\prestashop\HotProduct\HotProductRepository
+    public: false
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+      - '@inpost.izi.clock'
 
   izi\prestashop\Hook\Common\ActionCartDeleteBefore:
     class: izi\prestashop\Hook\Common\ActionCartDeleteBefore
@@ -595,6 +635,104 @@ services:
           - { name: inpost.izi.hook }
       arguments:
           - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  # Product hooks
+  izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore:
+    class: izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore
+    public: false
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+    tags:
+      - { name: inpost.izi.hook }
+
+  izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter
+    public: false
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+    tags:
+      - { name: inpost.izi.hook }
+
+  izi\prestashop\Hook\Common\Product\ActionProductUpdateAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionProductUpdateAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionCombinationDeleteBefore:
+    class: izi\prestashop\Hook\Common\Product\ActionCombinationDeleteBefore
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionCombinationDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionCombinationDeleteAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionCombinationUpdateAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionCombinationUpdateAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionImageAddAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionImageAddAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionImageDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionImageDeleteAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionSpecificPriceAddAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionSpecificPriceAddAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionSpecificPriceUpdateAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionSpecificPriceUpdateAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionSpecificPriceDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionSpecificPriceDeleteAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionUpdateQuantity:
+    class: izi\prestashop\Hook\Common\Product\ActionUpdateQuantity
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+      - '@inpost.izi.context'
 
   izi\prestashop\EventListener\ShipmentListener:
     class: izi\prestashop\EventListener\ShipmentListener
@@ -903,3 +1041,72 @@ services:
   izi\prestashop\Environment\EnvironmentFactory:
     class: izi\prestashop\Environment\EnvironmentFactory
     public: false
+
+  izi\prestashop\HotProduct\HotProductDataMapperInterface: '@izi\prestashop\HotProduct\HotProductDataMapper'
+  izi\prestashop\HotProduct\HotProductDataMapper:
+    class: izi\prestashop\HotProduct\HotProductDataMapper
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@inpost.izi.object_model.language_repository'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
+      - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
+      - '@izi\prestashop\Product\Image\ImageUrlsProviderInterface'
+
+  izi\prestashop\Product\Price\PriceCalculatorInterface: '@izi\prestashop\Product\Price\PriceCalculator'
+  izi\prestashop\Product\Price\PriceCalculator:
+    class: izi\prestashop\Product\Price\PriceCalculator
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
+      - '@inpost.izi.object_model.country_repository'
+
+  izi\prestashop\Product\Image\ImageUrlsProviderInterface: '@izi\prestashop\Product\Image\ImageUrlsProvider'
+  izi\prestashop\Product\Image\ImageUrlsProvider:
+    class: izi\prestashop\Product\Image\ImageUrlsProvider
+    public: false
+    arguments:
+      - '@inpost.izi.product.image_retriever'
+      - '@izi\prestashop\Configuration\ProductConfigurationInterface'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\Repository\ImageTypeRepository'
+
+  inpost.izi.product.image_retriever:
+    class: PrestaShop\PrestaShop\Adapter\Image\ImageRetriever
+    public: false
+    arguments:
+      - '@=service("inpost.izi.context").link'
+
+  izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\HotProduct\HotProductDataMapperInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+
+  izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+
+  izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener:
+    class: izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@inpost.izi.shop_context'
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
+      - '@izi\prestashop\CommandBusInterface'
+      - '@inpost.izi.general_logger'

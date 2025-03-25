@@ -6,6 +6,7 @@ namespace izi\prestashop\Configuration;
 
 class PrestaShopConfiguration
 {
+    public const DEFAULT_SHOP_ID = 'PS_SHOP_DEFAULT';
     public const DEFAULT_CURRENCY_ID = 'PS_CURRENCY_DEFAULT';
     public const DEFAULT_COUNTRY_ID = 'PS_COUNTRY_DEFAULT';
     public const DEFAULT_LANGUAGE_ID = 'PS_LANGUAGE_DEFAULT';
@@ -13,6 +14,7 @@ class PrestaShopConfiguration
     public const FREE_DELIVERY_MIN_AMOUNT = 'PS_SHIPPING_FREE_PRICE';
     public const SHIPPING_HANDLING_COST = 'PS_SHIPPING_HANDLING';
     public const ATTRIBUTES_SEPARATOR = 'PS_ATTRIBUTE_ANCHOR_SEPARATOR';
+    public const ANONYMOUS_CUSTOMER_GROUP_ID = 'PS_UNIDENTIFIED_GROUP';
 
     /**
      * @var LanguageAwareConfigurationInterface
@@ -22,6 +24,11 @@ class PrestaShopConfiguration
     public function __construct(LanguageAwareConfigurationInterface $configuration)
     {
         $this->configuration = $configuration;
+    }
+
+    public function getDefaultShopId(): int
+    {
+        return (int) $this->configuration->get(self::DEFAULT_SHOP_ID);
     }
 
     public function getDefaultCurrencyId(?int $shopId = null): int
@@ -63,5 +70,10 @@ class PrestaShopConfiguration
     public function getAttributesSeparator(?int $shopId = null): string
     {
         return (string) $this->configuration->get(self::ATTRIBUTES_SEPARATOR, $shopId);
+    }
+
+    public function getAnonymousCustomerGroupId(?int $shopId = null): int
+    {
+        return (int) $this->configuration->get(self::ANONYMOUS_CUSTOMER_GROUP_ID, $shopId);
     }
 }

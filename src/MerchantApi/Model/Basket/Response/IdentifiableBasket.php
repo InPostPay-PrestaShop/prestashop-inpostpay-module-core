@@ -10,8 +10,10 @@ use izi\prestashop\Common\Basket\Product;
 use izi\prestashop\Common\Basket\Summary;
 use izi\prestashop\Common\PromoCode;
 
-final class IdentifiableBasket extends Basket
+final class IdentifiableBasket implements \JsonSerializable
 {
+    use BasketTrait;
+
     /**
      * @var string
      */
@@ -26,19 +28,17 @@ final class IdentifiableBasket extends Basket
      */
     public function __construct(string $basket_id, Summary $summary, array $delivery, array $products, array $consents, array $promo_codes = [], array $related_products = [])
     {
-        parent::__construct($summary, $delivery, $products, $consents, $promo_codes, $related_products);
         $this->basket_id = $basket_id;
+        $this->summary = $summary;
+        $this->delivery = $delivery;
+        $this->promo_codes = $promo_codes;
+        $this->products = $products;
+        $this->related_products = $related_products;
+        $this->consents = $consents;
     }
 
     public function getId(): string
     {
         return $this->basket_id;
-    }
-
-    public function jsonSerialize(): array
-    {
-        return parent::jsonSerialize() + [
-            'basket_id' => $this->basket_id,
-        ];
     }
 }

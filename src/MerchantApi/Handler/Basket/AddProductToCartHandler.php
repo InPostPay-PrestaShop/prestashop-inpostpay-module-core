@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Handler\Basket;
 
+use izi\prestashop\Cart\Exception\ProductAlreadyInCartException;
+use izi\prestashop\Cart\Util\ProductHelper;
 use izi\prestashop\Handler\CommandHandlerTrait;
 use izi\prestashop\MerchantApi\Command\Basket\AddProductToCartCommand;
 use izi\prestashop\MerchantApi\Exception\CannotAddProductException;
-use izi\prestashop\MerchantApi\Exception\ProductAlreadyInCartException;
 use izi\prestashop\MerchantApi\Exception\ProductNotFoundException;
 use izi\prestashop\MerchantApi\Exception\ProductOutOfStockException;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
@@ -15,11 +16,10 @@ use izi\prestashop\ObjectModel\Repository\ProductRepository;
 use izi\prestashop\Translation\LegacyTranslator;
 use Psr\Log\LoggerInterface;
 
+/* IGNORE_THIS_FILE_FOR_TRANSLATION */
 final class AddProductToCartHandler implements AddProductToCartHandlerInterface
 {
     use CommandHandlerTrait;
-
-    private const TRANSLATION_SOURCE = 'addproducttocarthandler';
 
     /**
      * @var \Context
@@ -30,11 +30,6 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
      * @var ProductRepository
      */
     private $productRepository;
-
-    /**
-     * @var ObjectRepositoryInterface
-     */
-    private $combinationRepository;
 
     /**
      * @var LegacyTranslator
@@ -48,13 +43,11 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
 
     /**
      * @param ProductRepository $productRepository
-     * @param ObjectRepositoryInterface<\Combination> $combinationRepository
      */
-    public function __construct(\Context $context, ObjectRepositoryInterface $productRepository, ObjectRepositoryInterface $combinationRepository, LegacyTranslator $translator, LoggerInterface $logger)
+    public function __construct(\Context $context, ObjectRepositoryInterface $productRepository, LegacyTranslator $translator, LoggerInterface $logger)
     {
         $this->context = $context;
         $this->productRepository = $productRepository;
-        $this->combinationRepository = $combinationRepository;
         $this->translator = $translator;
         $this->logger = $logger;
     }
@@ -72,10 +65,23 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
         }
 
         $productId = $command->getProductId();
+        $combinationId = $command->getCombinationId();
 
-        if (null === $product = $this->productRepository->find($productId, (int) $cart->id_lang)) {
+        $productWithCombination = $this->productRepository->findWithCombination(
+            $productId,
+            $combinationId,
+            (int) $cart->id_lang,
+            (int) $cart->id_shop,
+            true
+        );
+
+        if (null === $productWithCombination) {
             throw ProductNotFoundException::create();
         }
+
+        $product = $productWithCombination->getProduct();
+        $combination = $productWithCombination->getCombination();
+        $combinationId = $combination ? (int) $combination->id : 0;
 
         if (!$product->active || !$product->available_for_order || !$product->checkAccess((int) $cart->id_customer)) {
             throw CannotAddProductException::create($this->context->getTranslator()->trans('This product (%product%) is no longer available.', [
@@ -87,24 +93,11 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
             throw CannotAddProductException::create($this->translator->l('This product requires customization. Please add it to your cart via the shop page.', RelatedProductsEventHandler::TRANSLATION_SOURCE));
         }
 
-        $combinationId = $command->getCombinationId();
-        $hasCombinations = $product->hasCombinations();
-
-        if (!$hasCombinations && null !== $combinationId) {
-            throw ProductNotFoundException::create();
+        if ($cartProduct = ProductHelper::findProductInCart($cart, $productId, $combinationId)) {
+            throw new ProductAlreadyInCartException($cartProduct);
         }
 
-        if ($hasCombinations && 0 === (int) $combinationId) {
-            $combinationId = $this->productRepository->getDefaultCombinationId($productId);
-        }
-
-        $combinationId = (int) $combinationId;
-
-        if ($this->isInCart($cart, $productId, $combinationId)) {
-            throw ProductAlreadyInCartException::create($this->translator->l('This product is already in your cart.', self::TRANSLATION_SOURCE));
-        }
-
-        $minimalQuantity = $this->getMinimalQuantity($product, $combinationId);
+        $minimalQuantity = $combination ? (int) $combination->minimal_quantity : (int) $product->minimal_quantity;
         $quantity = $quantity ?? $minimalQuantity;
 
         if ($quantity < $minimalQuantity) {
@@ -114,7 +107,7 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
             ], 'Shop.Notifications.Error'));
         }
 
-        $this->assertQuantityIsAvailable($quantity, $productId, $combinationId, (int) $cart->id_shop);
+        $this->assertQuantityIsAvailable($quantity, $productId, $combinationId, $cart);
         $this->addToCart($cart, $productId, $combinationId, $quantity);
     }
 
@@ -147,49 +140,16 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
         throw $e ?? new CannotAddProductException($this->translator->l('Could not add the product to your cart.', RelatedProductsEventHandler::TRANSLATION_SOURCE));
     }
 
-    private function getMinimalQuantity(\Product $product, int $combinationId): int
+    private function assertQuantityIsAvailable(int $quantity, int $productId, int $combinationId, \Cart $cart): void
     {
-        if (0 === $combinationId) {
-            return (int) $product->minimal_quantity;
-        }
-
-        $combination = $this->combinationRepository->find($combinationId);
-
-        if (null === $combination || (int) $product->id !== (int) $combination->id_product) {
-            throw ProductNotFoundException::create();
-        }
-
-        return (int) $combination->minimal_quantity;
-    }
-
-    private function assertQuantityIsAvailable(int $quantity, int $productId, int $combinationId, int $shopId): void
-    {
-        if ($this->productRepository->isAvailableOutOfStock($productId)) {
+        if ($this->productRepository->isAvailableOutOfStock($productId, (int) $cart->id_shop)) {
             return;
         }
 
-        $availableQuantity = $this->productRepository->getAvailableStockQuantity($productId, $combinationId, $shopId);
+        $availableQuantity = $this->productRepository->getAvailableQuantity($productId, $combinationId, $cart);
 
         if ($quantity > $availableQuantity) {
             throw ProductOutOfStockException::create(max($availableQuantity, 0));
         }
-    }
-
-    private function isInCart(\Cart $cart, int $productId, int $combinationId): bool
-    {
-        foreach ($cart->getProducts() as $cartProduct) {
-            if ($this->isSameProduct($cartProduct, $productId, $combinationId)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function isSameProduct(array $cartProduct, int $productId, int $combinationId): bool
-    {
-        return $productId === (int) $cartProduct['id_product']
-            && $combinationId === (int) $cartProduct['id_product_attribute']
-            && 0 === (int) $cartProduct['id_customization'];
     }
 }

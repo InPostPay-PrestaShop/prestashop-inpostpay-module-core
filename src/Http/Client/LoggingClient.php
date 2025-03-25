@@ -22,10 +22,16 @@ final class LoggingClient implements ClientInterface
      */
     private $logger;
 
-    public function __construct(ClientInterface $client, LoggerInterface $logger)
+    /**
+     * @var array
+     */
+    private $options;
+
+    public function __construct(ClientInterface $client, LoggerInterface $logger, array $options = [])
     {
         $this->client = $client;
         $this->logger = $logger;
+        $this->options = $options;
     }
 
     public function sendRequest(RequestInterface $request): ResponseInterface
@@ -74,9 +80,7 @@ final class LoggingClient implements ClientInterface
             $this->logger->info('Response: "{status_code} {uri}"', $context);
         } else {
             $this->logger->info('Response: "{status_code} {uri}"', $context);
-            if ('' !== $body = (string) $response->getBody()) {
-                $this->logger->debug('Response body: "{body}"', ['body' => $body]);
-            }
+            $this->logResponseBody($response);
         }
     }
 
@@ -93,5 +97,23 @@ final class LoggingClient implements ClientInterface
                 'error' => $throwable,
             ]);
         }
+    }
+
+    private function logResponseBody(ResponseInterface $response): void
+    {
+        if ('' === $body = (string) $response->getBody()) {
+            return;
+        }
+
+        if (!isset($this->options['max_response_body_size']) || strlen($body) <= $this->options['max_response_body_size']) {
+            $this->logger->debug('Response body: "{body}"', ['body' => $body]);
+
+            return;
+        }
+
+        $this->logger->debug('Response body: "{body}"', [
+            'body' => \Tools::substr($body, 0, $this->options['max_response_body_size']) . '...',
+            'body_size' => $response->getBody()->getSize(),
+        ]);
     }
 }

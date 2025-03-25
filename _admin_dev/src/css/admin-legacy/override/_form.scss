@@ -2,8 +2,13 @@
 .content-div {
   .form-group {
     margin-bottom: 1rem;
-  }
 
+    &::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+  }
 
   .input-group .input-group-addon {
     color: #6c868e;

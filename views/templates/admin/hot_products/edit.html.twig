@@ -1,0 +1,34 @@
+{% extends '@Modules/inpostizi/views/templates/admin/layout/basic-layout.html.twig' %}
+
+{% form_theme form '@Modules/inpostizi/views/templates/admin/hot_products/form_theme.html.twig' %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xs-12 col-12">
+      <div class="card">
+        {{ form_start(form) }}
+        <h3 class="card-header">
+          <i class="material-icons">edit</i> 
+          {{ layoutTitle }}
+        </h3>
+
+        <div class="card-body panel-body card-block px-sm-4 px-3 pt-4 pb-3">
+          <div class="form-wrapper card-text">
+            {{ form_errors(form) }}
+            {{ form_rest(form) }}
+          </div>
+        </div>
+
+        <div class="card-footer clearfix">
+          <a href="{{ path('admin_inpost_izi_products_index') }}" class="btn btn-outline-secondary">
+            {{ 'Cancel'|trans({}, 'Admin.Actions') }}
+          </a>
+          <button type="submit" class="btn btn-primary float-right">
+            {{ 'Save'|trans({}, 'Admin.Actions') }}
+          </button>
+        </div>
+        {{ form_end(form) }}
+      </div>
+    </div>
+  </div>
+{% endblock %}

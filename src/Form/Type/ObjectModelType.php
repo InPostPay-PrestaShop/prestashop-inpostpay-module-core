@@ -10,6 +10,7 @@ use izi\prestashop\Form\DataTransformer\ObjectModelToIdTransformer;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\ObjectModel\QueryBuilder;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -85,7 +86,7 @@ final class ObjectModelType extends AbstractType
                 'input' => 'object',
                 'query_builder' => null,
                 'choices' => null,
-                'choice_loader' => function (Options $options) {
+                'choice_loader' => function (Options $options): ?ChoiceLoaderInterface {
                     if (null !== $options['choices']) {
                         return null;
                     }
@@ -127,7 +128,7 @@ final class ObjectModelType extends AbstractType
             ->setAllowedTypes('shop_id', ['null', 'int'])
             ->setAllowedTypes('query_builder', ['null', 'callable', QueryBuilder::class])
             ->setAllowedValues('input', ['object', 'id'])
-            ->setNormalizer('query_builder', function (Options $options, $value) {
+            ->setNormalizer('query_builder', function (Options $options, $value): ?QueryBuilder {
                 if (is_callable($value)) {
                     $value = $value(
                         $this->manager->getRepository($options['class']),

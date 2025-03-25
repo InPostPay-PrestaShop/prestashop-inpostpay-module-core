@@ -1,0 +1,37 @@
+.table {
+  font-size: 13px;
+
+  td,
+  thead th {
+    padding: 10px;
+    border: 0;
+    color: #363a41;
+  }
+
+  thead {
+    border: 0;
+    border-bottom: 2px solid #25b9d7;
+  }
+
+  tbody {
+    border: 0;
+
+    tr {
+      border-bottom: 1px solid #eceeef;
+    }
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .btn-group {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn {
+    padding: 5px;
+    display: block;
+  }
+}

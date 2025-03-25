@@ -14,6 +14,7 @@ use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BasketId;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BindingConfirmation;
 use izi\prestashop\MerchantApi\Model\Basket\Response\Basket;
+use izi\prestashop\MerchantApi\Model\Basket\Response\IdentifiableBasket;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -61,13 +62,16 @@ final class BasketController extends AbstractApiController
         $basketId = $this->decodeRequest($request, BasketId::class);
         $command = new AddProductToBasketCommand($productId, $basketId);
 
-        /** @var Basket $basket */
+        /** @var IdentifiableBasket $basket */
         $basket = $this->bus->handle($command);
 
         return $this->basketResponse($basket);
     }
 
-    private function basketResponse(Basket $basket): JsonResponse
+    /**
+     * @param Basket|IdentifiableBasket $basket
+     */
+    private function basketResponse($basket): JsonResponse
     {
         $data = $this->serializer->serialize($basket, 'json', [
             'datetime_format' => BasketAppClientInterface::DATETIME_FORMAT,

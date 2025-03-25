@@ -73,4 +73,18 @@ class Query
 
         return $this->manager->getHydrator()->hydrate($data, $this->class, null, $this->languageId);
     }
+
+    /**
+     * @return mixed
+     */
+    public function getSingleScalarResult()
+    {
+        $result = $this->manager->getConnection()->fetchFirstColumn($this->sql);
+
+        if (count($result) > 1) {
+            throw new \DomainException('More than one result was found for query although one row or none was expected.');
+        }
+
+        return array_shift($result);
+    }
 }

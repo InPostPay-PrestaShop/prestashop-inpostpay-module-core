@@ -65,7 +65,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '2.0.0';
+        $this->version = '2.1.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -461,8 +461,11 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $this->adminKernel = new AdminKernel($kernel, _PS_VERSION_);
         $this->adminKernel->boot();
 
+        $psContainer = $kernel->getContainer();
+        $this->adminKernel->getContainer()->set('prestashop.security.admin.provider', $psContainer->get('prestashop.security.admin.provider'));
+
         // In case of some very early 1.7 versions, session may not have already been started by PS application.
-        $kernel->getContainer()->get('session')->start();
+        $psContainer->get('session')->start();
 
         return $this->adminKernel;
     }

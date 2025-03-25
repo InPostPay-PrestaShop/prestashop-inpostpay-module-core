@@ -1,0 +1,72 @@
+{% extends '@Modules/inpostizi/views/templates/admin/layout/basic-layout.html.twig' %}
+
+{% form_theme form '@Modules/inpostizi/views/templates/admin/hot_products/form_theme.html.twig' %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xs-12 col-12">
+      <div class="card">
+        {{ form_start(form) }}
+        <h3 class="card-header">
+          <i class="material-icons">add_circle</i>
+          {{ layoutTitle }}
+        </h3>
+
+        <div class="card-body panel-body card-block px-sm-4 px-3 pt-4 pb-3">
+          <div class="form-wrapper card-text">
+            {{ form_errors(form) }}
+
+            {% if is_ps_176 %}
+              {% import '@PrestaShop/Admin/macros.html.twig' as ps %}
+              {{- ps.form_group_row(form.productId, { attr: form.productId.vars.attr }, {
+                'label': form.productId.vars.label
+              }) -}}
+            {% else %}
+              {{ form_row(form.productId) }}
+            {% endif %}
+
+            <div id="combination_choice_wrapper">
+              {% if form.combinationId is defined %}
+                {% if form.combinationId.vars.errors|length > 0 %}
+                  <div class="form-group row">
+                    {{ form_label(form.combinationId) }}
+                    <div class="col-sm">
+                      {{ form_errors(form.combinationId) }}
+                    </div>
+                  </div>
+                {% endif %}
+
+                {{ form_rest(form.combinationId) }}
+              {% endif %}
+            </div>
+
+            {{ form_rest(form) }}
+          </div>
+        </div>
+
+        <div class="card-footer clearfix">
+          <a href="{{ path('admin_inpost_izi_products_index') }}" class="btn btn-outline-secondary">
+            {{ 'Cancel'|trans({}, 'Admin.Actions') }}
+          </a>
+          <button type="submit" class="btn btn-primary float-right">
+            {{ 'Save'|trans({}, 'Admin.Actions') }}
+          </button>
+        </div>
+        {{ form_end(form) }}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+
+  <link rel="stylesheet" href="{{ asset('css/admin/hot-products.css', 'InPostIzi') }}" />
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+
+  <script type="text/javascript" src="{{ asset('js/admin/hot-products.js', 'InPostIzi') }}">
+  </script>
+{% endblock %}
