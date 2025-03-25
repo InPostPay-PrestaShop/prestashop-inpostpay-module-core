@@ -11,7 +11,6 @@ if (class_exists(LegacyEvent::class)) {
     class Event extends LegacyEvent
     {
     }
-
 } else {
     class Event extends BaseEvent
     {

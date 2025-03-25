@@ -15,6 +15,8 @@ use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\Entities\BasketSessionInterface;
+use izi\prestashop\Event\EventDispatcherInterface;
+use izi\prestashop\Event\ValidateOrderEvent;
 use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
@@ -33,6 +35,7 @@ use PrestaShop\PrestaShop\Core\Crypto\Hashing;
 
 /**
  * @internal
+ *
  * @deprecated
  *
  * @todo refactor
@@ -76,7 +79,12 @@ class Create
      */
     private $repository;
 
-    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null, ?BasketSessionRepositoryInterface $repository = null)
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null, ?BasketSessionRepositoryInterface $repository = null, ?EventDispatcherInterface $eventDispatcher = null)
     {
         $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
@@ -85,6 +93,7 @@ class Create
         $this->bus = $bus ?? $this->module->get(CommandBusInterface::class);
         $this->ordersConfiguration = $this->module->get(OrdersConfigurationInterface::class);
         $this->repository = $repository ?? new BasketSessionRepository(SerializerFactory::create(), $this->module->get(ObjectManagerInterface::class));
+        $this->eventDispatcher = $eventDispatcher ?? $this->module->get(EventDispatcherInterface::class);
     }
 
     /**
@@ -169,6 +178,13 @@ class Create
         $this->adjustHandlingCost($shippingOptions, $serviceCodes);
         $this->validateCart($cart);
 
+        $this->eventDispatcher->addListener(ValidateOrderEvent::class, function (ValidateOrderEvent $event) use ($session, $request, $cart) {
+            if ($event->getOrder()->module === $this->module->name) {
+                $this->finalizeSession($session, $request, $event->getOrder()->id);
+                $this->saveCarrierModuleData($cart->id, $request->getDelivery());
+            }
+        });
+
         $this->module->validateOrder(
             $cart->id,
             (int) $this->ordersConfiguration->getInitialStatusId($paymentType, $shopId),
@@ -181,12 +197,7 @@ class Create
             $cart->secure_key
         );
 
-        $orderId = (int) $this->module->currentOrder;
-
-        $this->finalizeSession($session, $request, $orderId);
-        $this->saveCarrierModuleData($cart->id, $request->getDelivery());
-
-        return $orderId;
+        return (int) $this->module->currentOrder;
     }
 
     private function findOrCreateAddresses(\Customer $customer, CreateOrderRequest $request): array

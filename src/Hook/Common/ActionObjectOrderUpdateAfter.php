@@ -22,7 +22,6 @@ final class ActionObjectOrderUpdateAfter implements HookInterface
         $this->dispatcher = $dispatcher;
     }
 
-
     public static function getHookName(): string
     {
         return self::HOOK_NAME;

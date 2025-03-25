@@ -40,6 +40,7 @@ services:
         izi\prestashop\Form\BasketAppClientProvider: '@?izi\prestashop\Form\BasketAppClientProvider'
         izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener: '@?izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener'
         izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener: '@izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener'
+        izi\prestashop\EventListener\CreateShipmentListener: '@?izi\prestashop\EventListener\CreateShipmentListener'
 
   izi\prestashop\Event\EventDispatcherFactory:
     class: izi\prestashop\Event\EventDispatcherFactory
