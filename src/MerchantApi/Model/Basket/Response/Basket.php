@@ -10,7 +10,7 @@ use izi\prestashop\Common\Basket\Product;
 use izi\prestashop\Common\Basket\Summary;
 use izi\prestashop\Common\PromoCode;
 
-final class Basket implements \JsonSerializable
+class Basket implements \JsonSerializable
 {
     /**
      * @var Summary

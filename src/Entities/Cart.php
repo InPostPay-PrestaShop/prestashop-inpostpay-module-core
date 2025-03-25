@@ -25,4 +25,9 @@ final class Cart implements BasketInterface
     {
         return $this->cart;
     }
+
+    public function isFinalized(): bool
+    {
+        return $this->cart->orderExists();
+    }
 }

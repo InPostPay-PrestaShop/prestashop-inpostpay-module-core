@@ -20,4 +20,23 @@ class ProductRepository extends ObjectRepository
     {
         return null !== $this->find($idProduct);
     }
+
+    public function getDefaultCombinationId(int $productId): ?int
+    {
+        $combinationId = (int) \Product::getDefaultAttribute($productId);
+
+        return 0 >= $combinationId ? null : $combinationId;
+    }
+
+    public function isAvailableOutOfStock(int $productId): bool
+    {
+        $outOfStock = \StockAvailable::outOfStock($productId);
+
+        return (bool) \Product::isAvailableWhenOutOfStock($outOfStock);
+    }
+
+    public function getAvailableStockQuantity(int $productId, ?int $combinationId = null, ?int $shopId = null): int
+    {
+        return (int) \StockAvailable::getQuantityAvailableByProduct($productId, $combinationId, $shopId);
+    }
 }

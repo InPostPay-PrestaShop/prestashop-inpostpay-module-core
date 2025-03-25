@@ -10,6 +10,7 @@ use izi\prestashop\BasketApp\Exception\BasketNotBoundException;
 use izi\prestashop\BasketApp\Exception\BasketNotFoundException;
 use izi\prestashop\Builder\Basket\BasketBuilderFactoryInterface;
 use izi\prestashop\Command\UpdateBasketCommand;
+use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -49,7 +50,7 @@ final class UpdateBasketHandler implements UpdateBasketHandlerInterface
     {
         $session = $this->sessionRepository->findByEntityId($cartId = $command->getBasketId());
 
-        if (null === $session || !$session->isBasketBound() || null !== $session->getOrderId()) {
+        if (null === $session || !$session->isBasketBound() || BasketSession::isFinalized($session)) {
             return;
         }
 

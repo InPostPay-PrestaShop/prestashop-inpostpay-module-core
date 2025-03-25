@@ -4,21 +4,33 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Handler\Basket;
 
+use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Entities\BasketInterface;
+use izi\prestashop\MerchantApi\Command\Basket\AddProductToCartCommand;
+use izi\prestashop\MerchantApi\Exception\CannotAddProductException;
+use izi\prestashop\MerchantApi\Exception\ProductAlreadyInCartException;
+use izi\prestashop\MerchantApi\Exception\ProductNotFoundException;
+use izi\prestashop\MerchantApi\Exception\ProductOutOfStockException;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
+use izi\prestashop\MerchantApi\Model\Basket\Request\RelatedProductData;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
+use izi\prestashop\Translation\LegacyTranslator;
 use Psr\Log\LoggerInterface;
 
 final class RelatedProductsEventHandler implements BasketEventHandlerInterface
 {
-    private const TRANSLATION_SOURCE = 'relatedproductseventhandler';
+    /**
+     * @internal
+     * @deprecated
+     */
+    public const TRANSLATION_SOURCE = 'relatedproductseventhandler';
 
     /**
-     * @var \Module
+     * @var CommandBusInterface
      */
-    private $module;
+    private $bus;
 
     /**
      * @var \Context
@@ -26,21 +38,23 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
     private $context;
 
     /**
-     * @var ObjectManagerInterface
+     * @param CommandBusInterface $bus
+     * @param \Context $context
      */
-    private $manager;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    public function __construct(\Module $module, \Context $context, ObjectManagerInterface $manager, LoggerInterface $logger)
+    public function __construct($bus, \Context $context/*, ObjectManagerInterface $manager, LoggerInterface $logger*/)
     {
-        $this->module = $module;
         $this->context = $context;
-        $this->manager = $manager;
-        $this->logger = $logger;
+
+        if ($bus instanceof \Module) {
+            $args = func_get_args();
+            $bus = $this->createCommandBus($context, $bus, $args[2], $args[3]);
+        }
+
+        if (!$bus instanceof CommandBusInterface) {
+            throw new \InvalidArgumentException(sprintf('Expected parameter $bus to be an instance of "%s", "%s" given.', CommandBusInterface::class, get_debug_type($bus)));
+        }
+
+        $this->bus = $bus;
     }
 
     public static function getHandledEventType(): string
@@ -61,126 +75,59 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
         }
 
         foreach ($event->getRelatedProductsEventData() as $relatedProduct) {
-            [$productId, $combinationId] = array_map('intval', explode('.', $relatedProduct->getProductId()));
-            $quantity = (int) $relatedProduct->getQuantity()->getQuantity();
-
-            if (null !== $error = $this->addRelatedProduct($cart, $productId, $combinationId, $quantity)) {
-                return Notice::error($error);
+            try {
+                $this->addRelatedProduct($cart, $relatedProduct);
+            } catch (ProductAlreadyInCartException $e) {
+                // ignore silently
+            } catch (ProductNotFoundException $e) {
+                return Notice::error($this->context->getTranslator()->trans('Product not found', [], 'Shop.Notifications.Error'));
+            } catch (ProductOutOfStockException $e) {
+                return Notice::error($this->context->getTranslator()->trans('The available purchase order quantity for this product is %quantity%.', [
+                    '%quantity%' => $e->getAvailableQuantity(),
+                ], 'Shop.Notifications.Error'));
+            } catch (CannotAddProductException $e) {
+                return Notice::error($e->getMessage());
             }
         }
 
         return null;
     }
 
-    private function addRelatedProduct(\Cart $cart, int $productId, int $combinationId, int $quantity): ?string
+    private function addRelatedProduct(\Cart $cart, RelatedProductData $relatedProduct): void
     {
-        if ($this->isInCart($cart, $productId, $combinationId)) {
-            return null;
-        }
+        [$productId, $combinationId] = array_map('intval', explode('.', $relatedProduct->getProductId()));
+        $quantity = (int) $relatedProduct->getQuantity()->getQuantity();
 
-        if (0 >= $quantity) {
-            return $this->context->getTranslator()->trans('Null quantity.', [], 'Shop.Notifications.Error');
-        }
-
-        $product = $this->manager->getRepository(\Product::class)->find($productId, (int) $cart->id_lang);
-
-        if (null === $product) {
-            return $this->context->getTranslator()->trans('Product not found', [], 'Shop.Notifications.Error');
-        }
-
-        if (!$product->active || !$product->available_for_order || !$product->checkAccess((int) $cart->id_customer)) {
-            return $this->context->getTranslator()->trans('This product (%product%) is no longer available.', [
-                '%product%' => $product->name,
-            ], 'Shop.Notifications.Error');
-        }
-
-        if (2 === (int) $product->customizable) {
-            return $this->module->l('This product requires customization. Please add it to your cart via the shop page.', self::TRANSLATION_SOURCE);
-        }
-
-        if (!$product->hasAttributes()) {
-            $combinationId = 0;
-            $minimalQuantity = $product->minimal_quantity;
-        } else {
-            if (0 === $combinationId) {
-                $combinationId = \Product::getDefaultAttribute($productId); // TODO refactor static call
-            }
-
-            $combination = $this->manager->getRepository(\Combination::class)->find($combinationId);
-
-            if (null === $combination) {
-                return $this->context->getTranslator()->trans('Product not found', [], 'Shop.Notifications.Error');
-            }
-
-            $minimalQuantity = $combination->minimal_quantity;
-        }
-
-        if ($quantity < $minimalQuantity) {
-            return $this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
-                '%product%' => $product->name,
-                '%quantity%' => $minimalQuantity,
-            ], 'Shop.Notifications.Error');
-        }
-
-        $availableQuantity = $this->getAvailableQuantity($productId, $combinationId);
-        if (null !== $availableQuantity && $quantity > $availableQuantity) {
-            return $this->context->getTranslator()->trans('The available purchase order quantity for this product is %quantity%.', [
-                '%quantity%' => $availableQuantity,
-            ], 'Shop.Notifications.Error');
-        }
-
-        try {
-            $result = $cart->updateQty(
-                $quantity,
-                $productId,
-                $combinationId,
-                0,
-                'up',
-                0,
-                $this->context->shop
-            );
-        } catch (\Exception $e) {
-            $result = false;
-            $this->logger->critical('Related product addition error: {error}', [
-                'error' => $e,
-            ]);
-        }
-
-        if (false === $result) {
-            isset($e) || $this->logger->critical('Could not add product [{productId}] to cart #{cartId}.', [
-                'productId' => implode('-', [$productId, $combinationId]),
-                'cartId' => $cart->id,
-            ]);
-
-            return $this->module->l('Could not add the product to your cart.', self::TRANSLATION_SOURCE);
-        }
-
-        return null;
+        $this->bus->handle(new AddProductToCartCommand($cart, $productId, $combinationId, $quantity));
     }
 
-    // TODO refactor static calls
-    private function getAvailableQuantity(int $productId, int $combinationId): ?int
+    private function createCommandBus(\Context $context, \Module $module, ObjectManagerInterface $manager, LoggerInterface $logger): CommandBusInterface
     {
-        $outOfStock = \StockAvailable::outOfStock($productId);
-        if (\Product::isAvailableWhenOutOfStock($outOfStock)) {
-            return null;
-        }
+        @trigger_error(sprintf('Passing $module, $manager, and $logger as arguments for "%s::__construct()" is deprecated.', __CLASS__), E_USER_DEPRECATED);
 
-        return \StockAvailable::getQuantityAvailableByProduct($productId, $combinationId);
-    }
+        $handler = new AddProductToCartHandler(
+            $context,
+            $manager->getRepository(\Product::class),
+            $manager->getRepository(\Combination::class),
+            new LegacyTranslator($module->name),
+            $logger
+        );
 
-    private function isInCart(\Cart $cart, int $productId, int $combinationId): bool
-    {
-        foreach ($cart->getProducts() as $cartProduct) {
-            if (
-                $productId === (int) $cartProduct['id_product']
-                && $combinationId === (int) $cartProduct['id_product_attribute']
-                && 0 === $cartProduct['id_customization']
-            ) {
-                return true;
+        return new class($handler) implements CommandBusInterface {
+            /**
+             * @var callable
+             */
+            private $handler;
+
+            public function __construct(callable $handler)
+            {
+                $this->handler = $handler;
             }
-        }
 
-        return false;
+            public function handle($command)
+            {
+                return ($this->handler)($command);
+            }
+        };
     }
 }

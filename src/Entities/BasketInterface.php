@@ -6,6 +6,8 @@ namespace izi\prestashop\Entities;
 
 /**
  * @template T of object
+ *
+ * @method bool isFinalized()
  */
 interface BasketInterface
 {

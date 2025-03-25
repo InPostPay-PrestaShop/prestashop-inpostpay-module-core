@@ -14,6 +14,7 @@ services:
       - Cart: '@inpost.izi.object_model.cart_repository'
         Currency: '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
         Carrier: '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+        Combination: '@inpost.izi.object_model.combination_repository'
         Product: '@izi\prestashop\ObjectModel\Repository\ProductRepository'
         Configuration: '@izi\prestashop\ObjectModel\Repository\ConfigurationRepository'
         Hook: '@izi\prestashop\ObjectModel\Repository\HookRepository'
@@ -34,6 +35,7 @@ services:
         izi\prestashop\EventListener\CartListener: '@izi\prestashop\EventListener\CartListener'
         izi\prestashop\EventListener\OrderListener: '@izi\prestashop\EventListener\OrderListener'
         izi\prestashop\Form\BasketAppClientProvider: '@?izi\prestashop\Form\BasketAppClientProvider'
+        izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener: '@?izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener'
 
   izi\prestashop\Event\EventDispatcherFactory:
     class: izi\prestashop\Event\EventDispatcherFactory

@@ -65,9 +65,12 @@ services:
         izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand: '@izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface'
         izi\prestashop\MerchantApi\Command\GetBasketCommand: '@izi\prestashop\MerchantApi\Handler\GetBasketHandlerInterface'
         izi\prestashop\MerchantApi\Command\UpdateBasketCommand: '@izi\prestashop\MerchantApi\Handler\UpdateBasketHandlerInterface'
+        izi\prestashop\MerchantApi\Command\AddProductToBasketCommand: '@izi\prestashop\MerchantApi\Handler\AddProductToBasketHandlerInterface'
         izi\prestashop\MerchantApi\Command\CreateOrderCommand: '@izi\prestashop\MerchantApi\Handler\CreateOrderHandlerInterface'
         izi\prestashop\MerchantApi\Command\GetOrderCommand: '@izi\prestashop\MerchantApi\Handler\GetOrderHandlerInterface'
         izi\prestashop\MerchantApi\Command\UpdateOrderCommand: '@izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface'
+        izi\prestashop\MerchantApi\Command\Basket\CreateCartCommand: '@izi\prestashop\MerchantApi\Handler\Basket\CreateCartHandlerInterface'
+        izi\prestashop\MerchantApi\Command\Basket\AddProductToCartCommand: '@izi\prestashop\MerchantApi\Handler\Basket\AddProductToCartHandlerInterface'
         izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand: '@izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface'
 
   inpost.izi.constraint_validator_locator:
