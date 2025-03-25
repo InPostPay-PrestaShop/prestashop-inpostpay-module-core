@@ -473,6 +473,15 @@ services:
       - Address
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  inpost.izi.object_model.combination_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Combination }
+    arguments:
+      - Combination
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   izi\prestashop\Repository\OrderDataRepositoryInterface: '@izi\prestashop\Repository\BasketSessionRepository'
   izi\prestashop\Repository\BasketSessionRepository:
     class: izi\prestashop\Repository\BasketSessionRepository
@@ -621,6 +630,13 @@ services:
       - '@inpost.izi.object_model.order_repository'
       - '@izi\prestashop\CommandBusInterface'
       - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener:
+    class: izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@inpost.izi.context'
 
   izi\prestashop\View\Templating\RendererInterface: '@izi\prestashop\View\Templating\SmartyRenderer'
   izi\prestashop\View\Templating\SmartyRenderer:

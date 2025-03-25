@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\MerchantApi\Handler;
 
 use izi\prestashop\Builder\Basket\BasketBuilderFactoryInterface;
+use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\OrderExistsException;
@@ -40,7 +41,7 @@ final class ConfirmBasketBindingHandler implements ConfirmBasketBindingHandlerIn
             throw BasketNotFoundException::create();
         }
 
-        if (null !== $session->getOrderId()) {
+        if (BasketSession::isFinalized($session)) {
             throw OrderExistsException::create();
         }
 

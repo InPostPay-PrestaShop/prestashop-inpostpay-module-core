@@ -9,6 +9,7 @@ use izi\prestashop\EventListener\CartListener;
 use izi\prestashop\EventListener\OrderListener;
 use izi\prestashop\EventListener\ShipmentListener;
 use izi\prestashop\Form\BasketAppClientProvider;
+use izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -36,6 +37,7 @@ final class EventDispatcherFactory implements ServiceSubscriberInterface
             OrderListener::class,
             ShipmentListener::class,
             '?' . BasketAppClientProvider::class,
+            '?' . UpdateCartRulesListener::class,
         ];
     }
 

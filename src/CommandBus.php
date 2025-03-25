@@ -35,6 +35,9 @@ use izi\prestashop\Handler\UpdateBasketHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderStatusHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface;
+use izi\prestashop\MerchantApi\Command\AddProductToBasketCommand;
+use izi\prestashop\MerchantApi\Command\Basket\AddProductToCartCommand;
+use izi\prestashop\MerchantApi\Command\Basket\CreateCartCommand;
 use izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\CreateOrderCommand;
 use izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand;
@@ -42,6 +45,9 @@ use izi\prestashop\MerchantApi\Command\GetBasketCommand;
 use izi\prestashop\MerchantApi\Command\GetOrderCommand;
 use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
 use izi\prestashop\MerchantApi\Command\UpdateOrderCommand;
+use izi\prestashop\MerchantApi\Handler\AddProductToBasketHandlerInterface;
+use izi\prestashop\MerchantApi\Handler\Basket\AddProductToCartHandlerInterface;
+use izi\prestashop\MerchantApi\Handler\Basket\CreateCartHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\CreateOrderHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface;
@@ -84,7 +90,11 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             CreateOrderCommand::class => '?' . CreateOrderHandlerInterface::class,
             GetOrderCommand::class => '?' . GetOrderHandlerInterface::class,
             UpdateOrderCommand::class => '?' . UpdateOrderHandlerInterface::class,
+            AddProductToBasketCommand::class => '?' . AddProductToBasketHandlerInterface::class,
+
             UpdateCartMessageCommand::class => '?' . UpdateCartMessageHandlerInterface::class,
+            CreateCartCommand::class => '?' . CreateCartHandlerInterface::class,
+            AddProductToCartCommand::class => '?' . AddProductToCartHandlerInterface::class,
 
             /* configuration */
             UpdateGeneralConfigurationCommand::class => '?' . UpdateGeneralConfigurationHandlerInterface::class,
