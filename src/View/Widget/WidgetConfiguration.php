@@ -45,7 +45,7 @@ final class WidgetConfiguration implements WidgetConfigurationInterface
     /**
      * @var int|null
      *
-     * @Assert\Range(min=self::WIDTH_MIN_PX, max=self::WIDTH_MAX_PX)
+     * @Assert\Range(min=WidgetConfiguration::WIDTH_MIN_PX, max=WidgetConfiguration::WIDTH_MAX_PX)
      */
     private $maxWidthPx;
 
