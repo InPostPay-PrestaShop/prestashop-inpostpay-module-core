@@ -52,7 +52,7 @@ final class LazyUserProvider implements UserProviderInterface
 
     public function supportsClass($class): bool
     {
-        return $this->userProvider->supportsClass($class);
+        return $this->getUserProvider()->supportsClass($class);
     }
 
     private function getUserProvider(): UserProviderInterface

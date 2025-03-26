@@ -114,6 +114,13 @@ class CombinationRepository extends ObjectRepository
         return $this->find($combinationId);
     }
 
+    public function getAttributeGroupIds(int $productId, int $combinationId): array
+    {
+        $attributes = \Product::getAttributesParams($productId, $combinationId);
+
+        return array_column($attributes, 'id_attribute_group');
+    }
+
     private function createAttributesWithGroupQueryBuilder(int $languageId): QueryBuilder
     {
         return $this

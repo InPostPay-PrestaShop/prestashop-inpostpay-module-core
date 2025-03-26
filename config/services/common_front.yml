@@ -495,6 +495,14 @@ services:
       - { name: validator.constraint_validator }
     arguments:
       - '@izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface'
+      - '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
+
+  izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator:
+    class: izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface'
 
   izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
   izi\prestashop\Configuration\GuiConfiguration:

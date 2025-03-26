@@ -98,9 +98,11 @@ services:
       - izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator: '@izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator'
         izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator: '@izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator'
         izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator'
+        izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator'
         izi\prestashop\Validator\Cart\BindableValidator: '@izi\prestashop\Validator\Cart\BindableValidator'
         izi\prestashop\Validator\Cart\HasProductsValidator: '@izi\prestashop\Validator\Cart\HasProductsValidator'
         izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator: '@izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator'
+        izi\prestashop\Validator\Product\UnrestrictedValidator: '@izi\prestashop\Validator\Product\UnrestrictedValidator'
 
   inpost.izi.gui_configuration_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
