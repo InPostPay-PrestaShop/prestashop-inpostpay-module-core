@@ -195,7 +195,7 @@ final class ConfigurationController extends AbstractConfigurationController
      */
     public function supportSave(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
     {
-        if (!$this->isGranted(self::getConfigAuthorizationRole())) {
+        if (!$this->isGranted(...self::getConfigPermission())) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Access Denied.',

@@ -88,3 +88,9 @@ services:
     arguments:
       - '@service_container'
       - prestashop.security.admin.provider
+
+  PrestaShopBundle\Security\Voter\PageVoter:
+    class: PrestaShopBundle\Security\Voter\PageVoter
+    public: false
+    tags:
+      - { name: security.voter }

@@ -26,6 +26,7 @@ use izi\prestashop\OAuth2\Exception\OAuth2ExceptionInterface;
 use izi\prestashop\ObjectModel\Repository\ProductRepository;
 use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
+use PrestaShopBundle\Security\Voter\PageVoter;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -275,7 +276,7 @@ final class HotProductController extends AbstractConfigurationController
      */
     public function autocomplete(Request $request, ProductRepository $repository): Response
     {
-        $this->denyAccessUnlessGranted(self::getProductsReadAuthorizationRole());
+        $this->denyAccessUnlessGranted(...self::getProductsReadPermission());
 
         if ('' === $query = (string) $request->query->get('query')) {
             throw new UnprocessableEntityHttpException('Query cannot be empty.');
@@ -322,16 +323,15 @@ final class HotProductController extends AbstractConfigurationController
         ]);
     }
 
-    protected function getRequiredPermissions(): array
+    protected function getRequiredPermissions(): iterable
     {
-        return parent::getRequiredPermissions() + [self::getProductsReadAuthorizationRole()];
+        yield from parent::getRequiredPermissions();
+        yield self::getProductsReadPermission();
     }
 
-    private static function getProductsReadAuthorizationRole(): string
+    private static function getProductsReadPermission(): array
     {
-        return \Access::sluggifyTab([
-            'class_name' => 'AdminProducts',
-        ], 'READ');
+        return [PageVoter::READ, 'AdminProducts'];
     }
 
     private function handleUpdateError(\Throwable $e, Request $request): void

@@ -11,6 +11,7 @@ use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Role\Role;
 
 /* IGNORE_THIS_FILE_FOR_TRANSLATION */
 abstract class AbstractConfigurationController extends AbstractController
@@ -64,23 +65,28 @@ abstract class AbstractConfigurationController extends AbstractController
         return parent::render($view, $parameters, $response);
     }
 
-    final protected static function getConfigAuthorizationRole(): string
+    final protected static function getConfigPermission(): array
     {
-        return \Access::sluggifyModule([
+        $role = \Access::sluggifyModule([
             'name' => 'inpostizi',
         ], \Access::getAuthorizationFromLegacy('configure'));
+
+        return [$role, null];
     }
 
     protected function checkAccess(): void
     {
-        foreach ($this->getRequiredPermissions() as $role) {
-            $this->denyAccessUnlessGranted($role);
+        foreach ($this->getRequiredPermissions() as [$attributes, $subject]) {
+            $this->denyAccessUnlessGranted($attributes, $subject);
         }
     }
 
-    protected function getRequiredPermissions(): array
+    /**
+     * @return iterable<array{0: string|string[], 1: mixed}>
+     */
+    protected function getRequiredPermissions(): iterable
     {
-        return [self::getConfigAuthorizationRole()];
+        yield self::getConfigPermission();
     }
 
     protected function trans(string $id, array $parameters = [], ?string $domain = null, ?string $locale = null): string
@@ -152,5 +158,42 @@ abstract class AbstractConfigurationController extends AbstractController
             '%type%' => get_class($e),
             '%code%' => $e->getCode(),
         ], 'Admin.Notifications.Error'));
+    }
+
+    final protected function isGranted($attributes, $subject = null): bool
+    {
+        if (parent::isGranted($attributes, $subject)) {
+            return true;
+        }
+
+        if (null !== $subject || !str_starts_with($attributes, 'ROLE_')) {
+            return false;
+        }
+
+        return $this->checkUserRole($attributes);
+    }
+
+    /**
+     * Checks module configuration role using the user entity instead of the security token, since the token may not contain
+     * all the user roles if it was reloaded from session.
+     *
+     * Implementing a custom security voter (PS does not provide a default one) would have been a cleaner solution,
+     * but that could cause problems if the container cache was not refreshed after disabling or uninstalling the module.
+     */
+    private function checkUserRole(string $role): bool
+    {
+        if (null === $user = $this->getUser()) {
+            return false;
+        }
+
+        $userRoles = array_map(static function ($role): string {
+            if ($role instanceof Role) {
+                return $role->getRole();
+            }
+
+            return (string) $role;
+        }, $user->getRoles());
+
+        return in_array($role, $userRoles, true);
     }
 }
