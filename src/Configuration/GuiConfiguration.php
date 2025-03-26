@@ -10,12 +10,14 @@ use izi\prestashop\Configuration\DTO\Product\ProductRestrictions;
 use izi\prestashop\Configuration\DTO\Product\ProductRestrictionsCache;
 use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
+use izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface;
 use izi\prestashop\Repository\ProductRestrictionsRepositoryInterface;
 use izi\prestashop\Serializer\SafeDeserializerTrait;
 use izi\prestashop\Validator\Product\NotFromRestrictedManufacturer;
 use izi\prestashop\Validator\Product\NotInRestrictedCategory;
 use izi\prestashop\Validator\Product\NotOfType;
 use izi\prestashop\Validator\Product\NotWithRestrictedAttributes;
+use izi\prestashop\Validator\Product\NotWithRestrictedFeatures;
 use izi\prestashop\View\Widget\WidgetConfiguration;
 use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
@@ -26,7 +28,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 /**
  * @implements PersistentConfigurationInterface<GuiConfigurationInterface>
  */
-final class GuiConfiguration implements GuiConfigurationInterface, PersistentConfigurationInterface, ServiceSubscriberInterface
+final class GuiConfiguration implements GuiConfigurationInterface, PersistentConfigurationInterface, ServiceSubscriberInterface, ProductRestrictionsConfigurationInterface
 {
     use SafeDeserializerTrait;
 
@@ -38,6 +40,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
     private const PRODUCT_CARD_WIDGET_CONFIG = 'INPOST_PAY_PRODUCT_CARD_WIDGET_CONFIG';
     private const PRODUCT_CARD_HTML_STYLES = 'INPOST_PAY_PRODUCT_HTML_STYLES';
     private const PRODUCT_PAGE_RESTRICTIONS = 'INPOST_PAY_PRODUCT_PAGE_RESTRICTIONS';
+    private const DISALLOW_ORDERING_RESTRICTED_PRODUCTS = 'INPOST_PAY_DISALLOW_ORDERING_RESTRICTED_PRODUCTS';
 
     private const LOGIN_PAGE_WIDGET_DISPLAY = 'INPOST_PAY_SHOW_LOGIN_PAGE_WIDGET';
     private const LOGIN_PAGE_WIDGET_CONFIG = 'INPOST_PAY_LOGIN_PAGE_WIDGET_CONFIG';
@@ -147,6 +150,18 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
             $this->container->get('validator'),
             $this->getProductValidationConstraints()
         );
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getProductRestrictionConstraints(?int $shopId = null): array
+    {
+        if (!$this->getDisallowOrderingRestrictedProducts($shopId)) {
+            return [];
+        }
+
+        return $this->getProductValidationConstraints($shopId);
     }
 
     public function copy(): GuiConfigurationInterface
@@ -285,6 +300,16 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         return constant($classNamespace . '::' . $constantName);
     }
 
+    private function getDisallowOrderingRestrictedProducts(?int $shopId = null): bool
+    {
+        return (bool) $this->configuration->get(self::DISALLOW_ORDERING_RESTRICTED_PRODUCTS, $shopId);
+    }
+
+    private function setDisallowOrderingRestrictedProducts(bool $disallow, ?int $shopId = null): void
+    {
+        $this->configuration->set(self::DISALLOW_ORDERING_RESTRICTED_PRODUCTS, $disallow, $shopId);
+    }
+
     private function getProductRestrictions(): ProductRestrictions
     {
         $shopId = $this->getContextShopId();
@@ -295,11 +320,14 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         return $this
             ->getProductRestrictionsRepository()
             ->getProductRestrictions($shopId)
-            ->setProductTypes($productTypes);
+            ->setProductTypes($productTypes)
+            ->setBlockOrder($this->getDisallowOrderingRestrictedProducts($shopId));
     }
 
     private function updateProductRestrictions(ProductRestrictions $restrictions): void
     {
+        $this->setDisallowOrderingRestrictedProducts($restrictions->isBlockOrder());
+
         $repository = $this->getProductRestrictionsRepository();
 
         $repository->updateProductRestrictions($restrictions, $shopId = $this->getContextShopId());
@@ -314,10 +342,19 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
 
         foreach ($this->getContext()->getContextListShopID() as $shopId) {
             $shopId = (int) $shopId;
-            $cache = ($this->getCachedProductRestrictions($shopId))
+            $cache = $this
+                ->getCachedProductRestrictions($shopId)
                 ->setHasCategoryRestrictions($repository->hasCategoryRestrictions($shopId))
                 ->setHasManufacturerRestrictions($repository->hasManufacturerRestrictions($shopId))
                 ->setHasAttributeGroupRestrictions($repository->hasAttributeGroupRestrictions($shopId));
+
+            if (!$repository instanceof FeatureRestrictionsRepositoryInterface) {
+                @trigger_error(sprintf('Not implementing "%s" in "%s" is deprecated since version 2.2.0.', FeatureRestrictionsRepositoryInterface::class, get_class($repository)), E_USER_DEPRECATED);
+
+                $cache->setHasFeatureRestrictions(false);
+            } else {
+                $cache->setHasFeatureRestrictions($repository->hasFeatureRestrictions($shopId));
+            }
 
             $this->cacheProductRestrictions($cache, $shopId);
         }
@@ -370,9 +407,9 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         return $this->container->get('context');
     }
 
-    private function getProductValidationConstraints(): array
+    private function getProductValidationConstraints(?int $shopId = null): array
     {
-        $shopId = $this->getContextShopId();
+        $shopId = $shopId ?? $this->getContextShopId();
 
         return iterator_to_array($this->generateProductValidationConstraints($shopId));
     }
@@ -395,6 +432,10 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
 
         if ($restrictions->hasAttributeGroupRestrictions()) {
             yield new NotWithRestrictedAttributes(['shopId' => $shopId]);
+        }
+
+        if ($restrictions->hasFeatureRestrictions()) {
+            yield new NotWithRestrictedFeatures(['shopId' => $shopId]);
         }
     }
 }

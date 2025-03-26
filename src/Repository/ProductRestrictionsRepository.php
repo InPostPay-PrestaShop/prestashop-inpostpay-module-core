@@ -6,12 +6,14 @@ namespace izi\prestashop\Repository;
 
 use izi\prestashop\Configuration\DTO\Product\ProductRestrictions;
 use izi\prestashop\Database\Connection;
+use izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface;
 
-final class ProductRestrictionsRepository implements ProductRestrictionsRepositoryInterface
+final class ProductRestrictionsRepository implements ProductRestrictionsRepositoryInterface, FeatureRestrictionsRepositoryInterface
 {
     public const CATEGORY_RESTRICTIONS_TABLE = 'inpostizi_prod_category_bl';
     public const MANUFACTURER_RESTRICTIONS_TABLE = 'inpostizi_prod_manufacturer_bl';
     public const ATTRIBUTE_GROUP_RESTRICTIONS_TABLE = 'inpostizi_prod_attr_group_bl';
+    public const FEATURE_RESTRICTIONS_TABLE = 'inpostizi_prod_feature_bl';
 
     /**
      * @var Connection
@@ -83,16 +85,38 @@ final class ProductRestrictionsRepository implements ProductRestrictionsReposito
         return $this->exists($subQuery);
     }
 
+    public function isAnyFeatureRestricted(array $featureIds, ?int $shopId = null): bool
+    {
+        if ([] === $featureIds) {
+            return false;
+        }
+
+        $subQuery = $this
+            ->createByShopIdQueryBuilder(self::FEATURE_RESTRICTIONS_TABLE, $shopId)
+            ->where(sprintf('id_feature IN (%s)', implode(',', array_map('intval', $featureIds))));
+
+        return $this->exists($subQuery);
+    }
+
+    public function hasFeatureRestrictions(?int $shopId = null): bool
+    {
+        $subQuery = $this->createByShopIdQueryBuilder(self::FEATURE_RESTRICTIONS_TABLE, $shopId);
+
+        return $this->exists($subQuery);
+    }
+
     public function getProductRestrictions(?int $shopId = null): ProductRestrictions
     {
         $categoryIds = $this->getRestrictedCategoryIds($shopId);
         $manufacturerIds = $this->getRestrictedManufacturerIds($shopId);
         $attributeGroupIds = $this->getRestrictedAttributeGroupIds($shopId);
+        $featureIds = $this->getRestrictedFeatureIds($shopId);
 
         return (new ProductRestrictions())
             ->setCategoryIds($categoryIds)
             ->setManufacturerIds($manufacturerIds)
-            ->setAttributeGroupIds($attributeGroupIds);
+            ->setAttributeGroupIds($attributeGroupIds)
+            ->setFeatureIds($featureIds);
     }
 
     public function updateProductRestrictions(ProductRestrictions $productRestrictions, ?int $shopId = null): void
@@ -100,6 +124,7 @@ final class ProductRestrictionsRepository implements ProductRestrictionsReposito
         $this->updateRestrictedCategories($productRestrictions->getCategoryIds(), $shopId);
         $this->updateRestrictedManufacturers($productRestrictions->getManufacturerIds(), $shopId);
         $this->updateRestrictedAttributes($productRestrictions->getAttributeGroupIds(), $shopId);
+        $this->updateRestrictedFeatures($productRestrictions->getFeatureIds(), $shopId);
     }
 
     private function getRestrictedCategoryIds(?int $shopId): array
@@ -125,6 +150,15 @@ final class ProductRestrictionsRepository implements ProductRestrictionsReposito
         $qb = (new \DbQuery())
             ->select('id_attribute_group')
             ->from(self::ATTRIBUTE_GROUP_RESTRICTIONS_TABLE);
+
+        return $this->getRestrictions($qb, $shopId);
+    }
+
+    private function getRestrictedFeatureIds(?int $shopId): array
+    {
+        $qb = (new \DbQuery())
+            ->select('id_feature')
+            ->from(self::FEATURE_RESTRICTIONS_TABLE);
 
         return $this->getRestrictions($qb, $shopId);
     }
@@ -190,6 +224,27 @@ final class ProductRestrictionsRepository implements ProductRestrictionsReposito
         }, $attributeGroupIds);
 
         $this->connection->insert(self::ATTRIBUTE_GROUP_RESTRICTIONS_TABLE, $data);
+    }
+
+    /**
+     * @param int[] $featureIds
+     */
+    private function updateRestrictedFeatures(array $featureIds, ?int $shopId): void
+    {
+        $this->deleteByShopId(self::FEATURE_RESTRICTIONS_TABLE, $shopId);
+
+        if ([] === $featureIds) {
+            return;
+        }
+
+        $data = array_map(static function ($featureId) use ($shopId): array {
+            return [
+                'id_feature' => (int) $featureId,
+                'id_shop' => $shopId,
+            ];
+        }, $featureIds);
+
+        $this->connection->insert(self::FEATURE_RESTRICTIONS_TABLE, $data);
     }
 
     private function exists(\DbQuery $qb): bool

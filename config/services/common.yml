@@ -527,6 +527,7 @@ services:
   izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
   izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
   izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
   izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
   izi\prestashop\Repository\ProductRestrictionsRepository:
     class: izi\prestashop\Repository\ProductRestrictionsRepository
@@ -849,6 +850,7 @@ services:
       - '@izi\prestashop\Product\Price\LowestPriceProviderInterface'
       - '@izi\prestashop\PromoCode\PromoCodeProviderInterface'
       - '@izi\prestashop\PromoCode\AvailablePromotionsProviderInterface'
+      - '@inpost.izi.validator'
 
   izi\prestashop\Cache\ConfigurationCache:
     class: izi\prestashop\Cache\ConfigurationCache
@@ -1078,6 +1080,18 @@ services:
     arguments:
       - '@izi\prestashop\Payment\PaymentCurrencyChecker'
 
+  izi\prestashop\Validator\Cart\HasUnrestrictedProductValidator:
+    class: izi\prestashop\Validator\Cart\HasUnrestrictedProductValidator
+    tags:
+      - { name: validator.constraint_validator }
+
+  izi\prestashop\Validator\Product\UnrestrictedValidator:
+    class: izi\prestashop\Validator\Product\UnrestrictedValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Configuration\ProductRestrictionsConfigurationInterface'
+
   izi\prestashop\Environment\EnvironmentFactoryInterface: '@izi\prestashop\Environment\EnvironmentFactory'
   izi\prestashop\Environment\EnvironmentFactory:
     class: izi\prestashop\Environment\EnvironmentFactory
@@ -1154,7 +1168,10 @@ services:
 
   izi\prestashop\Mail\Resolver\OrderMailRecipientResolver:
     class: izi\prestashop\Mail\Resolver\OrderMailRecipientResolver
+    public: false
     arguments:
       - '@izi\prestashop\Repository\OrderDataRepositoryInterface'
       - '@inpost.izi.object_model.order_repository'
 
+  izi\prestashop\Configuration\ProductRestrictionsConfigurationInterface:
+    alias: izi\prestashop\Configuration\GuiConfiguration

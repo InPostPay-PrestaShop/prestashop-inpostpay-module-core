@@ -42,8 +42,10 @@ use izi\prestashop\PromoCode\AvailablePromotionsProviderInterface;
 use izi\prestashop\PromoCode\CartRulePromoCodeProvider;
 use izi\prestashop\PromoCode\NullAvailablePromotionsProvider;
 use izi\prestashop\PromoCode\PromoCodeProviderInterface;
+use izi\prestashop\Validator\Product\Unrestricted;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Core\Cart\Calculator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @todo split into separate services
@@ -135,6 +137,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private $cartSummary;
 
+    /**
+     * @var ValidatorInterface|null
+     */
+    private $validator;
+
     public function __construct(
         \Cart $cart,
         ContextManager $contextManager,
@@ -145,7 +152,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         ?ImageRetriever $imageRetriever = null,
         ?LowestPriceProviderInterface $lowestPriceProvider = null,
         ?PromoCodeProviderInterface $promoCodeProvider = null,
-        ?AvailablePromotionsProviderInterface $availablePromotionsProvider = null
+        ?AvailablePromotionsProviderInterface $availablePromotionsProvider = null,
+        ?ValidatorInterface $validator = null
     ) {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
@@ -157,6 +165,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $this->lowestPriceProvider = $lowestPriceProvider ?? new NullLowestPriceProvider();
         $this->promoCodeProvider = $promoCodeProvider ?? CartRulePromoCodeProvider::create();
         $this->availablePromotionsProvider = $availablePromotionsProvider ?? new NullAvailablePromotionsProvider();
+        $this->validator = $validator;
     }
 
     /**
@@ -333,7 +342,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $this->getProductAttributes($product),
             $this->getProductVariants($product),
             $imageUrls->getAdditionalImages(),
-            $related ? null : $this->getDeliveryProduct($model, $promoPrice ?? $basePrice, $quantity, (float) $product['weight']),
+            $related ? null : $this->getDeliveryProduct($model, $promoPrice ?? $basePrice, $quantity, (float) $product['weight'], $product),
             $related ? $this->getDeliveryRelatedProducts($model, $promoPrice ?? $basePrice, $quantity) : null
         );
     }
@@ -852,13 +861,23 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     /**
      * @return DeliveryProduct[]|null
      */
-    private function getDeliveryProduct(\Product $product, Price $price, Quantity $quantity, float $weight): ?array
+    private function getDeliveryProduct(\Product $product, Price $price, Quantity $quantity, float $weight, array $productData): ?array
     {
         $hasUnavailable = false;
         $productDeliveryDetails = [];
 
+        $isRestricted = false;
+        if (!empty($this->validator)) {
+            $violations = $this->validator->validate($productData, new Unrestricted((int) $productData['id_shop']));
+            $isRestricted = $violations->count() > 0;
+        }
+
         foreach (DeliveryType::cases() as $deliveryType) {
-            $productDelivery = $this->createCartProductDeliveryDetails($deliveryType, $product, $price, $quantity, $weight);
+            if ($isRestricted) {
+                $productDelivery = new DeliveryProduct($deliveryType, false);
+            } else {
+                $productDelivery = $this->createCartProductDeliveryDetails($deliveryType, $product, $price, $quantity, $weight);
+            }
             $productDeliveryDetails[] = $productDelivery;
 
             if (!$productDelivery->isDeliveryAvailable()) {
