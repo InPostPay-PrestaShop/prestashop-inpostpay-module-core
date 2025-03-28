@@ -331,7 +331,8 @@ final class HotProductController extends AbstractConfigurationController
 
     private static function getProductsReadPermission(): array
     {
-        return [PageVoter::READ, 'AdminProducts'];
+        // appending underscore to controller name was required before PS 1.7.5
+        return [PageVoter::READ, 'AdminProducts_'];
     }
 
     private function handleUpdateError(\Throwable $e, Request $request): void
