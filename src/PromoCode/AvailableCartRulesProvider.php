@@ -8,6 +8,7 @@ use izi\prestashop\Common\Basket\AvailablePromotion;
 use izi\prestashop\Common\Basket\PromoDetails;
 use izi\prestashop\Common\Basket\PromotionType;
 use izi\prestashop\Configuration\PromoCodesConfigurationInterface;
+use izi\prestashop\ObjectModel\Repository\CartRuleRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 
 final class AvailableCartRulesProvider implements AvailablePromotionsProviderInterface
@@ -30,18 +31,25 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
     private $cmsRepository;
 
     /**
+     * @var CartRuleRepository
+     */
+    private $cartRuleRepository;
+
+    /**
      * @var \Context
      */
     private $context;
 
     /**
      * @param ObjectRepositoryInterface<\CMS> $cmsRepository
+     * @param CartRuleRepository $cartRuleRepository
      */
-    public function __construct(CartRuleOptionsRepositoryInterface $repository, PromoCodesConfigurationInterface $configuration, ObjectRepositoryInterface $cmsRepository, \Context $context)
+    public function __construct(CartRuleOptionsRepositoryInterface $repository, PromoCodesConfigurationInterface $configuration, ObjectRepositoryInterface $cmsRepository, ObjectRepositoryInterface $cartRuleRepository, \Context $context)
     {
         $this->repository = $repository;
         $this->configuration = $configuration;
         $this->cmsRepository = $cmsRepository;
+        $this->cartRuleRepository = $cartRuleRepository;
         $this->context = $context;
     }
 
@@ -87,12 +95,22 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
             return (int) $cartRule['id_cart_rule'];
         }, $cart->getCartRules(\CartRule::FILTER_ACTION_ALL, false));
 
-        return array_filter($discounts, static function ($discount) use ($cartRuleIdsToSkip) {
+        return array_filter($discounts, function ($discount) use ($cartRuleIdsToSkip) {
             if ('' === (string) $discount['code']) {
                 return false;
             }
 
-            return !in_array((int) $discount['id_cart_rule'], $cartRuleIdsToSkip, true);
+            if ($discount['carrier_restriction']) {
+                return false;
+            }
+
+            $cartRuleId = (int) $discount['id_cart_rule'];
+
+            if ($discount['country_restriction'] && !$this->cartRuleRepository->isCompatibleWithCountry($cartRuleId, 'PL')) {
+                return false;
+            }
+
+            return !in_array($cartRuleId, $cartRuleIdsToSkip, true);
         });
     }
 
