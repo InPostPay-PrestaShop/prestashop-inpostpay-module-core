@@ -120,6 +120,10 @@ final class UpdateOrderHandler implements UpdateOrderHandlerInterface
 
     private function createOrderPayment(\Order $order, string $transactionId): void
     {
+        // refresh order data in case it has been updated using another Order object in hooks triggered by status change
+        $order = $this->repository->find((int) $order->id);
+
+        // this also causes Order update!
         if (!$order->addOrderPayment($order->total_paid, null, $transactionId)) {
             throw new \RuntimeException('Could not create order payment.');
         }
