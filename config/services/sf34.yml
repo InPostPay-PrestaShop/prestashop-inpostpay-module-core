@@ -15,6 +15,7 @@ services:
         Country: '@inpost.izi.object_model.country_repository'
         Currency: '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
         Carrier: '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+        CartRule: '@izi\prestashop\ObjectModel\Repository\CartRuleRepository'
         Combination: '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
         Product: '@izi\prestashop\ObjectModel\Repository\ProductRepository'
         Configuration: '@izi\prestashop\ObjectModel\Repository\ConfigurationRepository'

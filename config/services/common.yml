@@ -388,6 +388,14 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  izi\prestashop\ObjectModel\Repository\CartRuleRepository:
+    class: izi\prestashop\ObjectModel\Repository\CartRuleRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: CartRule }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   izi\prestashop\ObjectModel\Repository\RangePriceRepository:
     class: izi\prestashop\ObjectModel\Repository\RangePriceRepository
     public: false
@@ -1055,6 +1063,7 @@ services:
       - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
       - '@izi\prestashop\Configuration\PromoCodesConfigurationInterface'
       - '@izi\prestashop\ObjectModel\Repository\CmsPageRepository'
+      - '@izi\prestashop\ObjectModel\Repository\CartRuleRepository'
       - '@inpost.izi.context'
 
   inpost.izi.request_stack:
