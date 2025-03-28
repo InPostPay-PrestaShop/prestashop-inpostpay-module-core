@@ -23,8 +23,8 @@
                 <tr class="column-headers">
                   <th scope="col">{{ 'ID'|trans({}, 'Admin.Global') }}</th>
                   <th scope="col">{{ 'Product'|trans({}, 'Admin.Global') }}</th>
-                  <th scope="col">{{ 'Available from'|legacy_trans }}</th>
-                  <th scope="col">{{ 'Available to'|legacy_trans }}</th>
+                  <th scope="col">{{ 'Available from'|legacy_trans('updatehotproducttype') }}</th>
+                  <th scope="col">{{ 'Available to'|legacy_trans('updatehotproducttype') }}</th>
 
                   {% if is_multistore_context %}
                     <th scope="col">{{ 'Shop'|trans({}, 'Admin.Global') }}</th>
@@ -53,7 +53,7 @@
                       <td>
                         {% if product.active %}
                           {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
-                              'content': 'Active'|trans({}, 'Admin.Global'),
+                              'content': 'Active'|legacy_trans,
                               'state': 'success',
                               'is_legacy': is_legacy_admin_page
                             }
