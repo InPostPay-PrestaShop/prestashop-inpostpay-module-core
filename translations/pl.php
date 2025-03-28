@@ -128,8 +128,8 @@ $_MODULE['<{inpostizi}prestashop>messageoptionstype_5a584bae80c34e6ee9b177aa167e
 $_MODULE['<{inpostizi}prestashop>messageoptionstype_feba3b9ea8ec801f50840a9b309c7d03'] = 'Wartość wyrażeń zawartych w podwójnych nawiasach klamrowych jest obliczana (np. `{{ is_pww ? \"tak\" : \"nie\" }}` wypisze \"tak\" jeżeli klient wybrał usługę Paczka w Weekend lub \"nie\" w przeciwnym wypadku).';
 $_MODULE['<{inpostizi}prestashop>messageoptionstype_144e4eb4e0963dde914bedb08eebf335'] = 'Bardziej szczegółowe informacje można znaleźć w instrukcji modułu.';
 $_MODULE['<{inpostizi}prestashop>combinationbyattributeschoicetype_52c6dba9feba73a163b3d71faf11322b'] = 'Kombinacja produktu z wybranymi atrybutami nie istnieje.';
-$_MODULE['<{inpostizi}prestashop>productrestrictionstype_2a6a335bd119e7c166a661b670685b3f'] = 'Nie pozwól na zamówienie produktów z ograniczeniami.';
-$_MODULE['<{inpostizi}prestashop>productrestrictionstype_5f0f1ca46799330f5e8c4285f5f17676'] = 'Jeżeli włączone, złożenie zamówienia przez aplikację mobilną nie będzie możliwe w przypadku, gdy koszyk zawiera produkt spełniający któryś z poniższych warunków.';
+$_MODULE['<{inpostizi}prestashop>productrestrictionstype_94e0f2332e0b60a918077db74b15cd80'] = 'Nie zezwalaj na zamówienia';
+$_MODULE['<{inpostizi}prestashop>productrestrictionstype_5f0f1ca46799330f5e8c4285f5f17676'] = 'Jeżeli włączone, złożenie zamówienia przez aplikację mobilną nie będzie możliwe w przypadku, gdy koszyk zawiera produkt spełniający którykolwiek z poniższych warunków.';
 $_MODULE['<{inpostizi}prestashop>productrestrictionstype_3d19aea4e2d382e85165bbf71cef1e05'] = 'Typ produktu';
 $_MODULE['<{inpostizi}prestashop>productrestrictionstype_713432cf48c93262b4771c212040118d'] = 'Widget nie zostanie wyświetlony jeżeli kombinacja produktu ma atrybuty pochodzące z wybranych grup.';
 $_MODULE['<{inpostizi}prestashop>productrestrictionstype_ec64be38e5581c107b00cbffbada2973'] = 'Widget nie zostanie wyświetlony jeżeli produkt ma jakąkolwiek z wybranych cech.';

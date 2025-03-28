@@ -53,7 +53,7 @@ final class ProductRestrictionsType extends AbstractType
         $builder
             ->add('blockOrder', $switchType, [
                 'empty_data' => false,
-                'label' => $this->translator->l('Disallow ordering restricted products', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->l('Disallow orders', self::TRANSLATION_SOURCE),
                 'help' => $this->translator->l('If enabled, placing an order via the mobile app will not be possible if the cart contains  a product that meets any of the conditions below.', self::TRANSLATION_SOURCE),
             ])
             ->add('productTypes', ChoiceType::class, [
