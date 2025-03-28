@@ -1,17 +1,13 @@
 import TomSelect from 'tom-select';
 
-const select = document.getElementById('create_hot_product_productId');
-delete select.dataset.toggle; // w domyślnym theme'ie we wczesnych PS 1.7 do list wyboru dodawany jest data atrybut `data-toggle="select2"` 😨
-
 /**
- * @type {HTMLElement}
+ * @param {HTMLSelectElement} select
  */
-
-$(() => {
+const configureAutocomplete = (select) => {
   select.classList.remove('custom-select');
   const combinationChoiceWrapper = document.getElementById('combination_choice_wrapper');
 
-  // zerżnięte z UX autocomplete
+  // zapożyczone z UX autocomplete
   const tomSelectInstance = new TomSelect('#create_hot_product_productId', {
     items: [select.value],
     plugins: {
@@ -97,6 +93,20 @@ $(() => {
         combinationChoiceWrapper.innerHTML = html.getElementById('combination_choice_wrapper').innerHTML;
       });
   });
+}
+
+/**
+ * @type {HTMLSelectElement}
+ */
+const select = document.getElementById('create_hot_product_productId');
+if (null !== select) {
+  delete select.dataset.toggle; // w domyślnym theme'ie we wczesnych PS 1.7 do list wyboru dodawany jest data atrybut `data-toggle="select2"` 😨
+}
+
+$(() => {
+  if (null !== select) {
+    configureAutocomplete(select);
+  }
 
   const $datePickers = $('.js-hot-products-datepicker-input');
   $.each($datePickers, (i, picker) => {

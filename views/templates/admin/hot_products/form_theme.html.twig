@@ -6,15 +6,16 @@
   {{ include("@Twig/form_max_length.html.twig", {"attr": attr}, ignore_missing = true) }}
 {%- endblock form_widget_simple -%}
 
-{% block date_picker_widget %}
-  {% spaceless %}
-    <div class="input-group">
-      <input type="text" class="form-control js-hot-products-datepicker-input" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
-      <div class="input-group-append input-group-addon">
-        <div class="input-group-text">
-          <i class="material-icons">date_range</i>
-        </div>
+{%- block date_picker_widget -%}
+  {% if date_format is defined %}
+    {% set attr = attr|merge({'data-format': date_format}) %}
+  {% endif %}
+  <div class="input-group">
+    <input type="text" class="form-control js-hot-products-datepicker-input" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+    <div class="input-group-append input-group-addon">
+      <div class="input-group-text">
+        <i class="material-icons">date_range</i>
       </div>
     </div>
-  {% endspaceless %}
+  </div>
 {% endblock date_picker_widget %}
