@@ -2,6 +2,8 @@
 imports:
   - { resource: services/common.yml }
   - { resource: services/common_admin.yml }
+  - { resource: services/admin/form.yml }
+  - { resource: services/admin/form.php, ignore_errors: true }
 
 services:
   izi\prestashop\CommandBus:
@@ -425,26 +427,6 @@ services:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
       - '@inpost.izi.context'
       - '@izi\prestashop\Translation\LegacyTranslator'
-
-  izi\prestashop\Form\TypeExtension\DatePickerCompatibilityTypeExtension:
-    class: izi\prestashop\Form\TypeExtension\DatePickerCompatibilityTypeExtension
-    tags:
-      - { name: form.type_extension, extended_type: PrestaShopBundle\Form\Admin\Type\DatePickerType }
-
-  izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension:
-    class: izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension
-    tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\TimeType }
-
-  izi\prestashop\Form\TypeExtension\HelpTextExtension:
-    class: izi\prestashop\Form\TypeExtension\HelpTextExtension
-    tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
-
-  izi\prestashop\Form\TypeExtension\UnitTypeExtension:
-    class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
-    tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }
 
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
