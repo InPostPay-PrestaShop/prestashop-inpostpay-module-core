@@ -8,6 +8,8 @@ use izi\prestashop\Common\Basket\AvailablePromotion;
 
 interface AvailablePromotionsProviderInterface
 {
+    public const MAX_PROMO_COUNT = 5;
+
     /**
      * @return AvailablePromotion[]
      */

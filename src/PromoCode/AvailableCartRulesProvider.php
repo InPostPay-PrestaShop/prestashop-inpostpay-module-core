@@ -59,9 +59,21 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
             return [];
         }
 
-        return array_filter(array_map(function (array $cartRule) use ($cart) {
-            return $this->mapPromotionData($cart, $cartRule);
-        }, $cartRules));
+        $promotions = [];
+
+        foreach ($cartRules as $cartRule) {
+            if (null === $promotion = $this->mapPromotionData($cart, $cartRule)) {
+                continue;
+            }
+
+            $promotions[] = $promotion;
+
+            if (count($promotions) >= self::MAX_PROMO_COUNT) {
+                break;
+            }
+        }
+
+        return $promotions;
     }
 
     private function mapPromotionData(\Cart $cart, array $cartRule): ?AvailablePromotion
@@ -95,23 +107,33 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
             return (int) $cartRule['id_cart_rule'];
         }, $cart->getCartRules(\CartRule::FILTER_ACTION_ALL, false));
 
-        return array_filter($discounts, function ($discount) use ($cartRuleIdsToSkip) {
+        $cartRules = array_filter($discounts, function ($discount) use ($cartRuleIdsToSkip) {
             if ('' === (string) $discount['code']) {
                 return false;
             }
 
-            if ($discount['carrier_restriction']) {
+            if (!empty($discount['carrier_restriction'])) {
                 return false;
             }
 
             $cartRuleId = (int) $discount['id_cart_rule'];
 
-            if ($discount['country_restriction'] && !$this->cartRuleRepository->isCompatibleWithCountry($cartRuleId, 'PL')) {
+            if (!empty($discount['country_restriction']) && !$this->cartRuleRepository->isCompatibleWithCountry($cartRuleId, 'PL')) {
                 return false;
             }
 
             return !in_array($cartRuleId, $cartRuleIdsToSkip, true);
         });
+
+        usort($cartRules, static function (array $a, array $b): int {
+            if (0 !== $result = $a['priority'] <=> $b['priority']) {
+                return $result;
+            }
+
+            return $b['id_cart_rule'] <=> $a['id_cart_rule'];
+        });
+
+        return $cartRules;
     }
 
     private function getPromoDetails(\Cart $cart, int $cartRuleId): ?PromoDetails
