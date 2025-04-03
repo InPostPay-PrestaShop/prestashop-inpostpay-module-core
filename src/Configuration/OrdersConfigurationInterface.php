@@ -29,5 +29,5 @@ interface OrdersConfigurationInterface
      */
     public function getAvailablePaymentOptions(?int $shopId = null): array;
 
-    public function getMessageFormat(?int $shopId): string;
+    public function getMessageFormat(?int $shopId = null): string;
 }
