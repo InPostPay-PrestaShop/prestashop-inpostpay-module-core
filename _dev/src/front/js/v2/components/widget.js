@@ -13,6 +13,12 @@ const widget = () => {
       throw new Error('Widget is not initialized yet, use init() method first');
     }
 
+    if (typeof instance.rerender === 'function') {
+      instance.rerender();
+
+      return;
+    }
+
     instance.refresh();
   };
 
