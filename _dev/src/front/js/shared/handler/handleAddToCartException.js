@@ -1,5 +1,5 @@
-import selectorsMap from "../map/selectorsMap";
-import buildAlertBlock from "../utils/buildAlertBlock";
+import selectorsMap from '../map/selectorsMap';
+import buildAlertBlock from '../utils/buildAlertBlock';
 
 /**
  * @param error {Error}

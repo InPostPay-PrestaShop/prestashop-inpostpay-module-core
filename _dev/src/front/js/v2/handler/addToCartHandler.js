@@ -1,4 +1,4 @@
-import useHttpRequest from '..//http/base/useHttpRequest';
+import useHttpRequest from '../http/base/useHttpRequest';
 import getBindingApiKey from './getBindingApiKey';
 import handleAddToCartException from '../../shared/handler/handleAddToCartException';
 
