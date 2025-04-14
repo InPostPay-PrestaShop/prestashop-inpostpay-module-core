@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
-use izi\prestashop\Hook\AliasedHookInterface;
+use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -15,34 +14,25 @@ use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-final class DisplayProductAdditionalInfo implements AliasedHookInterface
+final class DisplayProductAdditionalInfo implements PrestaShopVersionAwareHookInterface
 {
     use ProductWidgetRendererTrait;
 
     public const HOOK_NAME = 'displayProductAdditionalInfo';
-    private const HOOK_ALIAS = 'displayProductButtons';
 
     /**
      * @var RendererInterface
      */
     private $renderer;
 
-    public function __construct(
-        GuiConfigurationInterface $configuration,
-        GeneralConfigurationInterface $generalConfiguration,
-        WidgetInterface $module,
-        RendererInterface $renderer,
-        \Context $context,
-        BasketSessionRepositoryInterface $basketSessionRepository,
-        ?ApiConfigurationInterface $apiConfiguration = null
-    ) {
+    public function __construct(GuiConfigurationInterface $configuration, GeneralConfigurationInterface $generalConfiguration, WidgetInterface $module, RendererInterface $renderer, \Context $context, BasketSessionRepositoryInterface $basketSessionRepository)
+    {
         $this->configuration = $configuration;
         $this->generalConfiguration = $generalConfiguration;
         $this->module = $module;
         $this->renderer = $renderer;
         $this->context = $context;
         $this->basketSessionRepository = $basketSessionRepository;
-        $this->apiConfiguration = $apiConfiguration;
     }
 
     public static function getHookName(): string
@@ -50,12 +40,9 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
         return self::HOOK_NAME;
     }
 
-    public static function getAliases(): array
+    public static function getVersionRange(): VersionRange
     {
-        return [
-            self::HOOK_ALIAS => new VersionRange('1.7.0', '1.7.1'),
-            self::HOOK_NAME => new VersionRange('1.7.1', '1.7.6'),
-        ];
+        return new VersionRange(null, '1.7.6');
     }
 
     /**
@@ -73,11 +60,8 @@ final class DisplayProductAdditionalInfo implements AliasedHookInterface
             return '';
         }
 
-        $refresh = $this->shouldRenderCacheableHookContent($parameters['request'] ?? null);
-
-        return $this->renderer->render('module:inpostizi/views/templates/hook/productButtonWidget.tpl', [
-            'widget' => $refresh ? '' : $this->renderWidget($product, $parameters, self::HOOK_NAME),
-            'refresh' => $refresh,
+        return $this->renderer->render('module:inpostizi/views/templates/front/productButtonWidget.tpl', [
+            'widget' => $this->renderWidget($product, $parameters, self::HOOK_NAME),
             'styles' => $this->getHtmlStyles(),
             'hookName' => self::HOOK_NAME,
             'idProduct' => $product['id_product'],

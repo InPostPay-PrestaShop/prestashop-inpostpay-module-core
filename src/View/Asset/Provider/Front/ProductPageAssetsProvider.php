@@ -39,12 +39,6 @@ final class ProductPageAssetsProvider implements AssetsProviderInterface
             $assets->addStyleSheet('product.css');
         }
 
-        $product = $this->context->controller->getProduct();
-
-        if (\Validate::isLoadedObject($product)) {
-            $assets->addJavaScriptVariable('inpostizi_product_page_id_product', (int) $product->id);
-        }
-
         return $assets;
     }
 }

@@ -34,7 +34,6 @@ final class EventStreamResponse extends StreamedResponse
             @apache_setenv('no-gzip', '1');
         }
 
-        ob_end_clean();
         gc_enable();
         ob_implicit_flush(80000 <= PHP_VERSION_ID ? true : 1);
         session_write_close();

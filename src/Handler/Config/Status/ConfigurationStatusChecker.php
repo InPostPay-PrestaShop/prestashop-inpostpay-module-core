@@ -79,10 +79,14 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
                 yield sprintf($this->translator->l('API access problem: %s', self::TRANSLATION_SOURCE), $violation->getMessage());
             }
         }
+
+        if (null === $this->apiConfiguration->getMerchantClientId()) {
+            yield $this->translator->l('Merchant client ID configuration is missing. The InPost Pay Widget will not be displayed.', self::TRANSLATION_SOURCE);
+        }
     }
 
     private function isAnyPaymentOptionAvailable(): bool
     {
-        return [] !== OrdersConfiguration::normalizeAvailablePaymentOptions($this->ordersConfiguration);
+        return [] !== $this->ordersConfiguration->getAvailablePaymentOptions();
     }
 }

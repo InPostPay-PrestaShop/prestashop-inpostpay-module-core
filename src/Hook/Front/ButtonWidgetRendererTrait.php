@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Common\BindingPlace;
-use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
-use izi\prestashop\Configuration\WidgetDisplayConfigurationInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
 trait ButtonWidgetRendererTrait
@@ -24,7 +22,7 @@ trait ButtonWidgetRendererTrait
 
     private function renderWidget(BindingPlace $bindingPlace, array $parameters, ?string $hookName = null): string
     {
-        $configuration = $this->getConfigurationForBinding($bindingPlace);
+        $configuration = $this->configuration->getDisplayConfiguration($bindingPlace);
 
         if (!$configuration->isDisplayed()) {
             return '';
@@ -39,7 +37,7 @@ trait ButtonWidgetRendererTrait
 
     private function getHtmlStyles(BindingPlace $bindingPlace): array
     {
-        $configuration = $this->getConfigurationForBinding($bindingPlace);
+        $configuration = $this->configuration->getDisplayConfiguration($bindingPlace);
         $styles = $configuration->getHtmlStyles();
 
         if ($styles instanceof \Traversable) {
@@ -47,19 +45,5 @@ trait ButtonWidgetRendererTrait
         }
 
         return $styles;
-    }
-
-    private function getConfigurationForBinding(BindingPlace $bindingPlace): WidgetDisplayConfigurationInterface
-    {
-        switch ($bindingPlace) {
-            case BindingPlace::BasketSummary():
-            case BindingPlace::LoginPage():
-            case BindingPlace::RegisterFormPage():
-            case BindingPlace::CheckoutPage():
-            case BindingPlace::MiniCartPage():
-                return GuiConfiguration::getDisplayConfig($this->configuration, $bindingPlace);
-            default:
-                throw new \DomainException(sprintf('Unsupported binding place "%s".', $bindingPlace->value));
-        }
     }
 }

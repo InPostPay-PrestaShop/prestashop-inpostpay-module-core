@@ -97,7 +97,7 @@
 {% block javascripts %}
   {{ parent() }}
 
-  {% if merchant_client_id is not same as(null) %}
+  {% if merchant_client_id %}
     <script type="application/javascript">
       window.inpostizi_merchant_client_id = '{{ merchant_client_id|e('js') }}';
     </script>

@@ -3,10 +3,7 @@
     {{ form_row(formDisplay) }}
   </div>
 
-  {% set style_forms = ['minWidthPx', 'maxWidthPx', 'minHeightPx'] %}
-  {% if form.vars.for_v2 is defined and form.vars.for_v2 %}
-    {% set style_forms = style_forms|merge(['alignment']) %}
-  {% endif %}
+  {% set style_forms = ['maxWidthPx'] %}
 
   {% for name, child in form %}
     {% if name not in style_forms %}
@@ -18,11 +15,15 @@
 </div>
 
 <div class="row">
+  <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
+    {{ form_row(alignmentForm) }}
+  </div>
+
   {% for child in form %}
     {% if not child.rendered %}
-    <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
-      {{ form_row(child) }}
-    </div>
+      <div class="col-xl-3 col-sm-6 col-12 col-xs-12 mt-2">
+        {{ form_row(child) }}
+      </div>
     {% endif %}
   {% endfor %}
 </div>

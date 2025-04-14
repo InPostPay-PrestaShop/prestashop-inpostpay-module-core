@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
@@ -30,12 +29,6 @@ final class AdminKernel extends Kernel
 {
     use MicroKernelTrait;
 
-    private const IGNORED_ANNOTATION_NAMES = [
-        'template',
-        'extends',
-        'readonly',
-    ];
-
     private $logDir;
     private $cacheDir;
     private $secret;
@@ -54,8 +47,6 @@ final class AdminKernel extends Kernel
         $this->name = 'inpostizi';
 
         parent::__construct($kernel->getEnvironment(), $kernel->isDebug());
-
-        $this->registerIgnoredAnnotationNames();
     }
 
     public function registerBundles(): iterable
@@ -158,12 +149,5 @@ final class AdminKernel extends Kernel
     private function getConfigDir(): string
     {
         return __DIR__ . '/../config';
-    }
-
-    private function registerIgnoredAnnotationNames(): void
-    {
-        foreach (self::IGNORED_ANNOTATION_NAMES as $name) {
-            AnnotationReader::addGlobalIgnoredName($name);
-        }
     }
 }

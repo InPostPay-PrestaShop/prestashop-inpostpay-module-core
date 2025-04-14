@@ -16,13 +16,11 @@ use izi\prestashop\Configuration\AdvancedConfiguration;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
-use izi\prestashop\Configuration\DTO\ApiConfiguration;
 use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Configuration\Initializer\ConfigurationInitializerInterface;
 use izi\prestashop\Configuration\ShippingConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
-use izi\prestashop\Environment\EnvironmentType;
 use izi\prestashop\Form\Type\AdvancedConfigurationType;
 use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
@@ -54,27 +52,28 @@ final class ConfigurationController extends AbstractController
     private $context;
 
     /**
+     * @var ApiConfigurationInterface
+     */
+    private $apiConfiguration;
+
+    /**
+     * @var bool
+     */
+    private $debug;
+
+    /**
      * @param iterable<ConfigurationInitializerInterface> $configInitializers
      */
-    public function __construct(LegacyTranslator $translator, \Context $context, iterable $configInitializers = [])
+    public function __construct(LegacyTranslator $translator, \Context $context, iterable $configInitializers, ApiConfigurationInterface $apiConfiguration, bool $debug = false)
     {
         $this->translator = $translator;
         $this->context = $context;
+        $this->apiConfiguration = $apiConfiguration;
+        $this->debug = $debug;
 
         foreach ($configInitializers as $initializer) {
             $initializer->init();
         }
-    }
-
-    public static function getSubscribedServices(): array
-    {
-        $services = is_callable(['parent', 'getSubscribedServices'])
-            ? parent::getSubscribedServices()
-            : [];
-
-        return $services + [
-            ApiConfigurationInterface::class,
-        ];
     }
 
     /**
@@ -164,17 +163,13 @@ final class ConfigurationController extends AbstractController
             }
         }
 
-        $apiConfig = $this->getApiConfiguration();
-        $environment = $apiConfig->getEnvironment();
-        $merchantClientId = is_callable([$environment, 'getWidgetVersion']) && '2.0' === $environment->getWidgetVersion() ? $apiConfig->getMerchantClientId() : null;
-
         return $this->render('@Modules/inpostizi/views/templates/admin/config/gui.html.twig', [
             'form' => $form->createView(),
             'layoutTitle' => $this->translator->l('GUI configuration', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
             'is_legacy_admin_page' => $this->isLegacyAdminPage(),
-            'widget_js_uri' => $environment->getWidgetJavaScriptUri(),
-            'merchant_client_id' => $merchantClientId,
+            'widget_js_uri' => $this->apiConfiguration->getEnvironment()->getWidgetJavaScriptUri(),
+            'merchant_client_id' => $this->apiConfiguration->getMerchantClientId(),
         ]);
     }
 
@@ -349,7 +344,7 @@ final class ConfigurationController extends AbstractController
 
     private function handleException(\Exception $e): void
     {
-        if ($this->getParameter('kernel.debug')) {
+        if ($this->debug) {
             throw $e;
         }
 
@@ -369,14 +364,5 @@ final class ConfigurationController extends AbstractController
         }
 
         return $hasAccess;
-    }
-
-    private function getApiConfiguration(): ApiConfigurationInterface
-    {
-        if ($this->has(ApiConfigurationInterface::class)) {
-            return $this->get(ApiConfigurationInterface::class);
-        }
-
-        return new ApiConfiguration(EnvironmentType::Sandbox());
     }
 }

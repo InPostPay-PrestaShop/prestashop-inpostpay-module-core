@@ -6,23 +6,22 @@ namespace izi\prestashop\View\Asset\Provider\Front;
 
 use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
-use izi\prestashop\Configuration\WidgetVersionCheckerTrait;
 use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\View\Asset\Provider\AssetsProviderInterface;
 use izi\prestashop\View\Asset\Provider\DTO\Assets;
 
-/**
- * @internal
- */
 final class WidgetConfigurationProvider implements AssetsProviderInterface
 {
-    use WidgetVersionCheckerTrait;
-
     /**
      * @var \Context
      */
     private $context;
+
+    /**
+     * @var ApiConfigurationInterface
+     */
+    private $apiConfiguration;
 
     /**
      * @var GeneralConfigurationInterface
@@ -45,12 +44,8 @@ final class WidgetConfigurationProvider implements AssetsProviderInterface
         $this->repository = $repository;
     }
 
-    public function getAssets(): ?Assets
+    public function getAssets(): Assets
     {
-        if (!$this->isWidgetV2Enabled()) {
-            return null;
-        }
-
         $fetchAfterRender = $this->shouldFetchBindingKeyAfterPageRender();
         $bindingApiKey = $fetchAfterRender ? null : $this->getBindingApiKey();
 
@@ -65,10 +60,6 @@ final class WidgetConfigurationProvider implements AssetsProviderInterface
         $cartId = (int) $this->context->cart->id;
 
         if (null === $session = $this->repository->findByEntityId($cartId)) {
-            return null;
-        }
-
-        if (!is_callable([$session, 'getBindingApiKey'])) {
             return null;
         }
 

@@ -36,35 +36,6 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             'methods' => ['GET'],
             'controller' => [WidgetController::class, 'getOrderConfirmationUrl'],
         ],
-        [
-            'path' => '/inpost/v1/izi/merchant/basket/get/link',
-            'controller' => [WidgetController::class, 'getDeepLink'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/basket/confirmation',
-            'controller' => [WidgetController::class, 'getIsBound'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/basket/delete/binding',
-            'methods' => ['DELETE'],
-            'controller' => [WidgetController::class, 'deleteBinding'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/order/confirmation/get',
-            'controller' => [WidgetController::class, 'getOrderComplete'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/widget/get/{hook}/{productId}',
-            'prefix' => '/inpost/v1/izi/merchant/widget/get',
-            'regex' => '#^/inpost/v1/izi/merchant/widget/get/(?<hook>\w+)/(?<productId>\d+)$#',
-            'controller' => [WidgetController::class, 'getWidgetHook'],
-        ],
-        [
-            'path' => '/inpost/v1/izi/merchant/basket/post/binding/{prefix}/{number}',
-            'prefix' => '/inpost/v1/izi/merchant/basket/post/binding',
-            'regex' => '#^/inpost/v1/izi/merchant/basket/post/binding(?:/(?<prefix>.+?)(?:/(?<number>.+?))?)?$#',
-            'controller' => [WidgetController::class, 'getPayData'],
-        ],
     ];
 
     private const API_ROUTES = [
@@ -131,13 +102,17 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 
     protected $content_only = true;
 
+    private $outputBuffer = '';
+
     public function postProcess()
     {
         $this->registerErrorHandler();
+        ob_start([$this, 'handleOutput'], 1);
 
         $request = $this->module->getCurrentRequest();
 
         $response = $this->handle($request);
+        Response::closeOutputBuffers(0, false);
         $response->send();
 
         exit;
@@ -402,5 +377,31 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             E_RECOVERABLE_ERROR => LogLevel::CRITICAL,
             E_ERROR => LogLevel::CRITICAL,
         ]);
+    }
+
+    private function handleOutput(string $buffer, int $phase): string
+    {
+        if (PHP_OUTPUT_HANDLER_FINAL & $phase && '' !== $this->outputBuffer) {
+            $this->module->getLogger()->warning('Output buffer content: "{buffer}".', [
+                'buffer' => $this->outputBuffer,
+            ]);
+
+            $this->outputBuffer = '';
+        }
+
+        if ('' === $buffer) {
+            return '';
+        }
+
+        $this->outputBuffer .= $buffer;
+
+        if (PHP_OUTPUT_HANDLER_START & $phase) {
+            $this->module->getLogger()->warning(sprintf(
+                "Output started before sending response.\n[stacktrace]\n%s\n",
+                (new \Exception())->getTraceAsString()
+            ));
+        }
+
+        return $buffer;
     }
 }

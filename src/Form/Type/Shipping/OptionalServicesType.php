@@ -83,7 +83,6 @@ final class OptionalServicesType extends AbstractType implements DataMapperInter
 
     /**
      * @param ServiceOptions[] $options
-     * @param ServiceCode $serviceCode
      */
     private function getServiceOptionsByCode(array $options, ServiceCode $serviceCode): ?ServiceOptions
     {

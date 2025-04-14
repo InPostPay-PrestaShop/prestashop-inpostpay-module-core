@@ -1,6 +1,5 @@
 # common FO/BO configuration
 parameters:
-  inpost.izi.basket_session_model_class: izi\prestashop\ObjectModel\Entity\InPostIziBasketSession
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.logger_config:
     type: rotating_file
@@ -33,15 +32,11 @@ services:
   inpost.izi.clock:
     class: Psr\Clock\ClockInterface
     public: false
-    tags:
-      - { name: inpost.izi.widget_controller_dependency, key: Psr\Clock\ClockInterface }
     factory: [ izi\prestashop\Clock\SystemClock, fromSystemTimezone ]
 
   inpost.izi.serializer:
     class: Symfony\Component\Serializer\SerializerInterface
     public: false
-    tags:
-      - { name: inpost.izi.widget_controller_dependency, key: Symfony\Component\Serializer\Normalizer\DenormalizerInterface }
     factory: [ izi\prestashop\Serializer\SerializerFactory, create ]
 
   izi\prestashop\CommandBusInterface:
@@ -108,7 +103,6 @@ services:
       - '@=service("inpost.izi.environment").getBasketAppApiUri()'
 
   izi\prestashop\BasketApp\Basket\BasketsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
-  izi\prestashop\BasketApp\Basket\V2\BasketsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
   izi\prestashop\BasketApp\Order\OrdersApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
   izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
   izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
@@ -130,13 +124,18 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
+      - '@izi\prestashop\Environment\EnvironmentFactoryInterface'
 
-  izi\prestashop\Configuration\OrdersConfigurationInterface: '@izi\prestashop\Configuration\OrdersConfiguration'
+  izi\prestashop\Configuration\OrdersConfigurationInterface:
+    alias: izi\prestashop\Configuration\OrdersConfiguration
+    public: true # todo: make private after refactoring basket data mapper and order creation handler
+
   izi\prestashop\Configuration\OrdersConfiguration:
     class: izi\prestashop\Configuration\OrdersConfiguration
     public: false
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
 
   izi\prestashop\Configuration\GeneralConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
   izi\prestashop\Configuration\GeneralConfiguration:
@@ -147,7 +146,7 @@ services:
 
   izi\prestashop\Configuration\ProductConfigurationInterface:
     alias: izi\prestashop\Configuration\ProductConfiguration
-    public: true
+    public: true # todo: make private after refactoring basket and order data mappers
 
   izi\prestashop\Configuration\ProductConfiguration:
     class: izi\prestashop\Configuration\ProductConfiguration
@@ -157,7 +156,7 @@ services:
 
   izi\prestashop\Configuration\ShippingConfigurationInterface:
     alias: izi\prestashop\Configuration\ShippingConfiguration
-    public: true # todo
+    public: true # todo: make private after refactoring order creation handler
 
   izi\prestashop\Configuration\ShippingConfiguration:
     class: izi\prestashop\Configuration\ShippingConfiguration
@@ -236,7 +235,7 @@ services:
 
   inpost.izi.merchant_api_logger:
     class: Psr\Log\LoggerInterface
-    public: true #todo
+    public: true # todo: make private after refactoring the front controller
     factory: [ '@izi\prestashop\Log\MonologLoggerFactory', create ]
     arguments:
       - merchant_api
@@ -287,45 +286,17 @@ services:
       - '@izi\prestashop\Order\Address\AddressDataMapper'
       - '@izi\prestashop\ObjectModel\ObjectManager'
 
-  izi\prestashop\Handler\GetClientDetailsHandlerInterface: '@izi\prestashop\Handler\GetClientDetailsHandler'
-  izi\prestashop\Handler\GetClientDetailsHandler:
-    class: izi\prestashop\Handler\GetClientDetailsHandler
-    public: false
-    tags:
-      - { name: inpost.izi.command_handler }
-    arguments:
-      - '@inpost.izi.context'
-      - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
-
-  izi\prestashop\Handler\UpdateBasketHandlerInterface: '@izi\prestashop\Handler\WidgetVersionCheckingUpdateBasketHandler'
+  izi\prestashop\Handler\UpdateBasketHandlerInterface: '@izi\prestashop\Handler\UpdateBasketHandler'
   izi\prestashop\Handler\UpdateBasketHandler:
     class: izi\prestashop\Handler\UpdateBasketHandler
     public: false
+    tags:
+      - { name: inpost.izi.command_handler }
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
       - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
       - '@inpost.izi.general_logger'
-
-  izi\prestashop\Handler\UpdateV2BasketHandler:
-    class: izi\prestashop\Handler\UpdateV2BasketHandler
-    public: false
-    arguments:
-      - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
-      - '@izi\prestashop\BasketApp\Basket\V2\BasketsApiClientInterface'
-      - '@inpost.izi.general_logger'
-
-  izi\prestashop\Handler\WidgetVersionCheckingUpdateBasketHandler:
-    class: izi\prestashop\Handler\WidgetVersionCheckingUpdateBasketHandler
-    public: false
-    tags:
-      - { name: inpost.izi.command_handler }
-    arguments:
-      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
-      - '@izi\prestashop\Handler\UpdateBasketHandler'
-      - '@izi\prestashop\Handler\UpdateV2BasketHandler'
 
   izi\prestashop\Handler\UnbindBasketHandlerInterface: '@izi\prestashop\Handler\UnbindBasketHandler'
   izi\prestashop\Handler\UnbindBasketHandler:
@@ -502,13 +473,13 @@ services:
       - Address
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  izi\prestashop\Repository\OrderDataRepositoryInterface: '@izi\prestashop\Repository\BasketSessionRepository'
   izi\prestashop\Repository\BasketSessionRepository:
     class: izi\prestashop\Repository\BasketSessionRepository
     public: false
     arguments:
       - '@inpost.izi.serializer'
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
-      - '%inpost.izi.basket_session_model_class%'
 
   izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
   izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
@@ -536,13 +507,6 @@ services:
       - { name: inpost.izi.hook }
     arguments:
       - '@izi\prestashop\CommandBusInterface'
-
-  izi\prestashop\Hook\Common\ActionCartSave:
-    class: izi\prestashop\Hook\Common\ActionCartSave
-    public: false
-    tags:
-      - { name: inpost.izi.hook }
-    deprecated: The "%service_id%" service is deprecated, use "izi\prestashop\Hook\Common\ActionCartUpdateAfter" instead.
 
   izi\prestashop\Hook\Common\ActionCartUpdateAfter:
     class: izi\prestashop\Hook\Common\ActionCartUpdateAfter
@@ -680,54 +644,21 @@ services:
       - '@izi\prestashop\View\Templating\RendererInterface'
       - '@izi\prestashop\Hook\WidgetParametersProviderInterface'
 
-  izi\prestashop\Hook\WidgetParametersProviderInterface: '@izi\prestashop\Hook\WidgetVersionCheckingWidgetParamsProvider'
-  izi\prestashop\Hook\WidgetVersionCheckingWidgetParamsProvider:
-    class: izi\prestashop\Hook\WidgetVersionCheckingWidgetParamsProvider
-    public: false
-    arguments:
-      - '@izi\prestashop\Configuration\ApiConfiguration'
-      - '@izi\prestashop\Hook\WidgetV1ParametersProvider'
-      - '@izi\prestashop\Hook\WidgetParametersProvider'
-
+  izi\prestashop\Hook\WidgetParametersProviderInterface: '@izi\prestashop\Hook\WidgetParametersProvider'
   izi\prestashop\Hook\WidgetParametersProvider:
     class: izi\prestashop\Hook\WidgetParametersProvider
     public: false
     arguments:
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
       - '@?inpost.izi.security.authorization_checker'
-      - '@izi\prestashop\View\Widget\V2\WidgetConfigurationResolver'
+      - '@izi\prestashop\View\Widget\WidgetConfigurationResolverInterface'
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@?inpost.izi.validator'
 
-  izi\prestashop\Hook\WidgetV1ParametersProvider:
-    class: izi\prestashop\Hook\WidgetV1ParametersProvider
+  izi\prestashop\View\Widget\WidgetConfigurationResolverInterface: '@izi\prestashop\View\Widget\WidgetConfigurationResolver'
+  izi\prestashop\View\Widget\WidgetConfigurationResolver:
+    class: izi\prestashop\View\Widget\WidgetConfigurationResolver
     public: false
-    arguments:
-      - '@?inpost.izi.security.authorization_checker'
-      - '@izi\prestashop\Hook\WidgetConfigurationResolver'
-
-  izi\prestashop\Hook\WidgetConfigurationResolver:
-    class: izi\prestashop\Hook\WidgetConfigurationResolver
-    public: true
-    arguments:
-      - '@izi\prestashop\Configuration\ApiConfiguration'
-      - '@inpost.izi.module'
-      - '@inpost.izi.context'
-      - '@izi\prestashop\Payment\PaymentCurrencyChecker'
-      - '@izi\prestashop\CommandBusInterface'
-    deprecated: The "%service_id%" service is deprecated, use "izi\prestashop\View\Widget\WidgetConfigurationResolverInterface" instead.
-
-  izi\prestashop\View\Widget\WidgetConfigurationResolverInterface: '@izi\prestashop\View\Widget\V2\WidgetConfigurationResolver'
-  izi\prestashop\View\Widget\V2\WidgetConfigurationResolver:
-    class: izi\prestashop\View\Widget\V2\WidgetConfigurationResolver
-    public: false
-
-  izi\prestashop\Hook\WidgetRenderer:
-    class: izi\prestashop\Hook\WidgetRenderer
-    public: true
-    arguments:
-      - '@izi\prestashop\View\Templating\RendererInterface'
-      - '@?inpost.izi.security.authorization_checker'
-    deprecated: The "%service_id%" service is deprecated, use "inpost.izi.widget" instead.
 
   izi\prestashop\Builder\Basket\BasketBuilderFactory:
     class: izi\prestashop\Builder\Basket\BasketBuilderFactory
@@ -951,3 +882,8 @@ services:
       - { name: validator.constraint_validator }
     arguments:
       - '@izi\prestashop\Payment\PaymentCurrencyChecker'
+
+  izi\prestashop\Environment\EnvironmentFactoryInterface: '@izi\prestashop\Environment\EnvironmentFactory'
+  izi\prestashop\Environment\EnvironmentFactory:
+    class: izi\prestashop\Environment\EnvironmentFactory
+    public: false

@@ -2,7 +2,6 @@
 
 namespace izi\prestashop\ObjectModel\Entity;
 
-use izi\prestashop\BasketApp\Basket\Request\Basket;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BindingConfirmation;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 
@@ -41,13 +40,6 @@ class InPostIziBasketSession extends \ObjectModel
     public $redirect_url;
 
     /**
-     * @var string|null base64 encoded {@see Basket}
-     *
-     * @deprecated no longer used, to be removed
-     */
-    public $basket_cache;
-
-    /**
      * @var bool|null if cart was updated via a Merchant API request
      */
     public $coupons;
@@ -72,7 +64,6 @@ class InPostIziBasketSession extends \ObjectModel
             'order_id' => ['type' => self::TYPE_INT, 'allow_null' => true],
             'order_details' => ['type' => self::TYPE_STRING, 'allow_null' => true],
             'redirect_url' => ['type' => self::TYPE_STRING, 'allow_null' => true],
-            'basket_cache' => ['type' => self::TYPE_STRING, 'allow_null' => true],
             'coupons' => ['type' => self::TYPE_BOOL, 'allow_null' => true],
             'redirected' => ['type' => self::TYPE_BOOL],
             'binding_api_key' => ['type' => self::TYPE_STRING, 'allow_null' => true],

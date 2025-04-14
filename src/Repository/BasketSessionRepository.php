@@ -8,6 +8,7 @@ use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\Entities\BasketSessionInterface;
 use izi\prestashop\Entities\CartProxy;
+use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\ObjectModel\Entity\InPostIziBasketSession;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Uuid\Uuid;
@@ -16,7 +17,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 /**
  * @implements BasketSessionRepositoryInterface<BasketSession>
  */
-final class BasketSessionRepository implements BasketSessionRepositoryInterface
+final class BasketSessionRepository implements BasketSessionRepositoryInterface, OrderDataRepositoryInterface
 {
     /**
      * @var SerializerInterface
@@ -28,27 +29,14 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
      */
     private $manager;
 
-    /**
-     * @var class-string<InPostIziBasketSession>
-     */
-    private $modelClass;
-
     private $sessionsByCartId = [];
     private $sessionsByBasketId = [];
     private $sessionsByOrderId = [];
 
-    /**
-     * @param class-string<InPostIziBasketSession> $modelClass
-     */
-    public function __construct(SerializerInterface $serializer, ObjectManagerInterface $manager, string $modelClass = InPostIziBasketSession::class)
+    public function __construct(SerializerInterface $serializer, ObjectManagerInterface $manager)
     {
-        if (!is_a($modelClass, InPostIziBasketSession::class, true)) {
-            throw new \DomainException(sprintf('%s is not a %s.', $modelClass, InPostIziBasketSession::class));
-        }
-
         $this->serializer = $serializer;
         $this->manager = $manager;
-        $this->modelClass = $modelClass;
     }
 
     public function findByBasketId(string $basketId): ?BasketSessionInterface
@@ -58,7 +46,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
         }
 
         $model = $this->manager
-            ->getRepository($this->modelClass)
+            ->getRepository(InPostIziBasketSession::class)
             ->findOneBy(['cart_id' => $basketId]);
 
         if (null === $model) {
@@ -79,7 +67,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
         }
 
         $model = $this->manager
-            ->getRepository($this->modelClass)
+            ->getRepository(InPostIziBasketSession::class)
             ->findOneBy(['session_id' => $cartId]);
 
         if (null === $model) {
@@ -100,7 +88,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
         }
 
         $model = $this->manager
-            ->getRepository($this->modelClass)
+            ->getRepository(InPostIziBasketSession::class)
             ->findOneBy(['order_id' => $orderId]);
 
         if (null === $model) {
@@ -112,7 +100,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
 
     public function createNewSession(BasketInterface $basket): BasketSessionInterface
     {
-        return BasketSession::new($basket, Uuid::v4(), $this->modelClass);
+        return BasketSession::new($basket, Uuid::v4());
     }
 
     public function persist(BasketSessionInterface $session): void
@@ -148,6 +136,15 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface
         $this->manager->getConnection()->update(InPostIziBasketSession::TABLE_NAME, [
             'binding_api_key' => null,
         ], ['order_id' => null]);
+    }
+
+    public function getOrderData(string $orderId): ?CreateOrderRequest
+    {
+        if (null === $session = $this->findByOrderId($orderId)) {
+            return null;
+        }
+
+        return $session->getOrderRequest();
     }
 
     private function doPersist(InPostIziBasketSession $model): void

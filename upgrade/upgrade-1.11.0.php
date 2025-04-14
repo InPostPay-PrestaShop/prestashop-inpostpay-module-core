@@ -1,6 +1,5 @@
 <?php
 
-use InPost\Izi\Upgrade\AssetsRemoverTrait;
 use InPost\Izi\Upgrade\CacheClearer;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Database\Connection;
@@ -15,16 +14,13 @@ if (!defined('_PS_VERSION_')) {
 }
 
 require_once __DIR__ . '/CacheClearer.php';
-require_once __DIR__ . '/AssetsRemoverTrait.php';
 
 class InPostIziUpdater_1_11_0
 {
-    use AssetsRemoverTrait;
-
-    private const STALE_ASSETS = [
-        'js/prestashopizi.109989890fd3720148dc.js',
-        'css/product.6f69cd7d93f20866f321.css',
-    ];
+    /**
+     * @var Module
+     */
+    private $module;
 
     /**
      * @var DatabaseInstaller
@@ -42,9 +38,7 @@ class InPostIziUpdater_1_11_0
         CacheClearer::getInstance()->clear();
         $this->installer->install($this->module);
 
-        return $this->registerHooks()
-            && \Configuration::updateGlobalValue('INPOST_PAY_WIDGET_VERSION', '1.0')
-            && $this->removeStaleAssets(self::STALE_ASSETS);
+        return $this->registerHooks();
     }
 
     private function registerHooks(): bool

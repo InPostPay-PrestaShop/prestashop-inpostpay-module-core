@@ -16,7 +16,7 @@ interface WidgetDisplayConfigurationInterface
     /**
      * @return T
      */
-    public function getWidgetConfiguration();
+    public function getWidgetConfiguration(): WidgetConfigurationInterface;
 
     /**
      * @return iterable<string, string> CSS values by property

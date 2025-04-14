@@ -30,4 +30,3 @@ services:
         actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'
         actionObjectOrderUpdateBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore'
         actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
-

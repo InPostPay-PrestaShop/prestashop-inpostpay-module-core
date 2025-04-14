@@ -4,53 +4,28 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Controller;
 
-use izi\prestashop\BasketApp\Basket\Request\Browser;
 use izi\prestashop\BasketApp\Exception\BasketAppException;
-use izi\prestashop\Command\BindBasketCommand;
-use izi\prestashop\Command\GenerateDeepLinkCommand;
 use izi\prestashop\Command\GetBasketBindingKeyCommand;
-use izi\prestashop\Command\GetBindingConfirmationCommand;
 use izi\prestashop\Command\GetOrderConfirmationUrlCommand;
-use izi\prestashop\Command\GetOrderEventsCommand;
-use izi\prestashop\Command\GetProductWidgetCommand;
-use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\CommandBusInterface;
-use izi\prestashop\Common\BindingPlace;
-use izi\prestashop\Common\Currency;
-use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\Entities\Cart;
 use izi\prestashop\Handler\Result\BasketBindingKey;
-use izi\prestashop\Handler\Result\BasketBindingResult;
-use izi\prestashop\Handler\Result\BindingConfirmationStream;
-use izi\prestashop\Handler\Result\DeepLink;
-use izi\prestashop\Handler\Result\OrderEventStream;
-use izi\prestashop\Handler\Result\ProductWidgetResult;
 use izi\prestashop\Http\Exception\HttpExceptionInterface as BasketAppHttpException;
-use izi\prestashop\Http\Response\EventStreamResponse;
 use izi\prestashop\Security\Voter\BindingWidgetVoter;
-use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
-use Symfony\Component\Serializer\Exception\ExceptionInterface;
-use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 final class WidgetController implements ServiceSubscriberInterface
 {
     public const TRANSLATION_SOURCE = 'widgetcontroller';
-
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
 
     /**
      * @var \Module
@@ -63,44 +38,28 @@ final class WidgetController implements ServiceSubscriberInterface
     private $context;
 
     /**
-     * @var ClockInterface
-     */
-    private $clock;
-
-    /**
-     * @var DenormalizerInterface
-     */
-    private $denormalizer;
-
-    /**
      * @var CommandBusInterface
      */
     private $bus;
 
-    public function __construct(\Module $module, \Context $context, ?ClockInterface $clock, ?DenormalizerInterface $denormalizer, CommandBusInterface $bus)
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    public function __construct(\Module $module, \Context $context, CommandBusInterface $bus, ContainerInterface $container)
     {
         $this->module = $module;
         $this->context = $context;
-        $this->clock = $clock;
-        $this->denormalizer = $denormalizer;
         $this->bus = $bus;
+        $this->container = $container;
     }
 
     public static function getSubscribedServices(): array
     {
         return [
             '?' . AuthorizationCheckerInterface::class,
-            '?' . DenormalizerInterface::class,
-            '?' . ClockInterface::class,
         ];
-    }
-
-    /**
-     * @required
-     */
-    public function setContainer(ContainerInterface $container): void
-    {
-        $this->container = $container;
     }
 
     public function getBindingKey(Request $request): JsonResponse
@@ -144,140 +103,6 @@ final class WidgetController implements ServiceSubscriberInterface
         }
     }
 
-    /**
-     * @deprecated
-     */
-    public function getDeepLink(): JsonResponse
-    {
-        try {
-            $command = new GenerateDeepLinkCommand($this->createBasket()->getId());
-
-            /** @var DeepLink $deepLink */
-            $deepLink = $this->bus->handle($command);
-
-            return new JsonResponse($deepLink);
-        } catch (\Exception $e) {
-            return $this->handleException($e);
-        }
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getPayData(Request $request, ?string $prefix = null, ?string $number = null): Response
-    {
-        try {
-            $command = $this->createBindingCommand($request, $prefix, $number);
-
-            /** @var BasketBindingResult $result */
-            $result = $this->bus->handle($command);
-            $this->context->cookie->inpostizi_basket_id = $result->getBasketId();
-
-            return new JsonResponse($result->getData());
-        } catch (\Exception $e) {
-            return $this->handleException($e);
-        }
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getOrderComplete(): EventStreamResponse
-    {
-        $command = new GetOrderEventsCommand((string) $this->context->cookie->inpostizi_basket_id);
-
-        /** @var OrderEventStream $stream */
-        $stream = $this->bus->handle($command);
-
-        return new EventStreamResponse(static function () use ($stream) {
-            foreach ($stream->getEvents() as $event) {
-                echo $event;
-            }
-        });
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getIsBound(): EventStreamResponse
-    {
-        $command = new GetBindingConfirmationCommand($this->context->cart->id ?? null);
-
-        /** @var BindingConfirmationStream $stream */
-        $stream = $this->bus->handle($command);
-
-        if (null !== $basketId = $stream->getBasketId()) {
-            $this->context->cookie->inpostizi_basket_id = $basketId;
-        }
-
-        return new EventStreamResponse(static function () use ($stream) {
-            foreach ($stream->getEvents() as $event) {
-                echo $event;
-            }
-        });
-    }
-
-    /**
-     * @deprecated
-     */
-    public function deleteBinding(): JsonResponse
-    {
-        try {
-            $command = new UnbindBasketCommand($this->createBasket()->getId());
-
-            $this->bus->handle($command);
-            unset($this->context->cookie->inpostizi_basket_id);
-
-            return JsonResponse::create(null, 204)->setContent(null);
-        } catch (\Exception $e) {
-            return $this->handleException($e);
-        }
-    }
-
-    /**
-     * @deprecated
-     */
-    public function getWidgetHook(string $hook, int $productId): JsonResponse
-    {
-        try {
-            if ('' === $hook = trim($hook)) {
-                throw new BadRequestHttpException($this->module->l('Hook name is required.', self::TRANSLATION_SOURCE));
-            }
-
-            $command = new GetProductWidgetCommand($hook, $productId);
-
-            /** @var ProductWidgetResult $result */
-            $result = $this->bus->handle($command);
-
-            return new JsonResponse([
-                'content' => $result->getContent(),
-            ]);
-        } catch (\Exception $e) {
-            return $this->handleException($e);
-        }
-    }
-
-    private function createBindingCommand(Request $request, ?string $prefix, ?string $number): BindBasketCommand
-    {
-        if (null === Currency::tryFrom($this->context->currency->iso_code ?? null)) {
-            throw new BadRequestHttpException($this->module->l('The currently selected currency is not supported.', self::TRANSLATION_SOURCE));
-        }
-
-        $basket = $this->createBasket();
-
-        if ([] === $this->context->cart->getProducts()) {
-            throw new BadRequestHttpException($this->module->l('There are no products in your cart.', self::TRANSLATION_SOURCE));
-        }
-
-        return new BindBasketCommand(
-            $basket,
-            $this->getBrowserData($request),
-            $this->createPhoneNumber($prefix, $number),
-            $request->cookies->get('BrowserId'),
-            $this->getBindingPlace($request)
-        );
-    }
-
     private function createBasket(): BasketInterface
     {
         if (!\Validate::isLoadedObject($this->context->cart)) {
@@ -285,68 +110,6 @@ final class WidgetController implements ServiceSubscriberInterface
         }
 
         return new Cart($this->context->cart);
-    }
-
-    private function getBrowserData(Request $request): Browser
-    {
-        if (!$request->query->has('browser')) {
-            throw new BadRequestHttpException($this->module->l('Browser data is missing.', self::TRANSLATION_SOURCE));
-        }
-
-        if (false === $browser = base64_decode($request->query->get('browser'))) {
-            throw new BadRequestHttpException($this->module->l('Could not decode browser data.', self::TRANSLATION_SOURCE));
-        }
-
-        $browser = json_decode($browser, true);
-        if (null === $browser && JSON_ERROR_NONE !== json_last_error()) {
-            throw new BadRequestHttpException($this->module->l('Could not decode browser data.', self::TRANSLATION_SOURCE));
-        }
-
-        if (!is_array($browser)) {
-            throw new BadRequestHttpException($this->module->l('Malformed browser data.', self::TRANSLATION_SOURCE));
-        }
-
-        $browser = array_merge($browser, [
-            'data_time' => $this->getClock()->now()->format(\DateTime::RFC3339),
-            'customer_ip' => $request->server->get('REMOTE_ADDR'),
-            'port' => $request->server->get('SERVER_PORT'),
-        ]);
-
-        try {
-            return $this->getDenormalizer()->denormalize($browser, Browser::class);
-        } catch (ExceptionInterface $e) {
-            throw new BadRequestHttpException($this->module->l('Malformed browser data.', self::TRANSLATION_SOURCE), $e);
-        }
-    }
-
-    private function createPhoneNumber(?string $prefix, ?string $number): ?PhoneNumber
-    {
-        if (null === $prefix && null === $number) {
-            return null;
-        }
-
-        if ('' === $prefix = trim($prefix)) {
-            throw new BadRequestHttpException($this->module->l('Phone number prefix is required.', self::TRANSLATION_SOURCE));
-        }
-
-        if ('' === $number = trim($number)) {
-            throw new BadRequestHttpException($this->module->l('Phone number is required.', self::TRANSLATION_SOURCE));
-        }
-
-        return new PhoneNumber('+' . ltrim($prefix, '+'), $number);
-    }
-
-    private function getBindingPlace(Request $request): ?BindingPlace
-    {
-        if (null === $bindingPlace = $request->query->get('binding_place')) {
-            return null;
-        }
-
-        if (null === $bindingPlace = BindingPlace::tryFrom($bindingPlace)) {
-            throw new BadRequestHttpException($this->module->l('Invalid binding place.', self::TRANSLATION_SOURCE));
-        }
-
-        return $bindingPlace;
     }
 
     private function handleException(\Exception $e): JsonResponse
@@ -390,14 +153,14 @@ final class WidgetController implements ServiceSubscriberInterface
     private function isGranted($attributes, $subject = null): bool
     {
         if (null === $authChecker = $this->get(AuthorizationCheckerInterface::class)) {
-            return false;
+            return true;
         }
 
         return $authChecker->isGranted($attributes, $subject);
     }
 
     /**
-     * @template T
+     * @template T of object
      *
      * @param class-string<T> $name
      *
@@ -405,24 +168,10 @@ final class WidgetController implements ServiceSubscriberInterface
      */
     private function get(string $name)
     {
-        if (!isset($this->container)) {
-            return null;
-        }
-
         if (!$this->container->has($name)) {
             return null;
         }
 
         return $this->container->get($name);
-    }
-
-    private function getClock(): ClockInterface
-    {
-        return $this->clock ?? ($this->clock = $this->get(ClockInterface::class));
-    }
-
-    private function getDenormalizer(): DenormalizerInterface
-    {
-        return $this->denormalizer ?? ($this->denormalizer = $this->get(DenormalizerInterface::class));
     }
 }

@@ -6,7 +6,6 @@ namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Hook\HookInterface;
-use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderDetailLazyArray;
 use PrestaShop\PrestaShop\Adapter\Presenter\Order\OrderLazyArray;
 
 final class DisplayIziThankYou implements HookInterface
@@ -14,11 +13,6 @@ final class DisplayIziThankYou implements HookInterface
     use ThankYouWidgetRendererTrait;
 
     public const HOOK_NAME = 'displayIziThankYou';
-
-    /**
-     * @var \PaymentModule
-     */
-    private $paymentModule;
 
     public function __construct(\PaymentModule $paymentModule, GeneralConfigurationInterface $configuration)
     {
@@ -67,7 +61,6 @@ final class DisplayIziThankYou implements HookInterface
         $orderId = null;
 
         if ($presentedOrder instanceof OrderLazyArray) {
-            /** @var OrderDetailLazyArray $orderDetails */
             $orderDetails = $presentedOrder->getDetails();
 
             $orderId = $orderDetails->getId();

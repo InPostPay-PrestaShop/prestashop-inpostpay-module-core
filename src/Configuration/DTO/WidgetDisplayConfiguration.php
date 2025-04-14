@@ -6,7 +6,7 @@ namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\WidgetDisplayConfigurationInterface;
-use izi\prestashop\View\Widget\Configuration;
+use izi\prestashop\View\Widget\WidgetConfiguration;
 use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -48,17 +48,14 @@ final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInte
 
     public static function for(BindingPlace $bindingPlace): self
     {
-        $widgetConfiguration = Configuration::for($bindingPlace);
+        $widgetConfiguration = new WidgetConfiguration($bindingPlace);
 
         return new self($widgetConfiguration);
     }
 
-    /**
-     * @return WidgetConfigurationInterface
-     */
-    public function getWidgetConfiguration()
+    public function getWidgetConfiguration(): WidgetConfigurationInterface
     {
-        return $this->widgetConfiguration ?? new Configuration($this->bindingPlace, false);
+        return $this->widgetConfiguration ?? new WidgetConfiguration($this->bindingPlace);
     }
 
     public function setWidgetConfiguration(?WidgetConfigurationInterface $widgetConfiguration): self

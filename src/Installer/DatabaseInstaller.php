@@ -10,6 +10,7 @@ use izi\prestashop\Database\Connection;
 use izi\prestashop\Installer\Database\Version_1_11_0;
 use izi\prestashop\Installer\Database\Version_1_4_0;
 use izi\prestashop\Installer\Database\Version_1_9_0;
+use izi\prestashop\Installer\Database\Version_2_0_0;
 
 final class DatabaseInstaller
 {
@@ -89,6 +90,7 @@ final class DatabaseInstaller
             new Version_1_4_0($connection),
             new Version_1_9_0($connection),
             new Version_1_11_0($connection),
+            new Version_2_0_0($connection),
         ];
     }
 }

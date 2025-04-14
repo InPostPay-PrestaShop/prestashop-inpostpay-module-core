@@ -8,7 +8,7 @@ namespace izi\prestashop\View\Widget;
 interface WidgetConfigurationResolverInterface
 {
     /**
-     * @return T|null
+     * @return T
      */
-    public function resolve(array $options): ?WidgetConfigurationInterface;
+    public function resolve(array $options): WidgetConfigurationInterface;
 }

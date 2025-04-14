@@ -6,8 +6,8 @@ namespace izi\prestashop\Builder\Basket;
 
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\DeliveryOption;
-use izi\prestashop\Common\Basket\OptionalService;
 use izi\prestashop\Common\Delivery\DeliveryType;
+use izi\prestashop\Common\Delivery\OptionalService;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;
@@ -138,9 +138,13 @@ class DeliveryFactory
 
     private function getServicePrice(ServiceOptions $options, \Cart $cart, \Carrier $carrier, \Carrier $defaultCarrier, bool $isFreeShipping): Price
     {
+        if ($isFreeShipping) {
+            return PriceFactory::create(0., 0.);
+        }
+
         $servicePrice = $this->priceCalculator->getAdditionalServicePrice($cart, $carrier, $options);
 
-        if ($isFreeShipping || $carrier === $defaultCarrier) {
+        if ($carrier === $defaultCarrier) {
             return $servicePrice;
         }
 

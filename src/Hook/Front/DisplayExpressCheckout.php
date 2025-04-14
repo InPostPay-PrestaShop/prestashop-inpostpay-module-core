@@ -45,7 +45,7 @@ final class DisplayExpressCheckout implements HookInterface
             return '';
         }
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/buttonWidget.tpl', [
+        return $this->renderer->render('module:inpostizi/views/templates/front/buttonWidget.tpl', [
             'widget' => $widget,
             'styles' => $this->getHtmlStyles($binding),
         ]);

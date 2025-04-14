@@ -4,31 +4,70 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Twig\Loader;
 
-if (interface_exists(\Twig_SourceContextLoaderInterface::class)) {
+/**
+ * Maps template names to their Sf 2.8 replacements.
+ *
+ * @internal
+ */
+final class TemplateNameMappingLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterface, \Twig_SourceContextLoaderInterface
+{
     /**
-     * Maps template names to their Sf 2.8 replacements.
-     *
-     * @internal
+     * @var \Twig_LoaderInterface&\Twig_ExistsLoaderInterface&\Twig_SourceContextLoaderInterface
      */
-    final class TemplateNameMappingLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterface, \Twig_SourceContextLoaderInterface
+    private $loader;
+
+    /**
+     * @var array<string, string>
+     */
+    private $templateNamesMap;
+
+    /**
+     * @param \Twig_LoaderInterface&\Twig_ExistsLoaderInterface&\Twig_SourceContextLoaderInterface $loader
+     * @param array<string, string> $templatesMap
+     */
+    public function __construct(\Twig_LoaderInterface $loader, array $templatesMap)
     {
-        use TemplateNameMappingLoaderDecoratorTrait;
-
-        public function getSourceContext($name): \Twig_Source
-        {
-            $name = $this->getMappedTemplateName($name);
-
-            return $this->loader->getSourceContext($name);
-        }
+        $this->loader = $loader;
+        $this->templateNamesMap = $templatesMap;
     }
-} else {
-    /**
-     * Maps template names to their Sf 2.8 replacements.
-     *
-     * @internal
-     */
-    final class TemplateNameMappingLoader implements \Twig_LoaderInterface, \Twig_ExistsLoaderInterface
+
+    public function exists($name): bool
     {
-        use TemplateNameMappingLoaderDecoratorTrait;
+        $name = $this->getMappedTemplateName($name);
+
+        return $this->loader->exists($name);
+    }
+
+    public function getSource($name): string
+    {
+        $name = $this->getMappedTemplateName($name);
+
+        return $this->loader->getSource($name);
+    }
+
+    public function getCacheKey($name): string
+    {
+        $name = $this->getMappedTemplateName($name);
+
+        return $this->loader->getCacheKey($name);
+    }
+
+    public function isFresh($name, $time): bool
+    {
+        $name = $this->getMappedTemplateName($name);
+
+        return $this->loader->isFresh($name, $time);
+    }
+
+    private function getMappedTemplateName(string $name): string
+    {
+        return $this->templateNamesMap[$name] ?? $name;
+    }
+
+    public function getSourceContext($name): \Twig_Source
+    {
+        $name = $this->getMappedTemplateName($name);
+
+        return $this->loader->getSourceContext($name);
     }
 }

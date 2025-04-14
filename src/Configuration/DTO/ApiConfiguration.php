@@ -28,16 +28,9 @@ final class ApiConfiguration implements ApiConfigurationInterface
     private $clientCredentials;
 
     /**
-     * @var bool|null
-     *
-     * @Assert\NotNull()
-     */
-    private $widgetV2 = true;
-
-    /**
      * @var string|null
      *
-     * @Assert\Expression(expression="not this.isWidgetV2() or value", message="Merchant client ID is required by Widget 2.0")
+     * @Assert\NotBlank()
      */
     private $merchantClientId;
 
@@ -50,9 +43,8 @@ final class ApiConfiguration implements ApiConfigurationInterface
     public function getEnvironment(): EnvironmentInterface
     {
         $type = $this->getEnvironmentType();
-        $widgetV2 = $this->widgetV2 ?? true;
 
-        return (new EnvironmentFactory())->createEnvironment($type, $widgetV2);
+        return (new EnvironmentFactory())->createEnvironment($type);
     }
 
     public function getEnvironmentType(): EnvironmentType
@@ -79,30 +71,12 @@ final class ApiConfiguration implements ApiConfigurationInterface
         return $this;
     }
 
-    /**
-     * @internal
-     */
-    public function isWidgetV2(): ?bool
+    public function getMerchantClientId(): ?string
     {
-        return $this->widgetV2;
+        return $this->merchantClientId;
     }
 
-    /**
-     * @internal
-     */
-    public function setWidgetV2(?bool $isV2): self
-    {
-        $this->widgetV2 = $isV2;
-
-        return $this;
-    }
-
-    public function getMerchantClientId(): string
-    {
-        return (string) $this->merchantClientId;
-    }
-
-    public function setMerchantClientId(?string $merchantClientId): ApiConfiguration
+    public function setMerchantClientId(?string $merchantClientId): self
     {
         $this->merchantClientId = $merchantClientId;
 

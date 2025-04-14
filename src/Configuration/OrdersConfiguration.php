@@ -6,9 +6,7 @@ namespace izi\prestashop\Configuration;
 
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Configuration\DTO\Order\MessageOptions;
-use izi\prestashop\Enum\Enum;
 use izi\prestashop\Serializer\SafeDeserializerTrait;
-use izi\prestashop\Serializer\SerializerFactory;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -40,81 +38,14 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
      */
     private $messageOptions = [];
 
-    public function __construct(LanguageAwareConfigurationInterface $configuration, SerializerInterface $serializer = null)
+    public function __construct(LanguageAwareConfigurationInterface $configuration, SerializerInterface $serializer)
     {
         $this->configuration = $configuration;
-        $this->serializer = $serializer ?? SerializerFactory::create();
+        $this->serializer = $serializer;
     }
 
-    /**
-     * @internal
-     *
-     * @return PaymentType[]
-     */
-    public static function normalizeAvailablePaymentOptions(OrdersConfigurationInterface $configuration, ?int $shopId = null): array
+    public function getInitialStatusId(?PaymentType $paymentType = null, ?int $shopId = null): int
     {
-        if (method_exists($configuration, 'getAvailablePaymentOptions')) {
-            return array_values($configuration->getAvailablePaymentOptions($shopId));
-        }
-
-        @trigger_error(sprintf('Not implementing the "getAvailablePaymentOptions()" method in "%s" is deprecated.', get_class($configuration)), \E_USER_DEPRECATED);
-
-        $bankPaymentEnabled = $configuration->isBankPaymentEnabled($shopId);
-        $carrierPaymentEnabled = $configuration->isCarrierPaymentEnabled($shopId);
-
-        if ($bankPaymentEnabled && $carrierPaymentEnabled) {
-            return PaymentType::cases();
-        }
-
-        if ($bankPaymentEnabled) {
-            return PaymentType::getBankProvidedPaymentOptions();
-        }
-
-        if ($carrierPaymentEnabled) {
-            return PaymentType::getCarrierProvidedPaymentOptions();
-        }
-
-        return [];
-    }
-
-    /**
-     * @internal
-     */
-    public static function resolveInitialStatusId(OrdersConfigurationInterface $configuration, ?PaymentType $paymentType = null, ?int $shopId = null): ?int
-    {
-        if ($configuration instanceof self) {
-            return $configuration->getInitialStatusId($paymentType, $shopId);
-        }
-
-        $class = new \ReflectionClass($configuration);
-        $method = $class->getMethod('getInitialStatusId');
-        $paramType = $method->getParameters()[0]->getType();
-
-        if (null !== $paramType && 'int' === $paramType->getName()) {
-            @trigger_error(sprintf('Method "%s::getInitialStatusId()" will require passing an instance of %s or null as the first argument.', OrdersConfigurationInterface::class, PaymentType::class), \E_USER_DEPRECATED);
-
-            return $configuration->getInitialStatusId($shopId);
-        }
-
-        return $configuration->getInitialStatusId($paymentType, $shopId);
-    }
-
-    /**
-     * @param PaymentType|int|null $paymentType
-     */
-    public function getInitialStatusId($paymentType = null, ?int $shopId = null): int
-    {
-        if (is_int($paymentType)) {
-            @trigger_error(sprintf('Passing $shopId as the first argument of "%s::%s()" is deprecated.', OrdersConfigurationInterface::class, __METHOD__), \E_USER_DEPRECATED);
-
-            $shopId = (int) $paymentType;
-            $paymentType = null;
-        }
-
-        if (null !== $paymentType && !$paymentType instanceof PaymentType) {
-            throw new \InvalidArgumentException(sprintf('Expected $paymentType to be an instance of "%", "%s" given.', PaymentType::class, get_debug_type($paymentType)));
-        }
-
         if (PaymentType::CashOnDelivery() === $paymentType && null !== $codStatusId = $this->getCashOnDeliveryStatusId($shopId)) {
             return $codStatusId;
         }
@@ -151,30 +82,6 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         return $this->availablePaymentOptions[(int) $shopId];
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public function isCarrierPaymentEnabled(?int $shopId = null): bool
-    {
-        @trigger_error(sprintf('"%s::%s()" is deprecated, use "%s::getAvailablePaymentOptions()" instead.', OrdersConfigurationInterface::class, __METHOD__, OrdersConfigurationInterface::class), \E_USER_DEPRECATED);
-
-        $availablePaymentOptions = $this->getAvailablePaymentOptions($shopId);
-
-        return [] !== array_uintersect($availablePaymentOptions, PaymentType::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function isBankPaymentEnabled(?int $shopId = null): bool
-    {
-        @trigger_error(sprintf('"%s::%s()" is deprecated, use "%s::getAvailablePaymentOptions()" instead.', OrdersConfigurationInterface::class, __METHOD__, OrdersConfigurationInterface::class), \E_USER_DEPRECATED);
-
-        $availablePaymentOptions = $this->getAvailablePaymentOptions($shopId);
-
-        return [] !== array_uintersect($availablePaymentOptions, PaymentType::getBankProvidedPaymentOptions(), [Enum::class, 'compareValues']);
-    }
-
     public function getPointOfSaleId(?int $shopId = null): ?string
     {
         return $this->configuration->get(self::POS_ID, $shopId);
@@ -202,8 +109,8 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
     public function persist(OrdersConfigurationInterface $configuration): void
     {
-        $defaultInitialStatusId = self::resolveInitialStatusId($configuration);
-        $codStatusId = self::resolveInitialStatusId($configuration, PaymentType::CashOnDelivery());
+        $defaultInitialStatusId = $configuration->getInitialStatusId();
+        $codStatusId = $configuration->getInitialStatusId(PaymentType::CashOnDelivery());
 
         $this->configuration->set(self::INITIAL_OS_ID, $defaultInitialStatusId);
         $this->configuration->set(self::COD_OS_ID, $codStatusId);
@@ -277,7 +184,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
     private function setAvailablePaymentOptions(OrdersConfigurationInterface $configuration): void
     {
-        $availablePaymentOptions = self::normalizeAvailablePaymentOptions($configuration);
+        $availablePaymentOptions = array_values($configuration->getAvailablePaymentOptions());
 
         $this->configuration->set(self::AVAILABLE_PAYMENT_OPTIONS, json_encode($availablePaymentOptions));
         $this->availablePaymentOptions = [0 => $availablePaymentOptions];
@@ -307,11 +214,8 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
     {
         if ($configuration instanceof DTO\OrdersConfiguration) {
             $options = $configuration->getMessageOptions();
-        } elseif (is_callable([$configuration, 'getMessageFormat'])) {
-            $options = new MessageOptions($configuration->getMessageFormat(), false, true);
         } else {
-            @trigger_error(sprintf('Not implementing the "getMessageFormat()" method in "%s" is deprecated.', get_class($configuration)), \E_USER_DEPRECATED);
-            $options = new MessageOptions();
+            $options = new MessageOptions($configuration->getMessageFormat(), false, true);
         }
 
         $value = $this->serializer->serialize($options, 'json');

@@ -12,9 +12,4 @@ use izi\prestashop\BasketApp\Basket\Request\Basket;
 interface BasketAppRequestBuilderInterface extends BasketBuilderInterface
 {
     public function build(): Basket;
-
-    /**
-     * @return static
-     */
-    public function setBrowserId(?string $browserId): self;
 }

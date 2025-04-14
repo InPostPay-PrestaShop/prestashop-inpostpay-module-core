@@ -6,7 +6,6 @@ namespace izi\prestashop\MerchantApi\Model\Order\Request;
 
 use izi\prestashop\Common\Customer\InvoiceDetails;
 use izi\prestashop\Common\Order\Consent;
-use izi\prestashop\MerchantApi\Model\Order\Request\Delivery;
 
 final class CreateOrderRequest implements \JsonSerializable
 {

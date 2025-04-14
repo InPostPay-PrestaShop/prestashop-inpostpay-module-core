@@ -7,9 +7,6 @@ namespace izi\prestashop\ObjectModel;
 use izi\prestashop\Database\Connection;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 
-/**
- * @method remove(\ObjectModel $model)
- */
 interface ObjectManagerInterface
 {
     public function getConnection(): Connection;
@@ -25,7 +22,7 @@ interface ObjectManagerInterface
      *
      * @return T|null
      */
-    public function find(string $class, int $id, ?int $languageId = null/*, ?int $shopId = null*/): ?\ObjectModel;
+    public function find(string $class, int $id, ?int $languageId = null, ?int $shopId = null): ?\ObjectModel;
 
     public function refresh(\ObjectModel $model);
 
@@ -54,5 +51,7 @@ interface ObjectManagerInterface
      *
      * @return QueryBuilder<T>
      */
-    public function createQueryBuilder(string $class/*, ?int $languageId = null*/): QueryBuilder;
+    public function createQueryBuilder(string $class, ?int $languageId = null): QueryBuilder;
+
+    public function remove(\ObjectModel $model);
 }

@@ -22,6 +22,8 @@ services:
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@inpost.izi.context'
       - !tagged inpost.izi.config_initializer
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - '%kernel.debug%'
 
   izi\prestashop\Form\Type\GeneralConfigurationType:
     class: izi\prestashop\Form\Type\GeneralConfigurationType
@@ -357,12 +359,6 @@ services:
     tags:
       - { name: form.type }
 
-  izi\prestashop\Form\Type\Widget\WidgetAlignmentChoiceType:
-    class: izi\prestashop\Form\Type\Widget\WidgetAlignmentChoiceType
-    autowire: true
-    tags:
-      - { name: form.type }
-
   izi\prestashop\Form\Type\Widget\WidgetVariantChoiceType:
     class: izi\prestashop\Form\Type\Widget\WidgetVariantChoiceType
     autowire: true
@@ -395,13 +391,6 @@ services:
     class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
     tags:
       - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }
-
-  izi\prestashop\Form\TypeExtension\VersionCheckingWidgetConfigurationTypeExtension:
-    class: izi\prestashop\Form\TypeExtension\VersionCheckingWidgetConfigurationTypeExtension
-    tags:
-      - { name: form.type_extension, extended_type: izi\prestashop\Form\Type\Widget\WidgetConfigurationType }
-    arguments:
-      - '@izi\prestashop\Configuration\ApiConfiguration'
 
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
@@ -453,7 +442,7 @@ services:
     class: izi\prestashop\Twig\Extension\LegacyTranslationExtension
     public: false
     tags:
-      - { name: twig.extension }
+      - { name: inpost.izi.twig_extension }
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
 
@@ -503,6 +492,21 @@ services:
       - '@assets.packages'
       - '@izi\prestashop\View\Asset\AssetManagerInterface'
       - InPostIzi
+
+  izi\prestashop\Configuration\Initializer\AnnotationsConfigInitializer:
+    class: izi\prestashop\Configuration\Initializer\AnnotationsConfigInitializer
+    public: false
+    tags:
+      - { name: inpost.izi.config_initializer }
+
+  izi\prestashop\Configuration\Initializer\TwigConfigInitializer:
+    class: izi\prestashop\Configuration\Initializer\TwigConfigInitializer
+    public: false
+    tags:
+      - { name: inpost.izi.config_initializer }
+    arguments:
+      - '@twig'
+      - !tagged inpost.izi.twig_extension
 
   izi\prestashop\Order\Message\ParameterDescriptorInterface: '@izi\prestashop\Order\Message\ParametersExtractor'
 

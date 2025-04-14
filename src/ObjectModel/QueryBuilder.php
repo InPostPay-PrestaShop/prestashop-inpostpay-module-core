@@ -8,6 +8,8 @@ namespace izi\prestashop\ObjectModel;
  * @template T of \ObjectModel
  *
  * @param class-string<T> $class
+ *
+ * @experimental API may change, extending {@see \DbQuery} is a temporary hack
  */
 class QueryBuilder extends \DbQuery
 {
