@@ -107,18 +107,20 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
             return (int) $cartRule['id_cart_rule'];
         }, $cart->getCartRules(\CartRule::FILTER_ACTION_ALL, false));
 
-        $cartRules = array_filter($discounts, function ($discount) use ($cartRuleIdsToSkip) {
+        $cartRules = array_filter($discounts, function ($discount) use ($cart, $cartRuleIdsToSkip) {
             if ('' === (string) $discount['code']) {
                 return false;
             }
 
             if (!empty($discount['carrier_restriction'])) {
+                // discount cannot be added unless a delivery option is selected via checkout page,
+                // and before finalizing the order we do not know what delivery option will actually be used
                 return false;
             }
 
             $cartRuleId = (int) $discount['id_cart_rule'];
 
-            if (!empty($discount['country_restriction']) && !$this->cartRuleRepository->isCompatibleWithCountry($cartRuleId, 'PL')) {
+            if (!empty($discount['country_restriction']) && !$this->canCountryRestrictedCartRuleBeAdded($cart, $cartRuleId)) {
                 return false;
             }
 
@@ -174,5 +176,28 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
         }
 
         return $this->configuration->getDefaultPromoDetailsPageId($shopId);
+    }
+
+    private function canCountryRestrictedCartRuleBeAdded(\Cart $cart, int $cartRuleId): bool
+    {
+        if (0 >= $addressId = (int) $cart->id_address_delivery) {
+            // discount cannot be added unless the delivery address is selected
+            return false;
+        }
+
+        foreach ($this->cartRuleRepository->getCompatibleCountries($cartRuleId) as $country) {
+            if ('PL' !== $country->iso_code) {
+                // as of writing this comment, only domestic delivery is available
+                continue;
+            }
+
+            /** @var \Address[] $addresses */
+            $addresses = $cart->getAddressCollection();
+            $address = $addresses[$addressId];
+
+            return (int) $address->id_country === (int) $country->id;
+        }
+
+        return false;
     }
 }

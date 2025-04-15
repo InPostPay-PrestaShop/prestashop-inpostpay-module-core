@@ -16,19 +16,25 @@ class CartRuleRepository extends ObjectRepository
         parent::__construct(\CartRule::class, $manager);
     }
 
-    public function isCompatibleWithCountry(int $cartRuleId, string $isoCode): bool
+    /**
+     * @param int $cartRuleId identifier of country restricted cart rule
+     *
+     * @return \Country[]
+     */
+    public function getCompatibleCountries(int $cartRuleId): array
     {
         if (0 >= $cartRuleId) {
-            return false;
+            return [];
         }
 
-        $qb = (new \DbQuery())
-            ->select('1')
+        return $this->manager
+            ->createQueryBuilder(\Country::class)
+            ->select('cl.*, c.*')
             ->from('cart_rule_country', 'crc')
             ->innerJoin('country', 'c', 'c.id_country = crc.id_country AND c.active = 1')
+            ->leftJoin('country_lang', 'cl', 'cl.id_country = c.id_country')
             ->where('crc.id_cart_rule = ' . $cartRuleId)
-            ->where('c.iso_code = "' . pSQL($isoCode) . '"');
-
-        return (bool) $this->manager->getConnection()->fetchOne('SELECT EXISTS(' . $qb . ')');
+            ->build()
+            ->getResult();
     }
 }
