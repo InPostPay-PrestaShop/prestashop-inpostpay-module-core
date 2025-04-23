@@ -31,6 +31,7 @@ final class ApiConfigurationType extends AbstractType
             ])
             ->add('merchantClientId', TextType::class, [
                 'label' => $this->translator->l('Merchant client ID', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('Merchant client ID is a value assigned by InPost. In order to obtain the value for the sandbox environment, send a request to integracjapay@inpost.pl. The value for the production environment can be obtained in the merchant panel.', self::TRANSLATION_SOURCE),
             ])
             ->add('clientCredentials', ClientCredentialsType::class, [
                 'required' => false,

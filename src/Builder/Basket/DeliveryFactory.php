@@ -138,9 +138,13 @@ class DeliveryFactory
 
     private function getServicePrice(ServiceOptions $options, \Cart $cart, \Carrier $carrier, \Carrier $defaultCarrier, bool $isFreeShipping): Price
     {
+        if ($isFreeShipping) {
+            return PriceFactory::create(0., 0.);
+        }
+
         $servicePrice = $this->priceCalculator->getAdditionalServicePrice($cart, $carrier, $options);
 
-        if ($isFreeShipping || $carrier === $defaultCarrier) {
+        if ($carrier === $defaultCarrier) {
             return $servicePrice;
         }
 

@@ -520,7 +520,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $model = new \Product($product['id_product'], false, $this->cart->id_lang);
 
         $quantity = !empty($product['id_product_attribute'])
-            ? (int) (new \Combination($product['id_product_attribute']))->minimal_quantity
+            ? (int) (new \Combination((int) $product['id_product_attribute']))->minimal_quantity
             : (int) $model->minimal_quantity;
 
         if (isset($product['quantity'])) {

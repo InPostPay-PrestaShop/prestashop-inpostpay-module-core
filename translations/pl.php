@@ -34,6 +34,7 @@ $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_b2270e0389d0e5acd30d8
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_7f77e3d7178f0b1979d13c101a456450'] = 'Włącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_0ba29c6a1afacf586b03a26162c72274'] = 'Środowisko';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_02a5fb45d7cc2eb4a4913f760b397416'] = 'Wybierz środowisko, na którym chcesz pokazać usługę InPost Pay. Pamiętaj, aby przed przejściem na środowisko produkcyjne upewnić się, że usługa w Twoim sklepie działa prawidłowo.';
+$_MODULE['<{inpostizi}prestashop>apiconfigurationtype_6153daeaf2b3f782e9c859a0b884a2dc'] = 'Merchant client ID jest wartością nadawaną przez InPost. W celu otrzymania wartości dla środowiska sandbox należy wysłać zgłoszenie na integracjapay@inpost.pl. Wartość dla środowiska produkcyjnego można uzyskać w panelu merchanta.';
 $_MODULE['<{inpostizi}prestashop>cartruleoptionstype_4b77241222efee4f0d7dc4871124c458'] = 'Podlega Dyrektywie Omnibus';
 $_MODULE['<{inpostizi}prestashop>cartruleoptionstype_93cba07454f06a4a960172bbd6e2a435'] = 'Tak';
 $_MODULE['<{inpostizi}prestashop>cartruleoptionstype_bafd7322c6e97d25b6299b5d6fe8920b'] = 'Nie';
