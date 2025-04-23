@@ -7,12 +7,12 @@ namespace izi\prestashop\Common\Basket;
 use izi\prestashop\Common\QuantityType;
 
 /**
- * @template T
+ * @template T of (int|float)
  */
 final class Quantity implements \JsonSerializable
 {
     /**
-     * @var T
+     * @var int|float
      */
     private $quantity;
 
@@ -27,15 +27,18 @@ final class Quantity implements \JsonSerializable
     private $quantity_unit;
 
     /**
-     * @var T|null
+     * @var int|float|null
      */
     private $available_quantity;
 
     /**
-     * @var T|null
+     * @var int|float|null
      */
     private $max_quantity;
 
+    /**
+     * @param T $quantity
+     */
     private function __construct($quantity, QuantityType $quantity_type, ?string $quantity_unit = null, $available_quantity = null, $max_quantity = null)
     {
         $this->quantity = $quantity;

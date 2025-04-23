@@ -23,10 +23,13 @@ services:
     public: false
     tags:
       - { name: inpost.izi.command_handler }
-    autowire: true
+    arguments:
+      - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
 
   izi\prestashop\Form\Type\CartRuleOptionsType:
     class: izi\prestashop\Form\Type\CartRuleOptionsType
     tags:
       - { name: form.type }
-    autowire: true
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'

@@ -21,10 +21,8 @@ class ImageTypeRepository extends ObjectRepository
      */
     public function getProductImageTypes(): array
     {
-        return $this->findBy(
-            [
-                'products' => 1,
-            ]
-        );
+        return $this->findBy([
+            'products' => true,
+        ]);
     }
 }

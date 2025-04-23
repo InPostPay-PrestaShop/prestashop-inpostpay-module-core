@@ -28,13 +28,19 @@ final class ProductRestrictionsCache implements \JsonSerializable
      */
     private $hasAttributeGroupRestrictions = false;
 
+    /**
+     * @var bool
+     */
+    private $hasFeatureRestrictions = false;
+
     public static function fromRestrictions(ProductRestrictions $restrictions): self
     {
         return (new self())
             ->setProductTypes($restrictions->getProductTypes())
             ->setHasCategoryRestrictions([] !== $restrictions->getCategoryIds())
             ->setHasManufacturerRestrictions([] !== $restrictions->getManufacturerIds())
-            ->setHasAttributeGroupRestrictions([] !== $restrictions->getAttributeGroupIds());
+            ->setHasAttributeGroupRestrictions([] !== $restrictions->getAttributeGroupIds())
+            ->setHasFeatureRestrictions([] !== $restrictions->getFeatureIds());
     }
 
     public function getProductTypes(): array
@@ -84,6 +90,18 @@ final class ProductRestrictionsCache implements \JsonSerializable
     public function setHasAttributeGroupRestrictions(bool $hasAttributeGroupRestrictions): self
     {
         $this->hasAttributeGroupRestrictions = $hasAttributeGroupRestrictions;
+
+        return $this;
+    }
+
+    public function hasFeatureRestrictions(): bool
+    {
+        return $this->hasFeatureRestrictions;
+    }
+
+    public function setHasFeatureRestrictions(bool $hasFeatureRestrictions): ProductRestrictionsCache
+    {
+        $this->hasFeatureRestrictions = $hasFeatureRestrictions;
 
         return $this;
     }

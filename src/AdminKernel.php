@@ -12,6 +12,7 @@ use PrestaShopBundle\PrestaShopBundle;
 use Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -53,6 +54,7 @@ final class AdminKernel extends Kernel
     {
         yield new FrameworkBundle();
         yield new TwigBundle();
+        yield new SecurityBundle();
 
         if (class_exists(SensioFrameworkExtraBundle::class)) {
             yield new SensioFrameworkExtraBundle();

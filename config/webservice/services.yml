@@ -16,6 +16,8 @@ services:
         izi\prestashop\Command\UpdateBasketCommand: '@izi\prestashop\Handler\UpdateBasketHandlerInterface'
         izi\prestashop\Command\UnbindBasketCommand: '@izi\prestashop\Handler\UnbindBasketHandlerInterface'
         izi\prestashop\Command\UpdateOrderAddressDeliveryCommand: '@izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface'
+        izi\prestashop\HotProduct\Message\DeleteRemoteProductCommand: '@izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandlerInterface'
+        izi\prestashop\HotProduct\Message\UpdateHotProductCommand: '@izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandlerInterface'
 
   inpost.izi.hook_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
@@ -30,3 +32,16 @@ services:
         actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'
         actionObjectOrderUpdateBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore'
         actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
+        # products
+        actionObjectProductDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore'
+        actionObjectProductDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter'
+        actionObjectProductUpdateAfter: '@izi\prestashop\Hook\Common\Product\ActionProductUpdateAfter'
+        actionObjectCombinationDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionCombinationDeleteBefore'
+        actionObjectCombinationDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionCombinationDeleteAfter'
+        actionObjectCombinationUpdateAfter: '@izi\prestashop\Hook\Common\Product\ActionCombinationUpdateAfter'
+        actionObjectImageAddAfter: '@izi\prestashop\Hook\Common\Product\ActionImageAddAfter'
+        actionObjectImageDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionImageDeleteAfter'
+        actionObjectSpecificPriceAddAfter: '@izi\prestashop\Hook\Common\Product\ActionSpecificPriceAddAfter'
+        actionObjectSpecificPriceUpdateAfter: '@izi\prestashop\Hook\Common\Product\ActionSpecificPriceUpdateAfter'
+        actionObjectSpecificPriceDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionSpecificPriceDeleteAfter'
+        actionUpdateQuantity: '@izi\prestashop\Hook\Common\Product\ActionUpdateQuantity'

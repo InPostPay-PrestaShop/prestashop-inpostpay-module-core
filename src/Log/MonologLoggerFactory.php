@@ -14,6 +14,8 @@ use Psr\Log\LoggerInterface;
 
 final class MonologLoggerFactory implements LoggerFactoryInterface
 {
+    private static $decoratePsrProcessor;
+
     /**
      * @param iterable<HandlerFactoryInterface> $factories
      */
@@ -103,8 +105,70 @@ final class MonologLoggerFactory implements LoggerFactoryInterface
 
     private function processPsrMessages(HandlerInterface $handler, array $options): void
     {
-        $processor = new PsrLogMessageProcessor($options['date_format'] ?? null, $options['remove_used_context_fields'] ?? false);
+        $removeContextFields = $options['remove_used_context_fields'] ?? false;
+        $processor = new PsrLogMessageProcessor($options['date_format'] ?? null, $removeContextFields);
+
+        if ($removeContextFields && self::shouldDecoratePsrProcessor()) {
+            $processor = new UsedContextFieldsRemovingProcessor($processor);
+        }
 
         $handler->pushProcessor($processor);
+    }
+
+    private static function shouldDecoratePsrProcessor(): bool
+    {
+        if (isset(self::$decoratePsrProcessor)) {
+            return self::$decoratePsrProcessor;
+        }
+
+        $class = new \ReflectionClass(PsrLogMessageProcessor::class);
+
+        if (null === $constructor = $class->getConstructor()) {
+            return self::$decoratePsrProcessor = true;
+        }
+
+        return self::$decoratePsrProcessor = 2 > count($constructor->getParameters());
+    }
+}
+
+/**
+ * @internal
+ */
+final class UsedContextFieldsRemovingProcessor
+{
+    /**
+     * @var callable
+     */
+    private $processor;
+
+    public function __construct(callable $processor)
+    {
+        $this->processor = $processor;
+    }
+
+    public function __invoke(array $record): array
+    {
+        if (false === strpos($record['message'], '{')) {
+            return ($this->processor)($record);
+        }
+
+        $toRemove = [];
+
+        foreach ($record['context'] as $key => $val) {
+            $placeholder = '{' . $key . '}';
+            if (false === strpos($record['message'], $placeholder)) {
+                continue;
+            }
+
+            $toRemove[] = $key;
+        }
+
+        $record = ($this->processor)($record);
+
+        foreach ($toRemove as $key) {
+            unset($record['context'][$key]);
+        }
+
+        return $record;
     }
 }

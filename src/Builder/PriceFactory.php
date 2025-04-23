@@ -12,7 +12,7 @@ class PriceFactory
     {
         $net = \Tools::ps_round($net, 2);
         $gross = \Tools::ps_round($gross, 2);
-        $vat = $gross - $net;
+        $vat = \Tools::ps_round($gross - $net, 2);
 
         return new Price($net, $gross, $vat);
     }

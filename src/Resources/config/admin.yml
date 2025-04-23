@@ -34,18 +34,10 @@ services:
   izi\prestashop\Routing\AdminUrlGenerator:
     class: izi\prestashop\Routing\AdminUrlGenerator
     public: false
-    decorates: Symfony\Component\Routing\Generator\UrlGeneratorInterface
+    decorates: router
     arguments:
       - '@izi\prestashop\Routing\AdminUrlGenerator.inner'
-
-  # overrides the default argument to use the decorated service
-  twig.extension.routing:
-    class: Symfony\Bridge\Twig\Extension\RoutingExtension
-    public: false
-    arguments:
-      - '@Symfony\Component\Routing\Generator\UrlGeneratorInterface'
-    tags:
-      - { name: twig.extension }
+      - '@request_stack'
 
   izi\prestashop\Routing\AnnotationDirectoryLoader:
     class: izi\prestashop\Routing\AnnotationDirectoryLoader
@@ -81,3 +73,24 @@ services:
     public: false
     arguments:
       - '@PrestaShop\PrestaShop\Adapter\LegacyContext'
+
+  izi\prestashop\Security\EmployeeAuthenticator:
+    class: izi\prestashop\Security\EmployeeAuthenticator
+    arguments:
+      - '@inpost.izi.context'
+
+  prestashop.security.admin.provider:
+    class: Symfony\Component\Security\Core\User\UserProviderInterface
+    synthetic: true
+
+  inpost.izi.employee_user_provider:
+    class: izi\prestashop\Security\LazyUserProvider
+    arguments:
+      - '@service_container'
+      - prestashop.security.admin.provider
+
+  PrestaShopBundle\Security\Voter\PageVoter:
+    class: PrestaShopBundle\Security\Voter\PageVoter
+    public: false
+    tags:
+      - { name: security.voter }

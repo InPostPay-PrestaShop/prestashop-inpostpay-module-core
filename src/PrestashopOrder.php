@@ -28,9 +28,11 @@ use izi\prestashop\MerchantApi\Model\Order\Response\Order;
 use izi\prestashop\MerchantApi\Model\Order\Response\OrderDetails;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Order\Address\AddressDataMapper;
+use izi\prestashop\Product\Image\ImageUrlsProvider;
+use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Product\Util\AttributeListParser;
+use izi\prestashop\Product\Util\DescriptionFormatter;
 use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
-use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 
 /**
  * @internal
@@ -41,9 +43,9 @@ use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 class PrestashopOrder
 {
     /**
-     * @var ImageRetriever
+     * @var ImageUrlsProvider
      */
-    private $imageRetriever;
+    private $imageProvider;
 
     /**
      * @var \InPostIzi
@@ -67,11 +69,6 @@ class PrestashopOrder
     private $freeShipping;
 
     /**
-     * @var ProductConfigurationInterface
-     */
-    private $productConfiguration;
-
-    /**
      * @var AddressDataMapper
      */
     private $addressDataMapper;
@@ -92,9 +89,7 @@ class PrestashopOrder
         $this->deliveryDetails = new \Address((int) $this->order->id_address_delivery);
         $this->customer = $this->order->getCustomer();
         $this->language = new \Language((int) $this->order->id_lang);
-        $this->productConfiguration = $this->module->get(ProductConfigurationInterface::class);
 
-        $this->imageRetriever = new ImageRetriever(\Context::getContext()->link);
         $this->addressDataMapper = new AddressDataMapper();
     }
 
@@ -344,23 +339,19 @@ class PrestashopOrder
 
         if (\Validate::isLoadedObject($model)) {
             $category = $model->id_category_default;
-            $description = $this->formatDescription((string) $model->description) ?: $this->formatDescription((string) $model->description_short);
+            $description = DescriptionFormatter::formatDescription($model);
             $link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->order->id_lang, $this->order->id_shop, $data['product_attribute_id']);
 
-            $images = $this->imageRetriever->getProductImages([
-                'id_product' => $model->id,
-                'id_product_attribute' => $data['product_attribute_id'],
-            ], $this->language);
-
-            $imageUrl = $this->getCoverImageUrl($images);
-            $additionalImages = $this->getProductImages($images);
+            $imageUrls = $this->getImageProvider()->getImageUrls((int) $data['product_id'], (int) $data['product_attribute_id'], $this->language, (int) $this->order->id_shop);
+            $imageUrl = $imageUrls->getMainImageUrl();
+            $additionalImages = $imageUrls->getAdditionalImages();
         } else {
             $category = $description = $link = $imageUrl = null;
             $additionalImages = [];
         }
 
         return new Product(
-            sprintf('%d.%d.%d', $data['product_id'], $data['product_attribute_id'], $data['id_customization']),
+            (string) ReferenceId::create((int) $data['product_id'], (int) $data['product_attribute_id'], (int) $data['id_customization']),
             $productName,
             PriceFactory::create((float) $data['unit_price_tax_excl'], (float) $data['unit_price_tax_incl']),
             Quantity::integer((int) $data['product_quantity']),
@@ -380,22 +371,6 @@ class PrestashopOrder
         return array_map(static function (array $attribute) {
             return new ProductAttribute($attribute['group'], $attribute['name']);
         }, $this->getAttributeListParser()->parse($attributes, (int) $this->order->id_shop));
-    }
-
-    private function formatDescription(string $description): string
-    {
-        $description = strip_tags($description);
-        $description = trim(preg_replace('/\s+/', ' ', $description));
-
-        if ('' === $description) {
-            return '';
-        }
-
-        $description = htmlentities($description, ENT_HTML401, 'utf-8', false);
-        $description = htmlspecialchars_decode($description);
-        $description = preg_replace('/&(?:#\d+|[a-zA-Z]+);/', '', $description);
-
-        return \Tools::substr($description, 0, 1000);
     }
 
     private function hasFreeShippingCartRule(): bool
@@ -425,65 +400,6 @@ class PrestashopOrder
         );
     }
 
-    private function getImageTypeNameByImageTypeId(int $idImageType, string $defaultValue): ?string
-    {
-        $imageType = $idImageType ? new \ImageType($idImageType) : null;
-
-        return $imageType && \Validate::isLoadedObject($imageType) ? $imageType->name : $defaultValue;
-    }
-
-    private function getCoverImageUrl(array $images): ?string
-    {
-        if (null === $image = $this->getCoverImage($images)) {
-            return null;
-        }
-
-        $idImageType = $this->productConfiguration->getNormalImageTypeId((int) $this->order->id_shop);
-
-        $image = $image['bySize'][$this->getImageTypeNameByImageTypeId($idImageType, 'cart_default')] ?? $image['small'];
-
-        return $image['url'];
-    }
-
-    private function getCoverImage(array $images): ?array
-    {
-        foreach ($images as $image) {
-            if (!empty($image['cover'])) {
-                return $image;
-            }
-        }
-
-        if (false !== $image = reset($images)) {
-            return $image;
-        }
-
-        return null;
-    }
-
-    /**
-     * @return ProductImage[]
-     */
-    private function getProductImages(array $images): array
-    {
-        if ([] === $images) {
-            return [];
-        }
-
-        $images = array_slice($images, 0, 10);
-
-        $idImageTypeSmall = $this->productConfiguration->getSmallImageTypeId((int) $this->order->id_shop);
-        $idImageTypeLarge = $this->productConfiguration->getLargeImageTypeId((int) $this->order->id_shop);
-        $smallFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeSmall, 'home_default');
-        $largeFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeLarge, 'medium_default');
-
-        return array_map(static function (array $image) use ($smallFormatName, $largeFormatName): ProductImage {
-            $smallSize = $image['bySize'][$smallFormatName] ?? $image['medium'];
-            $normalSize = $image['bySize'][$largeFormatName] ?? $image['large'];
-
-            return new ProductImage($smallSize['url'], $normalSize['url']);
-        }, $images);
-    }
-
     private function getAttributeListParser(): AttributeListParser
     {
         return $this->attributeListParser ?? $this->attributeListParser = new AttributeListParser(
@@ -491,5 +407,10 @@ class PrestashopOrder
             \Context::getContext(),
             _PS_VERSION_
         );
+    }
+
+    private function getImageProvider(): ImageUrlsProvider
+    {
+        return $this->imageProvider ?? $this->imageProvider = ImageUrlsProvider::create();
     }
 }

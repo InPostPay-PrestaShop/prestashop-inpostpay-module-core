@@ -2,6 +2,8 @@
 imports:
   - { resource: services/common.yml }
   - { resource: services/common_admin.yml }
+  - { resource: services/admin/form.yml }
+  - { resource: services/admin/form.php, ignore_errors: true }
 
 services:
   izi\prestashop\CommandBus:
@@ -24,6 +26,25 @@ services:
       - !tagged inpost.izi.config_initializer
       - '@izi\prestashop\Configuration\ApiConfigurationInterface'
       - '%kernel.debug%'
+    calls:
+      - { method: setLogger, arguments: [ '@inpost.izi.general_logger' ] }
+
+  izi\prestashop\Controller\Admin\HotProductController:
+    class: izi\prestashop\Controller\Admin\HotProductController
+    public: false
+    autowire: true
+    tags:
+      - { name: controller.service_arguments }
+      - { name: container.service_subscriber }
+    arguments:
+      - '@inpost.izi.shop_context'
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - !tagged inpost.izi.config_initializer
+      - '%kernel.debug%'
+    calls:
+      - { method: setLogger, arguments: [ '@inpost.izi.general_logger' ] }
 
   izi\prestashop\Form\Type\GeneralConfigurationType:
     class: izi\prestashop\Form\Type\GeneralConfigurationType
@@ -180,6 +201,12 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
       - '@inpost.izi.context'
+
+  izi\prestashop\Form\Type\ObjectModelAutocompleteType:
+    class: izi\prestashop\Form\Type\ObjectModelAutocompleteType
+    autowire: true
+    tags:
+      - { name: form.type }
 
   izi\prestashop\Form\Type\Product\ProductRestrictionsType:
     class: izi\prestashop\Form\Type\Product\ProductRestrictionsType
@@ -377,20 +404,29 @@ services:
     tags:
       - { name: form.type }
 
-  izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension:
-    class: izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension
+  izi\prestashop\HotProduct\Form\UpdateHotProductType:
+    class: izi\prestashop\HotProduct\Form\UpdateHotProductType
+    autowire: true
     tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\TimeType }
+      - { name: form.type }
 
-  izi\prestashop\Form\TypeExtension\HelpTextExtension:
-    class: izi\prestashop\Form\TypeExtension\HelpTextExtension
+  izi\prestashop\HotProduct\Form\CreateHotProductType:
+    class: izi\prestashop\HotProduct\Form\CreateHotProductType
     tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
+      - { name: form.type }
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@router'
 
-  izi\prestashop\Form\TypeExtension\UnitTypeExtension:
-    class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
+  izi\prestashop\Form\Type\Product\CombinationByAttributesChoiceType:
+    class: izi\prestashop\Form\Type\Product\CombinationByAttributesChoiceType
     tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Translation\LegacyTranslator'
 
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
@@ -510,10 +546,6 @@ services:
 
   izi\prestashop\Order\Message\ParameterDescriptorInterface: '@izi\prestashop\Order\Message\ParametersExtractor'
 
-  inpost.izi.shop_context:
-    alias: prestashop.adapter.shop.context
-    public: false
-
   izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
   izi\prestashop\Configuration\GuiConfiguration:
     class: izi\prestashop\Configuration\GuiConfiguration
@@ -555,3 +587,51 @@ services:
       - { name: inpost.izi.cache_clearer }
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
+
+  izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\HotProduct\HotProductValidator'
+      - '@izi\prestashop\HotProduct\HotProductDataMapperInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+
+  izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+      - '@izi\prestashop\HotProduct\HotProductDataMapperInterface'
+
+  izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+
+  izi\prestashop\HotProduct\HotProductValidator:
+    class: izi\prestashop\HotProduct\HotProductValidator
+    public: false
+    arguments:
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+
+  izi\prestashop\HotProduct\View\HotProductViewDataFactory:
+    class: izi\prestashop\HotProduct\View\HotProductViewDataFactory
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@inpost.izi.object_model.shop_repository'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'

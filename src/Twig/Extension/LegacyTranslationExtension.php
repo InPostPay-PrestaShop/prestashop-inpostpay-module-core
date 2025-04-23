@@ -37,8 +37,8 @@ class LegacyTranslationExtension extends AbstractExtension
         ];
     }
 
-    public function legacyTrans(string $value): string
+    public function legacyTrans(string $value, ?string $domain = null): string
     {
-        return $this->translator->l($value, 'admin_template_translations');
+        return $this->translator->l($value, $domain ?? 'admin_template_translations');
     }
 }

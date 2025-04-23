@@ -38,15 +38,10 @@ final class AttributeListParser
      */
     public function parse(string $attributes, ?int $shopId = null): array
     {
-        $separator = $this->getSeparator($shopId);
-        $colon = $this->getColon();
-
-        $pattern = strtr('/(?>(?P<attribute>.+?{colon}[^{colon_char}]+){separator}(?!{separator}(?:[^{colon_char}{separator_char}])+{colon}))/', [
-            '{colon}' => $colon,
-            '{separator}' => $separator,
-            '{colon_char}' => trim($colon),
-            '{separator_char}' => trim($separator),
-        ]);
+        $pattern = $this->getPattern(
+            $colon = $this->getColon(),
+            $separator = $this->getSeparator($shopId)
+        );
 
         if (!preg_match_all($pattern, $attributes . $separator, $matches)) {
             return [];
@@ -68,6 +63,24 @@ final class AttributeListParser
         }
 
         return $result;
+    }
+
+    private function getPattern(string $colon, string $separator): string
+    {
+        if ('' === $colonChar = trim($colon)) {
+            return strtr('/(?>(?P<attribute>.+?{colon}.+?){separator}(?!{separator}(?:[^{separator_char}])+{colon}))/', [
+                '{colon}' => $colon,
+                '{separator}' => $separator,
+                '{separator_char}' => trim($separator),
+            ]);
+        }
+
+        return strtr('/(?>(?P<attribute>.+?{colon}[^{colon_char}]+){separator}(?!{separator}(?:[^{colon_char}{separator_char}])+{colon}))/', [
+            '{colon}' => $colon,
+            '{separator}' => $separator,
+            '{colon_char}' => $colonChar,
+            '{separator_char}' => trim($separator),
+        ]);
     }
 
     private function getSeparator(?int $shopId): string

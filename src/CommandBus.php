@@ -35,18 +35,38 @@ use izi\prestashop\Handler\UpdateBasketHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderStatusHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface;
+use izi\prestashop\HotProduct\Message\CreateHotProductCommand;
+use izi\prestashop\HotProduct\Message\DeleteHotProductCommand;
+use izi\prestashop\HotProduct\Message\DeleteRemoteProductCommand;
+use izi\prestashop\HotProduct\Message\ImportHotProductCommand;
+use izi\prestashop\HotProduct\Message\UpdateHotProductCommand;
+use izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandlerInterface;
+use izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandlerInterface;
+use izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandlerInterface;
+use izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandlerInterface;
+use izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandlerInterface;
+use izi\prestashop\MerchantApi\Command\AddProductToBasketCommand;
+use izi\prestashop\MerchantApi\Command\Basket\AddProductToCartCommand;
+use izi\prestashop\MerchantApi\Command\Basket\CreateCartCommand;
+use izi\prestashop\MerchantApi\Command\Basket\IncrementCartQuantityCommand;
 use izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\CreateOrderCommand;
 use izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\GetBasketCommand;
 use izi\prestashop\MerchantApi\Command\GetOrderCommand;
+use izi\prestashop\MerchantApi\Command\GetProductsCommand;
 use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
 use izi\prestashop\MerchantApi\Command\UpdateOrderCommand;
+use izi\prestashop\MerchantApi\Handler\AddProductToBasketHandlerInterface;
+use izi\prestashop\MerchantApi\Handler\Basket\AddProductToCartHandlerInterface;
+use izi\prestashop\MerchantApi\Handler\Basket\CreateCartHandlerInterface;
+use izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\CreateOrderHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\GetBasketHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\GetOrderHandlerInterface;
+use izi\prestashop\MerchantApi\Handler\GetProductsHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface;
 use Psr\Container\ContainerInterface;
@@ -84,7 +104,13 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             CreateOrderCommand::class => '?' . CreateOrderHandlerInterface::class,
             GetOrderCommand::class => '?' . GetOrderHandlerInterface::class,
             UpdateOrderCommand::class => '?' . UpdateOrderHandlerInterface::class,
+            GetProductsCommand::class => '?' . GetProductsHandlerInterface::class,
+            AddProductToBasketCommand::class => '?' . AddProductToBasketHandlerInterface::class,
+
             UpdateCartMessageCommand::class => '?' . UpdateCartMessageHandlerInterface::class,
+            CreateCartCommand::class => '?' . CreateCartHandlerInterface::class,
+            AddProductToCartCommand::class => '?' . AddProductToCartHandlerInterface::class,
+            IncrementCartQuantityCommand::class => '?' . IncrementCartQuantityHandlerInterface::class,
 
             /* configuration */
             UpdateGeneralConfigurationCommand::class => '?' . UpdateGeneralConfigurationHandlerInterface::class,
@@ -95,6 +121,12 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             CheckStatusCommand::class => '?' . CheckStatusHandlerInterface::class,
             DownloadModuleDataCommand::class => '?' . DownloadModuleDataHandlerInterface::class,
             UpdateCartRuleOptionsCommand::class => '?' . UpdateCartRuleOptionsHandlerInterface::class,
+
+            CreateHotProductCommand::class => '?' . CreateHotProductHandlerInterface::class,
+            ImportHotProductCommand::class => '?' . ImportHotProductHandlerInterface::class,
+            UpdateHotProductCommand::class => '?' . UpdateHotProductHandlerInterface::class,
+            DeleteHotProductCommand::class => '?' . DeleteHotProductHandlerInterface::class,
+            DeleteRemoteProductCommand::class => '?' . DeleteRemoteProductHandlerInterface::class,
         ];
     }
 

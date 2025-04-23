@@ -109,6 +109,14 @@ class Connection
         });
     }
 
+    /**
+     * @return string|int The ID of the last inserted row
+     */
+    public function getLastInsertId()
+    {
+        return $this->db->Insert_ID();
+    }
+
     public function insert(string $table, array $data): void
     {
         $this->execute(function () use ($table, $data) {
@@ -125,13 +133,9 @@ class Connection
     public function update(string $table, array $data, array $criteria = []): int
     {
         $this->execute(function () use ($table, $data, $criteria) {
-            return $this->db->update(
-                $table,
-                $data,
-                $this->getWhereConditions($criteria),
-                0,
-                true
-            );
+            $where = $this->getWhereConditions($criteria);
+
+            return $this->db->update($table, $data, $where, 0, true);
         });
 
         return (int) $this->db->Affected_Rows();
@@ -148,7 +152,23 @@ class Connection
     }
 
     /**
-     * @param array<string, mixed> $criteria
+     * @param array<string|int, mixed> $criteria delete criteria
+     *
+     * @return int Number of affected rows
+     */
+    public function delete(string $table, array $criteria = []): int
+    {
+        $this->execute(function () use ($table, $criteria) {
+            $where = $this->getWhereConditions($criteria);
+
+            return $this->db->delete($table, $where);
+        });
+
+        return (int) $this->db->Affected_Rows();
+    }
+
+    /**
+     * @param array<string|int, mixed> $criteria
      */
     private function getWhereConditions(array $criteria): string
     {

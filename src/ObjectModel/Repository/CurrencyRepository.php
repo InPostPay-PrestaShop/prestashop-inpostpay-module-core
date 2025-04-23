@@ -16,9 +16,9 @@ class CurrencyRepository extends ObjectRepository
         parent::__construct(\Currency::class, $manager);
     }
 
-    public function findOneByIsoCode(string $isoCode): ?\Currency
+    public function findOneByIsoCode(string $isoCode, ?int $shopId = null): ?\Currency
     {
-        if (0 === $currencyId = (int) \Currency::getIdByIsoCode($isoCode)) {
+        if (0 === $currencyId = (int) \Currency::getIdByIsoCode($isoCode, $shopId)) {
             return null;
         }
 

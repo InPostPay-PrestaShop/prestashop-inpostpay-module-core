@@ -34,3 +34,12 @@
 
 {l s='Click here' mod='inpostizi'}
 {l s='to go to module documentation and read full instructions on how to configure message format.' mod='inpostizi'}
+
+{* Hot products *}
+{l s='Status' mod='inpostizi'}
+{l s='Active' mod='inpostizi'}
+{l s='Awaiting approval' mod='inpostizi'}
+{l s='Not found in API' mod='inpostizi'}
+{l s='Importable' mod='inpostizi'}
+{l s='Product does not exist or is not available for order' mod='inpostizi'}
+{l s='No products found.' mod='inpostizi'}
