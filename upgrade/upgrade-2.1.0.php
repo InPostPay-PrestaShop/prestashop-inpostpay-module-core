@@ -3,9 +3,6 @@
 use InPost\Izi\Upgrade\CacheClearer;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Database\Connection;
-use izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerAfter;
-use izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerBefore;
-use izi\prestashop\Hook\Common\ActionEmailSendBefore;
 use izi\prestashop\Hook\Common\Product as ProductHooks;
 use izi\prestashop\Installer\Database\Version_2_1_0;
 use izi\prestashop\Installer\DatabaseInstaller;
@@ -74,9 +71,6 @@ class InPostIziUpdater_2_1_0
             ProductHooks\ActionSpecificPriceUpdateAfter::HOOK_NAME,
             ProductHooks\ActionSpecificPriceDeleteAfter::HOOK_NAME,
             ProductHooks\ActionUpdateQuantity::HOOK_NAME,
-            ActionEmailSendBefore::HOOK_NAME,
-            ActionAdminInPostConfirmedShipmentsControllerAfter::HOOK_NAME,
-            ActionAdminInPostConfirmedShipmentsControllerBefore::HOOK_NAME,
         ]);
     }
 

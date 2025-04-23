@@ -36,8 +36,6 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Admin\DisplayBackOfficeHeader::HOOK_NAME => '?' . Admin\DisplayBackOfficeHeader::class,
             Admin\DisplayAdminOrderLeft::HOOK_NAME => '?' . Admin\DisplayAdminOrderLeft::class,
             Admin\DisplayAdminOrderSide::HOOK_NAME => '?' . Admin\DisplayAdminOrderSide::class,
-            Admin\ActionAdminInPostConfirmedShipmentsControllerAfter::HOOK_NAME => '?' . Admin\ActionAdminInPostConfirmedShipmentsControllerAfter::class,
-            Admin\ActionAdminInPostConfirmedShipmentsControllerBefore::HOOK_NAME => '?' . Admin\ActionAdminInPostConfirmedShipmentsControllerBefore::class,
 
             Common\ActionCartDeleteBefore::HOOK_NAME => Common\ActionCartDeleteBefore::class,
             Common\ActionCartUpdateAfter::HOOK_NAME => Common\ActionCartUpdateAfter::class,
@@ -48,7 +46,6 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\ActionShipmentUpdateAfter::HOOK_NAME => Common\ActionShipmentUpdateAfter::class,
             Common\ActionObjectOrderUpdateBefore::HOOK_NAME => Common\ActionObjectOrderUpdateBefore::class,
             Common\ActionObjectOrderUpdateAfter::HOOK_NAME => Common\ActionObjectOrderUpdateAfter::class,
-            Common\ActionEmailSendBefore::HOOK_NAME => Common\ActionEmailSendBefore::class,
 
             // products
             Common\Product\ActionProductDeleteBefore::HOOK_NAME => Common\Product\ActionProductDeleteBefore::class,

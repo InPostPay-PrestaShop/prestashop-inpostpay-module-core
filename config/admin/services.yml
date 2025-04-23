@@ -21,12 +21,6 @@ services:
   izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia:
     class: izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia
 
-  izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerAfter:
-    class: izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerAfter
-
-  izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerBefore:
-    class: izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerBefore
-
   izi\prestashop\Hook\Admin\DisplayAdminOrderSide:
     class: izi\prestashop\Hook\Admin\DisplayAdminOrderSide
 

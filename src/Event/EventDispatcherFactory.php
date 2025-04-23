@@ -6,7 +6,6 @@ namespace izi\prestashop\Event;
 
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\EventListener\CartListener;
-use izi\prestashop\EventListener\CreateShipmentListener;
 use izi\prestashop\EventListener\OrderListener;
 use izi\prestashop\EventListener\ShipmentListener;
 use izi\prestashop\Form\BasketAppClientProvider;
@@ -41,7 +40,6 @@ final class EventDispatcherFactory implements ServiceSubscriberInterface
             UpdateHotProductsListener::class,
             '?' . BasketAppClientProvider::class,
             '?' . UpdateCartRulesListener::class,
-            '?' . CreateShipmentListener::class,
         ];
     }
 

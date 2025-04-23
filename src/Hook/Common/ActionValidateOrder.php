@@ -6,8 +6,6 @@ namespace izi\prestashop\Hook\Common;
 
 use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\CommandBusInterface;
-use izi\prestashop\Event\EventDispatcherInterface;
-use izi\prestashop\Event\ValidateOrderEvent;
 use izi\prestashop\Hook\HookInterface;
 
 final class ActionValidateOrder implements HookInterface
@@ -24,19 +22,10 @@ final class ActionValidateOrder implements HookInterface
      */
     private $bus;
 
-    /**
-     * @var EventDispatcherInterface
-     */
-    private $dispatcher;
-
-    /**
-     * @param \InPostIzi $paymentModule
-     */
-    public function __construct(\PaymentModule $paymentModule, CommandBusInterface $bus, ?EventDispatcherInterface $dispatcher = null)
+    public function __construct(\PaymentModule $paymentModule, CommandBusInterface $bus)
     {
         $this->paymentModule = $paymentModule;
         $this->bus = $bus;
-        $this->dispatcher = $dispatcher ?? $paymentModule->get(EventDispatcherInterface::class);
     }
 
     public static function getHookName(): string
@@ -54,8 +43,6 @@ final class ActionValidateOrder implements HookInterface
         if (!$order instanceof \Order) {
             throw new \InvalidArgumentException(sprintf('Expected parameter "order" to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($order)));
         }
-
-        $this->dispatcher->dispatch(new ValidateOrderEvent($order), ValidateOrderEvent::class);
 
         if ($this->paymentModule->name === $order->module) {
             return;
