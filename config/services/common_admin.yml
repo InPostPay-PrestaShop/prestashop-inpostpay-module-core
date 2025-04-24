@@ -1,4 +1,8 @@
 # common BO configuration
+imports:
+  - { resource: admin/form.yml }
+  - { resource: admin/form.php, ignore_errors: true }
+
 services:
   izi\prestashop\View\Asset\AssetManagerInterface: '@izi\prestashop\View\Asset\AdminAssetManager'
   izi\prestashop\View\Asset\AdminAssetManager:
@@ -32,4 +36,12 @@ services:
       - { name: form.type }
     arguments:
       - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Form\Type\ObjectModelType:
+    class: izi\prestashop\Form\Type\ObjectModelType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
       - '@inpost.izi.context'

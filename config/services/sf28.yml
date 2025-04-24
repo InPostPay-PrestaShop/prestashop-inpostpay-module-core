@@ -111,6 +111,7 @@ services:
       - '@inpost.izi.form_type_locator'
       -
         Symfony\Component\Form\Extension\Core\Type\ChoiceType: ['@izi\prestashop\Form\TypeExtension\ChoicesAsValuesTypeExtension']
+        Symfony\Component\Form\Extension\Core\Type\FormType: ['@izi\prestashop\Form\TypeExtension\HelpTextExtension']
 
   inpost.izi.form_type_locator:
     class: izi\prestashop\DependencyInjection\ServiceLocator
