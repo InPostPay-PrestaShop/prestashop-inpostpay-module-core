@@ -190,6 +190,16 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
 
+  izi\prestashop\Configuration\ProductRestrictionsConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfiguration:
+    class: izi\prestashop\Configuration\GuiConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+      - '@inpost.izi.gui_configuration_locator'
+
   izi\prestashop\Environment\EnvironmentInterface: '@inpost.izi.environment'
   inpost.izi.environment:
     class: izi\prestashop\Environment\EnvironmentInterface
@@ -1060,6 +1070,15 @@ services:
     class: Symfony\Component\HttpFoundation\RequestStack
     factory: [ '@inpost.izi.module', getRequestStack ]
 
+  inpost.izi.validator:
+    class: Symfony\Component\Validator\Validator\ValidatorInterface
+    public: true
+    factory: [ izi\prestashop\Validator\ValidatorFactory, create ]
+    tags:
+      - { name: inpost.izi.gui_configuration_dependency, key: validator }
+    arguments:
+      - '@inpost.izi.constraint_validator_locator'
+
   izi\prestashop\Validator\Cart\BindableValidator:
     class: izi\prestashop\Validator\Cart\BindableValidator
     tags:
@@ -1083,6 +1102,35 @@ services:
     class: izi\prestashop\Validator\Cart\HasUnrestrictedProductValidator
     tags:
       - { name: validator.constraint_validator }
+
+  izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator:
+    class: izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator:
+    class: izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator:
+    class: izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface'
+      - '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
+
+  izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator:
+    class: izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface'
 
   izi\prestashop\Validator\Product\UnrestrictedValidator:
     class: izi\prestashop\Validator\Product\UnrestrictedValidator
@@ -1164,6 +1212,3 @@ services:
       - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
       - '@izi\prestashop\CommandBusInterface'
       - '@inpost.izi.general_logger'
-
-  izi\prestashop\Configuration\ProductRestrictionsConfigurationInterface:
-    alias: izi\prestashop\Configuration\GuiConfiguration

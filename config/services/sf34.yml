@@ -46,3 +46,24 @@ services:
     class: izi\prestashop\Event\EventDispatcherFactory
     arguments:
       - '@inpost.izi.event_subscriber_locator'
+
+  inpost.izi.constraint_validator_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - izi\prestashop\Validator\Cart\BindableValidator: '@?izi\prestashop\Validator\Cart\BindableValidator'
+        izi\prestashop\Validator\Cart\HasProductsValidator: '@?izi\prestashop\Validator\Cart\HasProductsValidator'
+        izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator: '@?izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator'
+        izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator: '@izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator'
+        izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator: '@izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator'
+        izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator'
+        izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator'
+        izi\prestashop\Validator\Product\UnrestrictedValidator: '@izi\prestashop\Validator\Product\UnrestrictedValidator'
+
+  inpost.izi.gui_configuration_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: [ container.service_locator ]
+    arguments:
+      - validator: '@inpost.izi.validator'
+        context: '@inpost.izi.shop_context'
+        izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepositoryInterface'
