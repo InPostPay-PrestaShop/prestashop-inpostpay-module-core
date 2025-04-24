@@ -151,7 +151,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
     public function onProductUpdated(ProductEvent $event): void
     {
         $product = $event->getProduct();
-        $updatedFields = $product->getFieldsToUpdate();
+        $updatedFields = $this->getUpdatedFields($product);
 
         if (null !== $updatedFields && [] === array_intersect(array_keys($updatedFields), self::OBSERVED_PRODUCT_PROPERTIES)) {
             return;
@@ -222,7 +222,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
     public function onCombinationUpdated(CombinationEvent $event): void
     {
         $combination = $event->getCombination();
-        $updatedFields = $combination->getFieldsToUpdate();
+        $updatedFields = $this->getUpdatedFields($combination);
 
         if (null !== $updatedFields && [] === array_intersect(array_keys($updatedFields), self::OBSERVED_COMBINATION_PROPERTIES)) {
             return;
@@ -438,5 +438,16 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         }
 
         return true;
+    }
+
+    private function getUpdatedFields(\ObjectModel $model): ?array
+    {
+        if (is_callable([$model, 'getFieldsToUpdate'])) {
+            return $model->getFieldsToUpdate();
+        }
+
+        return (\Closure::bind(function () {
+            return $this->update_fields;
+        }, $model, \ObjectModel::class))();
     }
 }
