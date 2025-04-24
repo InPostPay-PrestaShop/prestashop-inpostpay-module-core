@@ -90,27 +90,6 @@ services:
         izi\prestashop\HotProduct\Message\DeleteRemoteProductCommand: '@izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandlerInterface'
         izi\prestashop\HotProduct\Message\UpdateHotProductCommand: '@izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandlerInterface'
 
-  inpost.izi.constraint_validator_locator:
-    class: Symfony\Component\DependencyInjection\ServiceLocator
-    tags: [ container.service_locator ]
-    arguments:
-      - izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator: '@izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator'
-        izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator: '@izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator'
-        izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator'
-        izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator'
-        izi\prestashop\Validator\Cart\BindableValidator: '@izi\prestashop\Validator\Cart\BindableValidator'
-        izi\prestashop\Validator\Cart\HasProductsValidator: '@izi\prestashop\Validator\Cart\HasProductsValidator'
-        izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator: '@izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator'
-        izi\prestashop\Validator\Product\UnrestrictedValidator: '@izi\prestashop\Validator\Product\UnrestrictedValidator'
-
-  inpost.izi.gui_configuration_locator:
-    class: Symfony\Component\DependencyInjection\ServiceLocator
-    tags: [ container.service_locator ]
-    arguments:
-      - validator: '@inpost.izi.validator'
-        context: '@inpost.izi.shop_context'
-        izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepositoryInterface'
-
   inpost.izi.widget_controller_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
     tags: [ container.service_locator ]

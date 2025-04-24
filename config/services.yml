@@ -546,7 +546,6 @@ services:
 
   izi\prestashop\Order\Message\ParameterDescriptorInterface: '@izi\prestashop\Order\Message\ParametersExtractor'
 
-  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
   izi\prestashop\Configuration\GuiConfiguration:
     class: izi\prestashop\Configuration\GuiConfiguration
     autowire: true
@@ -557,13 +556,8 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
 
-  inpost.izi.security.authorization_checker:
-    alias: security.authorization_checker
-    public: false
-
-  inpost.izi.validator:
-    alias: validator
-    public: false
+  inpost.izi.security.authorization_checker: '@security.authorization_checker'
+  inpost.izi.validator: '@validator'
 
   izi\prestashop\CacheClearer\CacheClearerInterface: '@izi\prestashop\CacheClearer\ChainCacheClearer'
   izi\prestashop\CacheClearer\ChainCacheClearer:
