@@ -29,10 +29,13 @@ use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Repository\BasketSessionRepository;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\Serializer\SerializerFactory;
+use izi\prestashop\Validator\Product\Unrestricted;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @internal
+ *
  * @deprecated
  *
  * @todo refactor
@@ -76,7 +79,12 @@ class Create
      */
     private $repository;
 
-    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null, ?BasketSessionRepositoryInterface $repository = null)
+    /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+
+    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null, ?BasketSessionRepositoryInterface $repository = null, ?ValidatorInterface $validator = null)
     {
         $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
@@ -85,6 +93,7 @@ class Create
         $this->bus = $bus ?? $this->module->get(CommandBusInterface::class);
         $this->ordersConfiguration = $this->module->get(OrdersConfigurationInterface::class);
         $this->repository = $repository ?? new BasketSessionRepository(SerializerFactory::create(), $this->module->get(ObjectManagerInterface::class));
+        $this->validator = $validator ?? $this->module->get('inpost.izi.validator');
     }
 
     /**
@@ -582,6 +591,11 @@ class Create
         foreach ($products as $product) {
             if ($product['minimal_quantity'] > $product['cart_quantity']) {
                 throw new CannotCreateOrderException($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', ['%product%' => $product['name'], '%quantity%' => $product['minimal_quantity']], 'Shop.Notifications.Error'));
+            }
+
+            $violations = $this->validator->validate($product, new Unrestricted((int) $product['id_shop']));
+            if (count($violations) > 0) {
+                throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
             }
         }
 

@@ -7,8 +7,12 @@ namespace izi\prestashop\Repository;
 use izi\prestashop\Configuration\DTO\Product\ProductRestrictions;
 use izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface;
 use izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface;
+use izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface;
 use izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface;
 
+/**
+ * @extends FeatureRestrictionsRepositoryInterface
+ */
 interface ProductRestrictionsRepositoryInterface extends CategoryRestrictionsRepositoryInterface, ManufacturerRestrictionsRepositoryInterface, AttributeRestrictionsRepositoryInterface
 {
     public function getProductRestrictions(?int $shopId = null): ProductRestrictions;

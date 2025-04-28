@@ -36,6 +36,19 @@ services:
         displayCustomerLoginFormAfter: '@izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter'
         displayIziCartPreviewButton: '@izi\prestashop\Hook\Front\DisplayIziCartPreviewButton'
         displayIziCheckoutButton: '@izi\prestashop\Hook\Front\DisplayIziCheckoutButton'
+        # products
+        actionObjectProductDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore'
+        actionObjectProductDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter'
+        actionObjectProductUpdateAfter: '@izi\prestashop\Hook\Common\Product\ActionProductUpdateAfter'
+        actionObjectCombinationDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionCombinationDeleteBefore'
+        actionObjectCombinationDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionCombinationDeleteAfter'
+        actionObjectCombinationUpdateAfter: '@izi\prestashop\Hook\Common\Product\ActionCombinationUpdateAfter'
+        actionObjectImageAddAfter: '@izi\prestashop\Hook\Common\Product\ActionImageAddAfter'
+        actionObjectImageDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionImageDeleteAfter'
+        actionObjectSpecificPriceAddAfter: '@izi\prestashop\Hook\Common\Product\ActionSpecificPriceAddAfter'
+        actionObjectSpecificPriceUpdateAfter: '@izi\prestashop\Hook\Common\Product\ActionSpecificPriceUpdateAfter'
+        actionObjectSpecificPriceDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionSpecificPriceDeleteAfter'
+        actionUpdateQuantity: '@izi\prestashop\Hook\Common\Product\ActionUpdateQuantity'
 
   inpost.izi.basket_event_handler_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
@@ -65,29 +78,17 @@ services:
         izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand: '@izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface'
         izi\prestashop\MerchantApi\Command\GetBasketCommand: '@izi\prestashop\MerchantApi\Handler\GetBasketHandlerInterface'
         izi\prestashop\MerchantApi\Command\UpdateBasketCommand: '@izi\prestashop\MerchantApi\Handler\UpdateBasketHandlerInterface'
+        izi\prestashop\MerchantApi\Command\GetProductsCommand: '@izi\prestashop\MerchantApi\Handler\GetProductsHandlerInterface'
+        izi\prestashop\MerchantApi\Command\AddProductToBasketCommand: '@izi\prestashop\MerchantApi\Handler\AddProductToBasketHandlerInterface'
         izi\prestashop\MerchantApi\Command\CreateOrderCommand: '@izi\prestashop\MerchantApi\Handler\CreateOrderHandlerInterface'
         izi\prestashop\MerchantApi\Command\GetOrderCommand: '@izi\prestashop\MerchantApi\Handler\GetOrderHandlerInterface'
         izi\prestashop\MerchantApi\Command\UpdateOrderCommand: '@izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface'
+        izi\prestashop\MerchantApi\Command\Basket\CreateCartCommand: '@izi\prestashop\MerchantApi\Handler\Basket\CreateCartHandlerInterface'
+        izi\prestashop\MerchantApi\Command\Basket\AddProductToCartCommand: '@izi\prestashop\MerchantApi\Handler\Basket\AddProductToCartHandlerInterface'
+        izi\prestashop\MerchantApi\Command\Basket\IncrementCartQuantityCommand: '@izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandlerInterface'
         izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand: '@izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface'
-
-  inpost.izi.constraint_validator_locator:
-    class: Symfony\Component\DependencyInjection\ServiceLocator
-    tags: [ container.service_locator ]
-    arguments:
-      - izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator: '@izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator'
-        izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator: '@izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator'
-        izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator'
-        izi\prestashop\Validator\Cart\BindableValidator: '@izi\prestashop\Validator\Cart\BindableValidator'
-        izi\prestashop\Validator\Cart\HasProductsValidator: '@izi\prestashop\Validator\Cart\HasProductsValidator'
-        izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator: '@izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator'
-
-  inpost.izi.gui_configuration_locator:
-    class: Symfony\Component\DependencyInjection\ServiceLocator
-    tags: [ container.service_locator ]
-    arguments:
-      - validator: '@inpost.izi.validator'
-        context: '@inpost.izi.shop_context'
-        izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepositoryInterface'
+        izi\prestashop\HotProduct\Message\DeleteRemoteProductCommand: '@izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandlerInterface'
+        izi\prestashop\HotProduct\Message\UpdateHotProductCommand: '@izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandlerInterface'
 
   inpost.izi.widget_controller_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator

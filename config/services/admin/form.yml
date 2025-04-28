@@ -1,0 +1,20 @@
+services:
+  izi\prestashop\Form\TypeExtension\DatePickerCompatibilityTypeExtension:
+    class: izi\prestashop\Form\TypeExtension\DatePickerCompatibilityTypeExtension
+    tags:
+      - { name: form.type_extension, extended_type: PrestaShopBundle\Form\Admin\Type\DatePickerType }
+
+  izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension:
+    class: izi\prestashop\Form\TypeExtension\DateTimeImmutableTimeTypeExtension
+    tags:
+      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\TimeType }
+
+  izi\prestashop\Form\TypeExtension\HelpTextExtension:
+    class: izi\prestashop\Form\TypeExtension\HelpTextExtension
+    tags:
+      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
+
+  izi\prestashop\Form\TypeExtension\UnitTypeExtension:
+    class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
+    tags:
+      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }

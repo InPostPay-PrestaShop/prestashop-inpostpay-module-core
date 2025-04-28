@@ -48,6 +48,7 @@ services:
     factory: [ '@izi\prestashop\Form\FormFactoryFactory', create ]
     arguments:
       - '@inpost.izi.form_type_locator'
+      - Symfony\Component\Form\Extension\Core\Type\FormType: ['@izi\prestashop\Form\TypeExtension\HelpTextExtension']
 
   inpost.izi.form_type_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
@@ -55,3 +56,4 @@ services:
       - { name: container.service_locator }
     arguments:
       - izi\prestashop\Form\Type\CartRuleOptionsType: '@izi\prestashop\Form\Type\CartRuleOptionsType'
+        izi\prestashop\Form\Type\ObjectModelType: '@izi\prestashop\Form\Type\ObjectModelType'

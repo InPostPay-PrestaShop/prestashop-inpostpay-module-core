@@ -51,5 +51,9 @@ final class BindableValidator extends ConstraintValidator
         }
 
         yield new PaymentInCurrencyAvailable($this->paymentModule);
+
+        if (BindingPlace::ProductCard() !== $bindingPlace) {
+            yield new HasUnrestrictedProduct();
+        }
     }
 }

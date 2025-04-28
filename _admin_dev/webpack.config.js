@@ -8,6 +8,7 @@ const entries = [
   'consents',
   'gui',
   'support',
+  'hot-products',
 ];
 
 const getEntries = () => {

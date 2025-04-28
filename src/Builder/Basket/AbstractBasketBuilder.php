@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Builder\Basket;
 
 use izi\prestashop\Builder\PriceFactory;
+use izi\prestashop\Common\Basket\AvailablePromotion;
 use izi\prestashop\Common\Basket\Consent;
 use izi\prestashop\Common\Basket\ConsentLink;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
@@ -20,8 +21,8 @@ use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\DeliveryProduct;
 use izi\prestashop\Common\Product\DeliveryRelatedProducts;
 use izi\prestashop\Common\Product\ProductAttribute;
-use izi\prestashop\Common\Product\ProductImage;
 use izi\prestashop\Common\Product\ProductVariant;
+use izi\prestashop\Common\PromoCode;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
@@ -29,15 +30,22 @@ use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ContextManager;
+use izi\prestashop\Product\Image\ImageUrlsProvider;
 use izi\prestashop\Product\Price\BatchLowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceQuery;
 use izi\prestashop\Product\Price\NullLowestPriceProvider;
+use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Product\Util\AttributeListParser;
+use izi\prestashop\Product\Util\DescriptionFormatter;
+use izi\prestashop\PromoCode\AvailablePromotionsProviderInterface;
 use izi\prestashop\PromoCode\CartRulePromoCodeProvider;
+use izi\prestashop\PromoCode\NullAvailablePromotionsProvider;
 use izi\prestashop\PromoCode\PromoCodeProviderInterface;
+use izi\prestashop\Validator\Product\Unrestricted;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Core\Cart\Calculator;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @todo split into separate services
@@ -75,7 +83,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $productDeliveryFactory;
 
     /**
-     * @var ImageRetriever
+     * @var ImageRetriever|null
      */
     private $imageRetriever;
 
@@ -90,9 +98,19 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $promoCodeProvider;
 
     /**
+     * @var AvailablePromotionsProviderInterface
+     */
+    private $availablePromotionsProvider;
+
+    /**
      * @var AttributeListParser
      */
     private $attributeListParser;
+
+    /**
+     * @var ImageUrlsProvider
+     */
+    private $imageProvider;
 
     /**
      * @var \DateTimeImmutable|null
@@ -119,6 +137,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private $cartSummary;
 
+    /**
+     * @var ValidatorInterface|null
+     */
+    private $validator;
+
     public function __construct(
         \Cart $cart,
         ContextManager $contextManager,
@@ -128,7 +151,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         ProductDeliveryFactory $deliveryRelatedProductFactory,
         ?ImageRetriever $imageRetriever = null,
         ?LowestPriceProviderInterface $lowestPriceProvider = null,
-        ?PromoCodeProviderInterface $promoCodeProvider = null
+        ?PromoCodeProviderInterface $promoCodeProvider = null,
+        ?AvailablePromotionsProviderInterface $availablePromotionsProvider = null,
+        ?ValidatorInterface $validator = null
     ) {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
@@ -136,9 +161,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $this->deliveryFactory = $deliveryFactory;
         $this->productConfiguration = $productConfiguration;
         $this->productDeliveryFactory = $deliveryRelatedProductFactory;
-        $this->imageRetriever = $imageRetriever ?? new ImageRetriever($contextManager->getContext()->link);
+        $this->imageRetriever = $imageRetriever;
         $this->lowestPriceProvider = $lowestPriceProvider ?? new NullLowestPriceProvider();
         $this->promoCodeProvider = $promoCodeProvider ?? CartRulePromoCodeProvider::create();
+        $this->availablePromotionsProvider = $availablePromotionsProvider ?? new NullAvailablePromotionsProvider();
+        $this->validator = $validator;
     }
 
     /**
@@ -185,15 +212,24 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
                 $this->getAvailableDeliveryOptions($this->cart),
                 $products,
                 $this->getConsents(),
-                $this->promoCodeProvider->getPromoCodes($this->cart),
-                $this->getRelatedProducts($cartProducts)
+                array_values($this->promoCodeProvider->getPromoCodes($this->cart)),
+                $this->getRelatedProducts($cartProducts),
+                array_values($this->availablePromotionsProvider->getAvailablePromotions($this->cart))
             );
         } finally {
             $this->contextManager->restoreContext();
         }
     }
 
-    abstract protected function doBuild(Summary $summary, array $delivery, array $products, array $consents, array $promoCodes, array $relatedProducts);
+    /**
+     * @param DeliveryOption[] $delivery
+     * @param Product[] $products
+     * @param Consent[] $consents
+     * @param PromoCode[] $promoCodes
+     * @param Product[] $relatedProducts
+     * @param AvailablePromotion[] $availablePromotions
+     */
+    abstract protected function doBuild(Summary $summary, array $delivery, array $products, array $consents, array $promoCodes, array $relatedProducts/*, array $availablePromotions = []*/);
 
     /**
      * @return Product[]
@@ -286,14 +322,13 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $customizationId = array_key_exists('id_customization', $product) ? (int) $product['id_customization'] : 0;
 
         $category = $model->getDefaultCategory();
-        $description = $this->formatDescription((string) $model->description) ?: $this->formatDescription((string) $model->description_short);
+        $description = DescriptionFormatter::formatDescription($model);
         $link = $this->contextManager->getContext()->link->getProductLink($model, null, null, null, $this->cart->id_lang, null, $combinationId);
 
-        $images = $this->imageRetriever->getProductImages($product, $this->contextManager->getContext()->language);
-        $imageUrl = $this->getCoverImageUrl($images);
+        $imageUrls = $this->getImageProvider()->getImageUrls((int) $model->id, $combinationId);
 
         return new Product(
-            sprintf('%d.%d.%d', $model->id, (int) $combinationId, $customizationId),
+            (string) ReferenceId::create($model->id, $combinationId, $customizationId),
             $product['name'],
             $basePrice,
             $quantity,
@@ -301,31 +336,15 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $product['ean13'] ?? $model->ean13,
             $description,
             $link,
-            $imageUrl,
+            $imageUrls->getMainImageUrl(),
             $promoPrice,
             null === $promoPrice ? null : $this->getLowestPrice((int) $model->id, $combinationId),
             $this->getProductAttributes($product),
             $this->getProductVariants($product),
-            $this->getProductImages($images),
-            $related ? null : $this->getDeliveryProduct($model, $promoPrice ?? $basePrice, $quantity, (float) $product['weight']),
+            $imageUrls->getAdditionalImages(),
+            $related ? null : $this->getDeliveryProduct($model, $promoPrice ?? $basePrice, $quantity, (float) $product['weight'], $product),
             $related ? $this->getDeliveryRelatedProducts($model, $promoPrice ?? $basePrice, $quantity) : null
         );
-    }
-
-    private function formatDescription(string $description): string
-    {
-        $description = strip_tags($description);
-        $description = trim(preg_replace('/\s+/', ' ', $description));
-
-        if ('' === $description) {
-            return '';
-        }
-
-        $description = htmlentities($description, ENT_HTML401, 'utf-8', false);
-        $description = htmlspecialchars_decode($description);
-        $description = preg_replace('/&(?:#\d+|[a-zA-Z]+);/', '', $description);
-
-        return \Tools::substr($description, 0, 1000);
     }
 
     /**
@@ -807,72 +826,13 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         }, $this->cart, \CartCore::class))();
     }
 
-    private function getImageTypeNameByImageTypeId(int $idImageType, string $defaultValue): string
-    {
-        $imageType = $idImageType ? new \ImageType($idImageType) : null;
-
-        return $imageType && \Validate::isLoadedObject($imageType) ? $imageType->name : $defaultValue;
-    }
-
-    private function getCoverImageUrl(array $images): ?string
-    {
-        if (null === $image = $this->getCoverImage($images)) {
-            return null;
-        }
-
-        $idImageType = $this->productConfiguration->getNormalImageTypeId((int) $this->cart->id_shop);
-
-        $image = $image['bySize'][$this->getImageTypeNameByImageTypeId($idImageType, 'cart_default')] ?? $image['small'];
-
-        return $image['url'];
-    }
-
-    private function getCoverImage(array $images): ?array
-    {
-        foreach ($images as $image) {
-            if (!empty($image['cover'])) {
-                return $image;
-            }
-        }
-
-        if (false !== $image = reset($images)) {
-            return $image;
-        }
-
-        return null;
-    }
-
-    /**
-     * @return ProductImage[]
-     */
-    private function getProductImages(array $images): array
-    {
-        if ([] === $images) {
-            return [];
-        }
-
-        $images = array_slice($images, 0, 10);
-
-        $idImageTypeSmall = $this->productConfiguration->getSmallImageTypeId((int) $this->cart->id_shop);
-        $idImageTypeLarge = $this->productConfiguration->getLargeImageTypeId((int) $this->cart->id_shop);
-        $smallFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeSmall, 'home_default');
-        $largeFormatName = $this->getImageTypeNameByImageTypeId($idImageTypeLarge, 'medium_default');
-
-        return array_map(static function (array $image) use ($smallFormatName, $largeFormatName): ProductImage {
-            $smallSize = $image['bySize'][$smallFormatName] ?? $image['medium'];
-            $normalSize = $image['bySize'][$largeFormatName] ?? $image['large'];
-
-            return new ProductImage($smallSize['url'], $normalSize['url']);
-        }, $images);
-    }
-
     /**
      * @return DeliveryOption[]
      */
     private function getAvailableDeliveryOptions(\Cart $cart): array
     {
         if (null === $this->availableDeliveryOptions) {
-            $this->availableDeliveryOptions = $this->deliveryFactory->getAvailableDeliveryOptions($cart);
+            $this->availableDeliveryOptions = array_values($this->deliveryFactory->getAvailableDeliveryOptions($cart));
         }
 
         return $this->availableDeliveryOptions;
@@ -901,13 +861,23 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     /**
      * @return DeliveryProduct[]|null
      */
-    private function getDeliveryProduct(\Product $product, Price $price, Quantity $quantity, float $weight): ?array
+    private function getDeliveryProduct(\Product $product, Price $price, Quantity $quantity, float $weight, array $productData): ?array
     {
         $hasUnavailable = false;
         $productDeliveryDetails = [];
 
+        $isRestricted = false;
+        if (!empty($this->validator)) {
+            $violations = $this->validator->validate($productData, new Unrestricted((int) $productData['id_shop']));
+            $isRestricted = $violations->count() > 0;
+        }
+
         foreach (DeliveryType::cases() as $deliveryType) {
-            $productDelivery = $this->createCartProductDeliveryDetails($deliveryType, $product, $price, $quantity, $weight);
+            if ($isRestricted) {
+                $productDelivery = new DeliveryProduct($deliveryType, false);
+            } else {
+                $productDelivery = $this->createCartProductDeliveryDetails($deliveryType, $product, $price, $quantity, $weight);
+            }
             $productDeliveryDetails[] = $productDelivery;
 
             if (!$productDelivery->isDeliveryAvailable()) {
@@ -998,6 +968,15 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             new PrestaShopConfiguration(new Configuration()),
             $this->contextManager->getContext(),
             _PS_VERSION_
+        );
+    }
+
+    private function getImageProvider(): ImageUrlsProvider
+    {
+        return $this->imageProvider ?? $this->imageProvider = ImageUrlsProvider::create(
+            $this->imageRetriever,
+            $this->contextManager->getContext(),
+            $this->productConfiguration
         );
     }
 }

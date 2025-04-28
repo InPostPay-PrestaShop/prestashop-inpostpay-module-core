@@ -189,6 +189,13 @@ services:
       - '@inpost.izi.serializer'
       - '@izi\prestashop\CommandBus'
 
+  izi\prestashop\Controller\Api\ProductController:
+    class: izi\prestashop\Controller\Api\ProductController
+    public: true
+    arguments:
+      - '@inpost.izi.serializer'
+      - '@izi\prestashop\CommandBus'
+
   izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface: '@izi\prestashop\Handler\GetBasketBindingKeyHandler'
   izi\prestashop\Handler\GetBasketBindingKeyHandler:
     class: izi\prestashop\Handler\GetBasketBindingKeyHandler
@@ -249,6 +256,32 @@ services:
       - '@izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler'
       - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
 
+  izi\prestashop\MerchantApi\Handler\GetProductsHandlerInterface: '@izi\prestashop\MerchantApi\Handler\GetProductsHandler'
+  izi\prestashop\MerchantApi\Handler\GetProductsHandler:
+    class: izi\prestashop\MerchantApi\Handler\GetProductsHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\HotProduct\HotProductDataMapperInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+      - '@izi\prestashop\Cache\ConfigurationCache'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+
+  izi\prestashop\MerchantApi\Handler\AddProductToBasketHandlerInterface: '@izi\prestashop\MerchantApi\Handler\AddProductToBasketHandler'
+  izi\prestashop\MerchantApi\Handler\AddProductToBasketHandler:
+    class: izi\prestashop\MerchantApi\Handler\AddProductToBasketHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\ContextManager'
+      - '@izi\prestashop\CommandBusInterface'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+      - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
+
   izi\prestashop\MerchantApi\Handler\CreateOrderHandlerInterface: '@izi\prestashop\MerchantApi\Handler\CreateOrderHandler'
   izi\prestashop\MerchantApi\Handler\CreateOrderHandler:
     class: izi\prestashop\MerchantApi\Handler\CreateOrderHandler
@@ -292,13 +325,48 @@ services:
       - '@izi\prestashop\Configuration\OrdersConfiguration'
       - '@izi\prestashop\Order\Message\MessageFormatterInterface'
 
+  izi\prestashop\MerchantApi\Handler\Basket\CreateCartHandlerInterface: '@izi\prestashop\MerchantApi\Handler\Basket\CreateCartHandler'
+  izi\prestashop\MerchantApi\Handler\Basket\CreateCartHandler:
+    class: izi\prestashop\MerchantApi\Handler\Basket\CreateCartHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\MerchantApi\Handler\Basket\AddProductToCartHandlerInterface: '@izi\prestashop\MerchantApi\Handler\Basket\AddProductToCartHandler'
+  izi\prestashop\MerchantApi\Handler\Basket\AddProductToCartHandler:
+    class: izi\prestashop\MerchantApi\Handler\Basket\AddProductToCartHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandlerInterface: '@izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandler'
+  izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandler:
+    class: izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandlerInterface: '@izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler'
   izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler:
     class: izi\prestashop\MerchantApi\Handler\Basket\BasketEventHandler
     public: false
     arguments:
       - '@inpost.izi.basket_event_handler_locator'
-      - '@inpost.izi.context'
       - '@izi\prestashop\ContextManager'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
 
   izi\prestashop\MerchantApi\Handler\Basket\ProductsQuantityEventHandler:
     class: izi\prestashop\MerchantApi\Handler\Basket\ProductsQuantityEventHandler
@@ -328,10 +396,8 @@ services:
     tags:
       - { name: inpost.izi.basket_event_handler }
     arguments:
-      - '@inpost.izi.module'
+      - '@izi\prestashop\CommandBusInterface'
       - '@inpost.izi.context'
-      - '@izi\prestashop\ObjectModel\ObjectManager'
-      - '@inpost.izi.general_logger'
 
   izi\prestashop\MerchantApi\Firewall\MerchantApiAuthenticator:
     class: izi\prestashop\MerchantApi\Firewall\MerchantApiAuthenticator
@@ -399,45 +465,6 @@ services:
       - '@izi\prestashop\Configuration\ApiConfigurationInterface'
       - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
       - '@izi\prestashop\Repository\BasketSessionRepository'
-
-  inpost.izi.validator:
-    class: Symfony\Component\Validator\Validator\ValidatorInterface
-    public: false
-    factory: [ izi\prestashop\Validator\ValidatorFactory, create ]
-    tags:
-      - { name: inpost.izi.gui_configuration_dependency, key: validator }
-    arguments:
-      - '@inpost.izi.constraint_validator_locator'
-
-  izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator:
-    class: izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator
-    tags:
-      - { name: validator.constraint_validator }
-    arguments:
-      - '@izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface'
-
-  izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator:
-    class: izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator
-    tags:
-      - { name: validator.constraint_validator }
-    arguments:
-      - '@izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface'
-
-  izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator:
-    class: izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator
-    tags:
-      - { name: validator.constraint_validator }
-    arguments:
-      - '@izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface'
-
-  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
-  izi\prestashop\Configuration\GuiConfiguration:
-    class: izi\prestashop\Configuration\GuiConfiguration
-    public: false
-    arguments:
-      - '@izi\prestashop\Configuration\Adapter\Configuration'
-      - '@inpost.izi.serializer'
-      - '@?inpost.izi.gui_configuration_locator'
 
   izi\prestashop\Order\ContextCustomerUpdater:
     class: izi\prestashop\Order\ContextCustomerUpdater

@@ -7,12 +7,12 @@ namespace izi\prestashop\Common\Order;
 use izi\prestashop\Common\QuantityType;
 
 /**
- * @template T
+ * @template T of (int|float)
  */
 final class Quantity implements \JsonSerializable
 {
     /**
-     * @var T
+     * @var int|float
      */
     private $quantity;
 

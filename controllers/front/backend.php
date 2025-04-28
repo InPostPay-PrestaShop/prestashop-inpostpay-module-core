@@ -3,6 +3,7 @@
 use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\Controller\Api\BasketController;
 use izi\prestashop\Controller\Api\OrderController;
+use izi\prestashop\Controller\Api\ProductController;
 use izi\prestashop\Controller\WidgetController;
 use izi\prestashop\Http\Client\ModuleVersionInfoProvidingClient;
 use izi\prestashop\Http\Exception\HttpExceptionInterface;
@@ -39,6 +40,11 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
     ];
 
     private const API_ROUTES = [
+        [
+            'path' => '/inpost/v1/izi/products',
+            'methods' => ['GET'],
+            'controller' => [ProductController::class, 'getProducts'],
+        ],
         [
             'path' => '/inpost/v1/izi/order',
             'methods' => ['POST'],
@@ -93,6 +99,13 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             'regex' => '#^/inpost/v1/izi/basket/(?<basketId>.+)/binding/delete$#',
             'controller' => [BasketController::class, 'deleteBinding'],
         ],
+        [
+            'path' => '/inpost/v1/izi/basket/product/{productId}',
+            'methods' => ['POST'],
+            'prefix' => '/inpost/v1/izi/basket/product/',
+            'regex' => '#^/inpost/v1/izi/basket/product/(?<productId>.+)$#',
+            'controller' => [BasketController::class, 'addProduct'],
+        ],
     ];
 
     /**
@@ -110,6 +123,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         ob_start([$this, 'handleOutput'], 1);
 
         $request = $this->module->getCurrentRequest();
+        $request->attributes->set('_inpost_izi_shop_id', (int) $this->context->shop->id);
 
         $response = $this->handle($request);
         Response::closeOutputBuffers(0, false);

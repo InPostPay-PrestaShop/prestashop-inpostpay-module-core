@@ -9,6 +9,7 @@ use izi\prestashop\Serializer\Normalizer\DateTimeNormalizer as DateTimeNormalize
 use izi\prestashop\Serializer\Normalizer\EnumDenormalizer;
 use izi\prestashop\Serializer\Normalizer\JsonSerializableNormalizer as JsonSerializableNormalizerPolyfill;
 use izi\prestashop\Serializer\Normalizer\ObjectNormalizer as CustomObjectNormalizer;
+use izi\prestashop\Serializer\Normalizer\BasketAppPaginationPageDenormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceAmountNormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceNormalizer;
 use phpDocumentor\Reflection\DocBlock;
@@ -47,6 +48,7 @@ final class SerializerFactory
             class_exists(DateTimeNormalizer::class) ? new DateTimeNormalizer() : new DateTimeNormalizerPolyfill(),
             class_exists(JsonSerializableNormalizer::class) ? new JsonSerializableNormalizer() : new JsonSerializableNormalizerPolyfill(),
             new ArrayDenormalizer(),
+            new BasketAppPaginationPageDenormalizer(),
             self::createObjectNormalizer(),
         ];
     }

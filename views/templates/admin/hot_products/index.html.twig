@@ -1,0 +1,154 @@
+{% extends '@Modules/inpostizi/views/templates/admin/layout/basic-layout.html.twig' %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-xs-12 col-12">
+      <div class="card">
+        <div class="card-header d-flex align-items-center">
+          <h3 class="d-inline-block card-header-title mb-0">
+            {{ layoutTitle }}
+          </h3>
+          <div class="ml-auto">
+            <a href="{{ path('admin_inpost_izi_products_create') }}" class="btn btn-primary">
+              <i class="material-icons text-white">add_circle_outline</i>
+              {{ 'Add new'|trans({}, 'Admin.Actions') }}
+            </a>
+          </div>
+        </div>
+
+        <div class="card-body panel-body card-block">
+          <div class="table-responsive">
+            <table class="table table-condensed">
+              <thead>
+                <tr class="column-headers">
+                  <th scope="col">{{ 'ID'|trans({}, 'Admin.Global') }}</th>
+                  <th scope="col">{{ 'Product'|trans({}, 'Admin.Global') }}</th>
+                  <th scope="col">{{ 'Available from'|legacy_trans('updatehotproducttype') }}</th>
+                  <th scope="col">{{ 'Available to'|legacy_trans('updatehotproducttype') }}</th>
+
+                  {% if is_multistore_context %}
+                    <th scope="col">{{ 'Shop'|trans({}, 'Admin.Global') }}</th>
+                  {% endif %}
+
+                  {% if is_status_available %}
+                    <th scope="col">{{ 'Status'|legacy_trans }}</th>
+                  {% endif %}
+
+                  <th scope="col" class="text-right">{{ 'Actions'|trans({}, 'Admin.Global') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for product in products %}
+                  <tr>
+                    <td>{{ product.referenceId }}</td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.availableFrom ? product.availableFrom|date('Y-m-d H:i:s') : '-' }}</td>
+                    <td>{{ product.availableTo ? product.availableTo|date('Y-m-d H:i:s') : '-' }}</td>
+
+                    {% if is_multistore_context %}
+                      <td>{{ product.id ? product.shop|default('All shops'|trans({}, 'Admin.Global')) : '-' }}</td>
+                    {% endif %}
+
+                    {% if is_status_available %}
+                      <td>
+                        {% if product.active %}
+                          {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
+                              'content': 'Active'|legacy_trans,
+                              'state': 'success',
+                              'is_legacy': is_legacy_admin_page
+                            }
+                          %}
+                        {% elseif product.active is same as(false) %}
+                          {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
+                            'content': 'Awaiting approval'|legacy_trans,
+                            'state': 'info',
+                            'is_legacy': is_legacy_admin_page
+                          } %}
+                        {% else %}
+                          {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
+                            'content': 'Not found in API'|legacy_trans,
+                            'state': 'warning',
+                            'is_legacy': is_legacy_admin_page
+                          } %} {# TODO: popover with info that export can be retried by item edition? #}
+                        {% endif %}
+
+                        {% if product.id is same as(null) %}
+                          {% if product.importable %}
+                            {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
+                              'content': 'Importable'|legacy_trans,
+                              'state': 'warning',
+                              'is_legacy': is_legacy_admin_page
+                            } %} {# TODO: popover with info that unless imported, API data will not be updated after PS data changes? #}
+                          {% else %}
+                            {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
+                              'content': 'Product does not exist or is not available for order'|legacy_trans,
+                              'state': 'danger',
+                              'is_legacy': is_legacy_admin_page
+                            } %}
+                          {% endif %}
+                        {% endif %}
+                      </td>
+                    {% endif %}
+
+                    <td class="text-right">
+                      <div class="btn-group">
+                        {% if product.id is not same as(null) %}
+                          <a href="{{ path('admin_inpost_izi_products_edit', {'id': product.id}) }}"
+                            class="btn btn-link"
+                            title="{{ 'Edit'|trans({}, 'Admin.Actions') }}"
+                          >
+                            <i class="material-icons">edit</i>
+                          </a>
+                          <form action="{{ path('admin_inpost_izi_products_delete', {'id': product.id}) }}"
+                                method="post"
+                                class="d-inline"
+                                onsubmit="return confirm('{{ 'Are you sure you want to delete this item?'|trans({}, 'Admin.Notifications.Warning') }}');"
+                          >
+                            <input type="hidden" name="_method" value="DELETE">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('inpost-izi-delete-product') }}">
+                            <button type="submit" class="btn btn-link" title="{{ 'Delete'|trans({}, 'Admin.Actions') }}">
+                              <i class="material-icons">delete</i>
+                            </button>
+                          </form>
+                        {% else %}
+                          {% if product.importable %}
+                            <form action="{{ path('admin_inpost_izi_products_api_import', {'referenceId': product.referenceId}) }}"
+                                  method="post"
+                                  class="d-inline"
+                            >
+                              <input type="hidden" name="_csrf_token" value="{{ csrf_token('inpost-izi-import-product') }}">
+                              <button type="submit" class="btn btn-link" title="{{ 'Import'|trans({}, 'Admin.Actions') }}">
+                                <i class="material-icons">file_download</i>
+                              </button>
+                            </form>
+                          {% endif %}
+                          <form action="{{ path('admin_inpost_izi_products_api_delete', {'referenceId': product.referenceId}) }}"
+                                method="post"
+                                class="d-inline"
+                                onsubmit="return confirm('{{ 'Are you sure you want to delete this item?'|trans({}, 'Admin.Notifications.Warning') }}');"
+                          >
+                            <input type="hidden" name="_method" value="DELETE">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('inpost-izi-delete-remote-product') }}">
+                            <button type="submit" class="btn btn-link" title="{{ 'Delete'|trans({}, 'Admin.Actions') }}">
+                              <i class="material-icons">delete</i>
+                            </button>
+                          </form>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="{{ 5 + is_multistore_context + is_status_available }}" class="text-center">
+                      {{ 'No products found.'|legacy_trans }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

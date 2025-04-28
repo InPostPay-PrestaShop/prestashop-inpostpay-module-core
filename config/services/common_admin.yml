@@ -1,4 +1,8 @@
 # common BO configuration
+imports:
+  - { resource: admin/form.yml }
+  - { resource: admin/form.php, ignore_errors: true }
+
 services:
   izi\prestashop\View\Asset\AssetManagerInterface: '@izi\prestashop\View\Asset\AdminAssetManager'
   izi\prestashop\View\Asset\AdminAssetManager:
@@ -23,10 +27,21 @@ services:
     public: false
     tags:
       - { name: inpost.izi.command_handler }
-    autowire: true
+    arguments:
+      - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
 
   izi\prestashop\Form\Type\CartRuleOptionsType:
     class: izi\prestashop\Form\Type\CartRuleOptionsType
     tags:
       - { name: form.type }
-    autowire: true
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Form\Type\ObjectModelType:
+    class: izi\prestashop\Form\Type\ObjectModelType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@inpost.izi.context'

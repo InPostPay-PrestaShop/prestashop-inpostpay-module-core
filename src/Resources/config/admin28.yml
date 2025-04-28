@@ -29,6 +29,20 @@ services:
       - '%kernel.debug%'
     calls:
       - { method: setContainer, arguments: [ '@service_container' ] }
+      - { method: setLogger, arguments: [ '@inpost.izi.general_logger' ] }
+
+  izi\prestashop\Controller\Admin\HotProductController:
+    class: izi\prestashop\Controller\Admin\HotProductController
+    arguments:
+      - '@inpost.izi.shop_context'
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - !tagged inpost.izi.config_initializer
+      - '%kernel.debug%'
+    calls:
+      - { method: setContainer, arguments: [ '@service_container' ] }
+      - { method: setLogger, arguments: [ '@inpost.izi.general_logger' ] }
 
   annotations.dummy_registry:
     class: Doctrine\Common\Annotations\AnnotationRegistry
@@ -51,3 +65,5 @@ services:
     arguments:
       - '@izi\prestashop\Twig\Loader\TemplateNameMappingLoader.inner'
       - bootstrap_4_layout.html.twig: bootstrap_3_layout.html.twig
+        bootstrap_4_horizontal_layout.html.twig: bootstrap_3_horizontal_layout.html.twig
+        '@PrestaShop/Admin/TwigTemplateForm/bootstrap_4_horizontal_layout.html.twig': '@@PrestaShop/Admin/TwigTemplateForm/bootstrap_3_horizontal_layout.html.twig'

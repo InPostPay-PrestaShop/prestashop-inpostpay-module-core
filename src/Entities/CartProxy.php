@@ -42,6 +42,11 @@ final class CartProxy implements BasketInterface
         return $this->cart ?? ($this->cart = $this->getCart());
     }
 
+    public function isFinalized(): bool
+    {
+        return $this->getEntity()->orderExists();
+    }
+
     private function getCart(): \Cart
     {
         return $this->manager

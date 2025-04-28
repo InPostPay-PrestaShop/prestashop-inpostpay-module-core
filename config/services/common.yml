@@ -11,6 +11,9 @@ parameters:
       remove_used_context_fields: true
     include_stacktraces: true
 
+  inpost.izi.basket_app_logger_options:
+    max_response_body_size: 1000
+
 services:
   inpost.izi.module:
     class: InPostIzi
@@ -79,6 +82,7 @@ services:
     arguments:
       - '@inpost.izi.http_client.basket_app.logging.inner'
       - '@inpost.izi.basket_app_logger'
+      - '%inpost.izi.basket_app_logger_options%'
 
   inpost.izi.http_client.basket_app.module_version_info_providing:
     class: izi\prestashop\Http\Client\ModuleVersionInfoProvidingClient
@@ -106,6 +110,7 @@ services:
   izi\prestashop\BasketApp\Order\OrdersApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
   izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
   izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+  izi\prestashop\BasketApp\Product\ProductsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
 
   izi\prestashop\Order\Address\AddressDataMapper:
     class: izi\prestashop\Order\Address\AddressDataMapper
@@ -138,6 +143,8 @@ services:
       - '@inpost.izi.serializer'
 
   izi\prestashop\Configuration\GeneralConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
+  izi\prestashop\Configuration\PromoCodesConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
+
   izi\prestashop\Configuration\GeneralConfiguration:
     class: izi\prestashop\Configuration\GeneralConfiguration
     public: false
@@ -182,6 +189,16 @@ services:
     public: false
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  izi\prestashop\Configuration\ProductRestrictionsConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfiguration:
+    class: izi\prestashop\Configuration\GuiConfiguration
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+      - '@inpost.izi.gui_configuration_locator'
 
   izi\prestashop\Environment\EnvironmentInterface: '@inpost.izi.environment'
   inpost.izi.environment:
@@ -381,6 +398,14 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  izi\prestashop\ObjectModel\Repository\CartRuleRepository:
+    class: izi\prestashop\ObjectModel\Repository\CartRuleRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: CartRule }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   izi\prestashop\ObjectModel\Repository\RangePriceRepository:
     class: izi\prestashop\ObjectModel\Repository\RangePriceRepository
     public: false
@@ -402,6 +427,15 @@ services:
     public: false
     tags:
       - { name: inpost.izi.model_repository, model_class: Product }
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+
+  izi\prestashop\ObjectModel\Repository\CombinationRepository:
+    class: izi\prestashop\ObjectModel\Repository\CombinationRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Combination }
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
@@ -437,6 +471,15 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  inpost.izi.object_model.language_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Language }
+    arguments:
+      - Language
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   inpost.izi.object_model.order_repository:
     class: izi\prestashop\ObjectModel\Repository\ObjectRepository
     public: false
@@ -464,6 +507,15 @@ services:
       - Cart
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
+  inpost.izi.object_model.country_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Country }
+    arguments:
+      - Country
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
   inpost.izi.object_model.address_repository:
     class: izi\prestashop\ObjectModel\Repository\ObjectRepository
     public: false
@@ -471,6 +523,15 @@ services:
       - { name: inpost.izi.model_repository, model_class: Address }
     arguments:
       - Address
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  inpost.izi.object_model.shop_repository:
+    class: izi\prestashop\ObjectModel\Repository\ObjectRepository
+    public: false
+    tags:
+      - { name: inpost.izi.model_repository, model_class: Shop }
+    arguments:
+      - Shop
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
   izi\prestashop\Repository\OrderDataRepositoryInterface: '@izi\prestashop\Repository\BasketSessionRepository'
@@ -484,6 +545,7 @@ services:
   izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
   izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
   izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
   izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
   izi\prestashop\Repository\ProductRestrictionsRepository:
     class: izi\prestashop\Repository\ProductRestrictionsRepository
@@ -492,13 +554,31 @@ services:
     arguments:
       - '@izi\prestashop\Database\Connection'
 
-  izi\prestashop\Repository\CartRuleRepositoryInterface: '@izi\prestashop\Repository\CartRuleRepository'
+  izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface: '@izi\prestashop\PromoCode\CartRuleOptionsRepository'
+  izi\prestashop\Repository\CartRuleRepositoryInterface: '@izi\prestashop\PromoCode\CartRuleOptionsRepository'
+
+  izi\prestashop\PromoCode\CartRuleOptionsRepository:
+    class: izi\prestashop\PromoCode\CartRuleOptionsRepository
+    public: false
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
   izi\prestashop\Repository\CartRuleRepository:
     class: izi\prestashop\Repository\CartRuleRepository
     public: false
     arguments:
       - '@izi\prestashop\Database\Connection'
       - '@izi\prestashop\Configuration\Adapter\Configuration'
+    deprecated: The "%service_id%" service is deprecated since version 2.1, use "izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface" instead.
+
+  izi\prestashop\HotProduct\HotProductRepositoryInterface: '@izi\prestashop\HotProduct\HotProductRepository'
+  izi\prestashop\HotProduct\HotProductRepository:
+    class: izi\prestashop\HotProduct\HotProductRepository
+    public: false
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+      - '@inpost.izi.clock'
 
   izi\prestashop\Hook\Common\ActionCartDeleteBefore:
     class: izi\prestashop\Hook\Common\ActionCartDeleteBefore
@@ -587,6 +667,104 @@ services:
       arguments:
           - '@izi\prestashop\Event\EventDispatcherInterface'
 
+  # Product hooks
+  izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore:
+    class: izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore
+    public: false
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+    tags:
+      - { name: inpost.izi.hook }
+
+  izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter
+    public: false
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+    tags:
+      - { name: inpost.izi.hook }
+
+  izi\prestashop\Hook\Common\Product\ActionProductUpdateAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionProductUpdateAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionCombinationDeleteBefore:
+    class: izi\prestashop\Hook\Common\Product\ActionCombinationDeleteBefore
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionCombinationDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionCombinationDeleteAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionCombinationUpdateAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionCombinationUpdateAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionImageAddAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionImageAddAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionImageDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionImageDeleteAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionSpecificPriceAddAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionSpecificPriceAddAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionSpecificPriceUpdateAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionSpecificPriceUpdateAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionSpecificPriceDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionSpecificPriceDeleteAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionUpdateQuantity:
+    class: izi\prestashop\Hook\Common\Product\ActionUpdateQuantity
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+      - '@inpost.izi.context'
+
   izi\prestashop\EventListener\ShipmentListener:
     class: izi\prestashop\EventListener\ShipmentListener
     tags:
@@ -621,6 +799,13 @@ services:
       - '@inpost.izi.object_model.order_repository'
       - '@izi\prestashop\CommandBusInterface'
       - '@inpost.izi.general_logger'
+
+  izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener:
+    class: izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@inpost.izi.context'
 
   izi\prestashop\View\Templating\RendererInterface: '@izi\prestashop\View\Templating\SmartyRenderer'
   izi\prestashop\View\Templating\SmartyRenderer:
@@ -671,6 +856,9 @@ services:
       - '@izi\prestashop\Builder\Basket\DeliveryFactory'
       - '@izi\prestashop\Builder\Basket\ProductDeliveryFactory'
       - '@izi\prestashop\Product\Price\LowestPriceProviderInterface'
+      - '@izi\prestashop\PromoCode\PromoCodeProviderInterface'
+      - '@izi\prestashop\PromoCode\AvailablePromotionsProviderInterface'
+      - '@inpost.izi.validator'
 
   izi\prestashop\Cache\ConfigurationCache:
     class: izi\prestashop\Cache\ConfigurationCache
@@ -860,9 +1048,36 @@ services:
     public: false
     factory: [ '@izi\prestashop\Product\Price\LowestPriceProviderFactory', create ]
 
+  izi\prestashop\PromoCode\PromoCodeProviderInterface: '@izi\prestashop\PromoCode\CartRulePromoCodeProvider'
+  izi\prestashop\PromoCode\CartRulePromoCodeProvider:
+    class: izi\prestashop\PromoCode\CartRulePromoCodeProvider
+    public: false
+    arguments:
+      - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
+
+  izi\prestashop\PromoCode\AvailablePromotionsProviderInterface: '@izi\prestashop\PromoCode\AvailableCartRulesProvider'
+  izi\prestashop\PromoCode\AvailableCartRulesProvider:
+    class: izi\prestashop\PromoCode\AvailableCartRulesProvider
+    public: false
+    arguments:
+      - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
+      - '@izi\prestashop\Configuration\PromoCodesConfigurationInterface'
+      - '@izi\prestashop\ObjectModel\Repository\CmsPageRepository'
+      - '@izi\prestashop\ObjectModel\Repository\CartRuleRepository'
+      - '@inpost.izi.context'
+
   inpost.izi.request_stack:
     class: Symfony\Component\HttpFoundation\RequestStack
     factory: [ '@inpost.izi.module', getRequestStack ]
+
+  inpost.izi.validator:
+    class: Symfony\Component\Validator\Validator\ValidatorInterface
+    public: true
+    factory: [ izi\prestashop\Validator\ValidatorFactory, create ]
+    tags:
+      - { name: inpost.izi.gui_configuration_dependency, key: validator }
+    arguments:
+      - '@inpost.izi.constraint_validator_locator'
 
   izi\prestashop\Validator\Cart\BindableValidator:
     class: izi\prestashop\Validator\Cart\BindableValidator
@@ -883,7 +1098,117 @@ services:
     arguments:
       - '@izi\prestashop\Payment\PaymentCurrencyChecker'
 
+  izi\prestashop\Validator\Cart\HasUnrestrictedProductValidator:
+    class: izi\prestashop\Validator\Cart\HasUnrestrictedProductValidator
+    tags:
+      - { name: validator.constraint_validator }
+
+  izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator:
+    class: izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator:
+    class: izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator:
+    class: izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface'
+      - '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
+
+  izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator:
+    class: izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\UnrestrictedValidator:
+    class: izi\prestashop\Validator\Product\UnrestrictedValidator
+    tags:
+      - { name: validator.constraint_validator }
+    arguments:
+      - '@izi\prestashop\Configuration\ProductRestrictionsConfigurationInterface'
+
   izi\prestashop\Environment\EnvironmentFactoryInterface: '@izi\prestashop\Environment\EnvironmentFactory'
   izi\prestashop\Environment\EnvironmentFactory:
     class: izi\prestashop\Environment\EnvironmentFactory
     public: false
+
+  izi\prestashop\HotProduct\HotProductDataMapperInterface: '@izi\prestashop\HotProduct\HotProductDataMapper'
+  izi\prestashop\HotProduct\HotProductDataMapper:
+    class: izi\prestashop\HotProduct\HotProductDataMapper
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@inpost.izi.object_model.language_repository'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
+      - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
+      - '@izi\prestashop\Product\Image\ImageUrlsProviderInterface'
+
+  izi\prestashop\Product\Price\PriceCalculatorInterface: '@izi\prestashop\Product\Price\PriceCalculator'
+  izi\prestashop\Product\Price\PriceCalculator:
+    class: izi\prestashop\Product\Price\PriceCalculator
+    public: false
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
+      - '@inpost.izi.object_model.country_repository'
+
+  izi\prestashop\Product\Image\ImageUrlsProviderInterface: '@izi\prestashop\Product\Image\ImageUrlsProvider'
+  izi\prestashop\Product\Image\ImageUrlsProvider:
+    class: izi\prestashop\Product\Image\ImageUrlsProvider
+    public: false
+    arguments:
+      - '@inpost.izi.product.image_retriever'
+      - '@izi\prestashop\Configuration\ProductConfigurationInterface'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\Repository\ImageTypeRepository'
+
+  inpost.izi.product.image_retriever:
+    class: PrestaShop\PrestaShop\Adapter\Image\ImageRetriever
+    public: false
+    arguments:
+      - '@=service("inpost.izi.context").link'
+
+  izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\HotProduct\HotProductDataMapperInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+
+  izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+
+  izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener:
+    class: izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@inpost.izi.shop_context'
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
+      - '@izi\prestashop\CommandBusInterface'
+      - '@inpost.izi.general_logger'

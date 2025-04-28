@@ -60,6 +60,10 @@ final class BasketSession implements SwitchableBasketSessionInterface
      */
     public static function new(BasketInterface $basket, Uuid $uuid): self
     {
+        if (self::isBasketFinalized($basket)) {
+            throw new \DomainException(sprintf('Basket %s was already finalized.', $basket->getId()));
+        }
+
         $model = new InPostIziBasketSession();
         $model->session_id = (int) $basket->getId();
         $model->cart_id = (string) $uuid;
@@ -95,6 +99,18 @@ final class BasketSession implements SwitchableBasketSessionInterface
         }, $session);
 
         return $session;
+    }
+
+    /**
+     * @internal
+     */
+    public static function isFinalized(BasketSessionInterface $session): bool
+    {
+        if (null !== $session->getOrderId()) {
+            return true;
+        }
+
+        return self::isBasketFinalized($session->getBasket());
     }
 
     public function getBasketId(): string
@@ -231,5 +247,16 @@ final class BasketSession implements SwitchableBasketSessionInterface
         }
 
         return $this->orderRequest;
+    }
+
+    private static function isBasketFinalized(BasketInterface $basket): bool
+    {
+        if (is_callable([$basket, 'isFinalized'])) {
+            return $basket->isFinalized();
+        }
+
+        @trigger_error(sprintf('Not implementing "isFinalized()" in "%s" is deprecated since 2.1.0.', get_class($basket)), E_USER_DEPRECATED);
+
+        return false;
     }
 }
