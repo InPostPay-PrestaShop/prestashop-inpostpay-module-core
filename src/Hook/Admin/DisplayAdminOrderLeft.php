@@ -8,6 +8,7 @@ use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\Repository\OrderDataRepositoryInterface;
+use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\View\Templating\RendererInterface;
 
 final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
@@ -24,10 +25,16 @@ final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
      */
     private $repository;
 
-    public function __construct(RendererInterface $renderer, OrderDataRepositoryInterface $repository)
+    /**
+     * @var LegacyTranslator
+     */
+    private $translator;
+
+    public function __construct(RendererInterface $renderer, OrderDataRepositoryInterface $repository, ?LegacyTranslator $translator = null)
     {
         $this->renderer = $renderer;
         $this->repository = $repository;
+        $this->translator = $translator ?? new LegacyTranslator('inpostizi');
     }
 
     public static function getHookName(): string
@@ -55,11 +62,12 @@ final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
             return '';
         }
 
-        $isApmDelivery = DeliveryType::Apm() === $data->getDelivery()->getType();
+        $deliveryType = $data->getDelivery()->getType();
 
         return $this->renderer->render('module:inpostizi/views/templates/hook/legacy/admin/order_details.tpl', [
-            'delivery' => $isApmDelivery ? 'Paczkomat' : 'Kurier',
-            'apm' => $isApmDelivery ? $data->getDelivery()->getPoint() : '',
+            'delivery' => $deliveryType->trans($this->translator),
+            'apm' => DeliveryType::Apm() === $deliveryType ? $data->getDelivery()->getPoint() : '',
+            'issue_invoice' => null !== $data->getInvoiceDetails(),
         ]);
     }
 }
