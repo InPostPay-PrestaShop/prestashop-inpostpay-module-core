@@ -6,6 +6,8 @@ $_MODULE['<{inpostizi}prestashop>inpostizi_be39a2c31fd39417d193787b0745002d'] = 
 $_MODULE['<{inpostizi}prestashop>inpostizi_e92d43479cae605e1a18eb091520f704'] = 'Moduł wymaga PHP w wersji 7.1.3 lub późniejszej.';
 $_MODULE['<{inpostizi}prestashop>inpostizi_3f93d44654423ff8a5fcbbfe8d82f57f'] = 'Nie udało się zaktualizować struktury bazy danych.';
 $_MODULE['<{inpostizi}prestashop>inpostizi_3b838c5f28dad4dc154d5d1f0e279453'] = 'Moduł musi być włączony, aby wyświetlić stronę konfiguracji.';
+$_MODULE['<{inpostizi}prestashop>deliverytype_4d5340b646d9723cdb3bdf42182658d0'] = 'Paczkomat';
+$_MODULE['<{inpostizi}prestashop>deliverytype_5055d1a4444c630d6839f48ab48aef91'] = 'Kurier';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_782990a55975fc9d54d74f3ffb2c7dad'] = 'Koszyk nie istnieje.';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_69cab7d3b86365a08719b64843b38c79'] = 'Wystąpił problem z komunikacją z aplikacją mobilną. Spróbuj ponownie później.';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_50349e727b1f9a9a4ef897aad4f1bbf8'] = 'Twoje zapytanie nie mogło zostać przetworzone.';
@@ -270,3 +272,6 @@ $_MODULE['<{inpostizi}prestashop>admin_template_translations_6a628e226d3bd61caba
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_79e41f293980da78b8ed7b49ad5462b5'] = 'Możliwy import';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_e9e569ef5153bfd6b14a155352d56301'] = 'Produkt nie istnieje lub nie jest dostępny na sprzedaż';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_405e6a003a719605addb982f394d2fbe'] = 'Nie odnaleziono produktów.';
+$_MODULE['<{inpostizi}prestashop>order_details_6310f29293c902c64db619c29179d99a'] = 'Wysyłka';
+$_MODULE['<{inpostizi}prestashop>order_details_4d5340b646d9723cdb3bdf42182658d0'] = 'Paczkomat';
+$_MODULE['<{inpostizi}prestashop>order_details_bfa7e2e76dfa5492ab926b3c8d5d5e65'] = 'Klient prosi o wystawienie faktury VAT';
