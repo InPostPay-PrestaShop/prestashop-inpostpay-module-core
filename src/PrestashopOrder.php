@@ -18,10 +18,8 @@ use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\ProductAttribute;
-use izi\prestashop\Common\Product\ProductImage;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
-use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\MerchantApi\Model\Order\Response\Delivery;
 use izi\prestashop\MerchantApi\Model\Order\Response\Order;
@@ -36,6 +34,7 @@ use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
 
 /**
  * @internal
+ *
  * @deprecated
  *
  * @todo refactor...
@@ -335,7 +334,7 @@ class PrestashopOrder
             $attributes = $this->getProductAttributes(substr($data['product_name'], $pos + 1, -1));
         }
 
-        $model = new \Product((int) $data['product_id'], false, $this->order->id_lang, $this->order->id_shop);
+        $model = new \Product((int) $data['product_id'], false, $this->order->id_lang, (int) $data['id_shop']);
 
         if (\Validate::isLoadedObject($model)) {
             $category = $model->id_category_default;

@@ -24,9 +24,7 @@ final class GenericStrategy implements MinAmountCalculationStrategyInterface
             return 0.;
         }
 
-        $shopId = (int) $cart->id_shop;
-
-        if (0. >= $minAmount = $this->configuration->getFreeDeliveryMinAmount($shopId)) {
+        if (0. >= $minAmount = $this->configuration->getFreeDeliveryMinAmount()) {
             return null;
         }
 

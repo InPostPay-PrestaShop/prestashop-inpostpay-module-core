@@ -40,7 +40,7 @@ final class GetBasketHandler implements GetBasketHandlerInterface
         }
 
         return $this->builderFactory
-            ->createResponseBuilder($session->getBasket())
+            ->createResponseBuilder($session->getBasket(), $session->getShopId())
             ->build();
     }
 }

@@ -97,7 +97,7 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
         $this->validator = $validator;
     }
 
-    public function createRequestBuilder(BasketInterface $basket): RequestBuilder
+    public function createRequestBuilder(BasketInterface $basket, ?int $shopId = null): RequestBuilder
     {
         $cart = $this->getCart($basket);
 
@@ -115,10 +115,14 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
             $this->validator
         );
 
+        if (null !== $shopId) {
+            $builder->setShopId($shopId);
+        }
+
         return $builder->setExpirationDate($this->getExpirationDate());
     }
 
-    public function createResponseBuilder(BasketInterface $basket): ResponseBuilder
+    public function createResponseBuilder(BasketInterface $basket, ?int $shopId = null): ResponseBuilder
     {
         $cart = $this->getCart($basket);
 
@@ -135,6 +139,10 @@ final class BasketBuilderFactory implements BasketBuilderFactoryInterface
             $this->availablePromotionsProvider,
             $this->validator
         );
+
+        if (null !== $shopId) {
+            $builder->setShopId($shopId);
+        }
 
         return $builder->setExpirationDate($this->getExpirationDate());
     }

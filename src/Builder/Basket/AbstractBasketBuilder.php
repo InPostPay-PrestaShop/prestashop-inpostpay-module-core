@@ -142,6 +142,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private $validator;
 
+    /**
+     * @var int
+     */
+    private $shopId;
+
     public function __construct(
         \Cart $cart,
         ContextManager $contextManager,
@@ -166,6 +171,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $this->promoCodeProvider = $promoCodeProvider ?? CartRulePromoCodeProvider::create();
         $this->availablePromotionsProvider = $availablePromotionsProvider ?? new NullAvailablePromotionsProvider();
         $this->validator = $validator;
+        $this->shopId = (int) $this->cart->id_shop;
+    }
+
+    public function setShopId(int $shopId): void
+    {
+        $this->shopId = $shopId;
     }
 
     /**
@@ -201,7 +212,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     public function build()
     {
         try {
-            $this->contextManager->changeContext($this->cart);
+            $this->contextManager->changeContext($this->cart, [
+                'shop_id' => $this->shopId,
+            ]);
 
             $cartProducts = $this->cart->getProducts(false, false, null, true, true);
             $products = $this->createCartProducts($cartProducts);
@@ -255,7 +268,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function createCartProduct(array $product): Product
     {
-        $model = new \Product($product['id_product'], false, $this->cart->id_lang);
+        $model = new \Product($product['id_product'], false, $this->cart->id_lang, $product['id_shop']);
 
         return $this->createProduct(
             $model,
@@ -274,7 +287,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             true,
             false,
             (int) $product['cart_quantity'],
-            (int) $product['id_customization']
+            (int) $product['id_customization'],
+            (int) $product['id_shop']
         );
 
         $net = $product['price_without_reduction_without_tax'] ?? $this->calculateProductPrice(
@@ -283,7 +297,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             false,
             false,
             (int) $product['cart_quantity'],
-            (int) $product['id_customization']
+            (int) $product['id_customization'],
+            (int) $product['id_shop']
         );
 
         return PriceFactory::create((float) $net, (float) $gross);
@@ -301,7 +316,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             true,
             true,
             (int) $product['cart_quantity'],
-            (int) $product['id_customization']
+            (int) $product['id_customization'],
+            (int) $product['id_shop']
         );
 
         $net = $product['price_with_reduction_without_tax'] ?? $this->calculateProductPrice(
@@ -310,7 +326,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             false,
             true,
             (int) $product['cart_quantity'],
-            (int) $product['id_customization']
+            (int) $product['id_customization'],
+            (int) $product['id_shop']
         );
 
         return PriceFactory::create((float) $net, (float) $gross);
@@ -320,11 +337,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     {
         $combinationId = array_key_exists('id_product_attribute', $product) ? (int) $product['id_product_attribute'] : null;
         $customizationId = array_key_exists('id_customization', $product) ? (int) $product['id_customization'] : 0;
+        $shopId = array_key_exists('id_shop', $product) ? (int) $product['id_shop'] : null;
 
-        $category = $model->getDefaultCategory();
+        $category = $model->id_category_default ?: $model->getDefaultCategory();
         $description = DescriptionFormatter::formatDescription($model);
-        $link = $this->contextManager->getContext()->link->getProductLink($model, null, null, null, $this->cart->id_lang, null, $combinationId);
-
+        $link = $this->contextManager->getContext()->link->getProductLink($model, null, null, null, $this->cart->id_lang, $shopId, $combinationId);
         $imageUrls = $this->getImageProvider()->getImageUrls((int) $model->id, $combinationId);
 
         return new Product(
@@ -338,7 +355,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $link,
             $imageUrls->getMainImageUrl(),
             $promoPrice,
-            null === $promoPrice ? null : $this->getLowestPrice((int) $model->id, $combinationId),
+            null === $promoPrice ? null : $this->getLowestPrice((int) $model->id, $combinationId, $shopId),
             $this->getProductAttributes($product),
             $this->getProductVariants($product),
             $imageUrls->getAdditionalImages(),
@@ -387,7 +404,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             return [];
         }
 
-        return $this->getAttributeListParser()->parse($attributes, (int) $this->cart->id_shop);
+        return $this->getAttributeListParser()->parse($attributes, (int) $this->shopId);
     }
 
     private function createQuantity(array $product, int $quantity): Quantity
@@ -588,7 +605,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getConsents(): array
     {
-        $configConsents = $this->consentsConfiguration->getConsents($shopId = (int) $this->cart->id_shop);
+        $configConsents = $this->consentsConfiguration->getConsents($shopId = (int) $this->shopId);
 
         if ([] === $configConsents) {
             return [];
@@ -673,11 +690,18 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $module = \Module::getInstanceByName('inpostizi');
         $configuration = $module->get(OrdersConfigurationInterface::class);
 
-        return array_values($configuration->getAvailablePaymentOptions((int) $this->cart->id_shop));
+        return array_values($configuration->getAvailablePaymentOptions((int) $this->shopId));
     }
 
-    private function calculateProductPrice(int $productId, ?int $combinationId = null, bool $withTax = true, bool $withReduction = true, int $quantity = 1, ?int $customizationId = null): ?float
+    private function calculateProductPrice(int $productId, ?int $combinationId = null, bool $withTax = true, bool $withReduction = true, int $quantity = 1, ?int $customizationId = null, ?int $shopId = null): ?float
     {
+        if (null === $shopId || (int) $this->contextManager->getContext()->shop->id === $shopId) {
+            $context = null;
+        } else {
+            $context = $this->contextManager->getContext()->cloneContext();
+            $context->shop = new \Shop($shopId);
+        }
+
         return \Product::getPriceStatic(
             $productId,
             $withTax,
@@ -694,7 +718,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $specificPrice,
             true,
             true,
-            null,
+            $context,
             true,
             $customizationId
         );
@@ -733,7 +757,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getConfiguration(string $key)
     {
-        return \Configuration::get($key, null, null, $this->cart->id_shop);
+        return \Configuration::get($key, null, null, $this->shopId);
     }
 
     private function prepareRelatedProducts(array $cartProducts): array
@@ -755,7 +779,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         }
 
         foreach ($cartProductsById as $productId => $cartProduct) {
-            $product = new \Product($productId, false, $this->cart->id_lang);
+            $product = new \Product($productId, false, $this->cart->id_lang, $cartProduct['id_shop']);
 
             if (false === $accessories = $product->getAccessories($this->cart->id_lang)) {
                 continue;
@@ -832,7 +856,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getAvailableDeliveryOptions(\Cart $cart): array
     {
         if (null === $this->availableDeliveryOptions) {
-            $this->availableDeliveryOptions = array_values($this->deliveryFactory->getAvailableDeliveryOptions($cart));
+            $this->availableDeliveryOptions = array_values($this->deliveryFactory->getAvailableDeliveryOptions($cart, $this->shopId));
         }
 
         return $this->availableDeliveryOptions;
@@ -851,7 +875,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
         foreach (DeliveryType::cases() as $deliveryType) {
             $freeDeliveryAmount = $this->getFreeDeliveryAmount($deliveryType);
-            $productDelivery = $this->productDeliveryFactory->createForRelatedProduct($deliveryType, $this->cartSummary, $this->cart, $productModel, $price, $quantity, $freeDeliveryAmount);
+            $productDelivery = $this->productDeliveryFactory->createForRelatedProduct($deliveryType, $this->cartSummary, $this->cart, $productModel, $price, $quantity, $freeDeliveryAmount, $this->shopId);
             $productDeliveryDetails[] = $productDelivery;
         }
 
@@ -900,7 +924,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             }
         }
 
-        return $this->productDeliveryFactory->createForCartProduct($deliveryType, $this->cart, $product, $price, $weight, $quantity);
+        return $this->productDeliveryFactory->createForCartProduct($deliveryType, $this->cart, $product, $price, $weight, $quantity, $this->shopId);
     }
 
     private function getFreeDeliveryAmount(DeliveryType $deliveryType): ?float
@@ -918,9 +942,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         return null;
     }
 
-    private function getLowestPrice(int $productId, ?int $combinationId = null): ?Price
+    private function getLowestPrice(int $productId, ?int $combinationId = null, ?int $shopId = null): ?Price
     {
-        $query = $this->createLowestPriceQuery($productId, $combinationId);
+        $query = $this->createLowestPriceQuery($productId, $combinationId, $shopId);
 
         return $this->lowestPriceProvider->getPrice($query);
     }
@@ -937,13 +961,15 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $productId = (int) $product['id_product'];
             $combinationId = 0 < $product['id_product_attribute'] ? (int) $product['id_product_attribute'] : null;
 
-            $queries[] = $this->createLowestPriceQuery($productId, $combinationId);
+            $idShop = array_key_exists('id_shop', $product) ? (int) $product['id_shop'] : null;
+
+            $queries[] = $this->createLowestPriceQuery($productId, $combinationId, $idShop);
         }
 
         return $queries;
     }
 
-    private function createLowestPriceQuery(int $productId, ?int $combinationId = null): LowestPriceQuery
+    private function createLowestPriceQuery(int $productId, ?int $combinationId = null, ?int $shopId = null): LowestPriceQuery
     {
         $context = $this->contextManager->getContext();
 
@@ -954,7 +980,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
         return new LowestPriceQuery(
             $productId,
-            (int) $this->cart->id_shop,
+            $shopId ?? (int) $this->shopId,
             (int) $this->cart->id_currency,
             (int) $context->country->id,
             $customerGroupId,

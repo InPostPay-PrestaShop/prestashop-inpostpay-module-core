@@ -140,7 +140,7 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
 
     private function getPromoDetails(\Cart $cart, int $cartRuleId): ?PromoDetails
     {
-        $shopId = (int) $cart->id_shop;
+        $shopId = (int) $this->context->shop->id;
 
         if (null === $pageId = $this->getPromoDetailsPageId($cartRuleId, $shopId)) {
             return null;

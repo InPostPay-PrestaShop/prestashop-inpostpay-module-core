@@ -70,14 +70,16 @@ final class BasketEventHandler implements BasketEventHandlerInterface, ServiceSu
         ];
     }
 
-    public function handle(BasketInterface $basket, BasketEvent $event): ?Notice
+    public function handle(BasketInterface $basket, BasketEvent $event, ?int $shopId = null): ?Notice
     {
         /** @var BasketEventHandlerInterface $handler */
         $handler = $this->locator->get($event->getType()->value);
 
         try {
             $cart = $basket->getEntity();
-            $this->contextManager->changeContext($cart);
+            $this->contextManager->changeContext($cart, [
+                'shop_id' => $shopId,
+            ]);
 
             $notice = $handler->handle($basket, $event);
 

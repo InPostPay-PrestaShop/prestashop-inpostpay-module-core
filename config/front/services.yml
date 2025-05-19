@@ -37,6 +37,7 @@ services:
         displayCustomerLoginFormAfter: '@izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter'
         displayIziCartPreviewButton: '@izi\prestashop\Hook\Front\DisplayIziCartPreviewButton'
         displayIziCheckoutButton: '@izi\prestashop\Hook\Front\DisplayIziCheckoutButton'
+        displayHeader: '@izi\prestashop\Hook\Front\DisplayHeader'
         # products
         actionObjectProductDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore'
         actionObjectProductDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter'

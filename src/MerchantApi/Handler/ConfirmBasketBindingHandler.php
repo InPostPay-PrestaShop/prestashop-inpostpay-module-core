@@ -49,7 +49,7 @@ final class ConfirmBasketBindingHandler implements ConfirmBasketBindingHandlerIn
         $this->repository->persist($session);
 
         return $this->builderFactory
-            ->createResponseBuilder($session->getBasket())
+            ->createResponseBuilder($session->getBasket(), $session->getShopId())
             ->build();
     }
 }

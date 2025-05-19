@@ -71,7 +71,7 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
             $productId,
             $combinationId,
             (int) $cart->id_lang,
-            (int) $cart->id_shop,
+            null,
             true
         );
 
@@ -84,9 +84,7 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
         $combinationId = $combination ? (int) $combination->id : 0;
 
         if (!$product->active || !$product->available_for_order || !$product->checkAccess((int) $cart->id_customer)) {
-            throw CannotAddProductException::create($this->context->getTranslator()->trans('This product (%product%) is no longer available.', [
-                '%product%' => $product->name,
-            ], 'Shop.Notifications.Error'));
+            throw CannotAddProductException::create($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product->name], 'Shop.Notifications.Error'));
         }
 
         if (2 === (int) $product->customizable) {
@@ -101,10 +99,7 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
         $quantity = $quantity ?? $minimalQuantity;
 
         if ($quantity < $minimalQuantity) {
-            throw CannotAddProductException::create($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
-                '%product%' => $product->name,
-                '%quantity%' => $minimalQuantity,
-            ], 'Shop.Notifications.Error'));
+            throw CannotAddProductException::create($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', ['%product%' => $product->name, '%quantity%' => $minimalQuantity], 'Shop.Notifications.Error'));
         }
 
         $this->assertQuantityIsAvailable($quantity, $productId, $combinationId, $cart);
@@ -142,7 +137,7 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
 
     private function assertQuantityIsAvailable(int $quantity, int $productId, int $combinationId, \Cart $cart): void
     {
-        if ($this->productRepository->isAvailableOutOfStock($productId, (int) $cart->id_shop)) {
+        if ($this->productRepository->isAvailableOutOfStock($productId)) {
             return;
         }
 
