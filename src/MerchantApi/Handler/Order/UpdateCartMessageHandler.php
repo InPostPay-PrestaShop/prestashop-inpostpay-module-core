@@ -46,7 +46,7 @@ final class UpdateCartMessageHandler implements UpdateCartMessageHandlerInterfac
         }
 
         $message = $this->findOrCreateMessage($cartId);
-        $message->message = $this->formatMessage((int) $cart->id_shop, $command->getRequest());
+        $message->message = $this->formatMessage($command->getRequest());
 
         if ('' === $message->message) {
             $this->manager->remove($message);
@@ -57,9 +57,9 @@ final class UpdateCartMessageHandler implements UpdateCartMessageHandlerInterfac
         $this->manager->save($message);
     }
 
-    private function formatMessage(int $shopId, CreateOrderRequest $request): string
+    private function formatMessage(CreateOrderRequest $request): string
     {
-        $message = $this->configuration->getMessageFormat($shopId);
+        $message = $this->configuration->getMessageFormat();
 
         return $this->formatter->format($message, $request);
     }

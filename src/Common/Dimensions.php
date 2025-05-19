@@ -7,17 +7,17 @@ namespace izi\prestashop\Common;
 final class Dimensions
 {
     /**
-     * @var float $width
+     * @var float
      */
     private $width;
 
     /**
-     * @var float $height
+     * @var float
      */
     private $height;
 
     /**
-     * @var float $depth
+     * @var float
      */
     private $depth;
 

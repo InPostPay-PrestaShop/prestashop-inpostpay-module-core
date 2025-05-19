@@ -39,7 +39,7 @@ final class PriceRangeStrategy implements MinAmountCalculationStrategyInterface
             return $minAmount;
         }
 
-        if ($carrier->shipping_handling && 0. !== $this->configuration->getShippingHandlingCost((int) $cart->id_shop)) {
+        if ($carrier->shipping_handling && 0. !== $this->configuration->getShippingHandlingCost()) {
             return $minAmount;
         }
 

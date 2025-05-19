@@ -92,7 +92,13 @@ final class ContextManager
 
     private function buildRestorationPointForContextCart(\Cart $cart, array $options, array &$restorationPoint): void
     {
-        if (null !== $country = $this->changeCountry($cart, $options['country'] ?? [])) {
+        $shopId = $options['shop_id'] ?? (int) $this->context->shop->id;
+
+        if (null !== $shop = $this->changeShop($shopId)) {
+            $restorationPoint['shop'] = $shop;
+        }
+
+        if (null !== $country = $this->changeCountry($cart, $options['country'] ?? [], $shopId)) {
             $restorationPoint['country'] = $country;
         }
 
@@ -112,7 +118,9 @@ final class ContextManager
         $restorationPoint['cart'] = $this->context->cart;
         $this->context->cart = $cart;
 
-        if (null !== $shop = $this->changeShop($cart)) {
+        $shopId = $options['shop_id'] ?? (int) $cart->id_shop;
+
+        if (null !== $shop = $this->changeShop($shopId)) {
             $restorationPoint['shop'] = $shop;
         }
 
@@ -124,7 +132,7 @@ final class ContextManager
             $restorationPoint['language'] = $language;
         }
 
-        if (null !== $country = $this->changeCountry($cart, $options['country'] ?? [])) {
+        if (null !== $country = $this->changeCountry($cart, $options['country'] ?? [], $shopId)) {
             $restorationPoint['country'] = $country;
         }
 
@@ -179,12 +187,10 @@ final class ContextManager
         return $contextCurrency;
     }
 
-    private function changeShop(\Cart $cart): ?array
+    private function changeShop(int $shopId): ?array
     {
         $type = \Shop::getContext();
         $contextShop = $this->context->shop;
-
-        $shopId = (int) $cart->id_shop;
 
         if (\Shop::CONTEXT_SHOP === $type && (int) $contextShop->id === $shopId) {
             return null;
@@ -233,9 +239,9 @@ final class ContextManager
         return $contextLanguage;
     }
 
-    private function changeCountry(\Cart $cart, array $countryCodes): ?\Country
+    private function changeCountry(\Cart $cart, array $countryCodes, int $shopId): ?\Country
     {
-        if (null === $country = $this->findTaxCalculationCountry($cart, $countryCodes)) {
+        if (null === $country = $this->findTaxCalculationCountry($cart, $countryCodes, $shopId)) {
             throw new \RuntimeException('Could not find suitable country to switch to.');
         }
 
@@ -250,9 +256,8 @@ final class ContextManager
         return $contextCountry;
     }
 
-    private function findTaxCalculationCountry(\Cart $cart, array $countryCodes): ?\Country
+    private function findTaxCalculationCountry(\Cart $cart, array $countryCodes, int $shopId): ?\Country
     {
-        $shopId = (int) $cart->id_shop;
         $taxAddressType = $this->configuration->getTaxAddressType($shopId);
 
         if ('id_address_delivery' === $taxAddressType) {

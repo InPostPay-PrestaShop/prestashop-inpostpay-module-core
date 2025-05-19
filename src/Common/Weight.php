@@ -37,6 +37,7 @@ final class Weight
 
     /**
      * @param $multiplier float|int
+     *
      * @return self
      */
     public function multiply($multiplier): self

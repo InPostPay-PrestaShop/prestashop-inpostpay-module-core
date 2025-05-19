@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Serializer;
 
+use izi\prestashop\Serializer\Normalizer\BasketAppPaginationPageDenormalizer;
 use izi\prestashop\Serializer\Normalizer\CustomDenormalizer;
 use izi\prestashop\Serializer\Normalizer\DateTimeNormalizer as DateTimeNormalizerPolyfill;
 use izi\prestashop\Serializer\Normalizer\EnumDenormalizer;
 use izi\prestashop\Serializer\Normalizer\JsonSerializableNormalizer as JsonSerializableNormalizerPolyfill;
 use izi\prestashop\Serializer\Normalizer\ObjectNormalizer as CustomObjectNormalizer;
-use izi\prestashop\Serializer\Normalizer\BasketAppPaginationPageDenormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceAmountNormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceNormalizer;
 use phpDocumentor\Reflection\DocBlock;

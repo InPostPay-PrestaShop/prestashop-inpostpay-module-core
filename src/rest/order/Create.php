@@ -172,7 +172,7 @@ class Create
         $deliveryType = $request->getDelivery()->getType();
         $serviceCodes = $request->getDelivery()->getOptionalServiceCodes();
 
-        $shopId = (int) $cart->id_shop;
+        $shopId = $session->getShopId() ?? (int) $cart->id_shop;
 
         $shippingOptions = $this->shippingConfiguration->getShippingOptions($deliveryType, $shopId);
         $carrierReferenceId = $shippingOptions->getCarrierMapping(...$serviceCodes)->getReferenceId();
@@ -188,7 +188,7 @@ class Create
         $customer = $this->findOrCreateCustomer($cart, $request->getAccountInfo());
         $addresses = $this->findOrCreateAddresses($customer, $request);
 
-        $this->setUpContext($cart, $addresses);
+        $this->setUpContext($cart, $addresses, $shopId);
         $this->updateCart($cart, $carrierId, $addresses);
         $this->updateCartMessage($cart, $request);
         $this->adjustHandlingCost($shippingOptions, $serviceCodes);
@@ -217,7 +217,8 @@ class Create
                 [],
                 null,
                 false,
-                $cart->secure_key
+                $cart->secure_key,
+                $this->context->shop
             );
 
             return (int) $this->module->currentOrder;
@@ -625,6 +626,7 @@ class Create
             throw new CannotCreateOrderException($this->context->getTranslator()->trans('Cart is empty', [], 'Shop.Notifications.Error'));
         }
 
+        $this->validateCartRules($cart);
         $this->checkMinimalPurchaseAmount($cart);
 
         foreach ($products as $product) {
@@ -647,6 +649,18 @@ class Create
         }
 
         throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
+    }
+
+    private function validateCartRules(\Cart $cart): void
+    {
+        /** @var \CartRule $cartRule */
+        foreach ($cart->getCartRules() as ['obj' => $cartRule]) {
+            if (!$error = $cartRule->checkValidity($this->context, true)) {
+                continue;
+            }
+
+            throw new CannotCreateOrderException(sprintf($this->module->l('Voucher "%s" is no longer available: %s.'), $cartRule->code ?: $cartRule->name, $error));
+        }
     }
 
     private function checkMinimalPurchaseAmount(\Cart $cart): void
@@ -686,14 +700,14 @@ class Create
     /**
      * @param array{delivery: \AddressCore, invoice: \AddressCore} $addresses
      */
-    private function setUpContext(\Cart $cart, array $addresses): void
+    private function setUpContext(\Cart $cart, array $addresses, int $shopId): void
     {
         if ($currencyId = \Currency::getIdByIsoCode('PLN')) {
             $cart->id_currency = $currencyId;
         }
 
         $this->context->cart = $cart;
-        $this->context->shop = new \Shop($cart->id_shop);
+        $this->context->shop = new \Shop($shopId);
         $this->context->customer = new \Customer($cart->id_customer);
         $this->context->cart->setTaxCalculationMethod();
         $this->context->currency = \Currency::getCurrencyInstance($cart->id_currency);
@@ -701,7 +715,7 @@ class Create
 
         $this->context->getTranslator()->setLocale($this->context->language->locale);
 
-        \Shop::setContext(\Shop::CONTEXT_SHOP, $cart->id_shop);
+        \Shop::setContext(\Shop::CONTEXT_SHOP, $shopId);
 
         $taxAddress = 'id_address_invoice' === \Configuration::get(PrestaShopConfiguration::TAX_ADDRESS_TYPE)
             ? $addresses['invoice']

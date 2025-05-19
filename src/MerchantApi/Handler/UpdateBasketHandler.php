@@ -53,13 +53,13 @@ final class UpdateBasketHandler implements UpdateBasketHandlerInterface
         }
 
         $event = $command->getEvent();
-        $notice = $this->eventHandler->handle($session->getBasket(), $event);
+        $notice = $this->eventHandler->handle($session->getBasket(), $event, $session->getShopId());
 
         $session->updatedBy($event);
         $this->repository->persist($session);
 
         return $this->builderFactory
-            ->createResponseBuilder($session->getBasket())
+            ->createResponseBuilder($session->getBasket(), $session->getShopId())
             ->setNotice($notice)
             ->build();
     }

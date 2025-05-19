@@ -102,7 +102,7 @@ final class DeliveryPriceCalculator implements DeliveryPriceCalculatorInterface
 
     private function getTaxAddress(\Cart $cart): \Address
     {
-        $taxAddressType = $this->configuration->getTaxAddressType((int) $cart->id_shop);
+        $taxAddressType = $this->configuration->getTaxAddressType();
         $addressId = (int) $cart->$taxAddressType;
 
         return $this->addressRepository->find($addressId) ?? \Address::initialize();

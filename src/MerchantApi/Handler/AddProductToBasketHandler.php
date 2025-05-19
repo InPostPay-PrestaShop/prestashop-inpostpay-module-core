@@ -94,7 +94,9 @@ final class AddProductToBasketHandler implements AddProductToBasketHandlerInterf
         }
 
         try {
-            $this->contextManager->changeContext($cart);
+            $this->contextManager->changeContext($cart, [
+                'shop_id' => $session->getShopId(),
+            ]);
 
             try {
                 $this->bus->handle($command);
@@ -155,7 +157,7 @@ final class AddProductToBasketHandler implements AddProductToBasketHandlerInterf
     private function buildResponse(BasketSessionInterface $session): IdentifiableBasket
     {
         return $this->basketBuilderFactory
-            ->createResponseBuilder($session->getBasket())
+            ->createResponseBuilder($session->getBasket(), $session->getShopId())
             ->build()
             ->asIdentifiable($session->getBasketId());
     }

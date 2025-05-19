@@ -25,12 +25,17 @@ final class GetBasketBindingKeyHandler implements GetBasketBindingKeyHandlerInte
      * @var BasketsApiClientInterface
      */
     private $client;
+    /**
+     * @var \Context
+     */
+    private $context;
 
     /**
      * @param BasketSessionRepositoryInterface<BasketSession> $repository
      */
-    public function __construct(BasketSessionRepositoryInterface $repository, BasketsApiClientInterface $client)
+    public function __construct(BasketSessionRepositoryInterface $repository, BasketsApiClientInterface $client, ?\Context $context = null)
     {
+        $this->context = $context ?? \Context::getContext();
         $this->repository = $repository;
         $this->client = $client;
     }
@@ -62,6 +67,7 @@ final class GetBasketBindingKeyHandler implements GetBasketBindingKeyHandlerInte
     private function createNewSession(BasketInterface $basket): BasketSessionInterface
     {
         $session = $this->repository->createNewSession($basket);
+        $session->setShopId((int) $this->context->shop->id);
         $this->repository->persist($session);
 
         return $session;
