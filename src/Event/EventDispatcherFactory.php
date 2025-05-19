@@ -6,11 +6,13 @@ namespace izi\prestashop\Event;
 
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\EventListener\CartListener;
+use izi\prestashop\EventListener\CreateShipmentListener;
 use izi\prestashop\EventListener\OrderListener;
 use izi\prestashop\EventListener\ShipmentListener;
 use izi\prestashop\Form\BasketAppClientProvider;
 use izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener;
 use izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener;
+use izi\prestashop\Mail\EventListener\ReplaceOrderNotificationRecipientListener;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -38,8 +40,10 @@ final class EventDispatcherFactory implements ServiceSubscriberInterface
             OrderListener::class,
             ShipmentListener::class,
             UpdateHotProductsListener::class,
+            ReplaceOrderNotificationRecipientListener::class,
             '?' . BasketAppClientProvider::class,
             '?' . UpdateCartRulesListener::class,
+            '?' . CreateShipmentListener::class,
         ];
     }
 
