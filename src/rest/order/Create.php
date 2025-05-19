@@ -125,9 +125,17 @@ class Create
             throw new CannotCreateOrderException($this->module->l('There already exists an order for this basket.', self::TRANSLATION_SOURCE));
         }
 
-        if (null === $session->getOrderId()) {
-            $this->finalizeSession($session, $request, (int) $order->id);
+        $this->module->getLogger()->warning('Repeated order request for cart #{cartId}. Updating delivery emails.', [
+            'cartId' => $cart->id,
+            'orderId' => $order->id,
+        ]);
+
+        if (null !== $originalRequest = $session->getOrderRequest()) {
+            $request = $originalRequest->withDeliveryEmails($request->getDelivery());
         }
+
+        $this->finalizeSession($session, $request, (int) $order->id);
+        $this->saveCarrierModuleData($cart->id, $request->getDelivery());
 
         return (int) $order->id;
     }
@@ -186,26 +194,47 @@ class Create
         $this->adjustHandlingCost($shippingOptions, $serviceCodes);
         $this->validateCart($cart);
 
-        $this->eventDispatcher->addListener(ValidateOrderEvent::class, function (ValidateOrderEvent $event) use ($session, $request, $cart) {
-            if ($event->getOrder()->module === $this->module->name) {
-                $this->finalizeSession($session, $request, $event->getOrder()->id);
-                $this->saveCarrierModuleData($cart->id, $request->getDelivery());
+        $orderId = null;
+
+        $this->eventDispatcher->addListener(ValidateOrderEvent::class, $listener = function (ValidateOrderEvent $event) use ($session, $request, $cart, &$orderId) {
+            if ($event->getOrder()->module !== $this->module->name) {
+                return;
             }
+
+            $orderId = (int) $event->getOrder()->id;
+
+            $this->finalizeSession($session, $request, $orderId);
+            $this->saveCarrierModuleData($cart->id, $request->getDelivery());
         });
 
-        $this->module->validateOrder(
-            $cart->id,
-            (int) $this->ordersConfiguration->getInitialStatusId($paymentType, $shopId),
-            $cart->getOrderTotal(),
-            $this->module->displayName,
-            null,
-            [],
-            null,
-            false,
-            $cart->secure_key
-        );
+        try {
+            $this->module->validateOrder(
+                $cart->id,
+                (int) $this->ordersConfiguration->getInitialStatusId($paymentType, $shopId),
+                $cart->getOrderTotal(),
+                $this->module->displayName,
+                null,
+                [],
+                null,
+                false,
+                $cart->secure_key
+            );
 
-        return (int) $this->module->currentOrder;
+            return (int) $this->module->currentOrder;
+        } catch (\Exception $exception) {
+            if (null === $orderId) {
+                throw $exception;
+            }
+
+            $this->module->getLogger()->error('An exception occurred after creating order #{orderId}: {exception}.', [
+                'orderId' => $orderId,
+                'exception' => $exception,
+            ]);
+
+            return $orderId;
+        } finally {
+            $this->eventDispatcher->removeListener(ValidateOrderEvent::class, $listener);
+        }
     }
 
     private function findOrCreateAddresses(\Customer $customer, CreateOrderRequest $request): array
