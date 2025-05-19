@@ -1,7 +1,7 @@
 <?php
 
 global $_MODULE;
-$_MODULE = [];
+$_MODULE = array();
 $_MODULE['<{inpostizi}prestashop>inpostizi_be39a2c31fd39417d193787b0745002d'] = 'InPost Pay';
 $_MODULE['<{inpostizi}prestashop>inpostizi_e92d43479cae605e1a18eb091520f704'] = 'Moduł wymaga PHP w wersji 7.1.3 lub późniejszej.';
 $_MODULE['<{inpostizi}prestashop>inpostizi_3f93d44654423ff8a5fcbbfe8d82f57f'] = 'Nie udało się zaktualizować struktury bazy danych.';
@@ -237,6 +237,8 @@ $_MODULE['<{inpostizi}prestashop>create_5da7b3dc1a91973a4cf0f9fd3201ce0a'] = 'Ad
 $_MODULE['<{inpostizi}prestashop>create_a7bf47f259b0e675d565b57d5bead1b4'] = 'Dane klienta nie są poprawne: %s';
 $_MODULE['<{inpostizi}prestashop>create_f609bb09ff74c0ba85a8ad6491985fec'] = 'Uwagi do zamówienia nie są poprawne.';
 $_MODULE['<{inpostizi}prestashop>create_aa5c35a3fda1aae28e338de76d2849f4'] = 'Nie możesz złożyć zamówienia, produkt nie jest dostępny w tej ilości: %s';
+$_MODULE['<{inpostizi}prestashop>create_cda059f021a57b6dbc4304efa95b40ab'] = 'Kupon rabatowy %s nie jest już dostępny: %s';
+$_MODULE['<{inpostizi}prestashop>create_6e0a1f3186d8fc17ec4cfb51ce31153b'] = 'Cena koszyka uległa zmianie. Zweryfikuj swoje zamówienie.';
 $_MODULE['<{inpostizi}prestashop>create_17ffb24862c7db18f577ee8328688a9d'] = 'Wybrana metoda płatności nie jest dostępna.';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_afc2a4a7af3445e015c1aeb370e9b6b7'] = 'Wybierz język do tłumaczenia ';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_dd1ba1872df91985ed1ca4cde2dfe669'] = 'Aktualności';

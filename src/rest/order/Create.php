@@ -192,7 +192,7 @@ class Create
         $this->updateCart($cart, $carrierId, $addresses);
         $this->updateCartMessage($cart, $request);
         $this->adjustHandlingCost($shippingOptions, $serviceCodes);
-        $this->validateCart($cart);
+        $this->validateCart($cart, $request);
 
         $orderId = null;
 
@@ -618,7 +618,7 @@ class Create
         }
     }
 
-    private function validateCart(\Cart $cart): void
+    private function validateCart(\Cart $cart, CreateOrderRequest $request): void
     {
         $products = $cart->getProducts();
 
@@ -628,6 +628,7 @@ class Create
 
         $this->validateCartRules($cart);
         $this->checkMinimalPurchaseAmount($cart);
+        $this->checkCartTotal($cart, $request);
 
         foreach ($products as $product) {
             if ($product['minimal_quantity'] > $product['cart_quantity']) {
@@ -659,7 +660,7 @@ class Create
                 continue;
             }
 
-            throw new CannotCreateOrderException(sprintf($this->module->l('Voucher "%s" is no longer available: %s.'), $cartRule->code ?: $cartRule->name, $error));
+            throw new CannotCreateOrderException(sprintf($this->module->l('Voucher %s is no longer available: %s'), $cartRule->code ?: $cartRule->name, $error));
         }
     }
 
@@ -675,6 +676,19 @@ class Create
         }
 
         throw new CannotCreateOrderException($this->context->getTranslator()->trans('A minimum shopping cart total of %amount% (tax excl.) is required to validate your order. Current cart total is %total% (tax excl.).', ['%amount%' => $this->formatPrice($minimalPurchase), '%total%' => $this->formatPrice($productsTotalExcludingTax)], 'Shop.Theme.Checkout'));
+    }
+
+    private function checkCartTotal(\Cart $cart, CreateOrderRequest $request): void
+    {
+        $details = $request->getOrderDetails();
+
+        $orderTotal = $cart->getOrderTotal();
+        $basketPrice = $details->getBasketPrice()->getGross();
+        $epsilon = $details->getCurrency()->getSmallestUnitAmount() / 2.;
+
+        if (abs($orderTotal - $basketPrice) >= $epsilon) {
+            throw new CannotCreateOrderException($this->module->l('Basket price has changed. Please review your order.', self::TRANSLATION_SOURCE));
+        }
     }
 
     private function getMinimalPurchaseAmount(): float
