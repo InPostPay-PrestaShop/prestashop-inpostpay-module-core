@@ -77,6 +77,14 @@ final class Delivery implements \JsonSerializable
         return $this->mail;
     }
 
+    public function withEmail(?string $email): self
+    {
+        $delivery = clone $this;
+        $delivery->mail = $email;
+
+        return $delivery;
+    }
+
     public function getPhoneNumber(): ?PhoneNumber
     {
         return $this->phone_number;

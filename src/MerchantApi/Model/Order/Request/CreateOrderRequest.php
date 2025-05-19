@@ -75,4 +75,15 @@ final class CreateOrderRequest implements \JsonSerializable
     {
         return get_object_vars($this);
     }
+
+    /**
+     * Create a new request with delivery emails updated based on the given delivery details
+     */
+    public function withDeliveryEmails(Delivery $delivery): self
+    {
+        $request = clone $this;
+        $request->delivery = $this->delivery->withEmail($delivery->getEmail());
+
+        return $request;
+    }
 }
