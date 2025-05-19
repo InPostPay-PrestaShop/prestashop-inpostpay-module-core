@@ -22,6 +22,7 @@ services:
         actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
         actionAjaxDieCartControllerdisplayAjaxUpdateBefore: '@izi\prestashop\Hook\Front\ActionCartControllerAjaxUpdateResponse'
         actionFrontControllerSetMedia: '@izi\prestashop\Hook\Front\ActionFrontControllerSetMedia'
+        actionEmailSendBefore: '@izi\prestashop\Hook\Common\ActionEmailSendBefore'
         paymentOptions: '@izi\prestashop\Hook\Front\ActionGetPaymentOptions'
         displayOrderConfirmation: '@izi\prestashop\Hook\Front\DisplayOrderConfirmation'
         displayIziThankYou: '@izi\prestashop\Hook\Front\DisplayIziThankYou'
