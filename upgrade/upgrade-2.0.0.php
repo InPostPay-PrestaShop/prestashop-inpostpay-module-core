@@ -111,11 +111,32 @@ class InPostIziUpdater_2_0_0
     {
         $result = true;
 
-        foreach (GuiConfiguration::getConfigurableBindingPlaces() as $bindingPlace) {
+        foreach ($this->getConfigurableBindingPlaces() as $bindingPlace) {
             $result &= $this->updateStylesConfig($bindingPlace);
         }
 
         return (bool) $result;
+    }
+
+    /**
+     * Method may not exist if the previous version of the file was already included (e.g., during recompilation of the container)
+     * before unpacking a new version of the module.
+     */
+    private function getConfigurableBindingPlaces(): array
+    {
+        if (method_exists(GuiConfiguration::class, 'getConfigurableBindingPlaces')) {
+            return GuiConfiguration::getConfigurableBindingPlaces();
+        }
+
+        return [
+            BindingPlace::BasketSummary(),
+            BindingPlace::ProductCard(),
+            BindingPlace::LoginPage(),
+            BindingPlace::RegisterFormPage(),
+            BindingPlace::CheckoutPage(),
+            BindingPlace::MiniCartPage(),
+            BindingPlace::OrderCreate(),
+        ];
     }
 
     private function updateStylesConfig(BindingPlace $bindingPlace): bool
