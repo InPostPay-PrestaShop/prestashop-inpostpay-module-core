@@ -95,6 +95,11 @@ final class GeneralConfigurationType extends AbstractType
                 'label' => $this->translator->l('Full page cache in use', self::TRANSLATION_SOURCE),
                 'help' => $this->translator->l('Use this option if you are using the full page cache module or a varnish, lightspeed cache.', self::TRANSLATION_SOURCE),
             ])
+            ->add('sendAnalyticsData', $switchClass, [
+                'property_path' => 'generalConfiguration.sendAnalyticsData',
+                'label' => $this->translator->l('Send analytics data', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('Use this option if you want to send analytics data to InPostPay', self::TRANSLATION_SOURCE),
+            ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,
                 'error_mapping' => [

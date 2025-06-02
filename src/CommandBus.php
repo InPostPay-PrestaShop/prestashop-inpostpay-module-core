@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace izi\prestashop;
 
+use izi\prestashop\Analytics\Command\UpdateCartAnalyticsCommand;
+use izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandlerInterface;
 use izi\prestashop\Command\Config\CheckStatusCommand;
 use izi\prestashop\Command\Config\DownloadModuleDataCommand;
 use izi\prestashop\Command\Config\UpdateAdvancedConfigurationCommand;
@@ -127,6 +129,8 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             UpdateHotProductCommand::class => '?' . UpdateHotProductHandlerInterface::class,
             DeleteHotProductCommand::class => '?' . DeleteHotProductHandlerInterface::class,
             DeleteRemoteProductCommand::class => '?' . DeleteRemoteProductHandlerInterface::class,
+
+            UpdateCartAnalyticsCommand::class => '?' . UpdateCartAnalyticsHandlerInterface::class,
         ];
     }
 

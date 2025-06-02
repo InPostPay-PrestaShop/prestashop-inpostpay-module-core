@@ -37,6 +37,7 @@ class InPostIziUpdater_2_2_0
     public static function create(Module $module): self
     {
         $db = Db::getInstance();
+
         $dbInstaller = new DatabaseInstaller(new Configuration($db), [
             new Version_2_2_0(new Connection($db)),
         ]);

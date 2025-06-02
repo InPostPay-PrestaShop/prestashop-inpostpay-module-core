@@ -2,6 +2,7 @@
 
 namespace izi\prestashop;
 
+use izi\prestashop\Analytics\BasketAnalyticsInterface;
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\Currency;
@@ -12,6 +13,8 @@ use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\OptionalService;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\Order\Consent;
+use izi\prestashop\Common\Order\OrderAdditionalParameter;
+use izi\prestashop\Common\Order\OrderAdditionalParameters;
 use izi\prestashop\Common\Order\Product;
 use izi\prestashop\Common\Order\Quantity;
 use izi\prestashop\Common\PaymentType;
@@ -77,11 +80,17 @@ class PrestashopOrder
      */
     private $attributeListParser;
 
-    public function __construct(\Order $order, string $basketId, ?CreateOrderRequest $orderData = null)
+    /**
+     * @var BasketAnalyticsInterface
+     */
+    private $basketAnalytics;
+
+    public function __construct(\Order $order, string $basketId, ?CreateOrderRequest $orderData = null, ?BasketAnalyticsInterface $basketAnalytics = null)
     {
         $this->order = $order;
         $this->basketId = $basketId;
         $this->orderData = $orderData;
+        $this->basketAnalytics = $basketAnalytics;
 
         $this->module = \Module::getInstanceByName('inpostizi');
 
@@ -92,9 +101,9 @@ class PrestashopOrder
         $this->addressDataMapper = new AddressDataMapper();
     }
 
-    public static function getOrder(\Order $order, string $basketId, ?CreateOrderRequest $request = null): Order
+    public static function getOrder(\Order $order, string $basketId, ?CreateOrderRequest $request = null, ?BasketAnalyticsInterface $basketAnalytics = null): Order
     {
-        return (new self($order, $basketId, $request))->mapOrder();
+        return (new self($order, $basketId, $request, $basketAnalytics))->mapOrder();
     }
 
     public function mapOrder(): Order
@@ -259,8 +268,34 @@ class PrestashopOrder
             $this->getTrackingNumbers(),
             $this->readComments(),
             $this->getDiscountsTotal(),
-            $this->order->reference
+            $this->order->reference,
+            $this->readOrderAdditionalParameters()
         );
+    }
+
+    private function readOrderAdditionalParameters(): ?OrderAdditionalParameters
+    {
+        $sendAnalyticsData = $this->getConfiguration('INPOST_PAY_SEND_ANALYTICS_DATA');
+
+        if (!$sendAnalyticsData || null === $this->basketAnalytics) {
+            return null;
+        }
+
+        $orderAdditionalParameters = new OrderAdditionalParameters();
+
+        if (null !== $this->basketAnalytics->getClientId()) {
+            $orderAdditionalParameters->addParameter(new OrderAdditionalParameter('client_id', $this->basketAnalytics->getClientId()));
+        }
+
+        if (null !== $this->basketAnalytics->getFbclid()) {
+            $orderAdditionalParameters->addParameter(new OrderAdditionalParameter('fbclid', $this->basketAnalytics->getFbclid()));
+        }
+
+        if (null !== $this->basketAnalytics->getGclid()) {
+            $orderAdditionalParameters->addParameter(new OrderAdditionalParameter('gclid', $this->basketAnalytics->getGclid()));
+        }
+
+        return $orderAdditionalParameters;
     }
 
     public function readSummaryOrderFinalPrice(): Price

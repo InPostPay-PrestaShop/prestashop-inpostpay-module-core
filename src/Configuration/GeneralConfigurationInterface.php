@@ -16,5 +16,7 @@ interface GeneralConfigurationInterface
 
     public function getCheckoutButtonDisplayHook(?int $shopId = null): ?string;
 
-    public function isFullPageCacheModuleInUse(): bool;
+    public function isFullPageCacheModuleInUse(?int $shopId = null): bool;
+
+    public function isSendAnalyticsData(?int $shopId = null): bool;
 }

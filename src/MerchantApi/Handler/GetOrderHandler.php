@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Handler;
 
+use izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface;
 use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\Handler\CommandHandlerTrait;
 use izi\prestashop\MerchantApi\Command\GetOrderCommand;
@@ -31,13 +32,23 @@ final class GetOrderHandler implements GetOrderHandlerInterface
     private $sessionRepository;
 
     /**
+     * @var BasketAnalyticsRepositoryInterface
+     */
+    private $analyticsRepository;
+
+    /**
      * @param ObjectRepositoryInterface<\Order> $orderRepository
      * @param BasketSessionRepositoryInterface<BasketSession> $repository
+     * @param BasketAnalyticsRepositoryInterface|null $analyticsRepository
      */
-    public function __construct(ObjectRepositoryInterface $orderRepository, BasketSessionRepositoryInterface $repository)
-    {
+    public function __construct(
+        ObjectRepositoryInterface $orderRepository,
+        BasketSessionRepositoryInterface $repository,
+        ?BasketAnalyticsRepositoryInterface $analyticsRepository = null
+    ) {
         $this->orderRepository = $orderRepository;
         $this->sessionRepository = $repository;
+        $this->analyticsRepository = $analyticsRepository ?? new \izi\prestashop\Analytics\BasketAnalyticsRepository(new \izi\prestashop\Database\Connection());
     }
 
     public function __invoke(GetOrderCommand $command): Order
@@ -54,6 +65,6 @@ final class GetOrderHandler implements GetOrderHandlerInterface
 
         \Shop::setContext(\Shop::CONTEXT_SHOP, (int) $order->id_shop);
 
-        return PrestashopOrder::getOrder($order, $session->getBasketId(), $session->getOrderRequest());
+        return PrestashopOrder::getOrder($order, $session->getBasketId(), $session->getOrderRequest(), $this->analyticsRepository->find((int) $order->id_cart));
     }
 }

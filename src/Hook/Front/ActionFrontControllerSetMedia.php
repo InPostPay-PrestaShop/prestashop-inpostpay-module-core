@@ -37,8 +37,12 @@ final class ActionFrontControllerSetMedia implements HookInterface
     /**
      * @param iterable<AssetsProviderInterface> $assetsProviders
      */
-    public function __construct(AssetManagerInterface $assetManager, AuthorizationCheckerInterface $authorizationChecker, iterable $assetsProviders, ApiConfigurationInterface $configuration)
-    {
+    public function __construct(
+        AssetManagerInterface $assetManager,
+        AuthorizationCheckerInterface $authorizationChecker,
+        iterable $assetsProviders,
+        ApiConfigurationInterface $configuration
+    ) {
         $this->assetManager = $assetManager;
         $this->authorizationChecker = $authorizationChecker;
         $this->assetsProviders = $assetsProviders;
