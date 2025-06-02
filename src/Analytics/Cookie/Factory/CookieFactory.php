@@ -24,7 +24,7 @@ final class CookieFactory implements CookieFactoryInterface
             $path,
             $domain,
             $secure,
-            $httpOnly,
+            $httpOnly
         );
     }
 }
