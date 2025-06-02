@@ -15,6 +15,11 @@ class InPostIziBasketSession extends \ObjectModel
     public $session_id;
 
     /**
+     * @var int \Shop ID
+     */
+    public $id_shop;
+
+    /**
      * @var string basket UUID
      */
     public $cart_id;
@@ -58,6 +63,7 @@ class InPostIziBasketSession extends \ObjectModel
         'table' => self::TABLE_NAME,
         'primary' => 'id',
         'fields' => [
+            'id_shop' => ['type' => self::TYPE_INT, 'allow_null' => true],
             'session_id' => ['type' => self::TYPE_INT, 'required' => true],
             'cart_id' => ['type' => self::TYPE_STRING, 'required' => true],
             'confirmation_response' => ['type' => self::TYPE_STRING, 'allow_null' => true],

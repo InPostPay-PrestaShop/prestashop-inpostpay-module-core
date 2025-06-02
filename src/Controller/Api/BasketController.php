@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Controller\Api;
 
 use izi\prestashop\BasketApp\BasketAppClientInterface;
-use izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\AddProductToBasketCommand;
+use izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand;
 use izi\prestashop\MerchantApi\Command\GetBasketCommand;
 use izi\prestashop\MerchantApi\Command\UpdateBasketCommand;

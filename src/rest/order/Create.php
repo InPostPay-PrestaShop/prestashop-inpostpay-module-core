@@ -15,6 +15,8 @@ use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\Entities\BasketSessionInterface;
+use izi\prestashop\Event\EventDispatcherInterface;
+use izi\prestashop\Event\ValidateOrderEvent;
 use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
@@ -80,11 +82,16 @@ class Create
     private $repository;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    /**
      * @var ValidatorInterface
      */
     private $validator;
 
-    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null, ?BasketSessionRepositoryInterface $repository = null, ?ValidatorInterface $validator = null)
+    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null, ?BasketSessionRepositoryInterface $repository = null, ?EventDispatcherInterface $eventDispatcher = null, ?ValidatorInterface $validator = null)
     {
         $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
@@ -93,6 +100,7 @@ class Create
         $this->bus = $bus ?? $this->module->get(CommandBusInterface::class);
         $this->ordersConfiguration = $this->module->get(OrdersConfigurationInterface::class);
         $this->repository = $repository ?? new BasketSessionRepository(SerializerFactory::create(), $this->module->get(ObjectManagerInterface::class));
+        $this->eventDispatcher = $eventDispatcher ?? $this->module->get(EventDispatcherInterface::class);
         $this->validator = $validator ?? $this->module->get('inpost.izi.validator');
     }
 
@@ -117,9 +125,17 @@ class Create
             throw new CannotCreateOrderException($this->module->l('There already exists an order for this basket.', self::TRANSLATION_SOURCE));
         }
 
-        if (null === $session->getOrderId()) {
-            $this->finalizeSession($session, $request, (int) $order->id);
+        $this->module->getLogger()->warning('Repeated order request for cart #{cartId}. Updating delivery emails.', [
+            'cartId' => $cart->id,
+            'orderId' => $order->id,
+        ]);
+
+        if (null !== $originalRequest = $session->getOrderRequest()) {
+            $request = $originalRequest->withDeliveryEmails($request->getDelivery());
         }
+
+        $this->finalizeSession($session, $request, (int) $order->id);
+        $this->saveCarrierModuleData($cart->id, $request->getDelivery());
 
         return (int) $order->id;
     }
@@ -156,7 +172,7 @@ class Create
         $deliveryType = $request->getDelivery()->getType();
         $serviceCodes = $request->getDelivery()->getOptionalServiceCodes();
 
-        $shopId = (int) $cart->id_shop;
+        $shopId = $session->getShopId() ?? (int) $cart->id_shop;
 
         $shippingOptions = $this->shippingConfiguration->getShippingOptions($deliveryType, $shopId);
         $carrierReferenceId = $shippingOptions->getCarrierMapping(...$serviceCodes)->getReferenceId();
@@ -172,30 +188,54 @@ class Create
         $customer = $this->findOrCreateCustomer($cart, $request->getAccountInfo());
         $addresses = $this->findOrCreateAddresses($customer, $request);
 
-        $this->setUpContext($cart, $addresses);
+        $this->setUpContext($cart, $addresses, $shopId);
         $this->updateCart($cart, $carrierId, $addresses);
         $this->updateCartMessage($cart, $request);
         $this->adjustHandlingCost($shippingOptions, $serviceCodes);
-        $this->validateCart($cart);
+        $this->validateCart($cart, $request);
 
-        $this->module->validateOrder(
-            $cart->id,
-            (int) $this->ordersConfiguration->getInitialStatusId($paymentType, $shopId),
-            $cart->getOrderTotal(),
-            $this->module->displayName,
-            null,
-            [],
-            null,
-            false,
-            $cart->secure_key
-        );
+        $orderId = null;
 
-        $orderId = (int) $this->module->currentOrder;
+        $this->eventDispatcher->addListener(ValidateOrderEvent::class, $listener = function (ValidateOrderEvent $event) use ($session, $request, $cart, &$orderId) {
+            if ($event->getOrder()->module !== $this->module->name) {
+                return;
+            }
 
-        $this->finalizeSession($session, $request, $orderId);
-        $this->saveCarrierModuleData($cart->id, $request->getDelivery());
+            $orderId = (int) $event->getOrder()->id;
 
-        return $orderId;
+            $this->finalizeSession($session, $request, $orderId);
+            $this->saveCarrierModuleData($cart->id, $request->getDelivery());
+        });
+
+        try {
+            $this->module->validateOrder(
+                $cart->id,
+                (int) $this->ordersConfiguration->getInitialStatusId($paymentType, $shopId),
+                $cart->getOrderTotal(),
+                $this->module->displayName,
+                null,
+                [],
+                null,
+                false,
+                $cart->secure_key,
+                $this->context->shop
+            );
+
+            return (int) $this->module->currentOrder;
+        } catch (\Exception $exception) {
+            if (null === $orderId) {
+                throw $exception;
+            }
+
+            $this->module->getLogger()->error('An exception occurred after creating order #{orderId}: {exception}.', [
+                'orderId' => $orderId,
+                'exception' => $exception,
+            ]);
+
+            return $orderId;
+        } finally {
+            $this->eventDispatcher->removeListener(ValidateOrderEvent::class, $listener);
+        }
     }
 
     private function findOrCreateAddresses(\Customer $customer, CreateOrderRequest $request): array
@@ -578,7 +618,7 @@ class Create
         }
     }
 
-    private function validateCart(\Cart $cart): void
+    private function validateCart(\Cart $cart, CreateOrderRequest $request): void
     {
         $products = $cart->getProducts();
 
@@ -586,7 +626,9 @@ class Create
             throw new CannotCreateOrderException($this->context->getTranslator()->trans('Cart is empty', [], 'Shop.Notifications.Error'));
         }
 
+        $this->validateCartRules($cart);
         $this->checkMinimalPurchaseAmount($cart);
+        $this->checkCartTotal($cart, $request);
 
         foreach ($products as $product) {
             if ($product['minimal_quantity'] > $product['cart_quantity']) {
@@ -610,6 +652,18 @@ class Create
         throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
     }
 
+    private function validateCartRules(\Cart $cart): void
+    {
+        /** @var \CartRule $cartRule */
+        foreach ($cart->getCartRules() as ['obj' => $cartRule]) {
+            if (!$error = $cartRule->checkValidity($this->context, true)) {
+                continue;
+            }
+
+            throw new CannotCreateOrderException(sprintf($this->module->l('Voucher %s is no longer available: %s'), $cartRule->code ?: $cartRule->name, $error));
+        }
+    }
+
     private function checkMinimalPurchaseAmount(\Cart $cart): void
     {
         if (0. >= $minimalPurchase = $this->getMinimalPurchaseAmount()) {
@@ -622,6 +676,19 @@ class Create
         }
 
         throw new CannotCreateOrderException($this->context->getTranslator()->trans('A minimum shopping cart total of %amount% (tax excl.) is required to validate your order. Current cart total is %total% (tax excl.).', ['%amount%' => $this->formatPrice($minimalPurchase), '%total%' => $this->formatPrice($productsTotalExcludingTax)], 'Shop.Theme.Checkout'));
+    }
+
+    private function checkCartTotal(\Cart $cart, CreateOrderRequest $request): void
+    {
+        $details = $request->getOrderDetails();
+
+        $orderTotal = $cart->getOrderTotal();
+        $basketPrice = $details->getBasketPrice()->getGross();
+        $epsilon = $details->getCurrency()->getSmallestUnitAmount() / 2.;
+
+        if (abs($orderTotal - $basketPrice) >= $epsilon) {
+            throw new CannotCreateOrderException($this->module->l('Basket price has changed. Please review your order.', self::TRANSLATION_SOURCE));
+        }
     }
 
     private function getMinimalPurchaseAmount(): float
@@ -647,14 +714,14 @@ class Create
     /**
      * @param array{delivery: \AddressCore, invoice: \AddressCore} $addresses
      */
-    private function setUpContext(\Cart $cart, array $addresses): void
+    private function setUpContext(\Cart $cart, array $addresses, int $shopId): void
     {
         if ($currencyId = \Currency::getIdByIsoCode('PLN')) {
             $cart->id_currency = $currencyId;
         }
 
         $this->context->cart = $cart;
-        $this->context->shop = new \Shop($cart->id_shop);
+        $this->context->shop = new \Shop($shopId);
         $this->context->customer = new \Customer($cart->id_customer);
         $this->context->cart->setTaxCalculationMethod();
         $this->context->currency = \Currency::getCurrencyInstance($cart->id_currency);
@@ -662,7 +729,7 @@ class Create
 
         $this->context->getTranslator()->setLocale($this->context->language->locale);
 
-        \Shop::setContext(\Shop::CONTEXT_SHOP, $cart->id_shop);
+        \Shop::setContext(\Shop::CONTEXT_SHOP, $shopId);
 
         $taxAddress = 'id_address_invoice' === \Configuration::get(PrestaShopConfiguration::TAX_ADDRESS_TYPE)
             ? $addresses['invoice']

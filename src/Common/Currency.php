@@ -17,4 +17,14 @@ final class Currency extends StringEnum
     {
         return self::Pln();
     }
+
+    public function getSmallestUnitAmount(): float
+    {
+        switch ($this) {
+            case self::Pln():
+                return 0.01;
+            default:
+                throw new \LogicException('Not implemented.');
+        }
+    }
 }

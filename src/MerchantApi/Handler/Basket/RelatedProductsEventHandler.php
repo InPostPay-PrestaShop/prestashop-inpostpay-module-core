@@ -25,6 +25,7 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
 {
     /**
      * @internal
+     *
      * @deprecated
      */
     public const TRANSLATION_SOURCE = 'relatedproductseventhandler';

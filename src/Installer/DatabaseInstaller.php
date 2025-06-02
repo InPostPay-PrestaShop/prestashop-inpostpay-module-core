@@ -88,6 +88,7 @@ final class DatabaseInstaller
             new Database\Version_1_11_0($connection),
             new Database\Version_2_0_0($connection),
             new Database\Version_2_1_0($connection),
+            new Database\Version_2_2_0($connection),
         ];
     }
 }

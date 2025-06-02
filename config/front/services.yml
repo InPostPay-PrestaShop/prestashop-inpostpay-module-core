@@ -22,6 +22,8 @@ services:
         actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
         actionAjaxDieCartControllerdisplayAjaxUpdateBefore: '@izi\prestashop\Hook\Front\ActionCartControllerAjaxUpdateResponse'
         actionFrontControllerSetMedia: '@izi\prestashop\Hook\Front\ActionFrontControllerSetMedia'
+        actionEmailSendBefore: '@izi\prestashop\Hook\Common\ActionEmailSendBefore'
+        displayHeader: '@izi\prestashop\Hook\Front\DisplayHeader'
         paymentOptions: '@izi\prestashop\Hook\Front\ActionGetPaymentOptions'
         displayOrderConfirmation: '@izi\prestashop\Hook\Front\DisplayOrderConfirmation'
         displayIziThankYou: '@izi\prestashop\Hook\Front\DisplayIziThankYou'
@@ -36,6 +38,7 @@ services:
         displayCustomerLoginFormAfter: '@izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter'
         displayIziCartPreviewButton: '@izi\prestashop\Hook\Front\DisplayIziCartPreviewButton'
         displayIziCheckoutButton: '@izi\prestashop\Hook\Front\DisplayIziCheckoutButton'
+        displayHeader: '@izi\prestashop\Hook\Front\DisplayHeader'
         # products
         actionObjectProductDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore'
         actionObjectProductDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter'
@@ -89,6 +92,7 @@ services:
         izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand: '@izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface'
         izi\prestashop\HotProduct\Message\DeleteRemoteProductCommand: '@izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandlerInterface'
         izi\prestashop\HotProduct\Message\UpdateHotProductCommand: '@izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandlerInterface'
+        izi\prestashop\Analytics\Command\UpdateCartAnalyticsCommand: '@izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandlerInterface'
 
   inpost.izi.widget_controller_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\MerchantApi\Model\Order\Response;
 
 use izi\prestashop\Common\Currency;
+use izi\prestashop\Common\Order\OrderAdditionalParameters;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\Price;
 
@@ -76,10 +77,29 @@ final class OrderDetails implements \JsonSerializable
     private $order_discount;
 
     /**
+     * @var OrderAdditionalParameters|null
+     */
+    private $order_additional_parameters;
+
+    /**
      * @param string[] $delivery_references_list
      */
-    public function __construct(string $order_id, string $pos_id, \DateTimeImmutable $order_creation_date, string $basket_id, string $order_merchant_status_description, PaymentType $payment_type, Price $order_base_price, Price $order_final_price, Currency $currency, array $delivery_references_list = [], ?string $order_comments = null, ?float $order_discount = null, ?string $customer_order_id = null)
-    {
+    public function __construct(
+        string $order_id,
+        string $pos_id,
+        \DateTimeImmutable $order_creation_date,
+        string $basket_id,
+        string $order_merchant_status_description,
+        PaymentType $payment_type,
+        Price $order_base_price,
+        Price $order_final_price,
+        Currency $currency,
+        array $delivery_references_list = [],
+        ?string $order_comments = null,
+        ?float $order_discount = null,
+        ?string $customer_order_id = null,
+        ?OrderAdditionalParameters $order_additional_parameters = null
+    ) {
         $this->order_comments = $order_comments;
         $this->order_id = $order_id;
         $this->pos_id = $pos_id;
@@ -93,6 +113,7 @@ final class OrderDetails implements \JsonSerializable
         $this->delivery_references_list = $delivery_references_list;
         $this->order_discount = $order_discount;
         $this->customer_order_id = $customer_order_id;
+        $this->order_additional_parameters = $order_additional_parameters;
     }
 
     public function getComments(): ?string
@@ -161,6 +182,11 @@ final class OrderDetails implements \JsonSerializable
     public function getDeliveryReferencesList(): array
     {
         return $this->delivery_references_list;
+    }
+
+    public function getOrderAdditionalParameters(): ?OrderAdditionalParameters
+    {
+        return $this->order_additional_parameters;
     }
 
     public function jsonSerialize(): array

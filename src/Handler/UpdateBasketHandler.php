@@ -55,7 +55,7 @@ final class UpdateBasketHandler implements UpdateBasketHandlerInterface
         }
 
         $basket = $this->builderFactory
-            ->createRequestBuilder($session->getBasket())
+            ->createRequestBuilder($session->getBasket(), $session->getShopId())
             ->build();
 
         try {

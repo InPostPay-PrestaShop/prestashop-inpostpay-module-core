@@ -9,7 +9,7 @@ parameters:
   universalObjectCratesClasses:
     - Cookie
   reportUnmatchedIgnoredErrors: false
-  phpVersion: 71300
+  phpVersion: 70103
   level: 5
   treatPhpDocTypesAsCertain: false
   scanDirectories:

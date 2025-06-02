@@ -7,17 +7,23 @@
 
   <div class="card-body">
     <div class="row mt-3">
-      <div class="col-6">
+      <div class="col">
         <p class="mb-1">
-          <strong>Wysyłka:</strong>
+          <strong>{l s='Delivery method' mod='inpostizi'}:</strong>
         </p>
         <p>{$delivery}</p>
 
         {if $apm != ''}
           <p class="mb-1">
-            <strong>Paczkomat:</strong>
+            <strong>{l s='APM' mod='inpostizi'}:</strong>
           </p>
           <p>{$apm}</p>
+        {/if}
+
+        {if $issue_invoice}
+          <p>
+            <strong>{l s='The customer requested a VAT invoice' mod='inpostizi'}</strong>
+          </p>
         {/if}
       </div>
     </div>

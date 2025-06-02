@@ -101,7 +101,7 @@ final class IncrementCartQuantityHandler implements IncrementCartQuantityHandler
 
     private function assertQuantityIsAvailable(int $quantity, int $productId, int $combinationId, \Cart $cart): void
     {
-        if ($this->productRepository->isAvailableOutOfStock($productId, (int) $cart->id_shop)) {
+        if ($this->productRepository->isAvailableOutOfStock($productId)) {
             return;
         }
 

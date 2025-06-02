@@ -67,6 +67,7 @@ final class BasketSession implements SwitchableBasketSessionInterface
         $model = new InPostIziBasketSession();
         $model->session_id = (int) $basket->getId();
         $model->cart_id = (string) $uuid;
+        $model->id_shop = (int) $basket->getEntity()->id_shop;
 
         return new self($basket, $model);
     }
@@ -247,6 +248,16 @@ final class BasketSession implements SwitchableBasketSessionInterface
         }
 
         return $this->orderRequest;
+    }
+
+    public function getShopId(): ?int
+    {
+        return $this->model->id_shop === null ? null : (int) $this->model->id_shop;
+    }
+
+    public function setShopId(int $idShop)
+    {
+        $this->model->id_shop = $idShop;
     }
 
     private static function isBasketFinalized(BasketInterface $basket): bool

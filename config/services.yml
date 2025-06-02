@@ -493,6 +493,15 @@ services:
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
 
+  izi\prestashop\Handler\Config\Status\CacheStatusChecker:
+    class: izi\prestashop\Handler\Config\Status\CacheStatusChecker
+    public: false
+    tags:
+      - { name: inpost.izi.status_checker }
+    arguments:
+      - '@inpost.izi.module'
+      - '@service_container'
+
   izi\prestashop\Translation\LegacyTranslator:
     class: izi\prestashop\Translation\LegacyTranslator
     public: false
@@ -619,3 +628,11 @@ services:
       - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
       - '@inpost.izi.object_model.shop_repository'
       - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+
+  izi\prestashop\EventListener\CreateShipmentListener:
+    class: izi\prestashop\EventListener\CreateShipmentListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@izi\prestashop\Repository\OrderDataRepositoryInterface'
+      - '@izi\prestashop\Translation\LegacyTranslator'

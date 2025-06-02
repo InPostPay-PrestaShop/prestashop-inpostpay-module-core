@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace izi\prestashop\Common\Basket;
 
 use izi\prestashop\Common\Price;
+use izi\prestashop\Common\Product\DeliveryProduct;
 use izi\prestashop\Common\Product\DeliveryRelatedProducts;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductImage;
 use izi\prestashop\Common\Product\ProductVariant;
-use izi\prestashop\Common\Product\DeliveryProduct;
 
 final class Product implements \JsonSerializable
 {

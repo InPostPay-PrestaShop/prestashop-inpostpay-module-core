@@ -101,12 +101,27 @@ final class X13PriceHistoryLowestPriceProvider implements BatchLowestPriceProvid
      */
     private function doGetPrices(LowestPriceQuery ...$queries): array
     {
-        $productIds = array_map([$this, 'getProductId'], $queries);
-        $query = current($queries);
+        $groupedQueries = [];
+        array_map(function ($query) use (&$groupedQueries) {
+            $groupedQueries[$query->getShopId()][] = $query;
+        }, $queries);
 
+        $prices = [];
+        foreach ($groupedQueries as $idShop => $shopQueries) {
+            $productIds = array_map([$this, 'getProductId'], $shopQueries);
+            $query = current($shopQueries);
+
+            $prices += $this->getPricesForShop($idShop, $productIds, $query);
+        }
+
+        return $prices;
+    }
+
+    private function getPricesForShop(int $idShop, array $productIds, LowestPriceQuery $query)
+    {
         $args = [
             $productIds,
-            $query->getShopId(),
+            $idShop,
             $query->getCurrencyId(),
             $query->getCountryId(),
             $query->getCustomerGroupId(),

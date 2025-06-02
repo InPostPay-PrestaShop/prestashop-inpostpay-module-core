@@ -61,15 +61,16 @@ class DeliveryFactory
     /**
      * @return DeliveryOption[]
      */
-    public function getAvailableDeliveryOptions(\Cart $cart): array
+    public function getAvailableDeliveryOptions(\Cart $cart, ?int $idShop = null): array
     {
         $deliveryOptions = [];
+        $idShop = $idShop ?? (int) $cart->id_shop;
 
         $deliveryDate = $this->getDeliveryDate();
         $isFreeShipping = null;
 
         foreach (DeliveryType::cases() as $deliveryType) {
-            $options = $this->configuration->getShippingOptions($deliveryType, (int) $cart->id_shop);
+            $options = $this->configuration->getShippingOptions($deliveryType, (int) $idShop);
             $referenceId = $options->getCarrierMapping()->getReferenceId();
 
             if (null === $referenceId || null === $carrier = $this->getCarrier($cart, $referenceId)) {

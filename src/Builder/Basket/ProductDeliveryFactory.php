@@ -79,11 +79,12 @@ class ProductDeliveryFactory
         \Product $product,
         Price $unitPrice,
         float $weight,
-        Quantity $quantity
+        Quantity $quantity,
+        ?int $idShop = null
     ): DeliveryProduct {
         $totalPrice = $unitPrice->multiply($quantity->getQuantity());
         $totalWeight = (new Weight($weight))->multiply($quantity->getQuantity());
-        $isDeliveryOptionAvailable = $this->isDeliveryOptionAvailable($product, $deliveryType, $totalPrice, $totalWeight, $cart);
+        $isDeliveryOptionAvailable = $this->isDeliveryOptionAvailable($product, $deliveryType, $totalPrice, $totalWeight, $cart, $idShop);
 
         return new DeliveryProduct($deliveryType, $isDeliveryOptionAvailable);
     }
@@ -95,11 +96,12 @@ class ProductDeliveryFactory
         \Product $product,
         Price $productPrice,
         Quantity $quantity,
-        ?float $freeDeliveryAmount = null
+        ?float $freeDeliveryAmount = null,
+        ?int $idShop = null
     ): DeliveryRelatedProducts {
         $basketNewPrice = $this->getCartTotalWithNewProduct($productPrice, $quantity, $this->getCartBasePrice($summary));
         $basketNewWeight = $this->getCartWeightWithNewProduct($product, $quantity, $cart);
-        $isDeliveryOptionAvailable = $this->isDeliveryOptionAvailable($product, $deliveryType, $basketNewPrice, $basketNewWeight, $cart);
+        $isDeliveryOptionAvailable = $this->isDeliveryOptionAvailable($product, $deliveryType, $basketNewPrice, $basketNewWeight, $cart, $idShop);
         $isFreeDelivery = $isDeliveryOptionAvailable && $this->isFreeDelivery($freeDeliveryAmount, $basketNewPrice); // if delivery option is not available, free delivery is not possible
 
         return new DeliveryRelatedProducts(
@@ -114,9 +116,11 @@ class ProductDeliveryFactory
         DeliveryType $deliveryType,
         Price $basketNewPrice,
         Weight $basketNewWeight,
-        \Cart $cart
+        \Cart $cart,
+        ?int $idShop = null
     ): bool {
-        $options = $this->configuration->getShippingOptions($deliveryType, (int) $cart->id_shop);
+        $idShop = $idShop ?? (int) $cart->id_shop;
+        $options = $this->configuration->getShippingOptions($deliveryType, (int) $idShop);
         $referenceId = $options->getCarrierMapping()->getReferenceId();
 
         if (null === $referenceId || null === $carrier = $this->carrierRepository->findOneByReferenceId($referenceId)) {

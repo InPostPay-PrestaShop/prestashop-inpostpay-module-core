@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook;
 
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
+use izi\prestashop\Hook\Exception\HookNotFoundException;
+use izi\prestashop\Hook\Exception\HookNotImplementedException;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Psr\Container\ContainerInterface;
 
@@ -36,6 +38,8 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Admin\DisplayBackOfficeHeader::HOOK_NAME => '?' . Admin\DisplayBackOfficeHeader::class,
             Admin\DisplayAdminOrderLeft::HOOK_NAME => '?' . Admin\DisplayAdminOrderLeft::class,
             Admin\DisplayAdminOrderSide::HOOK_NAME => '?' . Admin\DisplayAdminOrderSide::class,
+            Admin\ActionAdminInPostConfirmedShipmentsControllerAfter::HOOK_NAME => '?' . Admin\ActionAdminInPostConfirmedShipmentsControllerAfter::class,
+            Admin\ActionAdminInPostConfirmedShipmentsControllerBefore::HOOK_NAME => '?' . Admin\ActionAdminInPostConfirmedShipmentsControllerBefore::class,
 
             Common\ActionCartDeleteBefore::HOOK_NAME => Common\ActionCartDeleteBefore::class,
             Common\ActionCartUpdateAfter::HOOK_NAME => Common\ActionCartUpdateAfter::class,
@@ -46,6 +50,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\ActionShipmentUpdateAfter::HOOK_NAME => Common\ActionShipmentUpdateAfter::class,
             Common\ActionObjectOrderUpdateBefore::HOOK_NAME => Common\ActionObjectOrderUpdateBefore::class,
             Common\ActionObjectOrderUpdateAfter::HOOK_NAME => Common\ActionObjectOrderUpdateAfter::class,
+            Common\ActionEmailSendBefore::HOOK_NAME => Common\ActionEmailSendBefore::class,
 
             // products
             Common\Product\ActionProductDeleteBefore::HOOK_NAME => Common\Product\ActionProductDeleteBefore::class,
@@ -74,6 +79,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Front\DisplayCheckoutSummaryTop::HOOK_NAME => '?' . Front\DisplayCheckoutSummaryTop::class,
             Front\DisplayIziCartPreviewButton::HOOK_NAME => '?' . Front\DisplayIziCartPreviewButton::class,
             Front\DisplayIziCheckoutButton::HOOK_NAME => '?' . Front\DisplayIziCheckoutButton::class,
+            Front\DisplayHeader::HOOK_NAME => '?' . Front\DisplayHeader::class,
         ];
     }
 
@@ -87,7 +93,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             return $this->widget->renderWidget($hookName, $parameters);
         }
 
-        throw new \DomainException(sprintf('Hook "%s" is either not implemented or not available in the current context.', $hookName));
+        throw HookNotImplementedException::create($hookName);
     }
 
     /**
@@ -144,7 +150,11 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
 
         $canonicalName = $canonicalNames[$normalizedName];
 
-        return $this->locator->has($canonicalName) ? $this->locator->get($canonicalName) : null;
+        if (!$this->locator->has($canonicalName)) {
+            throw HookNotFoundException::create($name);
+        }
+
+        return $this->locator->get($canonicalName);
     }
 
     /**

@@ -5,7 +5,6 @@ use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Hook\Admin\DisplayAdminOrderLeft;
-use izi\prestashop\Hook\Common\ActionCartSave;
 use izi\prestashop\Hook\Common\ActionCartUpdateAfter;
 use izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate;
 use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
@@ -54,7 +53,7 @@ class InPostIziUpdater_1_6_0
             return false;
         }
 
-        return $this->module->unregisterHook(ActionCartSave::HOOK_NAME)
+        return $this->module->unregisterHook('actionCartSave')
             && $this->module->registerHook($this->getHooksToInstall());
     }
 

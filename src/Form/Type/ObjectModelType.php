@@ -101,21 +101,23 @@ final class ObjectModelType extends AbstractType
                         $options['shop_id']
                     );
                 },
-                'choice_label' => function (\ObjectModel $model): string {
+                'choice_label' => function (\ObjectModel $model) {
                     if (is_callable([$model, '__toString'])) {
                         return (string) $model;
                     }
 
+                    $label = null;
+
                     // might as well use model's "name" property by default...
                     if (property_exists($model, 'name')) {
                         if (!is_array($model->name)) {
-                            return $model->name;
+                            $label = $model->name;
+                        } elseif ([] !== $model->name) {
+                            $label = $model->name[$this->context->language->id] ?? current($model->name);
                         }
-
-                        return $model->name[$this->context->language->id] ?? (string) current($model->name);
                     }
 
-                    return sprintf('"%s" #%d', get_class($model), $model->id);
+                    return $label ?? sprintf('"%s" #%d', get_class($model), $model->id);
                 },
                 'choice_name' => static function (\ObjectModel $model): string {
                     return (string) $model->id;
