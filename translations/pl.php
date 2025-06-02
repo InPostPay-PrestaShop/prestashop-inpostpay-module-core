@@ -1,11 +1,12 @@
 <?php
 
 global $_MODULE;
-$_MODULE = array();
+$_MODULE = [];
 $_MODULE['<{inpostizi}prestashop>inpostizi_be39a2c31fd39417d193787b0745002d'] = 'InPost Pay';
 $_MODULE['<{inpostizi}prestashop>inpostizi_e92d43479cae605e1a18eb091520f704'] = 'Moduł wymaga PHP w wersji 7.1.3 lub późniejszej.';
 $_MODULE['<{inpostizi}prestashop>inpostizi_3f93d44654423ff8a5fcbbfe8d82f57f'] = 'Nie udało się zaktualizować struktury bazy danych.';
 $_MODULE['<{inpostizi}prestashop>inpostizi_3b838c5f28dad4dc154d5d1f0e279453'] = 'Moduł musi być włączony, aby wyświetlić stronę konfiguracji.';
+$_MODULE['<{inpostizi}prestashop>inpostizi_9ed4a1989f9f332b9d6b34eb21fcaa39'] = 'Czyszczenie cache kontenera Symfony mogło zakończyć się niepowodzeniem. Spróbuj wyczyścić cache ręcznie.';
 $_MODULE['<{inpostizi}prestashop>deliverytype_4d5340b646d9723cdb3bdf42182658d0'] = 'Paczkomat';
 $_MODULE['<{inpostizi}prestashop>deliverytype_5055d1a4444c630d6839f48ab48aef91'] = 'Kurier';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_782990a55975fc9d54d74f3ffb2c7dad'] = 'Koszyk nie istnieje.';
@@ -178,6 +179,7 @@ $_MODULE['<{inpostizi}prestashop>widgetframestylechoicetype_b7f41fc1412ad2ee75e9
 $_MODULE['<{inpostizi}prestashop>widgetframestylechoicetype_7545c5d3ad246a683a197a2903a4d5e6'] = 'Kwadratowe';
 $_MODULE['<{inpostizi}prestashop>widgetvariantchoicetype_51e6cd92b6c45f9affdc158ecca2b8b8'] = 'Żółty';
 $_MODULE['<{inpostizi}prestashop>widgetvariantchoicetype_e90dfb84e30edf611e326eeb04d680de'] = 'Czarny';
+$_MODULE['<{inpostizi}prestashop>cachestatuschecker_86b62594677b99f4b3de1790dc6e3b37'] = 'Cache kontenera Symfony jest przestarzały.';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_341b3a9691b47feef924ec0e1db4856c'] = 'Konfiguracja nie jest kompletna - zweryfikuj i prześlij formularz w zakładce \"ustawienia\".';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_7cca0b355fe9f13f75ed5a2399a172be'] = 'Żadna metoda płatności nie jest włączona - konfigurację można zmienić w zakładce \"ustawienia\".';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_d64fff9bf53342093407f32d61b278b1'] = 'Dane dostępowe do API nie zostały skonfigurowane.';
