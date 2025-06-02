@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace izi\prestashop\Installer\Database;
 
 use izi\prestashop\HotProduct\HotProductRepository;
-use izi\prestashop\ObjectModel\Entity\InPostIziBasketSession;
 use izi\prestashop\PromoCode\CartRuleOptionsRepository;
 use izi\prestashop\Repository\ProductRestrictionsRepository;
 

@@ -49,6 +49,11 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
     private $fullPageCacheModuleInUse;
 
     /**
+     * @var bool
+     */
+    private $sendAnalyticsData;
+
+    /**
      * @var int|null ID of {@see \CMS}
      *
      * @Assert\GreaterThan(0)
@@ -61,7 +66,8 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
         ?string $thankYouDisplayHook = null,
         ?string $productCardDisplayHook = null,
         ?string $checkoutButtonDisplayHook = null,
-        bool $fullPageCacheModuleInUse = false
+        bool $fullPageCacheModuleInUse = false,
+        bool $sendAnalyticsData = false
     ) {
         $this->enabledForEveryone = $enabledForEveryone;
         $this->maxSuggestedProducts = $maxSuggestedProducts;
@@ -69,6 +75,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
         $this->productCardDisplayHook = $productCardDisplayHook;
         $this->checkoutButtonDisplayHook = $checkoutButtonDisplayHook;
         $this->fullPageCacheModuleInUse = $fullPageCacheModuleInUse;
+        $this->sendAnalyticsData = $sendAnalyticsData;
     }
 
     public function isEnabledForEveryone(): bool
@@ -131,7 +138,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
         return $this;
     }
 
-    public function isFullPageCacheModuleInUse(): bool
+    public function isFullPageCacheModuleInUse(?int $shopId = null): bool
     {
         return $this->fullPageCacheModuleInUse;
     }
@@ -139,6 +146,18 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
     public function setFullPageCacheModuleInUse(bool $fullPageCacheModuleInUse): GeneralConfiguration
     {
         $this->fullPageCacheModuleInUse = $fullPageCacheModuleInUse;
+
+        return $this;
+    }
+
+    public function isSendAnalyticsData(?int $shopId = null): bool
+    {
+        return $this->sendAnalyticsData;
+    }
+
+    public function setSendAnalyticsData(bool $sendAnalyticsData): GeneralConfiguration
+    {
+        $this->sendAnalyticsData = $sendAnalyticsData;
 
         return $this;
     }
