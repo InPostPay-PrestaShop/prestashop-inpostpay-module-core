@@ -68,6 +68,8 @@ $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_dae272c53fe0f60237e1c5
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_07f0748f41ceeea585873d4cd84166e1'] = 'Jeśli wybierzesz hook \'%s\' musisz go ręcznie zaimplementować w pliku szablonu: \'{hook h=\"%s\"}\'.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_38e0bba4abb1c099b3c3b9dfeed745c2'] = 'Full page cache w użyciu';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_678e433c080caebffb245f4ec097579d'] = 'Użyj tej opcji jeśli używasz modułu full page cache lub innych narzędzi full page cache typu varnish, lightspeed cache.';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_062a2e2d89c1e5a2f9cc6762d32ef806'] = 'Przesyłaj dane analityczne';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_787a92562f9876f7e2fdb44cfe05dccf'] = 'Użyj tej opcji, jeśli chcesz wysyłać dane analityczne do InPost Pay';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_0d5381fd4e980fb92ffc90a505b4e992'] = 'Konfiguracja zdjęć produktów';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_7a440309fc897f07a1d99a07af29d8db'] = 'Maksymalna liczba produktów sugerowanych';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_2d18889b4f14532c8f33c95a7af033c9'] = 'W celu pokazania produktów sugerowanych należy uzupełnić sekcję Produktów Powiązanych w konfiguracji produktu.';
