@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook;
 
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
+use izi\prestashop\Hook\Exception\HookNotFoundException;
+use izi\prestashop\Hook\Exception\HookNotImplementedException;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Psr\Container\ContainerInterface;
 
@@ -91,7 +93,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             return $this->widget->renderWidget($hookName, $parameters);
         }
 
-        throw new \DomainException(sprintf('Hook "%s" is either not implemented or not available in the current context.', $hookName));
+        throw HookNotImplementedException::create($hookName);
     }
 
     /**
@@ -148,7 +150,11 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
 
         $canonicalName = $canonicalNames[$normalizedName];
 
-        return $this->locator->has($canonicalName) ? $this->locator->get($canonicalName) : null;
+        if (!$this->locator->has($canonicalName)) {
+            throw HookNotFoundException::create($name);
+        }
+
+        return $this->locator->get($canonicalName);
     }
 
     /**

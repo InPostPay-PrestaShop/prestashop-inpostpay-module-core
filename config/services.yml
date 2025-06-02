@@ -493,6 +493,15 @@ services:
       - '@izi\prestashop\Translation\LegacyTranslator'
       - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
 
+  izi\prestashop\Handler\Config\Status\CacheStatusChecker:
+    class: izi\prestashop\Handler\Config\Status\CacheStatusChecker
+    public: false
+    tags:
+      - { name: inpost.izi.status_checker }
+    arguments:
+      - '@inpost.izi.module'
+      - '@service_container'
+
   izi\prestashop\Translation\LegacyTranslator:
     class: izi\prestashop\Translation\LegacyTranslator
     public: false

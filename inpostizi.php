@@ -8,12 +8,15 @@ use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPa
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
 use izi\prestashop\DependencyInjection\ContainerFactory;
 use izi\prestashop\DependencyInjection\Exception\ContainerNotFoundException;
+use izi\prestashop\Hook\Exception\HookNotFoundException;
+use izi\prestashop\Hook\Exception\HookNotImplementedException;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
 use izi\prestashop\Installer\DatabaseInstaller;
 use izi\prestashop\Module\Exception\ModuleErrorInterface;
 use PrestaShop\PrestaShop\Adapter\ContainerBuilder as PrestaShopContainerBuilder;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
+use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException as PrestaShopContainerNotFoundException;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Config\Resource\FileResource;
@@ -189,6 +192,10 @@ class InPostIzi extends PaymentModule implements WidgetInterface
 
     public function getContent()
     {
+        if ($this->isContainerCacheStale() && $this->isContainerConfigLoaded()) {
+            $this->clearCacheAndRedirectBackToConfigPage();
+        }
+
         try {
             /** @var UrlGeneratorInterface $router */
             $router = $this->get('router');
@@ -197,28 +204,21 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         } catch (ServiceNotFoundException $e) {
             $this->handleConfigPageRequest();
         } catch (RouteNotFoundException $e) {
-            if (!$this->active && Tools::version_compare(_PS_VERSION_, '8.0.0', '>=') && !$this->hasShopAssociations()) {
-                /** @var Session $session */
-                $session = $this->get('session');
-                $session->getFlashBag()->add('error', $this->l('To access the configuration page, the module must be active.'));
-
-                Tools::redirectAdmin($router->generate('admin_module_manage'));
-            }
-
-            if (Tools::getValue('cache_cleared')) {
+            if ($this->isContainerConfigLoaded()) {
                 throw $e;
             }
 
-            Tools::clearSf2Cache();
-            Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, null, [
-                'configure' => $this->name,
-                'cache_cleared' => true,
-            ]));
+            $this->addFlash($this->l('To access the configuration page, the module must be active.'));
+            Tools::redirectAdmin($router->generate('admin_module_manage'));
         }
     }
 
     /**
+     * Handles hook calls.
+     *
      * @param string $methodName
+     *
+     * @return mixed hook result
      */
     public function __call($methodName, array $arguments)
     {
@@ -232,9 +232,21 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this
                 ->get(HookExecutorInterface::class)
                 ->execute($hookName, $parameters);
+        } catch (ModuleErrorInterface $e) {
+            throw $e;
+        } catch (HookNotImplementedException $e) {
+            $this->getLogger()->warning('Hook "{hookName}" is not implemented.', [
+                'hookName' => $e->getHookName(),
+            ]);
+
+            return null;
         } catch (Throwable $e) {
-            if ($e instanceof ModuleErrorInterface) {
-                throw $e;
+            if ($this->isContainerCacheRelated($e)) {
+                $this->getLogger()->error('Error executing hook "{hookName}": container cache is stale.', [
+                    'hookName' => $hookName,
+                ]);
+
+                return null;
             }
 
             $this->getLogger()->critical('Error executing hook "{hookName}": {exception}', [
@@ -242,7 +254,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
                 'exception' => $e,
             ]);
 
-            if ($this->isDebugEnabled()) {
+            if (_PS_MODE_DEV_ && $this->isDebugEnabled()) {
                 throw $e;
             }
 
@@ -261,29 +273,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     public function get($serviceName)
     {
-        if (Tools::version_compare(_PS_VERSION_, '1.7.6')) {
-            return $this->getLegacyContainer()->get($serviceName);
-        }
-
-        if (Tools::version_compare(_PS_VERSION_, '1.7.7')) {
-            return $this->getPS176Container()->get($serviceName);
-        }
-
-        try {
-            $service = parent::get($serviceName);
-        } catch (ServiceNotFoundException $exception) {
-            if ($this->isSymfonyContext() || null === $container = SymfonyContainer::getInstance()) {
-                throw $exception;
-            }
-
-            return $container->get($serviceName);
-        }
-
-        if (false !== $service) {
-            return $service;
-        }
-
-        return $this->getFrontOfficeLegacyContainer()->get($serviceName);
+        return $this->doGetContainer()->get($serviceName);
     }
 
     /**
@@ -365,6 +355,30 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     /**
      * @return ContainerInterface
      */
+    private function doGetContainer()
+    {
+        if (Tools::version_compare(_PS_VERSION_, '1.7.6')) {
+            return $this->getLegacyContainer();
+        }
+
+        if (Tools::version_compare(_PS_VERSION_, '1.7.7')) {
+            return $this->getPS176Container();
+        }
+
+        if (null !== $container = SymfonyContainer::getInstance()) {
+            return $container;
+        }
+
+        try {
+            return $this->getContainer();
+        } catch (PrestaShopContainerNotFoundException $e) {
+            return $this->getFrontOfficeLegacyContainer();
+        }
+    }
+
+    /**
+     * @return ContainerInterface
+     */
     private function getLegacyContainer()
     {
         if (!isset($this->legacyContainer)) {
@@ -409,7 +423,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     }
 
     /**
-     * Accesses the public "routing.loader" service in order to provide a @see \Symfony\Component\Config\Loader\LoaderResolverInterface
+     * Accesses the public "routing.loader" service to provide a @see \Symfony\Component\Config\Loader\LoaderResolverInterface
      * to the routing configuration loader used by @see \PrestaShop\PrestaShop\Adapter\Module\Tab\ModuleTabRegister
      */
     private function setUpRoutingLoaderResolver()
@@ -464,7 +478,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $psContainer = $kernel->getContainer();
         $this->adminKernel->getContainer()->set('prestashop.security.admin.provider', $psContainer->get('prestashop.security.admin.provider'));
 
-        // In case of some very early 1.7 versions, session may not have already been started by PS application.
+        // In some very early 1.7 versions, the session may not have yet been started by PS application.
         $psContainer->get('session')->start();
 
         return $this->adminKernel;
@@ -548,5 +562,83 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         }
 
         return $this->widget = $this->get('inpost.izi.widget');
+    }
+
+    /**
+     * @return bool
+     */
+    private function isContainerCacheRelated(Throwable $e)
+    {
+        if (!$e instanceof HookNotFoundException && !$e instanceof ServiceNotFoundException && !$e instanceof TypeError) {
+            return false;
+        }
+
+        return $this->isContainerCacheStale();
+    }
+
+    /**
+     * @return bool
+     */
+    private function isContainerCacheStale()
+    {
+        try {
+            $container = $this->doGetContainer();
+        } catch (ContainerNotFoundException $e) {
+            return false; // fingers crossed
+        }
+
+        if (!$container->hasParameter('inpost.izi.container_version')) {
+            return true;
+        }
+
+        return $this->version !== $container->getParameter('inpost.izi.container_version');
+    }
+
+    /**
+     * @return bool whether PS automatically loads the module's container configuration
+     */
+    private function isContainerConfigLoaded()
+    {
+        if ($this->active) {
+            return true;
+        }
+
+        if (Tools::version_compare(_PS_VERSION_, '8.0.0')) {
+            return true;
+        }
+
+        return $this->hasShopAssociations();
+    }
+
+    private function clearCacheAndRedirectBackToConfigPage()
+    {
+        if (Tools::getValue('cache_cleared')) {
+            $this->addFlash($this->l('An attempt to clear the cache may have failed. Please try to clear the cache manually.'));
+
+            return;
+        }
+
+        $this->getLogger()->warning('Container cache is stale, attempting to clear.');
+
+        Tools::clearSf2Cache();
+        Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, null, [
+            'configure' => $this->name,
+            'cache_cleared' => true,
+        ]));
+    }
+
+    /**
+     * @param string $message
+     * @param string $type
+     */
+    private function addFlash($message, $type = 'error')
+    {
+        try {
+            /** @var Session $session */
+            $session = $this->get('session');
+            $session->getFlashBag()->add($type, $message);
+        } catch (ServiceNotFoundException $e) {
+            // ignore silently
+        }
     }
 }
