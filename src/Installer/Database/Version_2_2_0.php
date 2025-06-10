@@ -34,7 +34,7 @@ class Version_2_2_0 extends AbstractMigration
     private function createBasketAnalyticsTable(): void
     {
         $this->connection->executeStatement('
-            CREATE TABLE `' . _DB_PREFIX_ . BasketAnalyticsRepository::TABLE_NAME . '` (
+            CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . BasketAnalyticsRepository::TABLE_NAME . '` (
                 `cart_id` INT(10) UNSIGNED NOT NULL,
                 `gclid` VARCHAR(512) DEFAULT NULL,
                 `fbclid` VARCHAR(512) DEFAULT NULL,
