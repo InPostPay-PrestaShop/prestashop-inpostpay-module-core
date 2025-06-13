@@ -668,6 +668,7 @@ services:
           - { name: inpost.izi.hook }
       arguments:
           - '@izi\prestashop\Event\EventDispatcherInterface'
+          - '@inpost.izi.context'
 
   izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter:
       class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter
@@ -676,6 +677,7 @@ services:
           - { name: inpost.izi.hook }
       arguments:
           - '@izi\prestashop\Event\EventDispatcherInterface'
+          - '@inpost.izi.context'
 
   # Product hooks
   izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore:

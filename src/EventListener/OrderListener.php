@@ -73,6 +73,10 @@ final class OrderListener implements EventSubscriberInterface
             return;
         }
 
+        if ('inpostizi' !== $order->module) {
+            return;
+        }
+
         $eventTime = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $order->date_upd);
         $command = new UpdateOrderStatusCommand((string) $event->getOrderId(), $eventTime, $this->getMerchantOrderStatus($order, $event->getNewOrderStatus()));
 
@@ -87,15 +91,6 @@ final class OrderListener implements EventSubscriberInterface
         }
     }
 
-    private function getMerchantOrderStatus(\Order $order, \OrderState $orderState): ?MerchantOrderStatus
-    {
-        if (empty(\OrderPayment::getByOrderReference($order->reference)) && $orderState->id === (int) \Configuration::get('PS_OS_CANCELED')) {
-            return MerchantOrderStatus::OrderRejected();
-        }
-
-        return null;
-    }
-
     public function onBeforeOrderAddressDeliveryUpdated(OrderEvent $event): void
     {
         if (null === $this->configuration->getClientCredentials()) {
@@ -104,7 +99,15 @@ final class OrderListener implements EventSubscriberInterface
 
         $order = $event->getOrder();
 
+        if ('inpostizi' !== $order->module) {
+            return;
+        }
+
         if (0 >= $orderId = (int) $order->id) {
+            return;
+        }
+
+        if (isset($this->ordersAddressUpdated[$orderId])) {
             return;
         }
 
@@ -121,10 +124,6 @@ final class OrderListener implements EventSubscriberInterface
 
     public function onOrderAddressDeliveryUpdated(OrderEvent $event): void
     {
-        if (null === $this->configuration->getClientCredentials()) {
-            return;
-        }
-
         $order = $event->getOrder();
         $orderId = (int) $event->getOrder()->id;
 
@@ -145,5 +144,18 @@ final class OrderListener implements EventSubscriberInterface
                 'error' => $e,
             ]);
         }
+    }
+
+    private function getMerchantOrderStatus(\Order $order, \OrderState $orderState): ?MerchantOrderStatus
+    {
+        if ($order->getOrderPayments()) {
+            return null;
+        }
+
+        if ($orderState->id === (int) \Configuration::get('PS_OS_CANCELED')) {
+            return MerchantOrderStatus::OrderRejected();
+        }
+
+        return null;
     }
 }
