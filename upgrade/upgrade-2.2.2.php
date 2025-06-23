@@ -69,7 +69,7 @@ class InPostIziUpdater_2_2_2
                     continue;
                 }
 
-                if ($clientId !== $data['INPOST_PAY_client_id'] ?? null) {
+                if ($clientId !== ($data['INPOST_PAY_client_id'] ?? null)) {
                     continue;
                 }
 
