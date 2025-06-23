@@ -62,14 +62,15 @@ class InPostIziUpdater_2_2_2
             'INPOST_PAY_client_id',
             'INPOST_PAY_AVAILABLE_PAYMENT_OPTIONS',
         ]);
+        $dataByShopGroup = $this->groupConfigValuesByShop($data);
 
-        foreach ($this->groupConfigValuesByShop($data) as $shopGroupId => $dataByShop) {
+        foreach ($dataByShopGroup as $shopGroupId => $dataByShop) {
             foreach ($dataByShop as $shopId => $data) {
                 if (!isset($data['INPOST_PAY_AVAILABLE_PAYMENT_OPTIONS'])) {
                     continue;
                 }
 
-                if ($clientId !== ($data['INPOST_PAY_client_id'] ?? null)) {
+                if ($clientId !== $this->resolveClientId($dataByShopGroup, $shopGroupId, $shopId)) {
                     continue;
                 }
 
@@ -83,6 +84,14 @@ class InPostIziUpdater_2_2_2
         }
 
         return true;
+    }
+
+    private function resolveClientId(array $config, int $shopGroupId, int $shopId): ?string
+    {
+        return $config[$shopGroupId][$shopId]['INPOST_PAY_client_id']
+            ?? $config[$shopGroupId][0]['INPOST_PAY_client_id']
+            ?? $config[0][0]['INPOST_PAY_client_id']
+            ?? null;
     }
 
     private function decodePaymentTypesList(string $value): array
