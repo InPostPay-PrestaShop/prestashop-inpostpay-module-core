@@ -25,7 +25,7 @@ interface OrdersConfigurationInterface
     public function getPointOfSaleId(?int $shopId = null): ?string;
 
     /**
-     * @return PaymentType[]
+     * @return PaymentType[] if all payment options are enabled, an empty array should be returned
      */
     public function getAvailablePaymentOptions(?int $shopId = null): array;
 

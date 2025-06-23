@@ -96,10 +96,10 @@ $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_fd282be0a539046c5c22736
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_32e0295e9c28454d52b4f4f3643b46e7'] = 'Status zamówienia utworzonego przez InPost Pay (płatność za pobraniem)';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_05a5fcc9d88a553b80b2633aa4556d58'] = 'Status dla zamówienia opłaconego przez InPost Pay';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_33af8066d3c83110d4bd897f687cedd2'] = 'Statusy zamówień';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_3a6abb709e118a970dd1ddd06f5c0fcd'] = 'Dostępne metody płatności';
+$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_8cd8b0f7c9d02973566d70ae96bcf976'] = 'Włącz wszystkie dostępne metody płatności';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_50b5c5b98ff1773e551421f082fed261'] = 'Metody płatności zostały określone na umowie o obsługę bramki płatniczej.';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_304adc8d65de68c0bbae5f7774f03914'] = 'Włącz płatność przy odbiorze zgodnie z podpisaną umową z InPost';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e1bbdbf5c497c484c061c4c2a0359e58'] = 'Płatność przy odbiorze będzie dostępna tylko wtedy, kiedy posiadasz podpisaną umowę z InPost na świadczenie tej usługi w Twoim sklepie.';
+$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e8051555e4af6e673fbe93a79a86671f'] = 'Włączone metody płatności';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e9adbbd1cd7eff7e1a588c31f79521d5'] = 'POS ID';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_d3188981fad68a05eec51ac57e69feca'] = 'W przypadku środowiska sandbox skontaktuj się z InPost. W przypadku środowiska produkcyjnego - zaloguj się do InPost i pobierz POS ID.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_f13673c7e261fd8d00915c9cb768ad95'] = 'Komentarz zamówienia';
@@ -183,7 +183,6 @@ $_MODULE['<{inpostizi}prestashop>widgetvariantchoicetype_51e6cd92b6c45f9affdc158
 $_MODULE['<{inpostizi}prestashop>widgetvariantchoicetype_e90dfb84e30edf611e326eeb04d680de'] = 'Czarny';
 $_MODULE['<{inpostizi}prestashop>cachestatuschecker_86b62594677b99f4b3de1790dc6e3b37'] = 'Cache kontenera Symfony jest przestarzały.';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_341b3a9691b47feef924ec0e1db4856c'] = 'Konfiguracja nie jest kompletna - zweryfikuj i prześlij formularz w zakładce \"ustawienia\".';
-$_MODULE['<{inpostizi}prestashop>configurationstatuschecker_7cca0b355fe9f13f75ed5a2399a172be'] = 'Żadna metoda płatności nie jest włączona - konfigurację można zmienić w zakładce \"ustawienia\".';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_d64fff9bf53342093407f32d61b278b1'] = 'Dane dostępowe do API nie zostały skonfigurowane.';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_0befa43bc12a10af2a8897889570b8ee'] = 'Problem z dostępem do API: %s';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_a7030a339317fbdb2af045820a465f79'] = 'Merchant client ID nie zostało skonfigurowane. Widget InPost Pay nie będzie wyświetlany.';

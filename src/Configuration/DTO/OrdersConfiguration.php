@@ -67,6 +67,13 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
     private $availablePaymentOptions;
 
     /**
+     * @var bool|null
+     *
+     * @Assert\NotNull()
+     */
+    private $allPaymentOptionsEnabled = true;
+
+    /**
      * @var MessageOptions|null
      *
      * @Assert\Valid()
@@ -163,13 +170,35 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this;
     }
 
+    public function isAllPaymentOptionsEnabled(): ?bool
+    {
+        return $this->allPaymentOptionsEnabled;
+    }
+
+    public function setAllPaymentOptionsEnabled(?bool $enabled): self
+    {
+        $this->allPaymentOptionsEnabled = $enabled;
+
+        return $this;
+    }
+
+    /**
+     * @deprecated use {@see getAvailablePaymentOptions()} instead
+     */
     public function isCarrierPaymentEnabled(): bool
     {
+        @trigger_error(sprintf('Method "%s()" is deprecated. Use "getAvailablePaymentOptions()" instead.', __METHOD__), \E_USER_DEPRECATED);
+
         return [] !== array_uintersect($this->availablePaymentOptions, PaymentType::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
     }
 
+    /**
+     * @deprecated use {@see setAvailablePaymentOptions()} instead
+     */
     public function setCarrierPaymentEnabled(?bool $carrierPaymentEnabled): self
     {
+        @trigger_error(sprintf('Method "%s()" is deprecated. Use "setAvailablePaymentOptions()" instead.', __METHOD__), \E_USER_DEPRECATED);
+
         $paymentOptions = PaymentType::getCarrierProvidedPaymentOptions();
 
         if ($carrierPaymentEnabled) {
@@ -216,5 +245,15 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
     public function getMessageFormat(?int $shopId = null): string
     {
         return $this->getMessageOptions()->getFormat();
+    }
+
+    /**
+     * @Assert\IsTrue(message="At least one payment option must be enabled.")
+     *
+     * @internal
+     */
+    public function hasEnabledPaymentOptions(): bool
+    {
+        return $this->allPaymentOptionsEnabled || [] !== $this->availablePaymentOptions;
     }
 }

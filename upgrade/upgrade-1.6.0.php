@@ -72,8 +72,17 @@ class InPostIziUpdater_1_6_0
     private function updateAvailablePaymentOptionsConfig(): bool
     {
         $map = [
-            'INPOST_PAY_payment_aion' => PaymentType::getAvailableByDefaultPaymentOptions(),
-            'INPOST_PAY_payment_inpost' => PaymentType::getCarrierProvidedPaymentOptions(),
+            'INPOST_PAY_payment_inpost' => [PaymentType::CashOnDelivery()],
+            'INPOST_PAY_payment_aion' => [
+                PaymentType::Card(),
+                PaymentType::CardToken(),
+                PaymentType::GooglePay(),
+                PaymentType::ApplePay(),
+                PaymentType::BlikCode(),
+                PaymentType::BlikToken(),
+                PaymentType::PayByLink(),
+                PaymentType::ShoppingLimit(),
+            ],
         ];
 
         $configs = $this->getAvailablePaymentOptionsConfigs($map);
