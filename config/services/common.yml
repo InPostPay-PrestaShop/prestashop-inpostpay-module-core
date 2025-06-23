@@ -1167,6 +1167,7 @@ services:
       - '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
       - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
       - '@izi\prestashop\Product\Image\ImageUrlsProviderInterface'
+      - '@inpost.izi.context'
 
   izi\prestashop\Product\Price\PriceCalculatorInterface: '@izi\prestashop\Product\Price\PriceCalculator'
   izi\prestashop\Product\Price\PriceCalculator:

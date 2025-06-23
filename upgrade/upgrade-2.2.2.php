@@ -77,7 +77,7 @@ class InPostIziUpdater_2_2_2
                 $enabledTypes = $this->decodePaymentTypesList($data['INPOST_PAY_AVAILABLE_PAYMENT_OPTIONS']);
                 $value = [] === array_udiff($availableTypes, $enabledTypes, [Enum::class, 'compareValues']);
 
-                if (!\Configuration::updateValue('INPOST_PAY_ENABLE_ALL_PAYMENT_OPTIONS', $value, false, $shopGroupId, $shopId)) {
+                if (!\Configuration::updateValue('INPOST_PAY_ENABLE_ALL_PAYMENT_OPTIONS', (int) $value, false, $shopGroupId, $shopId)) {
                     return false;
                 }
             }

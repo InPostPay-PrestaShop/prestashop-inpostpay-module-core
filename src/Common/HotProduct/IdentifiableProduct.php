@@ -22,7 +22,7 @@ final class IdentifiableProduct implements \JsonSerializable
      * @param ProductImage[] $additional_product_images
      * @param ProductAttribute[] $product_attributes
      */
-    public function __construct(string $product_id, string $product_name, string $product_description, string $product_image, Price $price, Currency $currency, Quantity $quantity, ?string $ean = null, ?ProductAvailability $product_availability = null, array $additional_product_images = [], array $product_attributes = [])
+    public function __construct(string $product_id, string $product_name, string $product_description, string $product_image, Price $price, Currency $currency, Quantity $quantity, ?string $ean = null, ?ProductAvailability $product_availability = null, array $additional_product_images = [], array $product_attributes = [], string $product_link = '')
     {
         $this->product_id = $product_id;
         $this->product_name = $product_name;
@@ -35,6 +35,7 @@ final class IdentifiableProduct implements \JsonSerializable
         $this->product_availability = $product_availability;
         $this->additional_product_images = $additional_product_images;
         $this->product_attributes = $product_attributes;
+        $this->setLink($product_link);
     }
 
     public function getId(): string

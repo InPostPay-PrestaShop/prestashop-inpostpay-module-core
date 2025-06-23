@@ -64,6 +64,11 @@ trait ProductTrait
      */
     private $product_attributes;
 
+    /**
+     * @var string
+     */
+    private $product_link;
+
     public function getEan(): ?string
     {
         return $this->ean;
@@ -121,6 +126,20 @@ trait ProductTrait
     public function getAttributes(): array
     {
         return $this->product_attributes;
+    }
+
+    public function getLink(): string
+    {
+        return $this->product_link;
+    }
+
+    private function setLink(string $link): void
+    {
+        if ('' === $link) {
+            @trigger_error('Passing a product link will be required in the future version of InPost Pay.', E_USER_DEPRECATED);
+        }
+
+        $this->product_link = $link;
     }
 
     public function jsonSerialize(): array
