@@ -7,6 +7,7 @@ namespace izi\prestashop\HotProduct;
 use izi\prestashop\HotProduct\Exception\InvalidProductDataException;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\ObjectModel\Repository\ProductRepository;
+use izi\prestashop\Product\ProductWithCombination;
 
 final class HotProductValidator
 {
@@ -47,7 +48,10 @@ final class HotProductValidator
         return true;
     }
 
-    public function validate(HotProduct $hotProduct): void
+    /**
+     * @return ProductWithCombination associated with the hot product
+     */
+    public function validate(HotProduct $hotProduct, bool $allowDefaultCombination = false): ProductWithCombination
     {
         $shopId = $hotProduct->getShopId();
 
@@ -55,7 +59,8 @@ final class HotProductValidator
             $hotProduct->getProductId(),
             $hotProduct->getCombinationId(),
             null,
-            $shopId
+            $shopId,
+            $allowDefaultCombination
         );
 
         if (null === $productWithCombination) {
@@ -65,5 +70,24 @@ final class HotProductValidator
         if (!self::isAvailableForOrder($productWithCombination->getProduct())) {
             throw new InvalidProductDataException('Product is inactive or not available for order.');
         }
+
+        if (!self::hasEan($productWithCombination)) {
+            throw new InvalidProductDataException('EAN code is required.');
+        }
+
+        return $productWithCombination;
+    }
+
+    private static function hasEan(ProductWithCombination $productWithCombination): bool
+    {
+        if ('' !== trim((string) $productWithCombination->getProduct()->ean13)) {
+            return true;
+        }
+
+        if (null === $combination = $productWithCombination->getCombination()) {
+            return false;
+        }
+
+        return '' !== trim((string) $combination->ean13);
     }
 }

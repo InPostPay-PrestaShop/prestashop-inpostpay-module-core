@@ -15,7 +15,7 @@ use izi\prestashop\Common\Product\ProductImage;
 trait ProductTrait
 {
     /**
-     * @var string|null
+     * @var string
      */
     private $ean;
 
@@ -69,7 +69,7 @@ trait ProductTrait
      */
     private $product_link;
 
-    public function getEan(): ?string
+    public function getEan(): string
     {
         return $this->ean;
     }
@@ -133,6 +133,11 @@ trait ProductTrait
         return $this->product_link;
     }
 
+    public function jsonSerialize(): array
+    {
+        return get_object_vars($this);
+    }
+
     private function setLink(string $link): void
     {
         if ('' === $link) {
@@ -142,8 +147,12 @@ trait ProductTrait
         $this->product_link = $link;
     }
 
-    public function jsonSerialize(): array
+    private function setEan(?string $ean): void
     {
-        return get_object_vars($this);
+        if ('' === $ean = (string) $ean) {
+            @trigger_error('Passing an EAN code will be required in the future version of InPost Pay.', E_USER_DEPRECATED);
+        }
+
+        $this->ean = $ean;
     }
 }

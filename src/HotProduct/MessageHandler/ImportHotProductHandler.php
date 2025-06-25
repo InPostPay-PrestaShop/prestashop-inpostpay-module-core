@@ -30,11 +30,6 @@ final class ImportHotProductHandler implements ImportHotProductHandlerInterface
     private $repository;
 
     /**
-     * @var ProductRepository
-     */
-    private $productRepository;
-
-    /**
      * @var ProductsApiClientInterface
      */
     private $client;
@@ -45,14 +40,19 @@ final class ImportHotProductHandler implements ImportHotProductHandlerInterface
     private $dataMapper;
 
     /**
+     * @var HotProductValidator
+     */
+    private $validator;
+
+    /**
      * @param ProductRepository $productRepository
      */
     public function __construct(HotProductRepositoryInterface $repository, ObjectRepositoryInterface $productRepository, ProductsApiClientInterface $client, HotProductDataMapperInterface $dataMapper)
     {
         $this->repository = $repository;
-        $this->productRepository = $productRepository;
         $this->client = $client;
         $this->dataMapper = $dataMapper;
+        $this->validator = new HotProductValidator($productRepository);
     }
 
     public function __invoke(ImportHotProductCommand $command): HotProduct
@@ -63,21 +63,11 @@ final class ImportHotProductHandler implements ImportHotProductHandlerInterface
             throw new InvalidProductDataException('Invalid product reference ID.');
         }
 
-        $productWithCombination = $this->productRepository->findWithCombination(
+        $productWithCombination = $this->validator->validate(new HotProduct(
             $productId = $referenceId->getProductId(),
             $referenceId->getCombinationId(),
-            null,
-            $shopId = $command->getShopId(),
-            true
-        );
-
-        if (null === $productWithCombination) {
-            throw new InvalidProductDataException('Product or combination does not exist.');
-        }
-
-        if (!HotProductValidator::isAvailableForOrder($productWithCombination->getProduct())) {
-            throw new InvalidProductDataException('Product is inactive or not available for order.');
-        }
+            $shopId = $command->getShopId()
+        ), true);
 
         $combination = $productWithCombination->getCombination();
         $combinationId = $combination ? (int) $combination->id : null;

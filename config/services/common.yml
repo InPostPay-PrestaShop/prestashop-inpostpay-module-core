@@ -1225,6 +1225,13 @@ services:
       - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
       - '@izi\prestashop\CommandBusInterface'
       - '@inpost.izi.general_logger'
+      - '@izi\prestashop\HotProduct\HotProductValidator'
+
+  izi\prestashop\HotProduct\HotProductValidator:
+    class: izi\prestashop\HotProduct\HotProductValidator
+    public: false
+    arguments:
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
 
   izi\prestashop\Mail\Resolver\OrderMailRecipientResolver:
     class: izi\prestashop\Mail\Resolver\OrderMailRecipientResolver

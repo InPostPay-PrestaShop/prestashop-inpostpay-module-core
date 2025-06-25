@@ -615,12 +615,6 @@ services:
       - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
       - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
 
-  izi\prestashop\HotProduct\HotProductValidator:
-    class: izi\prestashop\HotProduct\HotProductValidator
-    public: false
-    arguments:
-      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
-
   izi\prestashop\HotProduct\View\HotProductViewDataFactory:
     class: izi\prestashop\HotProduct\View\HotProductViewDataFactory
     arguments:

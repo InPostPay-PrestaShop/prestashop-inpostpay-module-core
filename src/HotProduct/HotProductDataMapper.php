@@ -128,7 +128,7 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
             $price,
             $currency,
             Quantity::integer($quantity),
-            $ean,
+            (string) $ean,
             $availability,
             $imageUrls->getAdditionalImages(),
             $this->getAttributes($combination, $languageId),
