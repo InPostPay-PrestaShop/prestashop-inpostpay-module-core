@@ -1232,6 +1232,7 @@ services:
     public: false
     arguments:
       - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\Translation\LegacyTranslator'
 
   izi\prestashop\Mail\Resolver\OrderMailRecipientResolver:
     class: izi\prestashop\Mail\Resolver\OrderMailRecipientResolver

@@ -189,6 +189,9 @@ $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_a7030a339317fbdb2af0
 $_MODULE['<{inpostizi}prestashop>deliveryoptionsstatuschecker_3194a4d8bc60ba3e66ddd94f10f32889'] = 'Nie jest dostępna żadna opcja dostawy.';
 $_MODULE['<{inpostizi}prestashop>actionfrontcontrollersetmedia_05e070788d5522addd174a9baa153f9f'] = 'Coś poszło nie tak. Spróbuj ponownie później.';
 $_MODULE['<{inpostizi}prestashop>actiongetpaymentoptions_a9e819aadeb05ca1df49418d8ef8faf2'] = 'Płać z InPost Pay';
+$_MODULE['<{inpostizi}prestashop>hotproductvalidator_c0674df384ee0721d5bf7a6152a1608f'] = 'Produkt lub kombinacja nie istnieje.';
+$_MODULE['<{inpostizi}prestashop>hotproductvalidator_3419fcc80e54c5ce62164714961f5d15'] = 'Produkt nie jest aktywny lub nie jest dostępny na sprzedaż.';
+$_MODULE['<{inpostizi}prestashop>hotproductvalidator_3825f0da01ae0a7c0a1ca0d1eb4e14dc'] = 'Kod EAN jest wymagany.';
 $_MODULE['<{inpostizi}prestashop>createhotproducttype_072bf7386ad6d32a8213bf1299f799fc'] = 'Szukaj produktu po nazwie lub kodzie...';
 $_MODULE['<{inpostizi}prestashop>updatehotproducttype_1432596d084873bee8df589b0b01448c'] = 'Dostępny od';
 $_MODULE['<{inpostizi}prestashop>updatehotproducttype_0a0b945c925ac8eb94a4ad328fc54840'] = 'Dostępny do';
