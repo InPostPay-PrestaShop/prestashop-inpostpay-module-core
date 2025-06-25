@@ -56,6 +56,10 @@ final class UpdateHotProductHandler implements UpdateHotProductHandlerInterface
         try {
             $status = $this->client->updateProduct($referenceId, $payload)->getStatus();
         } catch (ProductNotFoundException $e) {
+            if (!$command->createIfNotFound()) {
+                throw $e;
+            }
+
             $payload = $payload->asIdentifiable($referenceId);
             $this->client->createProducts(new CreateProductsRequest([$payload]));
 

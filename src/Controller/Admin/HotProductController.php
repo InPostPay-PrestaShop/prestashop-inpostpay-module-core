@@ -147,7 +147,8 @@ final class HotProductController extends AbstractConfigurationController
             return $this->redirectToRoute('admin_inpost_izi_products_index');
         }
 
-        $form = $this->createForm(UpdateHotProductType::class, UpdateHotProductCommand::for($product));
+        $command = UpdateHotProductCommand::for($product)->setCreateIfNotFound(true);
+        $form = $this->createForm(UpdateHotProductType::class, $command);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

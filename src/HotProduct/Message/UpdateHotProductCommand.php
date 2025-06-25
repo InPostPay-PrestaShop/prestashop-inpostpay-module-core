@@ -35,6 +35,11 @@ final class UpdateHotProductCommand
      */
     private $availableTo;
 
+    /**
+     * @var bool
+     */
+    private $createIfNotFound = false;
+
     public function __construct(int $id)
     {
         $this->id = $id;
@@ -103,5 +108,17 @@ final class UpdateHotProductCommand
         }
 
         return $this->availableFrom < $this->availableTo;
+    }
+
+    public function createIfNotFound(): bool
+    {
+        return $this->createIfNotFound;
+    }
+
+    public function setCreateIfNotFound(bool $createIfNotFound): self
+    {
+        $this->createIfNotFound = $createIfNotFound;
+
+        return $this;
     }
 }

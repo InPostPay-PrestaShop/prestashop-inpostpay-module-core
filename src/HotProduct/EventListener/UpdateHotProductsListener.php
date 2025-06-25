@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace izi\prestashop\HotProduct\EventListener;
 
+use izi\prestashop\BasketApp\Exception\BasketAppException;
+use izi\prestashop\BasketApp\Product\Exception\ProductNotFoundException;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Common\Currency;
+use izi\prestashop\HotProduct\Exception\InvalidProductDataException;
 use izi\prestashop\HotProduct\HotProduct;
 use izi\prestashop\HotProduct\HotProductRepositoryInterface;
 use izi\prestashop\HotProduct\HotProductValidator;
 use izi\prestashop\HotProduct\Message\DeleteRemoteProductCommand;
 use izi\prestashop\HotProduct\Message\UpdateHotProductCommand;
+use izi\prestashop\OAuth2\Exception\OAuth2ExceptionInterface;
+use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Product\Event\CombinationEvent;
 use izi\prestashop\Product\Event\ImageEvent;
 use izi\prestashop\Product\Event\ProductEvent;
@@ -18,6 +23,7 @@ use izi\prestashop\Product\Event\SpecificPriceEvent;
 use izi\prestashop\Product\Event\StockQuantityUpdatedEvent;
 use izi\prestashop\Product\Price\PriceCalculatorInterface;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
+use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -67,6 +73,11 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
     private $logger;
 
     /**
+     * @var HotProductValidator
+     */
+    private $validator;
+
+    /**
      * @var array<int, HotProduct[]> hot products by product ID
      */
     private $productsMap;
@@ -93,13 +104,14 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
      */
     private $toUpdate = [];
 
-    public function __construct(Context $context, HotProductRepositoryInterface $repository, PriceCalculatorInterface $calculator, CommandBusInterface $bus, LoggerInterface $logger)
+    public function __construct(Context $context, HotProductRepositoryInterface $repository, PriceCalculatorInterface $calculator, CommandBusInterface $bus, LoggerInterface $logger, ?HotProductValidator $validator = null)
     {
         $this->context = $context;
         $this->repository = $repository;
         $this->calculator = $calculator;
         $this->bus = $bus;
         $this->logger = $logger;
+        $this->validator = $validator ?? self::createValidator();
     }
 
     public static function getSubscribedEvents(): array
@@ -161,8 +173,6 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
             return;
         }
 
-        $available = HotProductValidator::isAvailableForOrder($product);
-
         foreach ($hotProducts as $hotProduct) {
             if (array_key_exists($hotProduct->getId(), $this->toDelete)) {
                 return;
@@ -172,11 +182,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 continue;
             }
 
-            if ($available) {
-                $this->scheduleUpdate($hotProduct);
-            } else {
-                $this->scheduleDelete($hotProduct);
-            }
+            $this->scheduleUpdate($hotProduct);
         }
     }
 
@@ -348,9 +354,24 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
 
     private function processUpdates(): void
     {
+        foreach ($this->toUpdate as $id => $product) {
+            try {
+                $this->validator->validate($product);
+            } catch (InvalidProductDataException $e) {
+                $this->toDelete[$id] = $product;
+                unset($this->toUpdate[$id]);
+            } catch (\Throwable $e) {
+                // ignore and attempt to update anyway
+            }
+        }
+
         foreach ($this->toDelete as $product) {
             try {
                 $this->bus->handle(new DeleteRemoteProductCommand((string) $product->getReferenceId()));
+            } catch (BasketAppException|NetworkExceptionInterface|OAuth2ExceptionInterface $e) {
+                $this->logger->error('Failed to delete hot product "{id}".', [
+                    'id' => (string) $product->getReferenceId(),
+                ]);
             } catch (\Throwable $e) {
                 $this->logger->error('Failed to delete hot product "{id}". Error: {exception}', [
                     'id' => (string) $product->getReferenceId(),
@@ -362,6 +383,12 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         foreach ($this->toUpdate as $product) {
             try {
                 $this->bus->handle(new UpdateHotProductCommand($product->getId()));
+            } catch (ProductNotFoundException $e) {
+                // ignore
+            } catch (BasketAppException|NetworkExceptionInterface|OAuth2ExceptionInterface $e) {
+                $this->logger->error('Failed to update hot product "{id}" data.', [
+                    'id' => (string) $product->getReferenceId(),
+                ]);
             } catch (\Throwable $e) {
                 $this->logger->error('Failed to update hot product "{id}" data. Error: {exception}', [
                     'id' => (string) $product->getReferenceId(),
@@ -449,5 +476,16 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         return (\Closure::bind(function () {
             return $this->update_fields;
         }, $model, \ObjectModel::class))();
+    }
+
+    private static function createValidator(): HotProductValidator
+    {
+        @trigger_error(sprintf('Not passing a $validator to "%s::__construct()" is deprecated since version 2.2.2.', __CLASS__), E_USER_DEPRECATED);
+
+        /** @var \InPostIzi $module */
+        $module = \Module::getInstanceByName('inpostizi');
+        $repository = $module->get(ObjectManagerInterface::class)->getRepository(\Product::class);
+
+        return new HotProductValidator($repository);
     }
 }

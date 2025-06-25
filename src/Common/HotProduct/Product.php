@@ -25,10 +25,10 @@ final class Product implements \JsonSerializable
         $this->price = $price;
         $this->currency = $currency;
         $this->quantity = $quantity;
-        $this->ean = $ean;
         $this->product_availability = $product_availability;
         $this->additional_product_images = $additional_product_images;
         $this->product_attributes = $product_attributes;
+        $this->setEan($ean);
         $this->setLink($product_link);
     }
 
