@@ -124,7 +124,7 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
         return new Product(
             \Tools::substr($product->name ?? '', 0, 255),
             DescriptionFormatter::formatDescription($product),
-            $imageUrls->getMainImageUrl(),
+            (string) $imageUrls->getMainImageUrl(),
             $price,
             $currency,
             Quantity::integer($quantity),
