@@ -32,6 +32,7 @@ services:
         actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'
         actionObjectOrderUpdateBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore'
         actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
+        actionEmailSendBefore: '@izi\prestashop\Hook\Common\ActionEmailSendBefore'
         # products
         actionObjectProductDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore'
         actionObjectProductDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter'
