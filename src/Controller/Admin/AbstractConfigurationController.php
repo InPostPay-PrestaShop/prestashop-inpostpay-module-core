@@ -7,6 +7,7 @@ namespace izi\prestashop\Controller\Admin;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\Initializer\ConfigurationInitializerInterface;
 use izi\prestashop\Translation\LegacyTranslator;
+use PrestaShopBundle\Security\Voter\PageVoter;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Request;
@@ -119,7 +120,7 @@ abstract class AbstractConfigurationController extends AbstractController
             ],
         ];
 
-        if (null !== $this->apiConfiguration->getClientCredentials()) {
+        if (null !== $this->apiConfiguration->getClientCredentials() && $this->isGranted(PageVoter::READ, 'AdminProducts_')) {
             $pages['products'] = [
                 'route' => 'admin_inpost_izi_products_index',
                 'title' => $this->translator->l('Hot products', HotProductController::TRANSLATION_SOURCE),
