@@ -45,7 +45,8 @@ final class Product implements \JsonSerializable
             $this->ean,
             $this->product_availability,
             $this->additional_product_images,
-            $this->product_attributes
+            $this->product_attributes,
+            $this->product_link
         );
     }
 }
