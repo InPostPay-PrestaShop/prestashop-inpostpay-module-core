@@ -20,6 +20,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
     private const COD_OS_ID = 'INPOST_PAY_COD_OS_ID';
     private const PAID_OS_ID = 'INPOST_PAY_authorized_payment';
     private const STATUS_DESCRIPTION_MAP = 'INPOST_PAY_OS_DESCRIPTION_MAP';
+    private const ENABLE_ALL_PAYMENT_OPTIONS = 'INPOST_PAY_ENABLE_ALL_PAYMENT_OPTIONS';
     private const AVAILABLE_PAYMENT_OPTIONS = 'INPOST_PAY_AVAILABLE_PAYMENT_OPTIONS';
     private const POS_ID = 'INPOST_PAY_pos_id';
     private const MESSAGE_FORMAT = 'INPOST_PAY_ORDER_MESSAGE_FORMAT';
@@ -75,11 +76,15 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
      */
     public function getAvailablePaymentOptions(?int $shopId = null): array
     {
-        if (!isset($this->availablePaymentOptions[(int) $shopId])) {
-            $this->availablePaymentOptions[(int) $shopId] = $this->loadAvailablePaymentOptions($shopId);
+        if (isset($this->availablePaymentOptions[(int) $shopId])) {
+            return $this->availablePaymentOptions[(int) $shopId];
         }
 
-        return $this->availablePaymentOptions[(int) $shopId];
+        if ($this->isAllPaymentOptionsEnabled($shopId)) {
+            return $this->availablePaymentOptions[(int) $shopId] = [];
+        }
+
+        return $this->availablePaymentOptions[(int) $shopId] = $this->loadAvailablePaymentOptions($shopId);
     }
 
     public function getPointOfSaleId(?int $shopId = null): ?string
@@ -99,12 +104,13 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
             $this->getPaidStatusId(),
             $this->getPointOfSaleId(),
             $this->getStatusDescriptionMap(),
-            $this->getAvailablePaymentOptions()
+            $this->loadAvailablePaymentOptions()
         );
 
         return $configuration
             ->setCashOnDeliveryStatusId($this->getCashOnDeliveryStatus())
-            ->setMessageOptions($this->getMessageOptions());
+            ->setMessageOptions($this->getMessageOptions())
+            ->setAllPaymentOptionsEnabled($this->isAllPaymentOptionsEnabled());
     }
 
     public function persist(OrdersConfigurationInterface $configuration): void
@@ -160,7 +166,23 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         }
     }
 
-    private function loadAvailablePaymentOptions(?int $shopId): array
+    private function isAllPaymentOptionsEnabled(?int $shopId = null): bool
+    {
+        $value = $this->configuration->get(self::ENABLE_ALL_PAYMENT_OPTIONS, $shopId);
+
+        if (null === $value && !$this->configuration->has(self::AVAILABLE_PAYMENT_OPTIONS)) {
+            return true;
+        }
+
+        return (bool) $value;
+    }
+
+    private function setAllPaymentOptionsEnabled(bool $enabled): void
+    {
+        $this->configuration->set(self::ENABLE_ALL_PAYMENT_OPTIONS, (int) $enabled);
+    }
+
+    private function loadAvailablePaymentOptions(?int $shopId = null): array
     {
         $config = $this->configuration->get(self::AVAILABLE_PAYMENT_OPTIONS, $shopId);
 
@@ -170,7 +192,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
     private function decodeAvailablePaymentOptions($value): array
     {
         if (null === $value) {
-            return PaymentType::getAvailableByDefaultPaymentOptions();
+            return [];
         }
 
         $data = json_decode($value, true);
@@ -185,8 +207,19 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
     private function setAvailablePaymentOptions(OrdersConfigurationInterface $configuration): void
     {
         $availablePaymentOptions = array_values($configuration->getAvailablePaymentOptions());
-
         $this->configuration->set(self::AVAILABLE_PAYMENT_OPTIONS, json_encode($availablePaymentOptions));
+
+        if (is_callable([$configuration, 'isAllPaymentOptionsEnabled'])) {
+            $enabled = (bool) $configuration->isAllPaymentOptionsEnabled();
+            $this->setAllPaymentOptionsEnabled($enabled);
+
+            if ($enabled) {
+                $availablePaymentOptions = [];
+            }
+        } else {
+            $this->setAllPaymentOptionsEnabled(false);
+        }
+
         $this->availablePaymentOptions = [0 => $availablePaymentOptions];
     }
 
@@ -212,7 +245,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
     private function setMessageOptions(OrdersConfigurationInterface $configuration): void
     {
-        if ($configuration instanceof DTO\OrdersConfiguration) {
+        if (is_callable([$configuration, 'getMessageOptions'])) {
             $options = $configuration->getMessageOptions();
         } else {
             $options = new MessageOptions($configuration->getMessageFormat(), false, true);

@@ -17,7 +17,7 @@ final class Product implements \JsonSerializable
      * @param ProductImage[] $additional_product_images
      * @param ProductAttribute[] $product_attributes
      */
-    public function __construct(string $product_name, string $product_description, string $product_image, Price $price, Currency $currency, Quantity $quantity, ?string $ean = null, ?ProductAvailability $product_availability = null, array $additional_product_images = [], array $product_attributes = [])
+    public function __construct(string $product_name, string $product_description, string $product_image, Price $price, Currency $currency, Quantity $quantity, ?string $ean = null, ?ProductAvailability $product_availability = null, array $additional_product_images = [], array $product_attributes = [], string $product_link = '')
     {
         $this->product_name = $product_name;
         $this->product_description = $product_description;
@@ -25,10 +25,11 @@ final class Product implements \JsonSerializable
         $this->price = $price;
         $this->currency = $currency;
         $this->quantity = $quantity;
-        $this->ean = $ean;
         $this->product_availability = $product_availability;
         $this->additional_product_images = $additional_product_images;
         $this->product_attributes = $product_attributes;
+        $this->setEan($ean);
+        $this->setLink($product_link);
     }
 
     public function asIdentifiable(string $id): IdentifiableProduct
@@ -44,7 +45,8 @@ final class Product implements \JsonSerializable
             $this->ean,
             $this->product_availability,
             $this->additional_product_images,
-            $this->product_attributes
+            $this->product_attributes,
+            $this->product_link
         );
     }
 }

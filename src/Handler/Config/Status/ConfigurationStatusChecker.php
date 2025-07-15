@@ -65,10 +65,6 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
             return;
         }
 
-        if (!$this->isAnyPaymentOptionAvailable()) {
-            yield $this->translator->l('No payment option is enabled - update the configuration via the general settings tab.', self::TRANSLATION_SOURCE);
-        }
-
         if (null === $this->apiConfiguration->getClientCredentials()) {
             yield $this->translator->l('API access credentials are missing.', self::TRANSLATION_SOURCE);
         } else {
@@ -83,10 +79,5 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
         if (null === $this->apiConfiguration->getMerchantClientId()) {
             yield $this->translator->l('Merchant client ID configuration is missing. The InPost Pay Widget will not be displayed.', self::TRANSLATION_SOURCE);
         }
-    }
-
-    private function isAnyPaymentOptionAvailable(): bool
-    {
-        return [] !== $this->ordersConfiguration->getAvailablePaymentOptions();
     }
 }

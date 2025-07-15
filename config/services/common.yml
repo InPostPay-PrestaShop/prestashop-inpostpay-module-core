@@ -1,6 +1,6 @@
 # common FO/BO configuration
 parameters:
-  inpost.izi.container_version: '2.2.1'
+  inpost.izi.container_version: '2.2.2'
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.logger_config:
     type: rotating_file
@@ -668,6 +668,7 @@ services:
           - { name: inpost.izi.hook }
       arguments:
           - '@izi\prestashop\Event\EventDispatcherInterface'
+          - '@inpost.izi.context'
 
   izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter:
       class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter
@@ -676,6 +677,7 @@ services:
           - { name: inpost.izi.hook }
       arguments:
           - '@izi\prestashop\Event\EventDispatcherInterface'
+          - '@inpost.izi.context'
 
   # Product hooks
   izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore:
@@ -1165,6 +1167,7 @@ services:
       - '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
       - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
       - '@izi\prestashop\Product\Image\ImageUrlsProviderInterface'
+      - '@inpost.izi.context'
 
   izi\prestashop\Product\Price\PriceCalculatorInterface: '@izi\prestashop\Product\Price\PriceCalculator'
   izi\prestashop\Product\Price\PriceCalculator:
@@ -1222,6 +1225,14 @@ services:
       - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
       - '@izi\prestashop\CommandBusInterface'
       - '@inpost.izi.general_logger'
+      - '@izi\prestashop\HotProduct\HotProductValidator'
+
+  izi\prestashop\HotProduct\HotProductValidator:
+    class: izi\prestashop\HotProduct\HotProductValidator
+    public: false
+    arguments:
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\Translation\LegacyTranslator'
 
   izi\prestashop\Mail\Resolver\OrderMailRecipientResolver:
     class: izi\prestashop\Mail\Resolver\OrderMailRecipientResolver

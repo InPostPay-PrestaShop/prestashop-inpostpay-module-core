@@ -33,28 +33,40 @@ final class PaymentType extends StringEnum
     private const CASH_ON_DELIVERY = 'CASH_ON_DELIVERY';
 
     /**
+     * @deprecated
+     *
      * @return self[]
      */
     public static function getCarrierProvidedPaymentOptions(): array
     {
+        @trigger_error(sprintf('Method "%s()" is deprecated without replacement.', __METHOD__), \E_USER_DEPRECATED);
+
         return [self::CashOnDelivery()];
     }
 
     /**
+     * @deprecated
+     *
      * @return self[]
      */
     public static function getBankProvidedPaymentOptions(): array
     {
+        @trigger_error(sprintf('Method "%s()" is deprecated without replacement.', __METHOD__), \E_USER_DEPRECATED);
+
         $diff = array_udiff(self::cases(), self::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
 
         return array_values($diff);
     }
 
     /**
+     * @deprecated
+     *
      * @return self[]
      */
     public static function getAvailableByDefaultPaymentOptions(): array
     {
+        @trigger_error(sprintf('Method "%s()" is deprecated without replacement.', __METHOD__), \E_USER_DEPRECATED);
+
         $filtered = array_filter(self::cases(), static function (self $type) {
             return $type !== self::DeferredPayment();
         });

@@ -763,6 +763,10 @@ class Create
     {
         $availablePaymentOptions = $this->ordersConfiguration->getAvailablePaymentOptions($shopId);
 
+        if ([] === $availablePaymentOptions) {
+            return;
+        }
+
         if (in_array($paymentType, $availablePaymentOptions, true)) {
             return;
         }

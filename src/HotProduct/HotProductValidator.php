@@ -7,20 +7,30 @@ namespace izi\prestashop\HotProduct;
 use izi\prestashop\HotProduct\Exception\InvalidProductDataException;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\ObjectModel\Repository\ProductRepository;
+use izi\prestashop\Product\ProductWithCombination;
+use izi\prestashop\Translation\LegacyTranslator;
 
 final class HotProductValidator
 {
+    private const TRANSLATION_SOURCE = 'hotproductvalidator';
+
     /**
      * @var ProductRepository
      */
     private $productRepository;
 
     /**
+     * @var LegacyTranslator
+     */
+    private $translator;
+
+    /**
      * @param ProductRepository $productRepository
      */
-    public function __construct(ObjectRepositoryInterface $productRepository)
+    public function __construct(ObjectRepositoryInterface $productRepository, ?LegacyTranslator $translator = null)
     {
         $this->productRepository = $productRepository;
+        $this->translator = $translator ?? new LegacyTranslator('inpostizi');
     }
 
     /**
@@ -47,7 +57,10 @@ final class HotProductValidator
         return true;
     }
 
-    public function validate(HotProduct $hotProduct): void
+    /**
+     * @return ProductWithCombination associated with the hot product
+     */
+    public function validate(HotProduct $hotProduct, bool $allowDefaultCombination = false): ProductWithCombination
     {
         $shopId = $hotProduct->getShopId();
 
@@ -55,15 +68,35 @@ final class HotProductValidator
             $hotProduct->getProductId(),
             $hotProduct->getCombinationId(),
             null,
-            $shopId
+            $shopId,
+            $allowDefaultCombination
         );
 
         if (null === $productWithCombination) {
-            throw new InvalidProductDataException('Product or combination does not exist.');
+            throw new InvalidProductDataException($this->translator->l('Product or combination does not exist.', self::TRANSLATION_SOURCE));
         }
 
         if (!self::isAvailableForOrder($productWithCombination->getProduct())) {
-            throw new InvalidProductDataException('Product is inactive or not available for order.');
+            throw new InvalidProductDataException($this->translator->l('Product is inactive or not available for order.', self::TRANSLATION_SOURCE));
         }
+
+        if (!self::hasEan($productWithCombination)) {
+            throw new InvalidProductDataException($this->translator->l('EAN code is required.', self::TRANSLATION_SOURCE));
+        }
+
+        return $productWithCombination;
+    }
+
+    private static function hasEan(ProductWithCombination $productWithCombination): bool
+    {
+        if ('' !== trim((string) $productWithCombination->getProduct()->ean13)) {
+            return true;
+        }
+
+        if (null === $combination = $productWithCombination->getCombination()) {
+            return false;
+        }
+
+        return '' !== trim((string) $combination->ean13);
     }
 }

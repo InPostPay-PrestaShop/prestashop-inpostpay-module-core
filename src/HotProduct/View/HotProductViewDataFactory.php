@@ -6,6 +6,7 @@ namespace izi\prestashop\HotProduct\View;
 
 use izi\prestashop\BasketApp\Product\ProductsApiClientInterface;
 use izi\prestashop\BasketApp\Product\Response\Product;
+use izi\prestashop\HotProduct\Exception\InvalidProductDataException;
 use izi\prestashop\HotProduct\HotProduct;
 use izi\prestashop\HotProduct\HotProductValidator;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
@@ -35,6 +36,11 @@ final class HotProductViewDataFactory
     private $client;
 
     /**
+     * @var HotProductValidator
+     */
+    private $validator;
+
+    /**
      * @var array<int, \Shop> shops by ID
      */
     private $shopMap = [];
@@ -49,6 +55,7 @@ final class HotProductViewDataFactory
         $this->productRepository = $productRepository;
         $this->shopRepository = $shopRepository;
         $this->client = $client;
+        $this->validator = new HotProductValidator($productRepository);
     }
 
     /**
@@ -136,18 +143,16 @@ final class HotProductViewDataFactory
             return false;
         }
 
-        $product = $this->productRepository->findWithCombination(
-            $referenceId->getProductId(),
-            $referenceId->getCombinationId(),
-            (int) $this->context->language->id,
-            (int) $this->context->shop->id,
-            true
-        );
+        try {
+            $this->validator->validate(new HotProduct(
+                $referenceId->getProductId(),
+                $referenceId->getCombinationId(),
+                (int) $this->context->shop->id
+            ), true);
 
-        if (null === $product) {
+            return true;
+        } catch (InvalidProductDataException $e) {
             return false;
         }
-
-        return HotProductValidator::isAvailableForOrder($product->getProduct());
     }
 }

@@ -147,7 +147,8 @@ final class HotProductController extends AbstractConfigurationController
             return $this->redirectToRoute('admin_inpost_izi_products_index');
         }
 
-        $form = $this->createForm(UpdateHotProductType::class, UpdateHotProductCommand::for($product));
+        $command = UpdateHotProductCommand::for($product)->setCreateIfNotFound(true);
+        $form = $this->createForm(UpdateHotProductType::class, $command);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -342,7 +343,7 @@ final class HotProductController extends AbstractConfigurationController
         } elseif ($e instanceof MaxProductLimitReachedException) {
             $this->addFlash('error', $this->translator->l('Maximum number of hot products reached.', self::TRANSLATION_SOURCE));
         } elseif ($e instanceof BasketAppException) {
-            $this->addFlash('error', sprintf('Basket App API error: "%s".', $e->getError()->getCode()));
+            $this->addFlash('error', sprintf('Basket App API error "%s": "%s".', $e->getError()->getCode(), $e->getMessage()));
         } elseif ($e instanceof NetworkExceptionInterface || $e instanceof OAuth2ExceptionInterface) {
             $this->addFlash('error', 'API connection error.');
         } elseif ($e instanceof HttpExceptionInterface) {

@@ -51,6 +51,11 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
     private $imageProvider;
 
     /**
+     * @var \Context
+     */
+    private $context;
+
+    /**
      * @var array<int, \Language> Polish language by shop ID
      */
     private $languages = [];
@@ -60,7 +65,7 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
      * @param ProductRepository $productRepository
      * @param CombinationRepository $combinationRepository
      */
-    public function __construct(PrestaShopConfiguration $configuration, ObjectRepositoryInterface $languageRepository, ObjectRepositoryInterface $productRepository, ObjectRepositoryInterface $combinationRepository, PriceCalculatorInterface $priceCalculator, ImageUrlsProviderInterface $imageProvider)
+    public function __construct(PrestaShopConfiguration $configuration, ObjectRepositoryInterface $languageRepository, ObjectRepositoryInterface $productRepository, ObjectRepositoryInterface $combinationRepository, PriceCalculatorInterface $priceCalculator, ImageUrlsProviderInterface $imageProvider, ?\Context $context = null)
     {
         $this->configuration = $configuration;
         $this->languageRepository = $languageRepository;
@@ -68,6 +73,7 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
         $this->combinationRepository = $combinationRepository;
         $this->priceCalculator = $priceCalculator;
         $this->imageProvider = $imageProvider;
+        $this->context = $context ?? \Context::getContext();
     }
 
     public function map(HotProduct $hotProduct): Product
@@ -118,14 +124,15 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
         return new Product(
             \Tools::substr($product->name ?? '', 0, 255),
             DescriptionFormatter::formatDescription($product),
-            $imageUrls->getMainImageUrl(),
+            (string) $imageUrls->getMainImageUrl(),
             $price,
             $currency,
             Quantity::integer($quantity),
-            $ean,
+            (string) $ean,
             $availability,
             $imageUrls->getAdditionalImages(),
-            $this->getAttributes($combination, $languageId)
+            $this->getAttributes($combination, $languageId),
+            $this->context->link->getProductLink($product, null, null, null, $languageId, $shopId, $combinationId)
         );
     }
 

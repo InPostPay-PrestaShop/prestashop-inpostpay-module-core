@@ -17,9 +17,15 @@ final class ActionObjectOrderUpdateBefore implements HookInterface
      */
     private $dispatcher;
 
-    public function __construct(EventDispatcherInterface $dispatcher)
+    /**
+     * @var \Context
+     */
+    private $context;
+
+    public function __construct(EventDispatcherInterface $dispatcher, ?\Context $context = null)
     {
         $this->dispatcher = $dispatcher;
+        $this->context = $context ?? \Context::getContext();
     }
 
     public static function getHookName(): string
@@ -29,12 +35,17 @@ final class ActionObjectOrderUpdateBefore implements HookInterface
 
     public function execute(array $parameters): void
     {
-        $orderObj = $parameters['object'] ?? null;
+        $order = $parameters['object'] ?? null;
 
-        if (!$orderObj instanceof \Order) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($orderObj)));
+        if (!$order instanceof \Order) {
+            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($order)));
         }
 
-        $this->dispatcher->dispatch(new OrderEvent($orderObj), OrderEvent::BEFORE_UPDATE);
+        $controller = $this->context->controller;
+        if ($controller instanceof \ModuleFrontControllerCore && 'inpostizi' === $controller->module->name) {
+            return;
+        }
+
+        $this->dispatcher->dispatch(new OrderEvent($order), OrderEvent::BEFORE_UPDATE);
     }
 }
