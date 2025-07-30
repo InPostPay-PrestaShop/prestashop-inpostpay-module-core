@@ -21,6 +21,7 @@ use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\DeliveryProduct;
 use izi\prestashop\Common\Product\DeliveryRelatedProducts;
 use izi\prestashop\Common\Product\ProductAttribute;
+use izi\prestashop\Common\Product\ProductType;
 use izi\prestashop\Common\Product\ProductVariant;
 use izi\prestashop\Common\PromoCode;
 use izi\prestashop\Configuration\Adapter\Configuration;
@@ -113,6 +114,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $imageProvider;
 
     /**
+     * @var ValidatorInterface|null
+     */
+    private $validator;
+
+    /**
      * @var \DateTimeImmutable|null
      */
     private $expirationDate;
@@ -128,7 +134,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $additionalInformation;
 
     /**
-     * @var DeliveryProduct[]|null
+     * @var DeliveryOption[]|null
      */
     private $availableDeliveryOptions;
 
@@ -138,14 +144,19 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $cartSummary;
 
     /**
-     * @var ValidatorInterface|null
-     */
-    private $validator;
-
-    /**
      * @var int
      */
     private $shopId;
+
+    /**
+     * @var Price
+     */
+    private $promoPrice;
+
+    /**
+     * @var bool
+     */
+    private $hasDigitalDelivery = false;
 
     public function __construct(
         \Cart $cart,
@@ -217,16 +228,17 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             ]);
 
             $cartProducts = $this->cart->getProducts(false, false, null, true, true);
+            $deliveryOptions = $this->getAvailableDeliveryOptions($this->cart);
+            $relatedProducts = $this->getRelatedProducts($cartProducts);
             $products = $this->createCartProducts($cartProducts);
-            $this->cartSummary = $this->createSummary($products);
 
             return $this->doBuild(
-                $this->cartSummary,
-                $this->getAvailableDeliveryOptions($this->cart),
+                $this->createSummary($products),
+                $deliveryOptions,
                 $products,
                 $this->getConsents(),
                 array_values($this->promoCodeProvider->getPromoCodes($this->cart)),
-                $this->getRelatedProducts($cartProducts),
+                $relatedProducts,
                 array_values($this->availablePromotionsProvider->getAvailablePromotions($this->cart))
             );
         } finally {
@@ -360,7 +372,8 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $this->getProductVariants($product),
             $imageUrls->getAdditionalImages(),
             $related ? null : $this->getDeliveryProduct($model, $promoPrice ?? $basePrice, $quantity, (float) $product['weight'], $product),
-            $related ? $this->getDeliveryRelatedProducts($model, $promoPrice ?? $basePrice, $quantity) : null
+            $related ? $this->getDeliveryRelatedProducts($model, $promoPrice ?? $basePrice, $quantity) : null,
+            $model->is_virtual ? ProductType::Digital() : ProductType::Physical()
         );
     }
 
@@ -487,10 +500,14 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function getPromoPrice(): Price
     {
+        if (isset($this->promoPrice)) {
+            return $this->promoPrice;
+        }
+
         $gross = (float) $this->cart->getOrderTotal(true, \Cart::ONLY_PRODUCTS, null, null, false, true);
         $net = (float) $this->cart->getOrderTotal(false, \Cart::ONLY_PRODUCTS, null, null, false, true);
 
-        return PriceFactory::create($net, $gross);
+        return $this->promoPrice = PriceFactory::create($net, $gross);
     }
 
     private function getFinalPrice(): Price
@@ -804,6 +821,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
                 }
 
                 $relatedProductsById[$accessoryId] = $accessory;
+
+                if ($accessory['is_virtual']) {
+                    $this->hasDigitalDelivery = true;
+                }
+
                 if (null !== $limit && 0 === --$limit) {
                     return array_values($relatedProductsById);
                 }
@@ -857,6 +879,14 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     {
         if (null === $this->availableDeliveryOptions) {
             $this->availableDeliveryOptions = array_values($this->deliveryFactory->getAvailableDeliveryOptions($cart, $this->shopId));
+
+            foreach ($this->availableDeliveryOptions as $deliveryOption) {
+                if (DeliveryType::Digital() === $deliveryOption->getType()) {
+                    $this->hasDigitalDelivery = true;
+
+                    break;
+                }
+            }
         }
 
         return $this->availableDeliveryOptions;
@@ -865,21 +895,40 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     /**
      * @return DeliveryRelatedProducts[]|null
      */
-    private function getDeliveryRelatedProducts(\Product $productModel, Price $price, Quantity $quantity): ?array
+    private function getDeliveryRelatedProducts(\Product $product, Price $price, Quantity $quantity): ?array
     {
         $productDeliveryDetails = [];
 
-        if (null === $this->cartSummary) {
-            return null;
-        }
-
         foreach (DeliveryType::cases() as $deliveryType) {
-            $freeDeliveryAmount = $this->getFreeDeliveryAmount($deliveryType);
-            $productDelivery = $this->productDeliveryFactory->createForRelatedProduct($deliveryType, $this->cartSummary, $this->cart, $productModel, $price, $quantity, $freeDeliveryAmount, $this->shopId);
-            $productDeliveryDetails[] = $productDelivery;
+            if (!$this->hasDigitalDelivery && DeliveryType::Digital() === $deliveryType) {
+                continue;
+            }
+
+            $productDeliveryDetails[] = $this->createRelatedProductDeliveryDetails($deliveryType, $product, $price, $quantity);
         }
 
         return $productDeliveryDetails;
+    }
+
+    private function createRelatedProductDeliveryDetails(DeliveryType $deliveryType, \Product $product, Price $price, Quantity $quantity): DeliveryRelatedProducts
+    {
+        if (DeliveryType::Digital() === $deliveryType) {
+            return new DeliveryRelatedProducts($deliveryType, (bool) $product->is_virtual, true);
+        }
+
+        if ($product->is_virtual) {
+            $freeDelivery = $this->willExceedFreeDeliveryThreshold($deliveryType, $price, $quantity);
+
+            return new DeliveryRelatedProducts($deliveryType, false, $freeDelivery);
+        }
+
+        $freeDeliveryAmount = $this->getFreeDeliveryAmount($deliveryType);
+
+        if (!isset($this->cartSummary)) {
+            $this->cartSummary = new Summary($this->getPromoPrice(), Currency::Pln(), []);
+        }
+
+        return $this->productDeliveryFactory->createForRelatedProduct($deliveryType, $this->cartSummary, $this->cart, $product, $price, $quantity, $freeDeliveryAmount, $this->shopId);
     }
 
     /**
@@ -897,11 +946,16 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         }
 
         foreach (DeliveryType::cases() as $deliveryType) {
+            if (!$this->hasDigitalDelivery && DeliveryType::Digital() === $deliveryType) {
+                continue;
+            }
+
             if ($isRestricted) {
                 $productDelivery = new DeliveryProduct($deliveryType, false);
             } else {
                 $productDelivery = $this->createCartProductDeliveryDetails($deliveryType, $product, $price, $quantity, $weight);
             }
+
             $productDeliveryDetails[] = $productDelivery;
 
             if (!$productDelivery->isDeliveryAvailable()) {
@@ -916,12 +970,30 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         return $productDeliveryDetails;
     }
 
-    private function createCartProductDeliveryDetails(DeliveryType $deliveryType, \Product $product, Price $price, Quantity $quantity, float $weight): DeliveryProduct
+    private function getDeliveryOption(DeliveryType $deliveryType): ?DeliveryOption
     {
         foreach ($this->getAvailableDeliveryOptions($this->cart) as $deliveryOption) {
             if ($deliveryType === $deliveryOption->getType()) {
-                return new DeliveryProduct($deliveryType, true);
+                return $deliveryOption;
             }
+        }
+
+        return null;
+    }
+
+    private function createCartProductDeliveryDetails(DeliveryType $deliveryType, \Product $product, Price $price, Quantity $quantity, float $weight): DeliveryProduct
+    {
+        if (DeliveryType::Digital() === $deliveryType) {
+            return new DeliveryProduct($deliveryType, (bool) $product->is_virtual);
+        }
+
+        if ($product->is_virtual) {
+            return new DeliveryProduct($deliveryType, false);
+        }
+
+        if (null !== $this->getDeliveryOption($deliveryType)) {
+            // the delivery option would not be available for the cart if it was not available for the product
+            return new DeliveryProduct($deliveryType, true);
         }
 
         return $this->productDeliveryFactory->createForCartProduct($deliveryType, $this->cart, $product, $price, $weight, $quantity, $this->shopId);
@@ -929,17 +1001,15 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function getFreeDeliveryAmount(DeliveryType $deliveryType): ?float
     {
-        foreach ($this->getAvailableDeliveryOptions($this->cart) as $deliveryOption) {
-            if ($deliveryType === $deliveryOption->getType()) {
-                if (null === $amount = $deliveryOption->getFreeDeliveryMinimumGrossPrice()) {
-                    return null;
-                }
-
-                return $amount->getPriceAmount();
-            }
+        if (null === $deliveryOption = $this->getDeliveryOption($deliveryType)) {
+            return null;
         }
 
-        return null;
+        if (null === $amount = $deliveryOption->getFreeDeliveryMinimumGrossPrice()) {
+            return null;
+        }
+
+        return $amount->getPriceAmount();
     }
 
     private function getLowestPrice(int $productId, ?int $combinationId = null, ?int $shopId = null): ?Price
@@ -1004,5 +1074,17 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $this->contextManager->getContext(),
             $this->productConfiguration
         );
+    }
+
+    private function willExceedFreeDeliveryThreshold(DeliveryType $deliveryType, Price $productPrice, Quantity $quantity): bool
+    {
+        if (null === $freeDeliveryAmount = $this->getFreeDeliveryAmount($deliveryType)) {
+            return false;
+        }
+
+        $basketPrice = $this->getPromoPrice();
+        $newBasketPrice = $basketPrice->add($productPrice->multiply($quantity->getQuantity()));
+
+        return $freeDeliveryAmount <= $newBasketPrice->getGross();
     }
 }

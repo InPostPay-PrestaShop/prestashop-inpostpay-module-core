@@ -69,8 +69,18 @@ class DeliveryFactory
         $deliveryDate = $this->getDeliveryDate();
         $isFreeShipping = null;
 
-        foreach (DeliveryType::cases() as $deliveryType) {
-            $options = $this->configuration->getShippingOptions($deliveryType, (int) $idShop);
+        [$hasPhysicalProducts, $hasDigitalProducts] = $this->getProductTypes($cart);
+
+        if ($hasDigitalProducts) {
+            $deliveryOptions[] = $this->createDigitalDeliveryOption();
+        }
+
+        if (!$hasPhysicalProducts) {
+            return $deliveryOptions;
+        }
+
+        foreach (DeliveryType::getPhysicalDeliveryTypes() as $deliveryType) {
+            $options = $this->configuration->getShippingOptions($deliveryType, $idShop);
             $referenceId = $options->getCarrierMapping()->getReferenceId();
 
             if (null === $referenceId || null === $carrier = $this->getCarrier($cart, $referenceId)) {
@@ -95,6 +105,15 @@ class DeliveryFactory
         }
 
         return $deliveryOptions;
+    }
+
+    private function createDigitalDeliveryOption(): DeliveryOption
+    {
+        $deliveryDate = $this->clock->now()->modify('+1 minute');
+        $deliveryDate = $deliveryDate->setTime((int) $deliveryDate->format('G'), (int) $deliveryDate->format('i'));
+        $price = PriceFactory::create(0., 0.);
+
+        return new DeliveryOption(DeliveryType::Digital(), $deliveryDate, $price);
     }
 
     /**
@@ -210,5 +229,20 @@ class DeliveryFactory
             ->now()
             ->modify('+2 days')
             ->setTime(12, 0);
+    }
+
+    private function getProductTypes(\Cart $cart): array
+    {
+        $hasPhysicalProducts = $hasDigitalProducts = false;
+
+        foreach ($cart->getProducts() as $product) {
+            if ($product['is_virtual']) {
+                $hasDigitalProducts = true;
+            } else {
+                $hasPhysicalProducts = true;
+            }
+        }
+
+        return [$hasPhysicalProducts, $hasDigitalProducts];
     }
 }

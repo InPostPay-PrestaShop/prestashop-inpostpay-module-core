@@ -9,6 +9,7 @@ use izi\prestashop\Common\Product\DeliveryProduct;
 use izi\prestashop\Common\Product\DeliveryRelatedProducts;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductImage;
+use izi\prestashop\Common\Product\ProductType;
 use izi\prestashop\Common\Product\ProductVariant;
 
 final class Product implements \JsonSerializable
@@ -94,12 +95,17 @@ final class Product implements \JsonSerializable
     private $delivery_related_products;
 
     /**
+     * @var ProductType|null
+     */
+    private $product_type;
+
+    /**
      * @param ProductAttribute[] $product_attributes
      * @param ProductVariant[] $variants
      * @param ProductImage[] $additional_product_images
      * @param DeliveryProduct[] $delivery_product
      */
-    public function __construct(string $product_id, string $product_name, Price $base_price, Quantity $quantity, ?string $product_category = null, ?string $ean = null, ?string $product_description = null, ?string $product_link = null, ?string $product_image = null, ?Price $promo_price = null, ?Price $lowest_price = null, array $product_attributes = [], array $variants = [], array $additional_product_images = [], ?array $delivery_product = [], ?array $delivery_related_products = [])
+    public function __construct(string $product_id, string $product_name, Price $base_price, Quantity $quantity, ?string $product_category = null, ?string $ean = null, ?string $product_description = null, ?string $product_link = null, ?string $product_image = null, ?Price $promo_price = null, ?Price $lowest_price = null, array $product_attributes = [], array $variants = [], array $additional_product_images = [], ?array $delivery_product = [], ?array $delivery_related_products = [], ?ProductType $product_type = null)
     {
         $this->product_id = $product_id;
         $this->product_category = $product_category;
@@ -117,6 +123,7 @@ final class Product implements \JsonSerializable
         $this->additional_product_images = $additional_product_images;
         $this->delivery_product = $delivery_product;
         $this->delivery_related_products = $delivery_related_products;
+        $this->product_type = $product_type;
     }
 
     public function getId(): string
@@ -209,6 +216,11 @@ final class Product implements \JsonSerializable
     public function getDeliveryRelatedProducts(): ?array
     {
         return $this->delivery_related_products;
+    }
+
+    public function getType(): ?ProductType
+    {
+        return $this->product_type;
     }
 
     public function jsonSerialize(): array

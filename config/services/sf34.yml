@@ -43,6 +43,7 @@ services:
         izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener: '@izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener'
         izi\prestashop\EventListener\CreateShipmentListener: '@?izi\prestashop\EventListener\CreateShipmentListener'
         izi\prestashop\Mail\EventListener\ReplaceOrderNotificationRecipientListener: '@izi\prestashop\Mail\EventListener\ReplaceOrderNotificationRecipientListener'
+        izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener: '@izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener'
         izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener: '@izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener'
 
   izi\prestashop\Event\EventDispatcherFactory:
