@@ -21,6 +21,7 @@ use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\ProductAttribute;
+use izi\prestashop\Common\Product\ProductType;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
@@ -200,6 +201,7 @@ class PrestashopOrder
             $phoneNumber = $delivery->getPhoneNumber() ?? $this->mapPhoneNumber();
             $deliveryPoint = $delivery->getPoint();
             $courierNote = $delivery->getCourierNote();
+            $digitalDeliveryEmail = $delivery->getDigitalDeliveryEmail();
         } else {
             $deliveryType = DeliveryType::Courier();
             $deliveryCodes = [];
@@ -207,6 +209,11 @@ class PrestashopOrder
             $phoneNumber = $this->mapPhoneNumber();
             $deliveryPoint = null;
             $courierNote = $this->deliveryDetails->other;
+            $digitalDeliveryEmail = null;
+        }
+
+        if ($this->order->isVirtual()) {
+            $deliveryType = DeliveryType::Digital();
         }
 
         $deliveryDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
@@ -235,7 +242,8 @@ class PrestashopOrder
             $phoneNumber,
             $deliveryPoint,
             $this->addressDataMapper->mapDeliveryAddress($this->deliveryDetails),
-            $courierNote
+            $courierNote,
+            $digitalDeliveryEmail
         );
     }
 
@@ -396,7 +404,8 @@ class PrestashopOrder
             $imageUrl,
             $attributes,
             [],
-            $additionalImages
+            $additionalImages,
+            $data['is_virtual'] || $data['download_hash'] ? ProductType::Digital() : ProductType::Physical()
         );
     }
 

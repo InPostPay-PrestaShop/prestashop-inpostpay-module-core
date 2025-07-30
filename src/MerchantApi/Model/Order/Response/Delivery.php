@@ -58,9 +58,14 @@ final class Delivery implements \JsonSerializable
     private $courier_note;
 
     /**
+     * @var string|null
+     */
+    private $digital_delivery_email;
+
+    /**
      * @param OptionalService[] $delivery_options
      */
-    public function __construct(DeliveryType $delivery_type, \DateTimeImmutable $delivery_date, Price $delivery_price, array $delivery_options = [], ?string $mail = null, ?PhoneNumber $phone_number = null, ?string $delivery_point = null, ?DeliveryAddress $delivery_address = null, ?string $courier_note = null)
+    public function __construct(DeliveryType $delivery_type, \DateTimeImmutable $delivery_date, Price $delivery_price, array $delivery_options = [], ?string $mail = null, ?PhoneNumber $phone_number = null, ?string $delivery_point = null, ?DeliveryAddress $delivery_address = null, ?string $courier_note = null, ?string $digital_delivery_email = null)
     {
         $this->delivery_type = $delivery_type;
         $this->delivery_date = $delivery_date;
@@ -71,6 +76,7 @@ final class Delivery implements \JsonSerializable
         $this->delivery_address = $delivery_address;
         $this->delivery_price = $delivery_price;
         $this->courier_note = $courier_note;
+        $this->digital_delivery_email = $digital_delivery_email;
     }
 
     public function getType(): DeliveryType
@@ -119,6 +125,11 @@ final class Delivery implements \JsonSerializable
     public function getCourierNote(): ?string
     {
         return $this->courier_note;
+    }
+
+    public function getDigitalDeliveryEmail(): ?string
+    {
+        return $this->digital_delivery_email;
     }
 
     public function jsonSerialize(): array

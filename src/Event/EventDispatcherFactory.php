@@ -12,6 +12,7 @@ use izi\prestashop\EventListener\OrderListener;
 use izi\prestashop\EventListener\ShipmentListener;
 use izi\prestashop\Form\BasketAppClientProvider;
 use izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener;
+use izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener;
 use izi\prestashop\Mail\EventListener\ReplaceOrderNotificationRecipientListener;
 use izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener;
 use Psr\Container\ContainerInterface;
@@ -42,6 +43,7 @@ final class EventDispatcherFactory implements ServiceSubscriberInterface
             ShipmentListener::class,
             UpdateHotProductsListener::class,
             ReplaceOrderNotificationRecipientListener::class,
+            AddDigitalDeliveryRecipientListener::class,
             UpdateBasketAnalyticsListener::class,
             '?' . BasketAppClientProvider::class,
             '?' . UpdateCartRulesListener::class,

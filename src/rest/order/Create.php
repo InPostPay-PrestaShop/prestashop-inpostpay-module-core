@@ -175,10 +175,23 @@ class Create
         $shopId = $session->getShopId() ?? (int) $cart->id_shop;
 
         $shippingOptions = $this->shippingConfiguration->getShippingOptions($deliveryType, $shopId);
-        $carrierReferenceId = $shippingOptions->getCarrierMapping(...$serviceCodes)->getReferenceId();
 
-        if (null === $carrierReferenceId || null === $carrierId = $this->getCarrierId($carrierReferenceId, $shopId)) {
-            throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $deliveryType->value));
+        if (DeliveryType::Digital() === $deliveryType) {
+            if (!$cart->isVirtualCart()) {
+                throw new CannotCreateOrderException('Digital delivery is not available for carts with physical products.');
+            }
+
+            if ([] !== $serviceCodes) {
+                throw new CannotCreateOrderException(sprintf('Optional service "%s" is not available for digital delivery.', current($serviceCodes)->value));
+            }
+
+            $carrierId = null;
+        } else {
+            $carrierReferenceId = $shippingOptions->getCarrierMapping(...$serviceCodes)->getReferenceId();
+
+            if (null === $carrierReferenceId || null === $carrierId = $this->getCarrierId($carrierReferenceId, $shopId)) {
+                throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $deliveryType->value));
+            }
         }
 
         $paymentType = $request->getOrderDetails()->getPaymentType();
@@ -258,13 +271,16 @@ class Create
     /**
      * @param array{delivery: \AddressCore, invoice: \AddressCore} $addresses
      */
-    private function updateCart(\Cart $cart, int $carrierId, array $addresses): void
+    private function updateCart(\Cart $cart, ?int $carrierId, array $addresses): void
     {
         $deliveryAddressId = (int) $addresses['delivery']->id;
 
         $cart->updateAddressId($cart->id_address_delivery, $deliveryAddressId);
-        $this->setDeliveryOption($cart, [$deliveryAddressId => $carrierId . ',']);
         $cart->id_address_invoice = (int) $addresses['invoice']->id;
+
+        if (null !== $carrierId) {
+            $this->setDeliveryOption($cart, [$deliveryAddressId => $carrierId . ',']);
+        }
 
         if (!$cart->update()) {
             throw new InternalServerErrorException('Could not update cart data.');

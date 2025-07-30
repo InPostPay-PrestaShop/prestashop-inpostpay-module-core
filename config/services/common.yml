@@ -1248,6 +1248,13 @@ services:
     arguments:
       - '@izi\prestashop\Mail\Resolver\OrderMailRecipientResolver'
 
+  izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener:
+    class: izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@izi\prestashop\Repository\OrderDataRepositoryInterface'
+
   izi\prestashop\Analytics\Cookie\Repository\CookieRepositoryInterface: '@izi\prestashop\Analytics\Cookie\Repository\CookieRepository'
   izi\prestashop\Analytics\Cookie\Repository\CookieRepository:
     class: izi\prestashop\Analytics\Cookie\Repository\CookieRepository
