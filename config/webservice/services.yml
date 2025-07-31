@@ -23,7 +23,8 @@ services:
     class: Symfony\Component\DependencyInjection\ServiceLocator
     tags: [ container.service_locator ]
     arguments:
-      - actionObjectCartDeleteBefore: '@izi\prestashop\Hook\Common\ActionCartDeleteBefore'
+      - addWebserviceResources: '@izi\prestashop\Hook\Webservice\AddWebserviceResources'
+        actionObjectCartDeleteBefore: '@izi\prestashop\Hook\Common\ActionCartDeleteBefore'
         actionObjectCartUpdateAfter: '@izi\prestashop\Hook\Common\ActionCartUpdateAfter'
         actionObjectInPostShipmentModelAddAfter: '@izi\prestashop\Hook\Common\ActionShipmentAddAfter'
         actionObjectInPostShipmentModelUpdateBefore: '@izi\prestashop\Hook\Common\ActionShipmentUpdateBefore'
