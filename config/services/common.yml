@@ -535,7 +535,10 @@ services:
       - Shop
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
-  izi\prestashop\Repository\OrderDataRepositoryInterface: '@izi\prestashop\Repository\BasketSessionRepository'
+  izi\prestashop\Repository\OrderDataRepositoryInterface:
+    alias: izi\prestashop\Repository\BasketSessionRepository
+    public: true
+
   izi\prestashop\Repository\BasketSessionRepository:
     class: izi\prestashop\Repository\BasketSessionRepository
     public: false
@@ -776,6 +779,12 @@ services:
     arguments:
       - '@izi\prestashop\Event\EventDispatcherInterface'
       - '@inpost.izi.context'
+
+  izi\prestashop\Hook\Webservice\AddWebserviceResources:
+    class: izi\prestashop\Hook\Webservice\AddWebserviceResources
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
 
   izi\prestashop\EventListener\ShipmentListener:
     class: izi\prestashop\EventListener\ShipmentListener
