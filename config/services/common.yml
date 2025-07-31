@@ -899,6 +899,8 @@ services:
       - '@inpost.izi.clock'
       - '@izi\prestashop\Translation\ServiceNameTranslator'
       - '@izi\prestashop\Shipping\DeliveryPriceCalculator'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@inpost.izi.context'
 
   izi\prestashop\Builder\Basket\ProductDeliveryFactory:
     class: izi\prestashop\Builder\Basket\ProductDeliveryFactory

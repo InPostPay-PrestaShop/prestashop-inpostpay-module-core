@@ -45,7 +45,10 @@ final class DeliveryType extends StringEnum
         }
 
         if (self::Apm() === $this) {
-            return ServiceCode::cases();
+            return [
+                ServiceCode::Cod(),
+                ServiceCode::Pww(),
+            ];
         }
 
         return [ServiceCode::Cod()];

@@ -9,7 +9,7 @@ use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
-use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
+use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
@@ -31,8 +31,17 @@ use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Repository\BasketSessionRepository;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\Serializer\SerializerFactory;
+use izi\prestashop\Shipping\OptionalService\CashOnDeliveryHandler;
+use izi\prestashop\Shipping\OptionalService\ChainHandler;
+use izi\prestashop\Shipping\OptionalService\Exception\ServiceUnavailableException;
+use izi\prestashop\Shipping\OptionalService\GiftWrappingHandler;
+use izi\prestashop\Shipping\OptionalService\OptionalServiceHandlerInterface;
+use izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster;
+use izi\prestashop\Shipping\OptionalService\WeekendDeliveryHandler;
+use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Validator\Product\Unrestricted;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -204,7 +213,8 @@ class Create
         $this->setUpContext($cart, $addresses, $shopId);
         $this->updateCart($cart, $carrierId, $addresses);
         $this->updateCartMessage($cart, $request);
-        $this->adjustHandlingCost($shippingOptions, $serviceCodes);
+        $this->processOptionalServices($cart, $deliveryType, $serviceCodes);
+
         $this->validateCart($cart, $request);
 
         $orderId = null;
@@ -546,50 +556,6 @@ class Create
         return $customer;
     }
 
-    private function adjustHandlingCost(ShippingOptions $shippingOptions, array $serviceCodes): void
-    {
-        if (0. === $deliveryOptionsCost = $this->getAdditionalDeliveryOptionsCost($shippingOptions, $serviceCodes)) {
-            return;
-        }
-
-        $handlingCost = (float) \Configuration::get('PS_SHIPPING_HANDLING');
-        \Configuration::set('PS_SHIPPING_HANDLING', $handlingCost + $deliveryOptionsCost);
-        \Cache::clean('getPackageShippingCost_*');
-        \Cart::resetStaticCache();
-    }
-
-    /**
-     * @param ServiceCode[] $serviceCodes
-     */
-    private function getAdditionalDeliveryOptionsCost(ShippingOptions $shippingOptions, array $serviceCodes): float
-    {
-        if ([] === $serviceCodes) {
-            return 0.;
-        }
-
-        $additionalCostsPln = 0.;
-        foreach ($serviceCodes as $serviceCode) {
-            $serviceOptions = $shippingOptions->getServiceOptions($serviceCode);
-
-            if (null === $serviceOptions || null === $additionalCost = $serviceOptions->getAdditionalCost()) {
-                continue;
-            }
-
-            $additionalCostsPln += $additionalCost;
-        }
-
-        if (0. >= $additionalCostsPln) {
-            return 0.;
-        }
-
-        $defaultCurrency = \Currency::getDefaultCurrency();
-        if ('PLN' === $defaultCurrency->iso_code) {
-            return $additionalCostsPln;
-        }
-
-        return \Tools::convertPriceFull($additionalCostsPln, $this->context->currency, $defaultCurrency);
-    }
-
     private function updateCartMessage(\Cart $cart, CreateOrderRequest $request): void
     {
         try {
@@ -809,5 +775,33 @@ class Create
             'id_order' => $orderId,
             'key' => $cart->secure_key,
         ]);
+    }
+
+    private function processOptionalServices(\Cart $cart, DeliveryType $deliveryType, array $serviceCodes): void
+    {
+        if (DeliveryType::Digital() === $deliveryType) {
+            return;
+        }
+
+        try {
+            $handler = $this->module->get(OptionalServiceHandlerInterface::class);
+        } catch (ServiceNotFoundException $e) {
+            $config = new PrestaShopConfiguration(new Configuration());
+            $costAdjuster = new ShippingCostAdjuster($this->context, $this->shippingConfiguration, $config);
+
+            $handler = new ChainHandler([
+                new GiftWrappingHandler($config, $this->module->get(ObjectManagerInterface::class), new LegacyTranslator($this->module->name)),
+                new CashOnDeliveryHandler($costAdjuster),
+                new WeekendDeliveryHandler($costAdjuster),
+            ]);
+        }
+
+        foreach (ServiceCode::cases() as $serviceCode) {
+            try {
+                $handler->handle($cart, $serviceCode->value, $deliveryType, in_array($serviceCode, $serviceCodes, true));
+            } catch (ServiceUnavailableException $e) {
+                throw new CannotCreateOrderException($e->getMessage());
+            }
+        }
     }
 }
