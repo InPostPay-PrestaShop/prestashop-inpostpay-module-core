@@ -1,6 +1,6 @@
 # common FO/BO configuration
 parameters:
-  inpost.izi.container_version: '2.2.2'
+  inpost.izi.container_version: '2.3.0'
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.logger_config:
     type: rotating_file
