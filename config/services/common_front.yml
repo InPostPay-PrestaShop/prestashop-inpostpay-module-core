@@ -488,3 +488,47 @@ services:
     arguments:
       - '@inpost.izi.context'
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\Shipping\OptionalService\OptionalServiceHandlerInterface:
+    alias: izi\prestashop\Shipping\OptionalService\ChainHandler
+    public: true
+
+  izi\prestashop\Shipping\OptionalService\ChainHandler:
+    class: izi\prestashop\Shipping\OptionalService\ChainHandler
+    public: false
+    arguments:
+      - !tagged inpost.izi.shipping.optional_service_handler
+
+  izi\prestashop\Shipping\OptionalService\GiftWrappingHandler:
+    class: izi\prestashop\Shipping\OptionalService\GiftWrappingHandler
+    public: false
+    tags:
+      - { name: inpost.izi.shipping.optional_service_handler }
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@izi\prestashop\Translation\LegacyTranslator'
+
+  izi\prestashop\Shipping\OptionalService\CashOnDeliveryHandler:
+    class: izi\prestashop\Shipping\OptionalService\CashOnDeliveryHandler
+    public: false
+    tags:
+      - { name: inpost.izi.shipping.optional_service_handler }
+    arguments:
+      - '@izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster'
+
+  izi\prestashop\Shipping\OptionalService\WeekendDeliveryHandler:
+    class: izi\prestashop\Shipping\OptionalService\WeekendDeliveryHandler
+    public: false
+    tags:
+      - { name: inpost.izi.shipping.optional_service_handler }
+    arguments:
+      - '@izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster'
+
+  izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster:
+    class: izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster
+    public: false
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Configuration\ShippingConfigurationInterface'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'

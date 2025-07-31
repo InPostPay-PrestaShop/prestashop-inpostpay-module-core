@@ -220,16 +220,24 @@ class PrestashopOrder
             ->modify('+2 days')
             ->setTime(12, 0);
 
-        $deliveryOptions = array_map(static function (ServiceCode $code): OptionalService {
+        $deliveryOptions = array_map(function (ServiceCode $code): OptionalService {
+            // TODO: translate
             $serviceNameDictionary = [
                 'PWW' => 'Paczka w Weekend',
                 'COD' => 'Pobranie',
+                'GW' => 'Pakowanie prezentowe',
             ];
+
+            if ($code === ServiceCode::Gw()) {
+                $price = PriceFactory::create($this->order->total_wrapping_tax_excl, $this->order->total_wrapping_tax_incl);
+            } else {
+                $price = PriceFactory::create(0., 0.); // TODO: store and use actual service cost?
+            }
 
             return new OptionalService(
                 $serviceNameDictionary[$code->value] ?? $code->value,
                 $code,
-                PriceFactory::create(0., 0.) // TODO: get the actually used prices
+                $price
             );
         }, $deliveryCodes);
 
