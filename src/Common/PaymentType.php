@@ -31,6 +31,7 @@ final class PaymentType extends StringEnum
     private const SHOPPING_LIMIT = 'SHOPPING_LIMIT';
     private const DEFERRED_PAYMENT = 'DEFERRED_PAYMENT';
     private const CASH_ON_DELIVERY = 'CASH_ON_DELIVERY';
+    private const CARD_NT = 'CARD_NT';
 
     /**
      * @deprecated
