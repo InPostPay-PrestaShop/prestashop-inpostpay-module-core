@@ -525,7 +525,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     private function getFrontOfficeLegacyContainer()
     {
-        if (!$this->context->controller instanceof FrontController || !class_exists(PrestaShopContainerBuilder::class)) {
+        if (!class_exists(PrestaShopContainerBuilder::class)) {
             throw ContainerNotFoundException::create();
         }
 
