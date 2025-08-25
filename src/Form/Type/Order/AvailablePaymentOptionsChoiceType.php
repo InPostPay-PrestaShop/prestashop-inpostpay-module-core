@@ -68,9 +68,7 @@ final class AvailablePaymentOptionsChoiceType extends AbstractType
                     return true;
                 }
 
-                if (null === $type = PaymentType::tryFrom($value)) {
-                    return true;
-                }
+                $type = PaymentType::from($value);
 
                 return in_array($type, $choices, true);
             });

@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace izi\prestashop\Common;
 
 use izi\prestashop\Enum\Enum;
-use izi\prestashop\Enum\StringEnum;
+use izi\prestashop\Enum\NotAnEnum;
 
 /**
+ * @todo: Cannot be modeled as an enum since InPost does not consider adding new values as a breaking change.
+ *
  * @method static self Card()
  * @method static self CardToken()
  * @method static self GooglePay()
@@ -19,7 +21,7 @@ use izi\prestashop\Enum\StringEnum;
  * @method static self DeferredPayment()
  * @method static self CashOnDelivery()
  */
-final class PaymentType extends StringEnum
+final class PaymentType extends NotAnEnum
 {
     private const CARD = 'CARD';
     private const CARD_TOKEN = 'CARD_TOKEN';
@@ -31,7 +33,6 @@ final class PaymentType extends StringEnum
     private const SHOPPING_LIMIT = 'SHOPPING_LIMIT';
     private const DEFERRED_PAYMENT = 'DEFERRED_PAYMENT';
     private const CASH_ON_DELIVERY = 'CASH_ON_DELIVERY';
-    private const CARD_NT = 'CARD_NT';
 
     /**
      * @deprecated

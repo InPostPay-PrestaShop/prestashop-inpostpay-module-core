@@ -106,7 +106,7 @@ class InPostIziUpdater_2_2_2
             return [];
         }
 
-        return array_filter(array_map([PaymentType::class, 'tryFrom'], $data));
+        return array_map([PaymentType::class, 'from'], $data);
     }
 }
 

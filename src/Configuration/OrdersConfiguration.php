@@ -201,7 +201,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
             return [];
         }
 
-        return array_filter(array_map([PaymentType::class, 'tryFrom'], $data));
+        return array_map([PaymentType::class, 'from'], $data);
     }
 
     private function setAvailablePaymentOptions(OrdersConfigurationInterface $configuration): void

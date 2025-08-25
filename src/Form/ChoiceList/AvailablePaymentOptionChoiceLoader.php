@@ -73,6 +73,14 @@ final class AvailablePaymentOptionChoiceLoader implements ChoiceLoaderInterface
             $index1 = array_search($type1, $allTypes, true);
             $index2 = array_search($type2, $allTypes, true);
 
+            if (false === $index1) {
+                return 1;
+            }
+
+            if (false === $index2) {
+                return -1;
+            }
+
             return $index1 <=> $index2;
         });
 
