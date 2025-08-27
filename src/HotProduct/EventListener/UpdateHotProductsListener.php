@@ -369,11 +369,11 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
             try {
                 $this->bus->handle(new DeleteRemoteProductCommand((string) $product->getReferenceId()));
             } catch (BasketAppException|NetworkExceptionInterface|OAuth2ExceptionInterface $e) {
-                $this->logger->error('Failed to delete hot product "{id}".', [
+                $this->logger->error('Could not delete hot product "{id}".', [
                     'id' => (string) $product->getReferenceId(),
                 ]);
             } catch (\Throwable $e) {
-                $this->logger->error('Failed to delete hot product "{id}". Error: {exception}', [
+                $this->logger->error('An error occurred while trying to delete hot product "{id}".', [
                     'id' => (string) $product->getReferenceId(),
                     'exception' => $e,
                 ]);
@@ -386,11 +386,11 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
             } catch (ProductNotFoundException $e) {
                 // ignore
             } catch (BasketAppException|NetworkExceptionInterface|OAuth2ExceptionInterface $e) {
-                $this->logger->error('Failed to update hot product "{id}" data.', [
+                $this->logger->error('Could not update hot product "{id}" data.', [
                     'id' => (string) $product->getReferenceId(),
                 ]);
             } catch (\Throwable $e) {
-                $this->logger->error('Failed to update hot product "{id}" data. Error: {exception}', [
+                $this->logger->error('An error occurred while trying to update hot product "{id}" data.', [
                     'id' => (string) $product->getReferenceId(),
                     'exception' => $e,
                 ]);

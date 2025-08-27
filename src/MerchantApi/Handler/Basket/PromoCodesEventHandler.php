@@ -123,15 +123,13 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
             $result = $cart->addCartRule($cartRule->id);
         } catch (\Exception $e) {
             $result = false;
-            $this->logger->critical('Promo code addition error: {error}', [
-                'error' => $e,
-            ]);
         }
 
         if (!$result) {
-            isset($e) || $this->logger->critical('Could not add promo code "{code}" to cart #{cartId}.', [
+            $this->logger->critical('Could not add promo code "{code}" to cart #{cartId}.', [
                 'code' => $code,
                 'cartId' => $cart->id,
+                'exception' => $e ?? null,
             ]);
 
             return $this->module->l('Could not add the voucher to your cart.', self::TRANSLATION_SOURCE);

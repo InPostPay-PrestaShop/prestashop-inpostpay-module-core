@@ -48,6 +48,7 @@ abstract class AbstractConfigurationController extends AbstractController
         $this->context = $context;
         $this->apiConfiguration = $apiConfiguration;
         $this->debug = $debug;
+        $this->logger = new NullLogger();
 
         foreach ($configInitializers as $initializer) {
             $initializer->init();
@@ -145,10 +146,9 @@ abstract class AbstractConfigurationController extends AbstractController
 
     protected function handleError(\Throwable $e, Request $request): void
     {
-        $this->logger = $this->logger ?? new NullLogger();
-        $this->logger->critical('An error occurred while processing the request: {exception}', [
-            'route' => $request->attributes->get('_route'),
+        $this->logger->critical('An error occurred while processing the configuration page request.', [
             'exception' => $e,
+            'route' => $request->attributes->get('_route'),
         ]);
 
         if ($this->debug) {

@@ -104,10 +104,15 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         try {
             (new DatabaseInstaller())->install($this);
         } catch (Exception $e) {
-            $this->_errors[] = $this->l('Could not update the database schema.');
-            $this->getLogger()->critical('Installer error: {exception}.', [
+            $this->getLogger()->critical('Could not update the database schema.', [
                 'exception' => $e,
             ]);
+
+            if (_PS_MODE_DEV_) {
+                throw $e;
+            }
+
+            $this->_errors[] = $this->l('Could not update the database schema.');
 
             return false;
         }
@@ -152,7 +157,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
 
             return $result;
         } catch (Throwable $e) {
-            $this->getLogger()->critical('Upgrade error: {exception}.', [
+            $this->getLogger()->critical('An error occurred while upgrading module.', [
                 'exception' => $e,
             ]);
 
@@ -249,7 +254,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
                 return null;
             }
 
-            $this->getLogger()->critical('Error executing hook "{hookName}": {exception}', [
+            $this->getLogger()->critical('Error executing hook "{hookName}".', [
                 'hookName' => $hookName,
                 'exception' => $e,
             ]);

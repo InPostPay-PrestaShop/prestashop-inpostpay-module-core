@@ -122,21 +122,19 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
             );
         } catch (\Exception $e) {
             $result = false;
-            $this->logger->critical('Quantity update error: {error}', [
-                'error' => $e,
-            ]);
         }
 
-        if (false === $result) {
-            isset($e) || $this->logger->critical('Could not update product [{productId}] quantity in cart #{cartId}.', [
-                'productId' => implode('-', [$productId, $combinationId, $customizationId]),
-                'cartId' => $cart->id,
-            ]);
-
-            return $this->module->l('Could not update product quantity.', self::TRANSLATION_SOURCE);
+        if (false !== $result) {
+            return null;
         }
 
-        return null;
+        $this->logger->critical('Could not update product [{productId}] quantity in cart #{cartId}.', [
+            'productId' => implode('-', [$productId, $combinationId, $customizationId]),
+            'cartId' => $cart->id,
+            'exception' => $e ?? null,
+        ]);
+
+        return $this->module->l('Could not update product quantity.', self::TRANSLATION_SOURCE);
     }
 
     private function deleteProduct(\Cart $cart, int $productId, int $combinationId, int $customizationId): ?string
@@ -145,21 +143,19 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
             $result = $cart->deleteProduct($productId, $combinationId, $customizationId);
         } catch (\Exception $e) {
             $result = false;
-            $this->logger->critical('Cart product deletion error: {error}', [
-                'error' => $e,
-            ]);
         }
 
-        if (false === $result) {
-            isset($e) || $this->logger->critical('Could not delete product [{productId}] from cart #{cartId}.', [
-                'productId' => implode('-', [$productId, $combinationId, $customizationId]),
-                'cartId' => $cart->id,
-            ]);
-
-            return $this->module->l('Could delete the product from your cart.', self::TRANSLATION_SOURCE);
+        if (false !== $result) {
+            return null;
         }
 
-        return null;
+        $this->logger->critical('Could not delete product [{productId}] from cart #{cartId}.', [
+            'productId' => implode('-', [$productId, $combinationId, $customizationId]),
+            'cartId' => $cart->id,
+            'exception' => $e ?? null,
+        ]);
+
+        return $this->module->l('Could delete the product from your cart.', self::TRANSLATION_SOURCE);
     }
 
     private function checkMinimalQuantity(int $productId, int $combinationId, int $quantity, int $languageId): ?string

@@ -160,11 +160,11 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             $this->context->cookie->write();
 
             return $response;
-        } catch (Throwable $throwable) {
+        } catch (Throwable $e) {
             http_response_code(500);
-            $this->logError($throwable);
+            $this->logError($e);
 
-            throw $throwable;
+            throw $e;
         }
     }
 
@@ -200,8 +200,8 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             $response = null === $controller
                 ? $this->createNotFoundResponse($request, $path, true)
                 : $this->callController($controller, $request, $params);
-        } catch (Throwable $throwable) {
-            $response = $this->handleApiError($throwable);
+        } catch (Throwable $e) {
+            $response = $this->handleApiError($e);
         }
 
         $logger->info('Response "{method} {path}": {status_code}', [
@@ -221,51 +221,51 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         return $response;
     }
 
-    private function handleApiError(Throwable $throwable): Response
+    private function handleApiError(Throwable $e): Response
     {
-        $exception = $this->convertApiError($throwable);
+        $apiException = $this->convertApiError($e);
 
-        if ($exception instanceof InternalServerErrorException && $previous = $exception->getPrevious()) {
+        if ($apiException instanceof InternalServerErrorException && $previous = $apiException->getPrevious()) {
             $this->logError($previous);
         }
 
         return new JsonResponse([
-            'error_code' => $exception->getErrorCode(),
-            'error_message' => $exception->getMessage(),
-        ], $exception->getStatusCode());
+            'error_code' => $apiException->getErrorCode(),
+            'error_message' => $apiException->getMessage(),
+        ], $apiException->getStatusCode());
     }
 
-    private function convertApiError(Throwable $throwable): ApiException
+    private function convertApiError(Throwable $e): ApiException
     {
-        if ($throwable instanceof ApiException) {
-            return $throwable;
+        if ($e instanceof ApiException) {
+            return $e;
         }
 
-        if ($throwable instanceof NetworkExceptionInterface) {
-            $message = $throwable instanceof OAuth2ExceptionInterface
+        if ($e instanceof NetworkExceptionInterface) {
+            $message = $e instanceof OAuth2ExceptionInterface
                 ? 'Could not connect to the authorization server'
                 : 'Could not connect to the basket app API';
 
-            return BadGatewayException::create($throwable, $message);
+            return BadGatewayException::create($e, $message);
         }
 
-        if ($throwable instanceof OAuth2ExceptionInterface) {
-            return BadGatewayException::create($throwable, 'Could not obtain access token');
+        if ($e instanceof OAuth2ExceptionInterface) {
+            return BadGatewayException::create($e, 'Could not obtain access token');
         }
 
-        if ($throwable instanceof BasketAppException) {
-            return BadGatewayException::create($throwable, sprintf('Basket app API error: "%s"', $throwable->getError()->getCode()));
+        if ($e instanceof BasketAppException) {
+            return BadGatewayException::create($e, sprintf('Basket app API error: "%s"', $e->getError()->getCode()));
         }
 
-        if ($throwable instanceof ServerException && 503 === $throwable->getCode()) {
-            return ServiceUnavailableException::create($throwable, 'Basket app API is unavailable');
+        if ($e instanceof ServerException && 503 === $e->getCode()) {
+            return ServiceUnavailableException::create($e, 'Basket app API is unavailable');
         }
 
-        if ($throwable instanceof HttpExceptionInterface) {
-            return BadGatewayException::create($throwable, sprintf('Unexpected basket app API response status code: %d', $throwable->getCode()));
+        if ($e instanceof HttpExceptionInterface) {
+            return BadGatewayException::create($e, sprintf('Unexpected basket app API response status code: %d', $e->getCode()));
         }
 
-        return InternalServerErrorException::create($throwable);
+        return InternalServerErrorException::create($e);
     }
 
     private function getPath(Request $request): string
@@ -283,9 +283,9 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         return rtrim($path, '/');
     }
 
-    private function logError(Throwable $throwable): void
+    private function logError(Throwable $e): void
     {
-        $this->module->getLogger()->error('Error processing request: {error}', ['error' => $throwable]);
+        $this->module->getLogger()->error('An error occurred while processing request.', ['exception' => $e]);
     }
 
     private function resolveController(Request $request, string $path, array $routes): array

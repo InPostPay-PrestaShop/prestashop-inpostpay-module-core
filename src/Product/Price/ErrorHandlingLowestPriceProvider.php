@@ -35,7 +35,9 @@ final class ErrorHandlingLowestPriceProvider implements BatchLowestPriceProvider
         try {
             $this->provider->preparePrices(...$queries);
         } catch (\Throwable $e) {
-            $this->logError($e, __METHOD__);
+            $this->logger->error('An error occurred while preparing lowest price data.', [
+                'exception' => $e,
+            ]);
         }
     }
 
@@ -44,7 +46,10 @@ final class ErrorHandlingLowestPriceProvider implements BatchLowestPriceProvider
         try {
             return $this->provider->getPrice($query);
         } catch (\Throwable $e) {
-            $this->logError($e, __METHOD__);
+            $this->logger->error('Could not retrieve lowest price data.', [
+                'exception' => $e,
+                'query' => $query,
+            ]);
 
             return null;
         }
@@ -57,14 +62,5 @@ final class ErrorHandlingLowestPriceProvider implements BatchLowestPriceProvider
         }
 
         $this->provider->reset();
-    }
-
-    private function logError(\Throwable $e, string $method): void
-    {
-        $this->logger->error('Lowest price provider "{class}::{method}()" error: {exception}', [
-            'class' => get_class($this->provider),
-            'method' => $method,
-            'exception' => $e,
-        ]);
     }
 }

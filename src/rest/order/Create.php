@@ -245,14 +245,14 @@ class Create
             );
 
             return (int) $this->module->currentOrder;
-        } catch (\Exception $exception) {
+        } catch (\Exception $e) {
             if (null === $orderId) {
-                throw $exception;
+                throw $e;
             }
 
-            $this->module->getLogger()->error('An exception occurred after creating order #{orderId}: {exception}.', [
+            $this->module->getLogger()->error('An exception occurred after creating order #{orderId}.', [
                 'orderId' => $orderId,
-                'exception' => $exception,
+                'exception' => $e,
             ]);
 
             return $orderId;
@@ -594,8 +594,9 @@ class Create
 
             $newModel ? $model->add() : $model->update();
         } catch (\Exception $e) {
-            $this->module->getLogger()->error('Could not save shipment data: {error}', [
-                'error' => $e,
+            $this->module->getLogger()->error('Could not update the carrier module data for cart #{cartId}.', [
+                'cartId' => $cartId,
+                'exception' => $e,
             ]);
         }
     }
