@@ -86,7 +86,7 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
 
     protected function addForeignKey(string $table, string $foreignTable, array $localColumnNames, array $foreignColumnNames, string $name, array $options = []): void
     {
-        if ('MyISAM' === _MYSQL_ENGINE_) {
+        if ('InnoDB' !== _MYSQL_ENGINE_ || !$this->supportsForeignKeys($foreignTable)) {
             return;
         }
 
@@ -104,8 +104,8 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
         try {
             $this->connection->executeStatement($sql);
         } catch (\PrestaShopDatabaseException $e) {
-            if (1215 === $e->getCode()) {
-                // ignore silently: possible column types mismatch (e.g. due to migration from earlier PS versions) or the referenced table uses MyISAM engine
+            if (in_array($e->getCode(), [1005, 1215], true)) {
+                // ignore silently: possible column types mismatch (e.g. due to migration from earlier PS versions)
                 return;
             }
 
@@ -161,5 +161,16 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
         }
 
         return $sql;
+    }
+
+    private function supportsForeignKeys(string $table): bool
+    {
+        return (bool) $this->connection->fetchOne('SELECT EXISTS (
+            SELECT *
+            FROM INFORMATION_SCHEMA.TABLES
+            WHERE TABLE_SCHEMA = DATABASE()
+                AND ENGINE = "InnoDB"
+                AND TABLE_NAME = "' . _DB_PREFIX_ . pSQL($table) . '"
+        )');
     }
 }
