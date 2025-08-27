@@ -6,6 +6,9 @@ namespace izi\prestashop\Installer\Database;
 
 use izi\prestashop\PromoCode\CartRuleOptionsRepository;
 
+/**
+ * @final
+ */
 class Version_1_11_0 extends AbstractMigration
 {
     private const CART_RULE_ID_FK = CartRuleOptionsRepository::TABLE_NAME . '-cart_rule_id';
