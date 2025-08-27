@@ -7,9 +7,12 @@ namespace izi\prestashop\Analytics\Handler;
 use izi\prestashop\Analytics\BasketAnalytics;
 use izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface;
 use izi\prestashop\Analytics\Command\UpdateCartAnalyticsCommand;
+use izi\prestashop\Handler\CommandHandlerTrait;
 
 final class UpdateCartAnalyticsHandler implements UpdateCartAnalyticsHandlerInterface
 {
+    use CommandHandlerTrait;
+
     /**
      * @var BasketAnalyticsRepositoryInterface
      */
