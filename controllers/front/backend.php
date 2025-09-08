@@ -285,7 +285,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 
     private function logError(Throwable $e): void
     {
-        $this->module->getLogger()->error('An error occurred while processing request.', ['exception' => $e]);
+        $this->module->getLogger()->critical('An error occurred while processing request.', ['exception' => $e]);
     }
 
     private function resolveController(Request $request, string $path, array $routes): array

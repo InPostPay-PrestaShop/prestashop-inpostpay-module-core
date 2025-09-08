@@ -285,6 +285,10 @@ class Create
     {
         $deliveryAddressId = (int) $addresses['delivery']->id;
 
+        if (\Tools::version_compare(_PS_VERSION_, '9.0.0') && $cart->isMultiAddressDelivery()) {
+            $cart->setNoMultishipping();
+        }
+
         $cart->updateAddressId($cart->id_address_delivery, $deliveryAddressId);
         $cart->id_address_invoice = (int) $addresses['invoice']->id;
 
