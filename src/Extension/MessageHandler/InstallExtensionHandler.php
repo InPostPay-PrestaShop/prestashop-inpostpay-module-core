@@ -10,10 +10,8 @@ use izi\prestashop\Extension\ExtensionsServiceInterface;
 use izi\prestashop\Extension\ExtensionVersion;
 use izi\prestashop\Extension\Message\InstallExtensionCommand;
 use izi\prestashop\Handler\CommandHandlerTrait;
-use izi\prestashop\Http\Exception\HttpExceptionInterface;
 use PrestaShop\PrestaShop\Core\Addon\AddonManagerInterface;
 use PrestaShop\PrestaShop\Core\Module\ModuleManagerInterface;
-use Psr\Http\Client\NetworkExceptionInterface;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -59,11 +57,7 @@ final class InstallExtensionHandler
 
     private function getExtensionData(string $name, string $version): ExtensionVersion
     {
-        try {
-            $extensions = $this->service->getExtensions();
-        } catch (NetworkExceptionInterface|HttpExceptionInterface $e) {
-            throw new RuntimeException('Could not retrieve extensions data.', 0, $e);
-        }
+        $extensions = $this->service->getExtensions();
 
         foreach ($extensions as $extension) {
             if ($extension->getName() !== $name) {

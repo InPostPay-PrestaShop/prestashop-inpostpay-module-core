@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Extension;
 
-use izi\prestashop\Http\Exception\ClientException;
-use izi\prestashop\Http\Exception\RedirectionException;
-use izi\prestashop\Http\Exception\ServerException;
+use izi\prestashop\Extension\Exception\HttpException;
+use izi\prestashop\Extension\Exception\NetworkException;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Http\Message\RequestFactoryInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 final class ExtensionsService implements ExtensionsServiceInterface
@@ -46,27 +44,17 @@ final class ExtensionsService implements ExtensionsServiceInterface
     public function getExtensions(): array
     {
         $request = $this->requestFactory->createRequest('GET', $this->url);
-        $response = $this->client->sendRequest($request);
+
+        try {
+            $response = $this->client->sendRequest($request);
+        } catch (NetworkExceptionInterface $e) {
+            throw new NetworkException($e);
+        }
 
         if (200 !== $response->getStatusCode()) {
-            $this->handleUnsuccessfulResponse($request, $response);
+            throw new HttpException($request, $response);
         }
 
         return $this->serializer->deserialize((string) $response->getBody(), Extension::class . '[]', 'json');
-    }
-
-    private function handleUnsuccessfulResponse(RequestInterface $request, ResponseInterface $response): void
-    {
-        $statusCode = $response->getStatusCode();
-
-        if (500 <= $statusCode) {
-            throw new ServerException($request, $response);
-        }
-
-        if (400 <= $statusCode) {
-            throw new ClientException($request, $response);
-        }
-
-        throw new RedirectionException($request, $response);
     }
 }

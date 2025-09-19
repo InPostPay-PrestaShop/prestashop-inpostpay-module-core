@@ -20,6 +20,7 @@ use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Configuration\ShippingConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\Extension\Exception\ExtensionExceptionInterface;
+use izi\prestashop\Extension\Exception\ExtensionServiceException;
 use izi\prestashop\Extension\Message\InstallExtensionCommand;
 use izi\prestashop\Extension\View\ExtensionViewFactory;
 use izi\prestashop\Form\Type\AdvancedConfigurationType;
@@ -188,9 +189,9 @@ final class ConfigurationController extends AbstractConfigurationController
         if (null !== $extensionsViewFactory && $this->isGranted(PageVoter::CREATE, 'AdminModulesSf_')) {
             try {
                 $extensions = $extensionsViewFactory->getView();
-            } catch (ExtensionExceptionInterface $e) {
-                $this->getLogger()->error('Could not retrieve extensions data: {exception}', [
-                    'exception' => $e->getPrevious() ?? $e,
+            } catch (ExtensionServiceException $e) {
+                $this->getLogger()->error('Could not retrieve extensions data. {message}', [
+                    'message' => $e->getMessage(),
                 ]);
             } catch (\Throwable $e) {
                 $this->handleError($e, $request);
@@ -292,11 +293,17 @@ final class ConfigurationController extends AbstractConfigurationController
             $bus->handle($command);
 
             $this->addFlash('success', $this->translator->l('Extensions have been successfully updated.', self::TRANSLATION_SOURCE));
+        } catch (ExtensionServiceException $e) {
+            $this->getLogger()->error('Could not retrieve extensions data. {message}', [
+                'message' => $e->getMessage(),
+            ]);
+            $this->addFlash('error', sprintf($this->translator->l('Could not retrieve extensions data: %s', self::TRANSLATION_SOURCE), $e->getMessage()));
         } catch (ExtensionExceptionInterface $e) {
-            $this->getLogger()->error('Could not install extension "{name}" version "{version}": {exception}', [
-                'exception' => $e->getPrevious() ?? $e,
+            $this->getLogger()->error('Could not install extension "{name}" version "{version}". {message}', [
                 'name' => $name,
                 'version' => $version,
+                'message' => $e->getMessage(),
+                'exception' => $e->getPrevious(),
             ]);
             $this->addFlash('error', $e->getMessage());
         } catch (\Throwable $e) {

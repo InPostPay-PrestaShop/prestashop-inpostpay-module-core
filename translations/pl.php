@@ -18,6 +18,8 @@ $_MODULE['<{inpostizi}prestashop>configurationcontroller_192bdd5b10a4a1f19a7594b
 $_MODULE['<{inpostizi}prestashop>configurationcontroller_f98053ea5c75db6df542ec23268c5895'] = 'Ustawienia GUI';
 $_MODULE['<{inpostizi}prestashop>configurationcontroller_43f65a2f8564bcc183502e2b35c9a560'] = 'Cena transportu';
 $_MODULE['<{inpostizi}prestashop>configurationcontroller_db5eb84117d06047c97c9a0191b5fffe'] = 'Support';
+$_MODULE['<{inpostizi}prestashop>configurationcontroller_26a6afc14d0b942606eb58d8b2ff18c8'] = 'Rozszerzenia zostały pomyślnie zaktualizowane.';
+$_MODULE['<{inpostizi}prestashop>configurationcontroller_09532376444642aae81747a6bda912d8'] = 'Nie udało się pobrać danych rozszerzeń: %s';
 $_MODULE['<{inpostizi}prestashop>hotproductcontroller_6f040e0694f901ebf579d7accff11aa4'] = 'Nie udało się pobrać statusu produktów z API.';
 $_MODULE['<{inpostizi}prestashop>hotproductcontroller_2616299606176e7b6e90b07fafe19602'] = 'Promowane produkty';
 $_MODULE['<{inpostizi}prestashop>hotproductcontroller_13b2dba2063a9eae83d069e6db63f7fa'] = 'Tworzysz promowany produkt w kontekście wielu sklepów. Do Basket App zostaną przekazane dane produktu odpowiadające domyślnemu sklepowi.';
@@ -32,6 +34,7 @@ $_MODULE['<{inpostizi}prestashop>hotproductcontroller_4bb742544c04d37b2f14e792d6
 $_MODULE['<{inpostizi}prestashop>hotproductcontroller_04d2faff74c9b370f3846e4ab850a7b1'] = 'Promowany produkt został pomyślnie zaimportowany.';
 $_MODULE['<{inpostizi}prestashop>hotproductcontroller_e059c5a70a67395dedc8aa7ccff94830'] = 'Produkt został pomyślnie usunięty w API.';
 $_MODULE['<{inpostizi}prestashop>hotproductcontroller_6cc938294d5484ce78d79c77f9f93c05'] = 'Osiągnięto maksymalną ilość promowanych produktów.';
+$_MODULE['<{inpostizi}prestashop>createshipmentlistener_98943daa39fd0f223f8415b1bf0623ad'] = 'Aby informacja o przesyłce została poprawnie przetworzona przez InPost Pay, adres email musi zgadzać się z danymi otrzymanymi z InPost przy tworzeniu zamówienia (%s).';
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_b2270e0389d0e5acd30d865141272052'] = 'Wyłącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_7f77e3d7178f0b1979d13c101a456450'] = 'Włącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_0ba29c6a1afacf586b03a26162c72274'] = 'Środowisko';

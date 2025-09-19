@@ -5,13 +5,10 @@ declare(strict_types=1);
 namespace izi\prestashop\Extension\View;
 
 use Composer\Semver\Semver;
-use izi\prestashop\Extension\Exception\RuntimeException;
 use izi\prestashop\Extension\Extension;
 use izi\prestashop\Extension\ExtensionsServiceInterface;
 use izi\prestashop\Extension\ExtensionVersion;
-use izi\prestashop\Http\Exception\HttpExceptionInterface;
 use izi\prestashop\Module\ModuleRepository;
-use Psr\Http\Client\NetworkExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 final class ExtensionViewFactory
@@ -58,11 +55,7 @@ final class ExtensionViewFactory
 
     public function getView(): ?ExtensionListView
     {
-        try {
-            $extensions = $this->service->getExtensions();
-        } catch (NetworkExceptionInterface|HttpExceptionInterface $e) {
-            throw new RuntimeException('Could not retrieve extensions data.', 0, $e);
-        }
+        $extensions = $this->service->getExtensions();
 
         if ([] === $extensions = $this->filterVersions($extensions)) {
             return null;

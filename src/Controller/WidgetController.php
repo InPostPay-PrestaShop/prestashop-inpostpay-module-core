@@ -135,7 +135,7 @@ final class WidgetController implements ServiceSubscriberInterface
             ], 422);
         }
 
-        $this->module->getLogger()->critical('An error occurred while processing widget request: {exception}', [
+        $this->module->getLogger()->critical('An error occurred while processing widget request.', [
             'exception' => $e,
         ]);
 
