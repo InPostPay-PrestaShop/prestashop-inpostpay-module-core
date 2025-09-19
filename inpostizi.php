@@ -130,7 +130,15 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     {
         $this->setUpRoutingLoaderResolver();
 
-        return parent::uninstall();
+        if (!parent::uninstall()) {
+            return false;
+        }
+
+        if (\Tools::version_compare(_PS_VERSION_, '1.7.8')) {
+            Hook::exec('actionModuleUninstallAfter', ['object' => $this]);
+        }
+
+        return true;
     }
 
     /**
@@ -401,6 +409,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $cacheDir = sprintf('%s/inpost/izi/', rtrim(_PS_CACHE_DIR_, '/'));
 
         if (Tools::version_compare(_PS_VERSION_, '1.7.4')) {
+            $type = 'sf28';
             $className = sprintf('InPost\\Izi\\Container_%s', str_replace('.', '_', $this->version));
             $resources = $this->getSf28ConfigResources();
         } else {
@@ -409,7 +418,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             $resources = [sprintf('%s/config/%s/services.yml', rtrim($this->getLocalPath(), '/'), $type)];
         }
 
-        return (new ContainerFactory($cacheDir))->create($className, $resources);
+        return (new ContainerFactory($cacheDir))->create($className, $resources, $type);
     }
 
     /**
@@ -481,7 +490,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $this->adminKernel->boot();
 
         $psContainer = $kernel->getContainer();
-        $this->adminKernel->getContainer()->set('prestashop.security.admin.provider', $psContainer->get('prestashop.security.admin.provider'));
+        foreach (AdminKernel::SYNTHETIC_SERVICE_IDS as $id) {
+            $this->adminKernel->getContainer()->set($id, $psContainer->get($id));
+        }
 
         // In some very early 1.7 versions, the session may not have yet been started by PS application.
         $psContainer->get('session')->start();

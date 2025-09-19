@@ -403,8 +403,15 @@ services:
     arguments:
       - '@inpost.izi.module'
       - '@inpost.izi.context'
-      - '@izi\prestashop\ObjectModel\ObjectManager'
+      - '@izi\prestashop\PromoCode\PromoCodeManagerInterface'
       - '@inpost.izi.general_logger'
+
+  izi\prestashop\PromoCode\PromoCodeManagerInterface: '@izi\prestashop\PromoCode\CartRuleManager'
+  izi\prestashop\PromoCode\CartRuleManager:
+    class: izi\prestashop\PromoCode\CartRuleManager
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
   izi\prestashop\MerchantApi\Handler\Basket\RelatedProductsEventHandler:
     class: izi\prestashop\MerchantApi\Handler\Basket\RelatedProductsEventHandler

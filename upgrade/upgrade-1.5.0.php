@@ -1,7 +1,7 @@
 <?php
 
-use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
+use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\Consent;
@@ -16,7 +16,6 @@ if (!defined('_PS_VERSION_')) {
 }
 
 require_once __DIR__ . '/ConfigUpdaterTrait.php';
-require_once __DIR__ . '/CacheClearer.php';
 
 class InPostIziUpdater_1_5_0
 {
@@ -63,7 +62,7 @@ class InPostIziUpdater_1_5_0
 
     public function upgrade(): bool
     {
-        CacheClearer::getInstance()->clear();
+        SymfonyCacheClearer::getInstance()->clear();
 
         return $this->updateEnabledConfigValue()
             && $this->updateConsentStructure()

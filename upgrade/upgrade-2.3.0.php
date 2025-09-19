@@ -1,13 +1,11 @@
 <?php
 
-use InPost\Izi\Upgrade\CacheClearer;
+use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Hook\Webservice\AddWebserviceResources;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-require_once __DIR__ . '/CacheClearer.php';
 
 class InPostIziUpdater_2_3_0
 {
@@ -28,7 +26,7 @@ class InPostIziUpdater_2_3_0
 
     public function upgrade(): bool
     {
-        CacheClearer::getInstance()->clear();
+        SymfonyCacheClearer::getInstance()->clear();
 
         return $this->registerHooks();
     }

@@ -32,7 +32,6 @@ $_MODULE['<{inpostizi}prestashop>hotproductcontroller_4bb742544c04d37b2f14e792d6
 $_MODULE['<{inpostizi}prestashop>hotproductcontroller_04d2faff74c9b370f3846e4ab850a7b1'] = 'Promowany produkt został pomyślnie zaimportowany.';
 $_MODULE['<{inpostizi}prestashop>hotproductcontroller_e059c5a70a67395dedc8aa7ccff94830'] = 'Produkt został pomyślnie usunięty w API.';
 $_MODULE['<{inpostizi}prestashop>hotproductcontroller_6cc938294d5484ce78d79c77f9f93c05'] = 'Osiągnięto maksymalną ilość promowanych produktów.';
-$_MODULE['<{inpostizi}prestashop>createshipmentlistener_98943daa39fd0f223f8415b1bf0623ad'] = 'Aby informacja o przesyłce została poprawnie przetworzona przez InPost Pay, adres email musi zgadzać się z danymi otrzymanymi z InPost przy tworzeniu zamówienia (%s).';
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_b2270e0389d0e5acd30d865141272052'] = 'Wyłącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>advancedconfigurationtype_7f77e3d7178f0b1979d13c101a456450'] = 'Włącz debugowanie';
 $_MODULE['<{inpostizi}prestashop>apiconfigurationtype_0ba29c6a1afacf586b03a26162c72274'] = 'Środowisko';
@@ -199,7 +198,9 @@ $_MODULE['<{inpostizi}prestashop>productsquantityeventhandler_6db1f42edb02275ddc
 $_MODULE['<{inpostizi}prestashop>productsquantityeventhandler_e241dce2751f423f20aa8a1dabda0ead'] = 'Nie można zaktualizować ilości produktu.';
 $_MODULE['<{inpostizi}prestashop>productsquantityeventhandler_b9980de9208115d9102e3ed27df896ec'] = 'Może usunąć produkt z koszyka.';
 $_MODULE['<{inpostizi}prestashop>promocodeseventhandler_e97e27bc6f85e0dc4079ce3aa1920c36'] = 'Kod rabatowy został aktywowany.';
+$_MODULE['<{inpostizi}prestashop>promocodeseventhandler_beea127e34bef05faadb205637d9000a'] = 'Kod rabatowy został usunięty.';
 $_MODULE['<{inpostizi}prestashop>promocodeseventhandler_fa71ed2acd5e96f8be1fa8609fb4bbbf'] = 'Nie można dodać kuponu do koszyka.';
+$_MODULE['<{inpostizi}prestashop>promocodeseventhandler_520cb17bcc300ec257ce420b1e8ec6f2'] = 'Nie udało się usunąć kodu rabatowego z koszyka.';
 $_MODULE['<{inpostizi}prestashop>parametersextractor_df605260012435cbbab42f0e5c64fcbd'] = 'kod użytej metody płatności';
 $_MODULE['<{inpostizi}prestashop>parametersextractor_c470ae3599816022017be07ddb38a878'] = 'numer Paczkomatu';
 $_MODULE['<{inpostizi}prestashop>parametersextractor_aa38035ab7c137762ca1191f50548cac'] = 'kody wybranych usług dodatkowych';
@@ -280,6 +281,10 @@ $_MODULE['<{inpostizi}prestashop>admin_template_translations_6a628e226d3bd61caba
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_79e41f293980da78b8ed7b49ad5462b5'] = 'Możliwy import';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_e9e569ef5153bfd6b14a155352d56301'] = 'Produkt nie istnieje lub nie jest dostępny na sprzedaż';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_405e6a003a719605addb982f394d2fbe'] = 'Nie odnaleziono produktów.';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_5e2f5f3c24ae8c6ab3eca618826b0e23'] = 'Rozszerzenia';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_98dd43dfae05b11befe1f140e0ec787a'] = 'Zainstalowane';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_654866693fd91ce8e9764a218f569918'] = 'Rekomendowane';
+$_MODULE['<{inpostizi}prestashop>admin_template_translations_6311ae17c1ee52b36e68aaf4ad066387'] = 'Pozostałe';
 $_MODULE['<{inpostizi}prestashop>order_details_6310f29293c902c64db619c29179d99a'] = 'Wysyłka';
 $_MODULE['<{inpostizi}prestashop>order_details_4d5340b646d9723cdb3bdf42182658d0'] = 'Paczkomat';
 $_MODULE['<{inpostizi}prestashop>order_details_bfa7e2e76dfa5492ab926b3c8d5d5e65'] = 'Klient prosi o wystawienie faktury VAT';

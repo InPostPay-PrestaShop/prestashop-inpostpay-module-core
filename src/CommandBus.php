@@ -22,6 +22,8 @@ use izi\prestashop\Command\UpdateOrderAddressDeliveryCommand;
 use izi\prestashop\Command\UpdateOrderStatusCommand;
 use izi\prestashop\Command\UpdateOrderTrackingNumbersCommand;
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
+use izi\prestashop\Extension\Message\InstallExtensionCommand;
+use izi\prestashop\Extension\MessageHandler\InstallExtensionHandler;
 use izi\prestashop\Handler\Config\CheckStatusHandlerInterface;
 use izi\prestashop\Handler\Config\DownloadModuleDataHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandlerInterface;
@@ -122,6 +124,7 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             UpdateAdvancedConfigurationCommand::class => '?' . UpdateAdvancedConfigurationHandlerInterface::class,
             CheckStatusCommand::class => '?' . CheckStatusHandlerInterface::class,
             DownloadModuleDataCommand::class => '?' . DownloadModuleDataHandlerInterface::class,
+            InstallExtensionCommand::class => '?' . InstallExtensionHandler::class,
             UpdateCartRuleOptionsCommand::class => '?' . UpdateCartRuleOptionsHandlerInterface::class,
 
             CreateHotProductCommand::class => '?' . CreateHotProductHandlerInterface::class,

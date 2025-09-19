@@ -29,7 +29,7 @@ final class ContainerFactory
 
     public function __construct(string $cacheDir, ?HookDispatcherInterface $hookDispatcher = null)
     {
-        $this->cacheDir = rtrim($cacheDir, '/') . '/';
+        $this->cacheDir = rtrim($cacheDir, '/');
         $this->hookDispatcher = $hookDispatcher ?? new HookDispatcher();
     }
 
@@ -40,14 +40,14 @@ final class ContainerFactory
      *
      * @return T
      */
-    public function create(string $className, iterable $resources): ContainerInterface
+    public function create(string $className, iterable $resources, string $type): ContainerInterface
     {
         [$namespace, $shortName] = $this->resolveClassName($className);
-        $cachePath = sprintf('%s%s.php', $this->cacheDir, $shortName);
+        $cachePath = sprintf('%s/%s.php', $this->cacheDir, $shortName);
         $cache = new ConfigCache($cachePath, _PS_MODE_DEV_);
 
         if (!$cache->isFresh()) {
-            $container = $this->buildContainer($resources);
+            $container = $this->buildContainer($resources, $type);
 
             $this->dumpContainer($container, $cache, $namespace, $shortName);
         }
@@ -69,7 +69,7 @@ final class ContainerFactory
         ];
     }
 
-    private function buildContainer(iterable $resources): ContainerBuilder
+    private function buildContainer(iterable $resources, string $type): ContainerBuilder
     {
         $container = new ContainerBuilder();
 
@@ -77,6 +77,7 @@ final class ContainerFactory
 
         $container->setParameter('kernel.root_dir', _PS_ROOT_DIR_ . '/app');
         $container->setParameter('kernel.project_dir', _PS_ROOT_DIR_);
+        $container->setParameter('kernel.cache_dir', _PS_CACHE_DIR_);
         $container->setParameter('kernel.debug', _PS_MODE_DEV_);
         $container->setParameter('kernel.environment', _PS_MODE_DEV_ ? 'dev' : 'prod');
 
@@ -94,6 +95,7 @@ final class ContainerFactory
 
         $this->hookDispatcher->dispatch('actionInPostIziBuildContainer', [
             'loader' => $loader,
+            'type' => $type,
         ]);
 
         $container->isCompiled() || $container->compile(false);

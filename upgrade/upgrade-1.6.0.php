@@ -1,8 +1,8 @@
 <?php
 
 use InPost\Izi\Upgrade\AssetsRemoverTrait;
-use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
+use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Hook\Admin\DisplayAdminOrderLeft;
 use izi\prestashop\Hook\Common\ActionCartUpdateAfter;
@@ -20,7 +20,6 @@ if (!defined('_PS_VERSION_')) {
 }
 
 require_once __DIR__ . '/ConfigUpdaterTrait.php';
-require_once __DIR__ . '/CacheClearer.php';
 require_once __DIR__ . '/AssetsRemoverTrait.php';
 
 class InPostIziUpdater_1_6_0
@@ -36,7 +35,7 @@ class InPostIziUpdater_1_6_0
 
     public function upgrade(): bool
     {
-        CacheClearer::getInstance()->clear();
+        SymfonyCacheClearer::getInstance()->clear();
 
         return $this->registerHooks()
             && $this->updateAvailablePaymentOptionsConfig()

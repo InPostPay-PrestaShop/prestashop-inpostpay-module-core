@@ -43,3 +43,9 @@
 {l s='Importable' mod='inpostizi'}
 {l s='Product does not exist or is not available for order' mod='inpostizi'}
 {l s='No products found.' mod='inpostizi'}
+
+{* Extensions *}
+{l s='Extensions' mod='inpostizi'}
+{l s='Installed' mod='inpostizi'}
+{l s='Recommended' mod='inpostizi'}
+{l s='Other' mod='inpostizi'}
