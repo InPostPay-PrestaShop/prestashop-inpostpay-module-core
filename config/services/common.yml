@@ -2,6 +2,7 @@
 parameters:
   inpost.izi.container_version: '2.3.0'
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
+  inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
   inpost.izi.logger_config:
     type: rotating_file
     path: '%inpost.izi.logs_dir%/izi.log'
@@ -1340,3 +1341,23 @@ services:
     public: false
     arguments:
       - '@izi\prestashop\Database\Connection'
+
+  izi\prestashop\Extension\EventListener\ClearCacheListener:
+    class: izi\prestashop\Extension\EventListener\ClearCacheListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@izi\prestashop\CacheClearer\SymfonyCacheClearer'
+
+  izi\prestashop\CacheClearer\SymfonyCacheClearer:
+    class: izi\prestashop\CacheClearer\SymfonyCacheClearer
+    public: false
+    factory: [ izi\prestashop\CacheClearer\SymfonyCacheClearer, getInstance ]
+
+  inpost.izi.cache:
+    class: Symfony\Component\Cache\Adapter\FilesystemAdapter
+    public: false
+    arguments:
+      - ''
+      - 0
+      - '%inpost.izi.cache_dir%'

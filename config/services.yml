@@ -3,6 +3,9 @@ imports:
   - { resource: services/common.yml }
   - { resource: services/common_admin.yml }
 
+parameters:
+  inpost.izi.extensions_url: 'https://dokumentacja-inpost.atlassian.net/wiki/download/attachments/1249509380/modules.json'
+
 services:
   izi\prestashop\CommandBus:
     class: izi\prestashop\CommandBus
@@ -464,6 +467,16 @@ services:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
       - '%inpost.izi.logs_dir%'
 
+  izi\prestashop\Extension\MessageHandler\InstallExtensionHandler:
+    class: izi\prestashop\Extension\MessageHandler\InstallExtensionHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\Extension\ExtensionsServiceInterface'
+      - '@filesystem'
+      - '@prestashop.module.manager'
+
   izi\prestashop\Twig\Extension\LegacyTranslationExtension:
     class: izi\prestashop\Twig\Extension\LegacyTranslationExtension
     public: false
@@ -630,3 +643,35 @@ services:
     arguments:
       - '@izi\prestashop\Repository\OrderDataRepositoryInterface'
       - '@izi\prestashop\Translation\LegacyTranslator'
+
+  izi\prestashop\Extension\ExtensionsServiceInterface: '@izi\prestashop\Extension\ExtensionsService'
+  izi\prestashop\Extension\ExtensionsService:
+    class: izi\prestashop\Extension\ExtensionsService
+    public: false
+    arguments:
+      - '@inpost.izi.http_client.extensions'
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.serializer'
+      - '%inpost.izi.extensions_url%'
+
+  izi\prestashop\Extension\CachedExtensionsService:
+    class: izi\prestashop\Extension\CachedExtensionsService
+    public: false
+    decorates: izi\prestashop\Extension\ExtensionsService
+    arguments:
+      - '@izi\prestashop\Extension\CachedExtensionsService.inner'
+      - '@inpost.izi.cache'
+
+  inpost.izi.http_client.extensions:
+    class: Psr\Http\Client\ClientInterface
+    public: false
+    factory: [ '@izi\prestashop\Http\Client\Factory\GuzzleClientFactory', create ]
+
+  izi\prestashop\Extension\View\ExtensionViewFactory:
+    class: izi\prestashop\Extension\View\ExtensionViewFactory
+    public: false
+    arguments:
+      - '@izi\prestashop\Extension\ExtensionsServiceInterface'
+      - '@izi\prestashop\Module\ModuleRepository'
+      - '@inpost.izi.context'
+      - '@router'

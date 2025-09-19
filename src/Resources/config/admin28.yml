@@ -1,5 +1,6 @@
 parameters:
   twig.ps_form_theme: bootstrap_3_horizontal_layout.html.twig
+  inpost.izi.cache_dir: '%kernel.cache_dir%'
 
 services:
   Symfony\Component\Routing\Generator\UrlGeneratorInterface: '@router'

@@ -45,6 +45,7 @@ services:
         izi\prestashop\Mail\EventListener\ReplaceOrderNotificationRecipientListener: '@izi\prestashop\Mail\EventListener\ReplaceOrderNotificationRecipientListener'
         izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener: '@izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener'
         izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener: '@izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener'
+        izi\prestashop\Extension\EventListener\ClearCacheListener: '@izi\prestashop\Extension\EventListener\ClearCacheListener'
 
   izi\prestashop\Event\EventDispatcherFactory:
     class: izi\prestashop\Event\EventDispatcherFactory

@@ -1,6 +1,6 @@
 <?php
 
-use InPost\Izi\Upgrade\CacheClearer;
+use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Database\Connection;
 use izi\prestashop\Hook\Common\Product as ProductHooks;
@@ -10,8 +10,6 @@ use izi\prestashop\Installer\DatabaseInstaller;
 if (!defined('_PS_VERSION_')) {
     exit;
 }
-
-require_once __DIR__ . '/CacheClearer.php';
 
 class InPostIziUpdater_2_1_0
 {
@@ -49,7 +47,7 @@ class InPostIziUpdater_2_1_0
 
     public function upgrade(): bool
     {
-        CacheClearer::getInstance()->clear();
+        SymfonyCacheClearer::getInstance()->clear();
         $this->installer->install($this->module);
 
         return $this->registerHooks()

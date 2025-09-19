@@ -9,6 +9,7 @@ use izi\prestashop\Configuration\Initializer\ConfigurationInitializerInterface;
 use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Security\Voter\PageVoter;
 use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -48,7 +49,6 @@ abstract class AbstractConfigurationController extends AbstractController
         $this->context = $context;
         $this->apiConfiguration = $apiConfiguration;
         $this->debug = $debug;
-        $this->logger = new NullLogger();
 
         foreach ($configInitializers as $initializer) {
             $initializer->init();
@@ -146,7 +146,7 @@ abstract class AbstractConfigurationController extends AbstractController
 
     protected function handleError(\Throwable $e, Request $request): void
     {
-        $this->logger->critical('An error occurred while processing the configuration page request.', [
+        $this->getLogger()->critical('An error occurred while processing the configuration page request.', [
             'exception' => $e,
             'route' => $request->attributes->get('_route'),
         ]);
@@ -159,6 +159,11 @@ abstract class AbstractConfigurationController extends AbstractController
             '%type%' => get_class($e),
             '%code%' => $e->getCode(),
         ], 'Admin.Notifications.Error'));
+    }
+
+    final protected function getLogger(): LoggerInterface
+    {
+        return $this->logger ?? $this->logger = new NullLogger();
     }
 
     final protected function isGranted($attributes, $subject = null): bool
@@ -175,7 +180,7 @@ abstract class AbstractConfigurationController extends AbstractController
     }
 
     /**
-     * Checks module configuration role using the user entity instead of the security token, since the token may not contain
+     * Checks the role using the user entity instead of the security token, since the token may not contain
      * all the user roles if it was reloaded from session.
      *
      * Implementing a custom security voter (PS does not provide a default one) would have been a cleaner solution,

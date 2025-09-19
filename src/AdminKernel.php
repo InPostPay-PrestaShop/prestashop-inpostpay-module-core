@@ -30,6 +30,11 @@ final class AdminKernel extends Kernel
 {
     use MicroKernelTrait;
 
+    public const SYNTHETIC_SERVICE_IDS = [
+        'prestashop.security.admin.provider',
+        'prestashop.module.manager',
+    ];
+
     private $logDir;
     private $cacheDir;
     private $secret;

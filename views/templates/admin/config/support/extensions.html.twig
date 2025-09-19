@@ -1,0 +1,100 @@
+{% extends "@Modules/inpostizi/views/templates/admin/config/support/partials/block.html.twig" %}
+
+{% block support_block_header_content %}
+  <i class="material-icons mr-2">extension</i>
+  <span>
+    {{ 'Extensions'|legacy_trans }}
+  </span>
+{% endblock %}
+
+{% block support_block_body_content %}
+  <div class="table-responsive">
+    <table class="table table-condensed">
+      <thead>
+      <tr class="column-headers">
+        <th scope="col">{{ 'Name'|trans({}, 'Admin.Global') }}</th>
+        <th scope="col">{{ 'Description'|trans({}, 'Admin.Global') }}</th>
+        <th scope="col">{{ 'Version'|trans({}, 'Admin.Global') }}</th>
+        <th scope="col" class="text-right">{{ 'Actions'|trans({}, 'Admin.Global') }}</th>
+      </tr>
+      </thead>
+
+      {% if extensions.installed is not empty %}
+        <tbody>
+        <tr>
+          <th colspan="4" class="text-center">{{ 'Installed'|legacy_trans }}</th>
+        </tr>
+        {% for extension in extensions.installed %}
+          <tr>
+            <td>{{ extension.name }}</td>
+            <td>{{ extension.description }}</td>
+            <td>{{ extension.version }}</td>
+            <td class="text-right">
+              <div class="btn-group">
+                {% if extension.upgradeable %}
+                  <form action="{{ extension.url }}" method="post" class="d-inline">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('inpost-izi-install-extension') }}">
+                    <button type="submit" class="btn btn-link" title="{{ 'Upgrade'|trans({}, 'Admin.Actions') }}">
+                      <i class="material-icons">refresh</i>
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      {% endif %}
+
+      {% if extensions.recommended is not empty %}
+        <tbody>
+        <tr>
+          <th colspan="4" class="text-center">{{ 'Recommended'|legacy_trans }}</th>
+        </tr>
+        {% for extension in extensions.recommended %}
+          <tr>
+            <td>{{ extension.name }}</td>
+            <td>{{ extension.description }}</td>
+            <td>{{ extension.version }}</td>
+            <td class="text-right">
+              <div class="btn-group">
+                <form action="{{ extension.url }}" method="post" class="d-inline">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token('inpost-izi-install-extension') }}">
+                  <button type="submit" class="btn btn-link" title="{{ 'Install'|trans({}, 'Admin.Actions') }}">
+                    <i class="material-icons">file_download</i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      {% endif %}
+
+      {% if extensions.other is not empty %}
+        <tbody>
+        <tr>
+          <th colspan="4" class="text-center">{{ 'Other'|legacy_trans }}</th>
+        </tr>
+        {% for extension in extensions.other %}
+          <tr>
+            <td>{{ extension.name }}</td>
+            <td>{{ extension.description }}</td>
+            <td>{{ extension.version }}</td>
+            <td class="text-right">
+              <div class="btn-group">
+                <form action="{{ extension.url }}" method="post" class="d-inline">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token('inpost-izi-install-extension') }}">
+                  <button type="submit" class="btn btn-link" title="{{ 'Upgrade'|trans({}, 'Admin.Actions') }}"{% if extension.module is not same as(null) %} disabled="disabled"{% endif %}>
+                    <i class="material-icons">file_download</i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      {% endif %}
+    </table>
+  </div>
+{% endblock %}
