@@ -74,10 +74,16 @@ final class InstallExtensionHandler
         throw new ExtensionNotFoundException(sprintf('Could not find extension "%s" version "%s".', $name, $version));
     }
 
+    /**
+     * HTTP 1.1 option is set in default stream context to prevent 426 responses from the remote server.
+     * {@see Filesystem::copy()} uses {@see fopen()} with the default context to read the file
+     * and before PHP8 the "protocol_version" option defaults to 1.0.
+     */
     private function downloadExtension(ExtensionVersion $extension): string
     {
         try {
             $tmpFile = $this->filesystem->tempnam(sys_get_temp_dir(), 'izi');
+            stream_context_set_default(['http' => ['protocol_version' => '1.1']]);
             $this->filesystem->copy($extension->getUrl(), $tmpFile);
         } catch (IOExceptionInterface $e) {
             throw new RuntimeException('Could not download the extension.', 0, $e);

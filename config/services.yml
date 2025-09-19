@@ -4,7 +4,9 @@ imports:
   - { resource: services/common_admin.yml }
 
 parameters:
-  inpost.izi.extensions_url: 'https://dokumentacja-inpost.atlassian.net/wiki/download/attachments/1249509380/modules.json'
+  inpost.izi.extensions_service_options:
+    url: 'https://dokumentacja-inpost.atlassian.net/wiki/download/attachments/1249509380/modules.json'
+    max_redirects: 10
 
 services:
   izi\prestashop\CommandBus:
@@ -652,7 +654,7 @@ services:
       - '@inpost.izi.http_client.extensions'
       - '@inpost.izi.psr17_factory'
       - '@inpost.izi.serializer'
-      - '%inpost.izi.extensions_url%'
+      - '%inpost.izi.extensions_service_options%'
 
   izi\prestashop\Extension\CachedExtensionsService:
     class: izi\prestashop\Extension\CachedExtensionsService
