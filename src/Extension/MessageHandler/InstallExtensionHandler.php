@@ -77,7 +77,7 @@ final class InstallExtensionHandler
     /**
      * HTTP 1.1 option is set in default stream context to prevent 426 responses from the remote server.
      * {@see Filesystem::copy()} uses {@see fopen()} with the default context to read the file
-     * and before PHP8 the "protocol_version" option defaults to 1.0.
+     * and on PHP versions earlier than 8.0 the "protocol_version" option defaults to 1.0.
      */
     private function downloadExtension(ExtensionVersion $extension): string
     {
