@@ -94,10 +94,10 @@ final class CartListener implements EventSubscriberInterface
                 $command = new UpdateBasketCommand($cartId);
 
                 $this->bus->handle($command);
-            } catch (\Throwable $throwable) {
-                $this->logger->critical('Could not send updated cart #{cartId} data: {error}', [
+            } catch (\Throwable $e) {
+                $this->logger->critical('Could not send updated cart #{cartId} data.', [
                     'cartId' => $cartId,
-                    'error' => $throwable,
+                    'exception' => $e,
                 ]);
             }
         }

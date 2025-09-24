@@ -83,9 +83,9 @@ final class OrderListener implements EventSubscriberInterface
         try {
             $this->bus->handle($command);
         } catch (\Throwable $e) {
-            $this->logger->critical('Could not send order #{orderId} status update event data: {error}', [
+            $this->logger->critical('Could not send order #{orderId} status update event data.', [
                 'orderId' => $orderId,
-                'error' => $e,
+                'exception' => $e,
                 'orderStatusId' => (int) $event->getNewOrderStatus()->id,
             ]);
         }
@@ -139,9 +139,9 @@ final class OrderListener implements EventSubscriberInterface
         try {
             $this->bus->handle($command);
         } catch (\Throwable $e) {
-            $this->logger->critical('Could not send order #{orderId} address delivery update event data: {error}', [
+            $this->logger->critical('Could not send order #{orderId} address delivery update event data.', [
                 'orderId' => $orderId,
-                'error' => $e,
+                'exception' => $e,
             ]);
         }
     }

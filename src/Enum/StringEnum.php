@@ -8,9 +8,11 @@ namespace izi\prestashop\Enum;
 abstract class StringEnum extends Enum
 {
     /**
+     * @final
+     *
      * @return static
      */
-    final public static function from(?string $value): self
+    public static function from(?string $value): self
     {
         $value = $value ?? '0';
         $cases = static::casesByValue();
@@ -23,9 +25,11 @@ abstract class StringEnum extends Enum
     }
 
     /**
+     * @final
+     *
      * @return static|null
      */
-    final public static function tryFrom(?string $value): ?self
+    public static function tryFrom(?string $value): ?self
     {
         $cases = self::casesByValue();
 

@@ -82,7 +82,9 @@ final class CreateOrderRequest implements \JsonSerializable
     public function withDeliveryEmails(Delivery $delivery): self
     {
         $request = clone $this;
-        $request->delivery = $this->delivery->withEmail($delivery->getEmail());
+        $request->delivery = $this->delivery
+            ->withEmail($delivery->getEmail())
+            ->withDigitalDeliveryEmail($delivery->getDigitalDeliveryEmail());
 
         return $request;
     }

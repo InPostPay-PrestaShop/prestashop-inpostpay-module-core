@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Common\Delivery;
 
-use izi\prestashop\Enum\StringEnum;
+use izi\prestashop\Enum\NotAnEnum;
 
 /**
+ * @todo: Refactor. Not an enum, custom codes are allowed.
+ *
  * @method static self Cod() cash on delivery option
  * @method static self Pww() weekend delivery option
+ * @method static self Gw() gift wrapping option
  */
-final class ServiceCode extends StringEnum
+final class ServiceCode extends NotAnEnum
 {
     private const COD = 'COD';
     private const PWW = 'PWW';
+    private const GW = 'GW';
 
     public function isAvailabilityTimeDependent(): bool
     {

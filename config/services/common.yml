@@ -1,7 +1,8 @@
 # common FO/BO configuration
 parameters:
-  inpost.izi.container_version: '2.2.3'
+  inpost.izi.container_version: '2.3.0'
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
+  inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
   inpost.izi.logger_config:
     type: rotating_file
     path: '%inpost.izi.logs_dir%/izi.log'
@@ -535,7 +536,10 @@ services:
       - Shop
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
 
-  izi\prestashop\Repository\OrderDataRepositoryInterface: '@izi\prestashop\Repository\BasketSessionRepository'
+  izi\prestashop\Repository\OrderDataRepositoryInterface:
+    alias: izi\prestashop\Repository\BasketSessionRepository
+    public: true
+
   izi\prestashop\Repository\BasketSessionRepository:
     class: izi\prestashop\Repository\BasketSessionRepository
     public: false
@@ -777,6 +781,12 @@ services:
       - '@izi\prestashop\Event\EventDispatcherInterface'
       - '@inpost.izi.context'
 
+  izi\prestashop\Hook\Webservice\AddWebserviceResources:
+    class: izi\prestashop\Hook\Webservice\AddWebserviceResources
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+
   izi\prestashop\EventListener\ShipmentListener:
     class: izi\prestashop\EventListener\ShipmentListener
     tags:
@@ -899,6 +909,8 @@ services:
       - '@inpost.izi.clock'
       - '@izi\prestashop\Translation\ServiceNameTranslator'
       - '@izi\prestashop\Shipping\DeliveryPriceCalculator'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@inpost.izi.context'
 
   izi\prestashop\Builder\Basket\ProductDeliveryFactory:
     class: izi\prestashop\Builder\Basket\ProductDeliveryFactory
@@ -1248,6 +1260,13 @@ services:
     arguments:
       - '@izi\prestashop\Mail\Resolver\OrderMailRecipientResolver'
 
+  izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener:
+    class: izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@izi\prestashop\Repository\OrderDataRepositoryInterface'
+
   izi\prestashop\Analytics\Cookie\Repository\CookieRepositoryInterface: '@izi\prestashop\Analytics\Cookie\Repository\CookieRepository'
   izi\prestashop\Analytics\Cookie\Repository\CookieRepository:
     class: izi\prestashop\Analytics\Cookie\Repository\CookieRepository
@@ -1322,3 +1341,23 @@ services:
     public: false
     arguments:
       - '@izi\prestashop\Database\Connection'
+
+  izi\prestashop\Extension\EventListener\ClearCacheListener:
+    class: izi\prestashop\Extension\EventListener\ClearCacheListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@izi\prestashop\CacheClearer\SymfonyCacheClearer'
+
+  izi\prestashop\CacheClearer\SymfonyCacheClearer:
+    class: izi\prestashop\CacheClearer\SymfonyCacheClearer
+    public: false
+    factory: [ izi\prestashop\CacheClearer\SymfonyCacheClearer, getInstance ]
+
+  inpost.izi.cache:
+    class: Symfony\Component\Cache\Adapter\FilesystemAdapter
+    public: false
+    arguments:
+      - ''
+      - 0
+      - '%inpost.izi.cache_dir%'

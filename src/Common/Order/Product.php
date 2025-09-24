@@ -7,6 +7,7 @@ namespace izi\prestashop\Common\Order;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductImage;
+use izi\prestashop\Common\Product\ProductType;
 use izi\prestashop\Common\Product\ProductVariant;
 
 final class Product implements \JsonSerializable
@@ -72,11 +73,16 @@ final class Product implements \JsonSerializable
     private $additional_product_images;
 
     /**
+     * @var ProductType|null
+     */
+    private $product_type;
+
+    /**
      * @param ProductAttribute[] $product_attributes
      * @param ProductVariant[] $variants
      * @param ProductImage[] $additional_product_images
      */
-    public function __construct(string $product_id, string $product_name, Price $base_price, Quantity $quantity, ?string $product_category = null, ?string $ean = null, ?string $product_description = null, ?string $product_link = null, ?string $product_image = null, array $product_attributes = [], array $variants = [], array $additional_product_images = [])
+    public function __construct(string $product_id, string $product_name, Price $base_price, Quantity $quantity, ?string $product_category = null, ?string $ean = null, ?string $product_description = null, ?string $product_link = null, ?string $product_image = null, array $product_attributes = [], array $variants = [], array $additional_product_images = [], ?ProductType $product_type = null)
     {
         $this->product_id = $product_id;
         $this->product_category = $product_category;
@@ -90,6 +96,7 @@ final class Product implements \JsonSerializable
         $this->product_attributes = $product_attributes;
         $this->variants = $variants;
         $this->additional_product_images = $additional_product_images;
+        $this->product_type = $product_type;
     }
 
     public function getId(): string
@@ -156,6 +163,11 @@ final class Product implements \JsonSerializable
     public function getAdditionalProductImages(): array
     {
         return $this->additional_product_images;
+    }
+
+    public function getType(): ?ProductType
+    {
+        return $this->product_type;
     }
 
     public function jsonSerialize(): array

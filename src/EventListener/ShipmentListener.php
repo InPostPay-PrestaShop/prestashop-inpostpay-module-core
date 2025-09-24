@@ -117,9 +117,9 @@ final class ShipmentListener implements EventSubscriberInterface
         try {
             $this->bus->handle($command);
         } catch (\Throwable $e) {
-            $this->logger->critical('Could not send order #{orderId} tracking numbers update event data: {error}', [
+            $this->logger->critical('Could not send order #{orderId} tracking numbers update event data.', [
                 'orderId' => (int) $shipment->id_order,
-                'error' => $e,
+                'exception' => $e,
                 'shipmentId' => (int) $shipment->id,
             ]);
         }

@@ -16,6 +16,12 @@
     <div class="col-lg-4 col-sm-6 col-12 col-xs-12 mt-3 px-2">
       {% include '@Modules/inpostizi/views/templates/admin/config/support/troubleshooting.html.twig' %}
     </div>
+
+    {% if extensions is defined and extensions is not null %}
+      <div class="col-12 mt-3 px-2">
+        {% include '@Modules/inpostizi/views/templates/admin/config/support/extensions.html.twig' %}
+      </div>
+    {% endif %}
   </div>
 {% endblock %}
 

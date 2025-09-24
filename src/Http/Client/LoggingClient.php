@@ -43,10 +43,10 @@ final class LoggingClient implements ClientInterface
             $this->logResponse($request, $response);
 
             return $response;
-        } catch (\Throwable $throwable) {
-            $this->logError($request, $throwable);
+        } catch (\Throwable $e) {
+            $this->logError($request, $e);
 
-            throw $throwable;
+            throw $e;
         }
     }
 
@@ -84,17 +84,17 @@ final class LoggingClient implements ClientInterface
         }
     }
 
-    private function logError(RequestInterface $request, \Throwable $throwable): void
+    private function logError(RequestInterface $request, \Throwable $e): void
     {
-        if ($throwable instanceof NetworkExceptionInterface) {
+        if ($e instanceof NetworkExceptionInterface) {
             $this->logger->error('Network error for {uri}: "{message}"', [
-                'uri' => (string) $throwable->getRequest()->getUri(),
-                'message' => $throwable->getMessage(),
+                'uri' => (string) $e->getRequest()->getUri(),
+                'message' => $e->getMessage(),
             ]);
         } else {
-            $this->logger->critical('Unexpected error for {uri}: {error}', [
+            $this->logger->critical('Unexpected error for {uri}.', [
                 'uri' => (string) $request->getUri(),
-                'error' => $throwable,
+                'exception' => $e,
             ]);
         }
     }

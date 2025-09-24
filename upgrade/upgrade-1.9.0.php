@@ -1,8 +1,8 @@
 <?php
 
 use InPost\Izi\Upgrade\AssetsRemoverTrait;
-use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
+use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Database\Connection;
 use izi\prestashop\Installer\Database\Version_1_9_0;
@@ -12,7 +12,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once __DIR__ . '/CacheClearer.php';
 require_once __DIR__ . '/ConfigUpdaterTrait.php';
 require_once __DIR__ . '/AssetsRemoverTrait.php';
 
@@ -39,7 +38,7 @@ class InPostIziUpdater_1_9_0
 
     public function upgrade(): bool
     {
-        CacheClearer::getInstance()->clear();
+        SymfonyCacheClearer::getInstance()->clear();
         $this->installer->install($this->module);
 
         return $this->removeStaleAssets(self::STALE_ASSETS);

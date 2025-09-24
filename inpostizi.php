@@ -68,7 +68,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '2.2.3';
+        $this->version = '2.3.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -104,10 +104,15 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         try {
             (new DatabaseInstaller())->install($this);
         } catch (Exception $e) {
-            $this->_errors[] = $this->l('Could not update the database schema.');
-            $this->getLogger()->critical('Installer error: {exception}.', [
+            $this->getLogger()->critical('Could not update the database schema.', [
                 'exception' => $e,
             ]);
+
+            if (_PS_MODE_DEV_) {
+                throw $e;
+            }
+
+            $this->_errors[] = $this->l('Could not update the database schema.');
 
             return false;
         }
@@ -125,7 +130,15 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     {
         $this->setUpRoutingLoaderResolver();
 
-        return parent::uninstall();
+        if (!parent::uninstall()) {
+            return false;
+        }
+
+        if (\Tools::version_compare(_PS_VERSION_, '1.7.8')) {
+            Hook::exec('actionModuleUninstallAfter', ['object' => $this]);
+        }
+
+        return true;
     }
 
     /**
@@ -152,7 +165,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
 
             return $result;
         } catch (Throwable $e) {
-            $this->getLogger()->critical('Upgrade error: {exception}.', [
+            $this->getLogger()->critical('An error occurred while upgrading module.', [
                 'exception' => $e,
             ]);
 
@@ -249,7 +262,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
                 return null;
             }
 
-            $this->getLogger()->critical('Error executing hook "{hookName}": {exception}', [
+            $this->getLogger()->critical('Error executing hook "{hookName}".', [
                 'hookName' => $hookName,
                 'exception' => $e,
             ]);
@@ -396,6 +409,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $cacheDir = sprintf('%s/inpost/izi/', rtrim(_PS_CACHE_DIR_, '/'));
 
         if (Tools::version_compare(_PS_VERSION_, '1.7.4')) {
+            $type = 'sf28';
             $className = sprintf('InPost\\Izi\\Container_%s', str_replace('.', '_', $this->version));
             $resources = $this->getSf28ConfigResources();
         } else {
@@ -404,7 +418,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             $resources = [sprintf('%s/config/%s/services.yml', rtrim($this->getLocalPath(), '/'), $type)];
         }
 
-        return (new ContainerFactory($cacheDir))->create($className, $resources);
+        return (new ContainerFactory($cacheDir))->create($className, $resources, $type);
     }
 
     /**
@@ -476,7 +490,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $this->adminKernel->boot();
 
         $psContainer = $kernel->getContainer();
-        $this->adminKernel->getContainer()->set('prestashop.security.admin.provider', $psContainer->get('prestashop.security.admin.provider'));
+        foreach (AdminKernel::SYNTHETIC_SERVICE_IDS as $id) {
+            $this->adminKernel->getContainer()->set($id, $psContainer->get($id));
+        }
 
         // In some very early 1.7 versions, the session may not have yet been started by PS application.
         $psContainer->get('session')->start();
@@ -525,7 +541,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      */
     private function getFrontOfficeLegacyContainer()
     {
-        if (!$this->context->controller instanceof FrontController || !class_exists(PrestaShopContainerBuilder::class)) {
+        if (!class_exists(PrestaShopContainerBuilder::class)) {
             throw ContainerNotFoundException::create();
         }
 

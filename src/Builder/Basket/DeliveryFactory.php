@@ -10,8 +10,10 @@ use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\OptionalService;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\Price;
+use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
+use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\ObjectModel\Repository\CarrierRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
@@ -47,30 +49,52 @@ class DeliveryFactory
     private $priceCalculator;
 
     /**
+     * @var PrestaShopConfiguration
+     */
+    private $prestashopConfiguration;
+
+    /**
+     * @var \Context
+     */
+    private $context;
+
+    /**
      * @param CarrierRepository $carrierRepository
      */
-    public function __construct(ShippingConfigurationInterface $configuration, ObjectRepositoryInterface $carrierRepository, ClockInterface $clock, ServiceNameTranslator $serviceNameTranslator, DeliveryPriceCalculatorInterface $priceCalculator)
+    public function __construct(ShippingConfigurationInterface $configuration, ObjectRepositoryInterface $carrierRepository, ClockInterface $clock, ServiceNameTranslator $serviceNameTranslator, DeliveryPriceCalculatorInterface $priceCalculator, ?PrestaShopConfiguration $prestashopConfiguration = null, ?\Context $context = null)
     {
         $this->configuration = $configuration;
         $this->carrierRepository = $carrierRepository;
         $this->clock = $clock;
         $this->serviceNameTranslator = $serviceNameTranslator;
         $this->priceCalculator = $priceCalculator;
+        $this->prestashopConfiguration = $prestashopConfiguration ?? new PrestaShopConfiguration(new Configuration());
+        $this->context = $context ?? \Context::getContext();
     }
 
     /**
      * @return DeliveryOption[]
      */
-    public function getAvailableDeliveryOptions(\Cart $cart, ?int $idShop = null): array
+    public function getAvailableDeliveryOptions(\Cart $cart, ?int $shopId = null): array
     {
         $deliveryOptions = [];
-        $idShop = $idShop ?? (int) $cart->id_shop;
+        $shopId = $shopId ?? (int) $cart->id_shop;
 
         $deliveryDate = $this->getDeliveryDate();
         $isFreeShipping = null;
 
-        foreach (DeliveryType::cases() as $deliveryType) {
-            $options = $this->configuration->getShippingOptions($deliveryType, (int) $idShop);
+        [$hasPhysicalProducts, $hasDigitalProducts] = $this->getProductTypes($cart);
+
+        if ($hasDigitalProducts) {
+            $deliveryOptions[] = $this->createDigitalDeliveryOption();
+        }
+
+        if (!$hasPhysicalProducts) {
+            return $deliveryOptions;
+        }
+
+        foreach (DeliveryType::getPhysicalDeliveryTypes() as $deliveryType) {
+            $options = $this->configuration->getShippingOptions($deliveryType, $shopId);
             $referenceId = $options->getCarrierMapping()->getReferenceId();
 
             if (null === $referenceId || null === $carrier = $this->getCarrier($cart, $referenceId)) {
@@ -89,7 +113,7 @@ class DeliveryFactory
                 $deliveryType,
                 $deliveryDate,
                 $price,
-                $this->getOptionalServices($deliveryType, $cart, $options, $carrier, $isFreeShipping),
+                $this->getOptionalServices($deliveryType, $cart, $options, $carrier, $isFreeShipping, $shopId),
                 $this->priceCalculator->getFreeDeliveryMinAmount($cart, $carrier)
             );
         }
@@ -97,10 +121,19 @@ class DeliveryFactory
         return $deliveryOptions;
     }
 
+    private function createDigitalDeliveryOption(): DeliveryOption
+    {
+        $deliveryDate = $this->clock->now()->modify('+1 minute');
+        $deliveryDate = $deliveryDate->setTime((int) $deliveryDate->format('G'), (int) $deliveryDate->format('i'));
+        $price = PriceFactory::create(0., 0.);
+
+        return new DeliveryOption(DeliveryType::Digital(), $deliveryDate, $price);
+    }
+
     /**
      * @return OptionalService[]
      */
-    private function getOptionalServices(DeliveryType $deliveryType, \Cart $cart, ShippingOptions $options, \Carrier $defaultCarrier, bool $isFreeShipping): array
+    private function getOptionalServices(DeliveryType $deliveryType, \Cart $cart, ShippingOptions $options, \Carrier $defaultCarrier, bool $isFreeShipping, int $shopId): array
     {
         $services = [];
 
@@ -134,7 +167,25 @@ class DeliveryFactory
             );
         }
 
+        if ($this->prestashopConfiguration->isGiftWrappingEnabled($shopId)) {
+            $services[] = $this->getGiftWrappingOptionalService($cart);
+        }
+
         return $services;
+    }
+
+    private function getGiftWrappingOptionalService(\Cart $cart): OptionalService
+    {
+        $priceTaxIncl = $cart->getGiftWrappingPrice(true);
+        $priceTaxExcl = $cart->getGiftWrappingPrice(false);
+
+        return new OptionalService(
+            $this->context->getTranslator()->trans('I would like my order to be gift wrapped %cost%', [
+                '%cost%' => '',
+            ], 'Shop.Theme.Checkout'),
+            ServiceCode::Gw(),
+            PriceFactory::create($priceTaxExcl, $priceTaxIncl)
+        );
     }
 
     private function getServicePrice(ServiceOptions $options, \Cart $cart, \Carrier $carrier, \Carrier $defaultCarrier, bool $isFreeShipping): Price
@@ -210,5 +261,20 @@ class DeliveryFactory
             ->now()
             ->modify('+2 days')
             ->setTime(12, 0);
+    }
+
+    private function getProductTypes(\Cart $cart): array
+    {
+        $hasPhysicalProducts = $hasDigitalProducts = false;
+
+        foreach ($cart->getProducts() as $product) {
+            if ($product['is_virtual']) {
+                $hasDigitalProducts = true;
+            } else {
+                $hasPhysicalProducts = true;
+            }
+        }
+
+        return [$hasPhysicalProducts, $hasDigitalProducts];
     }
 }

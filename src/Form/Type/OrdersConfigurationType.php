@@ -50,6 +50,9 @@ final class OrdersConfigurationType extends AbstractType
             ->add('allPaymentOptionsEnabled', $switchClass, [
                 'required' => false,
                 'label' => $this->translator->l('Enable all available payment options', self::TRANSLATION_SOURCE),
+                'attr' => [
+                    'autocomplete' => 'off',
+                ],
                 'help' => nl2br(implode("\n\n", [
                     $this->translator->l('Payment methods are specified on the payment gateway contract', self::TRANSLATION_SOURCE),
                     $this->translator->l('Payment on delivery will be available only if you have an agreement with InPost to provide this service in your store.', self::TRANSLATION_SOURCE),

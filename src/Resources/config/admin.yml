@@ -4,6 +4,7 @@ imports:
 parameters:
   container.autowiring.strict_mode: true
   twig.ps_form_theme: bootstrap_4_horizontal_layout.html.twig
+  inpost.izi.cache_dir: '%kernel.cache_dir%'
 
 services:
   PrestaShopBundle\Twig\LayoutExtension:
@@ -94,3 +95,7 @@ services:
     public: false
     tags:
       - { name: security.voter }
+
+  prestashop.module.manager:
+    class: PrestaShop\PrestaShop\Core\Addon\AddonManagerInterface
+    synthetic: true

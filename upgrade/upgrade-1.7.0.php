@@ -1,14 +1,13 @@
 <?php
 
 use InPost\Izi\Upgrade\AssetsRemoverTrait;
-use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
+use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once __DIR__ . '/CacheClearer.php';
 require_once __DIR__ . '/ConfigUpdaterTrait.php';
 require_once __DIR__ . '/AssetsRemoverTrait.php';
 
@@ -30,7 +29,7 @@ class InPostIziUpdater_1_7_0
 
     public function upgrade(): bool
     {
-        CacheClearer::getInstance()->clear();
+        SymfonyCacheClearer::getInstance()->clear();
 
         return $this->fixAvailablePaymentOptionsConfig()
             && $this->removeStaleAssets(self::STALE_ASSETS);

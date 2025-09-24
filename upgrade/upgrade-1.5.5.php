@@ -1,7 +1,7 @@
 <?php
 
-use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
+use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Configuration\DTO\Shipping\CarrierMapping;
@@ -17,7 +17,6 @@ if (!defined('_PS_VERSION_')) {
 }
 
 require_once __DIR__ . '/ConfigUpdaterTrait.php';
-require_once __DIR__ . '/CacheClearer.php';
 
 class InPostIziUpdater_1_5_5
 {
@@ -72,7 +71,7 @@ class InPostIziUpdater_1_5_5
 
     public function upgrade(): bool
     {
-        CacheClearer::getInstance()->clear();
+        SymfonyCacheClearer::getInstance()->clear();
 
         if (!$this->updateShippingConfigStructure()) {
             return false;

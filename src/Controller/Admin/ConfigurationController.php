@@ -19,11 +19,16 @@ use izi\prestashop\Configuration\GuiConfiguration;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Configuration\ShippingConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
+use izi\prestashop\Extension\Exception\ExtensionExceptionInterface;
+use izi\prestashop\Extension\Exception\ExtensionServiceException;
+use izi\prestashop\Extension\Message\InstallExtensionCommand;
+use izi\prestashop\Extension\View\ExtensionViewFactory;
 use izi\prestashop\Form\Type\AdvancedConfigurationType;
 use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
 use izi\prestashop\Form\Type\GuiConfigurationType;
 use izi\prestashop\Form\Type\ShippingConfigurationType;
+use PrestaShopBundle\Security\Voter\PageVoter;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -172,7 +177,7 @@ final class ConfigurationController extends AbstractConfigurationController
      *
      * @Route(path="/support", name="admin_inpost_izi_config_support", methods={"GET"})
      */
-    public function support(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus): Response
+    public function support(Request $request, AdvancedConfigurationInterface $configuration, CommandBusInterface $bus, ?ExtensionViewFactory $extensionsViewFactory = null): Response
     {
         $this->checkAccess();
 
@@ -180,11 +185,25 @@ final class ConfigurationController extends AbstractConfigurationController
             'action' => $this->generateUrl('admin_inpost_izi_config_support_save', $request->query->all()),
         ]);
 
+        $extensions = null;
+        if (null !== $extensionsViewFactory && $this->isGranted(PageVoter::CREATE, 'AdminModulesSf_')) {
+            try {
+                $extensions = $extensionsViewFactory->getView();
+            } catch (ExtensionServiceException $e) {
+                $this->getLogger()->error('Could not retrieve extensions data. {message}', [
+                    'message' => $e->getMessage(),
+                ]);
+            } catch (\Throwable $e) {
+                $this->handleError($e, $request);
+            }
+        }
+
         return $this->render('@Modules/inpostizi/views/templates/admin/config/support.html.twig', [
             'layoutTitle' => $this->translator->l('Support', self::TRANSLATION_SOURCE),
             'headerTabContent' => $this->renderNav($request),
             'form' => $form->createView(),
             'status' => $bus->handle(new CheckStatusCommand()),
+            'extensions' => $extensions,
         ]);
     }
 
@@ -254,5 +273,43 @@ final class ConfigurationController extends AbstractConfigurationController
         ]);
 
         return $response;
+    }
+
+    /**
+     * @Route(path="/install-extension/{name}/{version}", name="admin_inpost_izi_config_install_extension", methods={"POST"})
+     */
+    public function installExtension(string $name, string $version, Request $request, CommandBusInterface $bus): Response
+    {
+        $this->checkAccess();
+
+        if (!$this->isCsrfTokenValid('inpost-izi-install-extension', $request->request->get('_csrf_token'))) {
+            $this->addFlash('error', $this->translator->l('The CSRF token is invalid.', HotProductController::TRANSLATION_SOURCE));
+
+            return $this->redirectToRoute('admin_inpost_izi_products_index');
+        }
+
+        try {
+            $command = new InstallExtensionCommand($name, $version);
+            $bus->handle($command);
+
+            $this->addFlash('success', $this->translator->l('Extensions have been successfully updated.', self::TRANSLATION_SOURCE));
+        } catch (ExtensionServiceException $e) {
+            $this->getLogger()->error('Could not retrieve extensions data. {message}', [
+                'message' => $e->getMessage(),
+            ]);
+            $this->addFlash('error', sprintf($this->translator->l('Could not retrieve extensions data: %s', self::TRANSLATION_SOURCE), $e->getMessage()));
+        } catch (ExtensionExceptionInterface $e) {
+            $this->getLogger()->error('Could not install extension "{name}" version "{version}". {message}', [
+                'name' => $name,
+                'version' => $version,
+                'message' => $e->getMessage(),
+                'exception' => $e->getPrevious(),
+            ]);
+            $this->addFlash('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            $this->handleError($e, $request);
+        }
+
+        return $this->redirectToRoute('admin_inpost_izi_config_support');
     }
 }

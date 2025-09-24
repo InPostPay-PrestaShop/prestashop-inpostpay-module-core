@@ -15,6 +15,7 @@ class PrestaShopConfiguration
     public const SHIPPING_HANDLING_COST = 'PS_SHIPPING_HANDLING';
     public const ATTRIBUTES_SEPARATOR = 'PS_ATTRIBUTE_ANCHOR_SEPARATOR';
     public const ANONYMOUS_CUSTOMER_GROUP_ID = 'PS_UNIDENTIFIED_GROUP';
+    public const GIFT_WRAPPING = 'PS_GIFT_WRAPPING';
 
     /**
      * @var LanguageAwareConfigurationInterface
@@ -75,5 +76,10 @@ class PrestaShopConfiguration
     public function getAnonymousCustomerGroupId(?int $shopId = null): int
     {
         return (int) $this->configuration->get(self::ANONYMOUS_CUSTOMER_GROUP_ID, $shopId);
+    }
+
+    public function isGiftWrappingEnabled(?int $shopId = null): bool
+    {
+        return (bool) $this->configuration->get(self::GIFT_WRAPPING, $shopId);
     }
 }

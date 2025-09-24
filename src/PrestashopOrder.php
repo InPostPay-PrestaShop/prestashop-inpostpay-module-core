@@ -21,6 +21,7 @@ use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\ProductAttribute;
+use izi\prestashop\Common\Product\ProductType;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
@@ -200,6 +201,7 @@ class PrestashopOrder
             $phoneNumber = $delivery->getPhoneNumber() ?? $this->mapPhoneNumber();
             $deliveryPoint = $delivery->getPoint();
             $courierNote = $delivery->getCourierNote();
+            $digitalDeliveryEmail = $delivery->getDigitalDeliveryEmail();
         } else {
             $deliveryType = DeliveryType::Courier();
             $deliveryCodes = [];
@@ -207,22 +209,35 @@ class PrestashopOrder
             $phoneNumber = $this->mapPhoneNumber();
             $deliveryPoint = null;
             $courierNote = $this->deliveryDetails->other;
+            $digitalDeliveryEmail = null;
+        }
+
+        if ($this->order->isVirtual()) {
+            $deliveryType = DeliveryType::Digital();
         }
 
         $deliveryDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
             ->modify('+2 days')
             ->setTime(12, 0);
 
-        $deliveryOptions = array_map(static function (ServiceCode $code): OptionalService {
+        $deliveryOptions = array_map(function (ServiceCode $code): OptionalService {
+            // TODO: translate
             $serviceNameDictionary = [
                 'PWW' => 'Paczka w Weekend',
                 'COD' => 'Pobranie',
+                'GW' => 'Pakowanie prezentowe',
             ];
+
+            if ($code === ServiceCode::Gw()) {
+                $price = PriceFactory::create($this->order->total_wrapping_tax_excl, $this->order->total_wrapping_tax_incl);
+            } else {
+                $price = PriceFactory::create(0., 0.); // TODO: store and use actual service cost?
+            }
 
             return new OptionalService(
                 $serviceNameDictionary[$code->value] ?? $code->value,
                 $code,
-                PriceFactory::create(0., 0.) // TODO: get the actually used prices
+                $price
             );
         }, $deliveryCodes);
 
@@ -235,7 +250,8 @@ class PrestashopOrder
             $phoneNumber,
             $deliveryPoint,
             $this->addressDataMapper->mapDeliveryAddress($this->deliveryDetails),
-            $courierNote
+            $courierNote,
+            $digitalDeliveryEmail
         );
     }
 
@@ -396,7 +412,8 @@ class PrestashopOrder
             $imageUrl,
             $attributes,
             [],
-            $additionalImages
+            $additionalImages,
+            $data['is_virtual'] || $data['download_hash'] ? ProductType::Digital() : ProductType::Physical()
         );
     }
 

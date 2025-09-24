@@ -28,7 +28,7 @@ final class WidgetController implements ServiceSubscriberInterface
     public const TRANSLATION_SOURCE = 'widgetcontroller';
 
     /**
-     * @var \Module
+     * @var \InPostIzi
      */
     private $module;
 
@@ -47,6 +47,9 @@ final class WidgetController implements ServiceSubscriberInterface
      */
     private $container;
 
+    /**
+     * @param \InPostIzi $module
+     */
     public function __construct(\Module $module, \Context $context, CommandBusInterface $bus, ContainerInterface $container)
     {
         $this->module = $module;
@@ -131,6 +134,10 @@ final class WidgetController implements ServiceSubscriberInterface
                 'message' => $this->module->l('Your request could not be processed.', self::TRANSLATION_SOURCE),
             ], 422);
         }
+
+        $this->module->getLogger()->critical('An error occurred while processing widget request.', [
+            'exception' => $e,
+        ]);
 
         return new JsonResponse([
             'message' => $this->module->l('Something went wrong. Please try again later.', self::TRANSLATION_SOURCE),

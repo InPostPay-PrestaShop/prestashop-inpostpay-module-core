@@ -38,6 +38,8 @@ final class ShippingConfiguration implements ShippingConfigurationInterface
                 return $this->courierShippingOptions;
             case DeliveryType::Apm():
                 return $this->apmShippingOptions;
+            case DeliveryType::Digital():
+                return new ShippingOptions();
             default:
                 throw new \LogicException('Not implemented.');
         }

@@ -2,3 +2,9 @@ include:
   - project: waynetecommerce/internal/shared-cicd
     ref: main
     file: 'addons/.gitlab-ci.yml'
+
+deploy-demo:
+  when: manual
+
+deploy-demo:store-zip:
+  when: manual

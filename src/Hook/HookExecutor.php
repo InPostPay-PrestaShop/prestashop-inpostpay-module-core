@@ -80,6 +80,8 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Front\DisplayIziCartPreviewButton::HOOK_NAME => '?' . Front\DisplayIziCartPreviewButton::class,
             Front\DisplayIziCheckoutButton::HOOK_NAME => '?' . Front\DisplayIziCheckoutButton::class,
             Front\DisplayHeader::HOOK_NAME => '?' . Front\DisplayHeader::class,
+
+            Webservice\AddWebserviceResources::HOOK_NAME => '?' . Webservice\AddWebserviceResources::class,
         ];
     }
 

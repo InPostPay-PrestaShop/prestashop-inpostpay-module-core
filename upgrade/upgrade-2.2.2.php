@@ -1,9 +1,9 @@
 <?php
 
-use InPost\Izi\Upgrade\CacheClearer;
 use InPost\Izi\Upgrade\ConfigUpdaterTrait;
 use izi\prestashop\BasketApp\BasketAppClientInterface;
 use izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface;
+use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Enum\Enum;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
@@ -12,7 +12,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once __DIR__ . '/CacheClearer.php';
 require_once __DIR__ . '/ConfigUpdaterTrait.php';
 
 class InPostIziUpdater_2_2_2
@@ -26,7 +25,7 @@ class InPostIziUpdater_2_2_2
 
     public function __construct(Db $db, ?PaymentsApiClientInterface $client)
     {
-        CacheClearer::getInstance()->clear();
+        SymfonyCacheClearer::getInstance()->clear();
 
         $this->db = $db;
         $this->client = $client;
@@ -106,7 +105,7 @@ class InPostIziUpdater_2_2_2
             return [];
         }
 
-        return array_filter(array_map([PaymentType::class, 'tryFrom'], $data));
+        return array_map([PaymentType::class, 'from'], $data);
     }
 }
 

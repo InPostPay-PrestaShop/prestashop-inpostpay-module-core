@@ -10,11 +10,18 @@ use izi\prestashop\Translation\LegacyTranslator;
 /**
  * @method static self Apm()
  * @method static self Courier()
+ * @method static self Digital()
  */
 final class DeliveryType extends StringEnum
 {
     private const APM = 'APM';
     private const COURIER = 'COURIER';
+    private const DIGITAL = 'DIGITAL';
+
+    public static function getPhysicalDeliveryTypes(): array
+    {
+        return [self::Apm(), self::Courier()];
+    }
 
     public function trans(LegacyTranslator $translator): string
     {
@@ -33,8 +40,15 @@ final class DeliveryType extends StringEnum
      */
     public function getAvailableServiceCodes(): array
     {
+        if (self::Digital() === $this) {
+            return [];
+        }
+
         if (self::Apm() === $this) {
-            return ServiceCode::cases();
+            return [
+                ServiceCode::Cod(),
+                ServiceCode::Pww(),
+            ];
         }
 
         return [ServiceCode::Cod()];

@@ -52,6 +52,10 @@ final class ShippingOptions implements \JsonSerializable
 
     public function getCarrierMapping(ServiceCode ...$serviceCodes): CarrierMapping
     {
+        $serviceCodes = array_filter($serviceCodes, static function (ServiceCode $serviceCode) {
+            return $serviceCode === ServiceCode::Cod() || $serviceCode === ServiceCode::Pww();
+        });
+
         foreach ($this->carrierMappings as $carrierMapping) {
             $mappingServiceCodes = $carrierMapping->getServiceCodes();
 
