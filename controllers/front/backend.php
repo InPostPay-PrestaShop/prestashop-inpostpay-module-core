@@ -383,7 +383,9 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         $handler->throwAt(E_ERROR, true);
         $handler->setDefaultLogger($this->module->getLogger(), [
             E_DEPRECATED => LogLevel::DEBUG,
+            E_USER_DEPRECATED => LogLevel::DEBUG,
             E_NOTICE => LogLevel::DEBUG,
+            E_USER_NOTICE => LogLevel::DEBUG,
             E_STRICT => LogLevel::DEBUG,
             E_WARNING => LogLevel::DEBUG,
             E_USER_WARNING => LogLevel::DEBUG,
@@ -391,6 +393,16 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             E_RECOVERABLE_ERROR => LogLevel::CRITICAL,
             E_ERROR => LogLevel::CRITICAL,
         ]);
+
+        // do not log deprecation notices triggered by external code
+        /** @var callable $prevHandler */
+        $prevHandler = set_error_handler(function (int $type, string $message, string $file, int $line) use (&$prevHandler) {
+            if ($type & (E_DEPRECATED | E_USER_DEPRECATED) && !str_contains($file, $this->module->name)) {
+                return false;
+            }
+
+            return $prevHandler($type, $message, $file, $line);
+        });
     }
 
     private function handleOutput(string $buffer, int $phase): string

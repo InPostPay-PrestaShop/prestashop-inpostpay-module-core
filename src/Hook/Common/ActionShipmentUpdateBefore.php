@@ -6,6 +6,7 @@ namespace izi\prestashop\Hook\Common;
 
 use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Event\ShipmentEvent;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 
 final class ActionShipmentUpdateBefore implements HookInterface
@@ -35,7 +36,7 @@ final class ActionShipmentUpdateBefore implements HookInterface
         $shipment = $parameters['object'] ?? null;
 
         if (!$shipment instanceof \InPostShipmentModel) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \InPostShipmentModel::class, get_debug_type($shipment)));
+            throw InvalidHookParamException::unexpectedType('object', $shipment, \InPostShipmentModel::class);
         }
 
         $this->dispatcher->dispatch(new ShipmentEvent($shipment), ShipmentEvent::BEFORE_UPDATE);

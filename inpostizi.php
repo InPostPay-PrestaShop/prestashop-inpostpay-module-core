@@ -10,6 +10,7 @@ use izi\prestashop\DependencyInjection\ContainerFactory;
 use izi\prestashop\DependencyInjection\Exception\ContainerNotFoundException;
 use izi\prestashop\Hook\Exception\HookNotFoundException;
 use izi\prestashop\Hook\Exception\HookNotImplementedException;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
 use izi\prestashop\Installer\DatabaseInstaller;
@@ -247,9 +248,20 @@ class InPostIzi extends PaymentModule implements WidgetInterface
                 ->execute($hookName, $parameters);
         } catch (ModuleErrorInterface $e) {
             throw $e;
+        } catch (InvalidHookParamException $e) {
+            $this->getLogger()->debug('Invalid params passed to hook "{hookName}".', [
+                'hookName' => $hookName,
+                'exception' => $e,
+            ]);
+
+            if (_PS_MODE_DEV_) {
+                throw $e;
+            }
+
+            return null;
         } catch (HookNotImplementedException $e) {
             $this->getLogger()->warning('Hook "{hookName}" is not implemented.', [
-                'hookName' => $e->getHookName(),
+                'hookName' => $hookName,
             ]);
 
             return null;

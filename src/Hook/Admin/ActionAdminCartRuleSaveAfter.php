@@ -7,6 +7,7 @@ namespace izi\prestashop\Hook\Admin;
 use izi\prestashop\Command\Config\UpdateCartRuleOptionsCommand;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Form\Type\CartRuleOptionsType;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Module\Exception\PrestaShopModuleErrorException;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -54,7 +55,7 @@ final class ActionAdminCartRuleSaveAfter implements HookInterface
         }
 
         if (!$cartRule instanceof \CartRule) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "return" to be false or an instance of %s, "%s" given.', \CartRule::class, get_debug_type($cartRule)));
+            throw InvalidHookParamException::unexpectedType('return', $cartRule, \CartRule::class);
         }
 
         $form = $this->formFactory->create(CartRuleOptionsType::class, new UpdateCartRuleOptionsCommand((int) $cartRule->id), [
@@ -75,7 +76,7 @@ final class ActionAdminCartRuleSaveAfter implements HookInterface
         $controller = $parameters['controller'] ?? null;
 
         if (!$controller instanceof \AdminControllerCore) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "controller" to be an instance of %s, "%s" given.', \AdminControllerCore::class, get_debug_type($controller)));
+            throw InvalidHookParamException::unexpectedType('controller', $controller, \AdminControllerCore::class);
         }
 
         $this->setControllerErrors($controller, $form);

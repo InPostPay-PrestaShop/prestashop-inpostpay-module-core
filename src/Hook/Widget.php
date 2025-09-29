@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook;
 
+use izi\prestashop\Hook\Exception\InvalidArgumentException;
 use izi\prestashop\View\Templating\RendererInterface;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
@@ -61,6 +62,6 @@ final class Widget implements WidgetInterface
             return;
         }
 
-        throw new \InvalidArgumentException(sprintf('Expected hook name to be a string or null, "%s" given', get_debug_type($hookName)));
+        throw new InvalidArgumentException(sprintf('Expected hook name to be a string or null, "%s" given', get_debug_type($hookName)));
     }
 }

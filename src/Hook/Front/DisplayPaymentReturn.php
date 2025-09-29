@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 
 final class DisplayPaymentReturn implements HookInterface
@@ -32,7 +33,7 @@ final class DisplayPaymentReturn implements HookInterface
         $order = $parameters['order'] ?? null;
 
         if (!$order instanceof \Order) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "order" to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($order)));
+            throw InvalidHookParamException::unexpectedType('order', $order, \Order::class);
         }
 
         if ($this->shouldBeRendered(self::HOOK_NAME, $order)) {

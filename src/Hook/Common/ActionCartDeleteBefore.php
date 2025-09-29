@@ -6,6 +6,7 @@ namespace izi\prestashop\Hook\Common;
 
 use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\CommandBusInterface;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 
 final class ActionCartDeleteBefore implements HookInterface
@@ -35,7 +36,7 @@ final class ActionCartDeleteBefore implements HookInterface
         $cart = $parameters['object'] ?? null;
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
+            throw InvalidHookParamException::unexpectedType('object', $cart, \Cart::class);
         }
 
         if (0 >= $cartId = (int) $cart->id) {

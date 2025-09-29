@@ -7,6 +7,7 @@ namespace izi\prestashop\Hook\Front;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
@@ -39,7 +40,7 @@ trait ProductWidgetRendererTrait
     private $basketSessionRepository;
 
     /**
-     * @param ProductLazyArray|array{id_product: int, add_to_cart_url: string|null} $product
+     * @param ProductLazyArray|array{id_product: int} $product
      */
     private function renderWidget($product, array $parameters, string $hookName): string
     {
@@ -69,7 +70,7 @@ trait ProductWidgetRendererTrait
     }
 
     /**
-     * @param ProductLazyArray|array{add_to_cart_url: string|null} $product
+     * @param ProductLazyArray|array $product
      */
     private function shouldDisplayWidget(string $hookName, $product): bool
     {
@@ -111,5 +112,27 @@ trait ProductWidgetRendererTrait
         }
 
         return $styles;
+    }
+
+    /**
+     * @return array|\ArrayAccess
+     */
+    private function getProduct(array $parameters)
+    {
+        $product = $parameters['product'] ?? null;
+
+        if (!is_array($product) && !$product instanceof \ArrayAccess) {
+            throw InvalidHookParamException::unexpectedType('product', $product, 'array|ArrayAccess');
+        }
+
+        if (!isset($product['id_product'])) {
+            throw new InvalidHookParamException('Expected offset "id_product" in parameter "product".');
+        }
+
+        if (!is_numeric($product['id_product'])) {
+            throw new InvalidHookParamException('Expected offset "id_product" of parameter "product" to be numeric.');
+        }
+
+        return $product;
     }
 }

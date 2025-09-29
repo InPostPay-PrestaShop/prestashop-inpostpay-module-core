@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Common\Product;
 
 use izi\prestashop\Event\EventDispatcherInterface;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Product\Event\ProductEvent;
 
@@ -35,7 +36,7 @@ final class ActionProductUpdateAfter implements HookInterface
         $product = $parameters['object'] ?? null;
 
         if (!$product instanceof \Product) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \Product::class, get_debug_type($product)));
+            throw InvalidHookParamException::unexpectedType('object', $product, \Product::class);
         }
 
         $this->dispatcher->dispatch(new ProductEvent($product), ProductEvent::UPDATED);

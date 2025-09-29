@@ -6,6 +6,7 @@ namespace izi\prestashop\Hook\Common;
 
 use izi\prestashop\Event\CartUpdatedEvent;
 use izi\prestashop\Event\EventDispatcherInterface;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 
 final class ActionCartUpdateAfter implements HookInterface
@@ -47,7 +48,7 @@ final class ActionCartUpdateAfter implements HookInterface
         $cart = $parameters['object'] ?? null;
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "cart" to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
+            throw InvalidHookParamException::unexpectedType('object', $cart, \Cart::class);
         }
 
         if ($this->context->controller instanceof \ModuleFrontControllerCore && $this->module === $this->context->controller->module) {
