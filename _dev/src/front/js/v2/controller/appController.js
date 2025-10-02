@@ -1,6 +1,7 @@
 import widgetOptionsBuilder from '../builder/widgetOptionsBuilder';
 import getBindingApiKey from '../handler/getBindingApiKey';
 import unboundWidgetClicked from '../handler/unboundWidgetClicked';
+import updateProductActionsBlock from '../handler/updateProductActionsBlock';
 import handleBasketEvent from '../handler/handleBasketEvent';
 import widget from '../components/widget';
 
@@ -28,7 +29,10 @@ const appController = () => {
     initWidget(build());
 
     window.prestashop.on('updatedCart', () => refreshWidget());
-    window.prestashop.on('updatedProduct', () => refreshWidget());
+    window.prestashop.on('updatedProduct', (event) => {
+      updateProductActionsBlock(event)
+      refreshWidget()
+    });
   };
 
   return {
