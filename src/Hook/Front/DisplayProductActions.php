@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Configuration\ProductAwareWidgetDisplayConfigurationInterface;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
@@ -52,15 +54,20 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
     {
         $product = $this->getProduct($parameters);
 
-        if (self::HOOK_NAME !== $this->generalConfiguration->getProductCardDisplayHook()) {
-            return '';
+        /**
+         * @var $configuration ProductAwareWidgetDisplayConfigurationInterface
+         */
+        $configuration = $this->configuration->getDisplayConfiguration(BindingPlace::ProductCard());
+
+        if (self::HOOK_NAME === $this->generalConfiguration->getProductCardDisplayHook() && $configuration->isDisplayed($product)) {
+            return $this->renderer->render('module:inpostizi/views/templates/front/productButtonWidget.tpl', [
+                'widget' => $this->renderWidget($product, $parameters, self::HOOK_NAME),
+                'styles' => $this->getHtmlStyles(),
+                'hookName' => self::HOOK_NAME,
+                'idProduct' => $product['id_product'],
+            ]);
         }
 
-        return $this->renderer->render('module:inpostizi/views/templates/front/productButtonWidget.tpl', [
-            'widget' => $this->renderWidget($product, $parameters, self::HOOK_NAME),
-            'styles' => $this->getHtmlStyles(),
-            'hookName' => self::HOOK_NAME,
-            'idProduct' => $product['id_product'],
-        ]);
+        return '';
     }
 }

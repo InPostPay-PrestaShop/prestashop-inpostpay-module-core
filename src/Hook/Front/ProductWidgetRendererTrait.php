@@ -54,10 +54,6 @@ trait ProductWidgetRendererTrait
 
         $configuration = $this->configuration->getDisplayConfiguration(BindingPlace::ProductCard());
 
-        if (!$configuration->isDisplayed($product)) {
-            return '';
-        }
-
         $widgetConfig = $configuration
             ->getWidgetConfiguration()
             ->setProductId((string) $productId);
