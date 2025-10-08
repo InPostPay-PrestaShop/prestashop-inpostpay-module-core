@@ -52,6 +52,7 @@ final class WidgetConfigurationProvider implements AssetsProviderInterface
         return (new Assets())
             ->addJavaScriptVariable('inpostizi_fetch_binding_key', $fetchAfterRender)
             ->addJavaScriptVariable('inpostizi_merchant_client_id', $this->apiConfiguration->getMerchantClientId())
+            ->addJavaScriptVariable('inpostizi_widget_split_bound_enabled', $this->configuration->isWidgetSplitBoundEnabled())
             ->addJavaScriptVariable('inpostizi_binding_api_key', $bindingApiKey);
     }
 

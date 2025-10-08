@@ -54,6 +54,11 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
     private $sendAnalyticsData;
 
     /**
+     * @var bool
+     */
+    private $widgetSplitBoundEnabled;
+
+    /**
      * @var int|null ID of {@see \CMS}
      *
      * @Assert\GreaterThan(0)
@@ -67,7 +72,8 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
         ?string $productCardDisplayHook = null,
         ?string $checkoutButtonDisplayHook = null,
         bool $fullPageCacheModuleInUse = false,
-        bool $sendAnalyticsData = false
+        bool $sendAnalyticsData = false,
+        bool $widgetSplitBoundEnabled = false
     ) {
         $this->enabledForEveryone = $enabledForEveryone;
         $this->maxSuggestedProducts = $maxSuggestedProducts;
@@ -76,6 +82,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
         $this->checkoutButtonDisplayHook = $checkoutButtonDisplayHook;
         $this->fullPageCacheModuleInUse = $fullPageCacheModuleInUse;
         $this->sendAnalyticsData = $sendAnalyticsData;
+        $this->widgetSplitBoundEnabled = $widgetSplitBoundEnabled;
     }
 
     public function isEnabledForEveryone(): bool
@@ -175,6 +182,18 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
     public function setDefaultPromoDetailsPageId(?int $cmsId): self
     {
         $this->defaultPromoDetailsPageId = $cmsId;
+
+        return $this;
+    }
+
+    public function isWidgetSplitBoundEnabled(?int $shopId = null): bool
+    {
+        return $this->widgetSplitBoundEnabled;
+    }
+
+    public function setWidgetSplitBoundEnabled(bool $widgetSplitBoundEnabled): GeneralConfiguration
+    {
+        $this->widgetSplitBoundEnabled = $widgetSplitBoundEnabled;
 
         return $this;
     }

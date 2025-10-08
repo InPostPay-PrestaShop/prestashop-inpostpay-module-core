@@ -20,6 +20,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
     private const CHECKOUT_BUTTON_DISPLAY_HOOK = 'INPOST_PAY_CHECKOUT_DISPLAY_HOOK';
     private const FULL_PAGE_CACHE_MODULE_IN_USE = 'INPOST_PAY_FULL_PAGE_CACHE_MODULE_IN_USE';
     private const SEND_ANALYTICS_DATA = 'INPOST_PAY_SEND_ANALYTICS_DATA';
+    private const WIDGET_SPLIT_BOUND = 'INPOST_PAY_WIDGET_SPLIT_BOUND';
     private const DEFAULT_PROMOTION_DETAILS_PAGE_ID = 'INPOST_PAY_DEFAULT_PROMO_DETAILS_CMS_ID';
 
     /**
@@ -85,6 +86,11 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
         return (bool) $this->configuration->get(self::SEND_ANALYTICS_DATA, $shopId);
     }
 
+    public function isWidgetSplitBoundEnabled(?int $shopId = null): bool
+    {
+        return (bool) $this->configuration->get(self::WIDGET_SPLIT_BOUND, $shopId);
+    }
+
     public function getDefaultPromoDetailsPageId(?int $shopId = null): ?int
     {
         $value = $this->configuration->get(self::DEFAULT_PROMOTION_DETAILS_PAGE_ID, $shopId);
@@ -104,7 +110,8 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
             $this->getProductCardDisplayHook(),
             $this->getCheckoutButtonDisplayHook(),
             $this->isFullPageCacheModuleInUse(),
-            $this->isSendAnalyticsData()
+            $this->isSendAnalyticsData(),
+            $this->isWidgetSplitBoundEnabled()
         );
 
         return $configuration->setDefaultPromoDetailsPageId($this->getDefaultPromoDetailsPageId());
@@ -119,6 +126,7 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
         $this->configuration->set(self::CHECKOUT_BUTTON_DISPLAY_HOOK, $configuration->getCheckoutButtonDisplayHook());
         $this->configuration->set(self::FULL_PAGE_CACHE_MODULE_IN_USE, $configuration->isFullPageCacheModuleInUse());
         $this->configuration->set(self::SEND_ANALYTICS_DATA, $configuration->isSendAnalyticsData());
+        $this->configuration->set(self::WIDGET_SPLIT_BOUND, $configuration->isWidgetSplitBoundEnabled());
 
         if ($configuration instanceof PromoCodesConfigurationInterface) {
             $this->configuration->set(self::DEFAULT_PROMOTION_DETAILS_PAGE_ID, $configuration->getDefaultPromoDetailsPageId());

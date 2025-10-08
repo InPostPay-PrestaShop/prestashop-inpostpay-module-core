@@ -100,6 +100,11 @@ final class GeneralConfigurationType extends AbstractType
                 'label' => $this->translator->l('Send analytics data', self::TRANSLATION_SOURCE),
                 'help' => $this->translator->l('Use this option if you want to send analytics data to InPostPay', self::TRANSLATION_SOURCE),
             ])
+            ->add('widgetSplitBoundEnabled', $switchClass, [
+                'property_path' => 'generalConfiguration.widgetSplitBoundEnabled',
+                'label' => $this->translator->l('Use the split button', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('Replaces the standard button on the product card with a split version that offers two actions: add to cart and display information about basket binding.', self::TRANSLATION_SOURCE),
+            ])
             ->add('apiConfiguration', ApiConfigurationType::class, [
                 'label' => false,
                 'error_mapping' => [
