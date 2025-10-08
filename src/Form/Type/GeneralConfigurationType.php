@@ -112,6 +112,11 @@ final class GeneralConfigurationType extends AbstractType
                 'label' => $this->translator->trans('Send analytics data', [], 'Modules.Inpostizi.General'),
                 'help' => $this->translator->trans('If enabled, the values of the customer\'s tracking cookies will be added to the order data sent to InPost Pay.', [], 'Modules.Inpostizi.General'),
             ])
+            ->add('widgetSplitBoundEnabled', SwitchType::class, [
+                'property_path' => 'generalConfiguration.widgetSplitBoundEnabled',
+                'label' => $this->translator->trans('Use the split button', [], 'Modules.Inpostizi.General'),
+                'help' => $this->translator->trans('Replaces the standard button on the product page with a split version that offers two actions: add to cart and display information about basket binding.', [], 'Modules.Inpostizi.General'),
+            ])
             ->add('ordersConfiguration', OrdersConfigurationType::class, [
                 'label' => false,
             ])

@@ -13,6 +13,8 @@ const appController = () => {
       setBasketBindingApiKey,
       setUnboundWidgetClicked,
       setHandleBasketEvent,
+      setIsWidgetSplitBoundEnabled,
+      setAddToBasketClicked,
       setLanguage,
       build,
     } = widgetOptionsBuilder();
@@ -22,9 +24,11 @@ const appController = () => {
     }
 
     setMerchantClientId(window.inpostizi_merchant_client_id);
+    setIsWidgetSplitBoundEnabled(window.inpostizi_widget_split_bound_enabled);
     setBasketBindingApiKey(getBindingApiKey());
     setUnboundWidgetClicked(unboundWidgetClicked);
     setHandleBasketEvent(handleBasketEvent);
+    setAddToBasketClicked(unboundWidgetClicked);
 
     initWidget(build());
 

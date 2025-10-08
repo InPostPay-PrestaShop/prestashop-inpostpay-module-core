@@ -4,8 +4,10 @@
  * @property {undefined|string|Promise<string>} basketBindingApiKey
  * @property {Promise<string>} unboundWidgetClicked
  * @property {function} handleBasketEvent
+ * @property {function} addToBasketClicked
  * @property {string|undefined} apiBaseUrl
  * @property {boolean} webView
+ * @property {boolean} isWidgetSplitBoundEnabled
  * @property {string} language
  */
 
@@ -15,9 +17,11 @@ const widgetOptionsBuilder = () => {
     merchantClientId: '',
     basketBindingApiKey: undefined,
     unboundWidgetClicked: undefined,
+    addToBasketClicked: undefined,
     handleBasketEvent: () => false,
     apiBaseUrl: undefined,
     webView: false,
+    isWidgetSplitBoundEnabled: false,
     language: 'pl',
   };
 
@@ -71,6 +75,20 @@ const widgetOptionsBuilder = () => {
   };
 
   /**
+   * @param widgetSplitBoundEnabled {boolean}
+   */
+  const setIsWidgetSplitBoundEnabled = (widgetSplitBoundEnabled) => {
+    widgetOptions.isWidgetSplitBoundEnabled = widgetSplitBoundEnabled;
+  };
+
+  /**
+   * @param addToBasketClicked {function}
+   */
+  const setAddToBasketClicked = (addToBasketClicked) => {
+    widgetOptions.addToBasketClicked = addToBasketClicked;
+  };
+
+  /**
    * @return {WidgetOptions}
    */
   const build = () => {
@@ -82,6 +100,9 @@ const widgetOptionsBuilder = () => {
       }
     }
 
+    filteredOptions.features = {};
+    filteredOptions.features.isWidgetSplitBoundEnabled = filteredOptions.isWidgetSplitBoundEnabled;
+
     return filteredOptions;
   };
 
@@ -90,6 +111,8 @@ const widgetOptionsBuilder = () => {
     setBasketBindingApiKey,
     setUnboundWidgetClicked,
     setHandleBasketEvent,
+    setIsWidgetSplitBoundEnabled,
+    setAddToBasketClicked,
     setApiBaseUrl,
     setWebView,
     setLanguage,
