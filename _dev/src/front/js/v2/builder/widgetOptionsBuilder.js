@@ -100,6 +100,9 @@ const widgetOptionsBuilder = () => {
       }
     }
 
+    /**
+     * TEMPORARY SOLUTION
+     */
     filteredOptions.features = {};
     filteredOptions.features.isWidgetSplitBoundEnabled = filteredOptions.isWidgetSplitBoundEnabled;
 
