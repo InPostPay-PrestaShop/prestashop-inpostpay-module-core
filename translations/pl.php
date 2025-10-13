@@ -72,6 +72,8 @@ $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_38e0bba4abb1c099b3c3b9
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_678e433c080caebffb245f4ec097579d'] = 'Użyj tej opcji jeśli używasz modułu full page cache lub innych narzędzi full page cache typu varnish, lightspeed cache.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_062a2e2d89c1e5a2f9cc6762d32ef806'] = 'Przesyłaj dane analityczne';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_787a92562f9876f7e2fdb44cfe05dccf'] = 'Użyj tej opcji, jeśli chcesz wysyłać dane analityczne do InPost Pay';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_c4b90283041534b915dd88c59b28e4d1'] = 'Używaj podzielonego widgetu';
+$_MODULE['<{inpostizi}prestashop>generalconfigurationtype_6ea7fbeb751c8934e3ae69b38de72e5a'] = 'Jeżeli włączone, widget na karcie produktu będzie podzielony na dwa przyciski: dodawania do koszyka oraz otwierający modal informacyjny.';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_0d5381fd4e980fb92ffc90a505b4e992'] = 'Konfiguracja zdjęć produktów';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_7a440309fc897f07a1d99a07af29d8db'] = 'Maksymalna liczba produktów sugerowanych';
 $_MODULE['<{inpostizi}prestashop>generalconfigurationtype_2d18889b4f14532c8f33c95a7af033c9'] = 'W celu pokazania produktów sugerowanych należy uzupełnić sekcję Produktów Powiązanych w konfiguracji produktu.';
