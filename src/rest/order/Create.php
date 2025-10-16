@@ -607,7 +607,7 @@ class Create
 
     private function validateCart(\Cart $cart, CreateOrderRequest $request): void
     {
-        $products = $cart->getProducts();
+        $products = $cart->getProducts(true);
 
         if ([] === $products) {
             throw new CannotCreateOrderException($this->context->getTranslator()->trans('Cart is empty', [], 'Shop.Notifications.Error'));
