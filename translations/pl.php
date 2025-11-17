@@ -105,6 +105,9 @@ $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e8051555e4af6e673fbe93a
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e9adbbd1cd7eff7e1a588c31f79521d5'] = 'POS ID';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_d3188981fad68a05eec51ac57e69feca'] = 'W przypadku środowiska sandbox skontaktuj się z InPost. W przypadku środowiska produkcyjnego - zaloguj się do InPost i pobierz POS ID.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_f13673c7e261fd8d00915c9cb768ad95'] = 'Komentarz zamówienia';
+$_MODULE['<{inpostizi}prestashop>productconfigurationtype_f0ffb145cf94055a8a4b4036007054b9'] = 'Domyślny rodzaj galerii zdjęć';
+$_MODULE['<{inpostizi}prestashop>productconfigurationtype_d242d58268fec7de2df17d2eb3533511'] = 'Określa, które zdjęcia są przesyłane do aplikacji mobilnej (dotyczy zarówno produktów z koszyka i zamówienia, jak i promowanych produktów).';
+$_MODULE['<{inpostizi}prestashop>productconfigurationtype_21a34acbe661464bf8ec2534c64a402a'] = 'Możesz nadpisać to ustawienie dla poszczególnych produktów, korzystając z formularza edycji produktu.';
 $_MODULE['<{inpostizi}prestashop>productconfigurationtype_dc69b3498766f84bb8aa3316146bdd53'] = 'Typ zdjęcia na liście produktów';
 $_MODULE['<{inpostizi}prestashop>productconfigurationtype_47b35415c84af2e3bb76cacfa921a23a'] = 'Ten format zdjęcia będzie wyświetlany na liście produktów w aplikacji.';
 $_MODULE['<{inpostizi}prestashop>productconfigurationtype_fe6d529783e5c4708e3ee5c627af8c25'] = 'Typ zdjęcia w szczegółach produktu';
@@ -189,6 +192,7 @@ $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_d64fff9bf53342093407
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_0befa43bc12a10af2a8897889570b8ee'] = 'Problem z dostępem do API: %s';
 $_MODULE['<{inpostizi}prestashop>configurationstatuschecker_a7030a339317fbdb2af045820a465f79'] = 'Merchant client ID nie zostało skonfigurowane. Widget InPost Pay nie będzie wyświetlany.';
 $_MODULE['<{inpostizi}prestashop>deliveryoptionsstatuschecker_3194a4d8bc60ba3e66ddd94f10f32889'] = 'Nie jest dostępna żadna opcja dostawy.';
+$_MODULE['<{inpostizi}prestashop>actionafterupdateproductformhandler_4fc1c75e187bb04304e595bf0a9e47e7'] = 'Wystąpił błąd podczas aktualizacji opcji InPost Pay.';
 $_MODULE['<{inpostizi}prestashop>actionfrontcontrollersetmedia_05e070788d5522addd174a9baa153f9f'] = 'Coś poszło nie tak. Spróbuj ponownie później.';
 $_MODULE['<{inpostizi}prestashop>actiongetpaymentoptions_a9e819aadeb05ca1df49418d8ef8faf2'] = 'Płać z InPost Pay';
 $_MODULE['<{inpostizi}prestashop>hotproductvalidator_c0674df384ee0721d5bf7a6152a1608f'] = 'Produkt lub kombinacja nie istnieje.';
@@ -214,10 +218,14 @@ $_MODULE['<{inpostizi}prestashop>producttype_101ca77dec0df7d2f721467aef2a03d8'] 
 $_MODULE['<{inpostizi}prestashop>producttype_ba08c35a9d8f80fd99614f57e7f4c03c'] = 'Dostosowywalne produkty';
 $_MODULE['<{inpostizi}prestashop>producttype_c6ca748854a782c9150f972d4e4c9074'] = 'Zestawy produktów';
 $_MODULE['<{inpostizi}prestashop>producttype_53d0ca486dc7ee72cac2c538297ad2a3'] = 'Produkty wirtualne';
+$_MODULE['<{inpostizi}prestashop>imagegallerytype_e37cf03c2b4c1b5c0ad5214081e2c009'] = 'Wszystkie zdjęcia';
+$_MODULE['<{inpostizi}prestashop>imagegallerytype_4dd0ff8772b0b1249408dc9e4f6b3885'] = 'Tylko zdjęcie okładkowe';
 $_MODULE['<{inpostizi}prestashop>restrictedaction_4117ad91ce7cf3af284a17d8bdc78713'] = 'Nie wyświetlaj widgetu';
 $_MODULE['<{inpostizi}prestashop>restrictedaction_1401d7c432212f9308f54b57f519e5e7'] = 'Nie pozwól zamówić';
 $_MODULE['<{inpostizi}prestashop>restrictedaction_2acde1b85cc02410a25711f7f503dc1c'] = 'Nie pozwól na dostawę do Paczkomatu';
 $_MODULE['<{inpostizi}prestashop>restrictedaction_9615ed3135486a635731930d8009ca18'] = 'Nie pozwól na dostawę kurierem';
+$_MODULE['<{inpostizi}prestashop>productoptionstype_8f37d219d605ffeb1e11cf5aec34076c'] = 'Rodzaj galerii zdjęć';
+$_MODULE['<{inpostizi}prestashop>productoptionstype_a7f7058d98537328c1dbabdcae4169c9'] = 'Opcje InPost Pay';
 $_MODULE['<{inpostizi}prestashop>giftwrappinghandler_d858ecb18335ce715d73570770de37fb'] = 'Pakowanie prezentowe nie jest już dostępne';
 $_MODULE['<{inpostizi}prestashop>paymenttypetranslator_e7f9e382dc50889098cbe56f2554c77b'] = 'Karta kredytowa';
 $_MODULE['<{inpostizi}prestashop>paymenttypetranslator_5c56966215f9c0850e2caeadc446dda8'] = 'Zapamiętana karta kredytowa';

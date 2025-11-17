@@ -9,9 +9,8 @@ use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Form\Type\CartRuleOptionsType;
 use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
-use izi\prestashop\Module\Exception\PrestaShopModuleErrorException;
+use izi\prestashop\Hook\Legacy\ControllerHelper;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 final class ActionAdminCartRuleSaveAfter implements HookInterface
@@ -40,7 +39,7 @@ final class ActionAdminCartRuleSaveAfter implements HookInterface
     }
 
     /**
-     * @param array{return: false|\CartRule, controller: \AdminCartRulesControllerCore, request?: Request} $parameters
+     * @param array{return: \CartRule|false, controller: \AdminCartRulesControllerCore, request?: Request} $parameters
      */
     public function execute(array $parameters): void
     {
@@ -55,7 +54,7 @@ final class ActionAdminCartRuleSaveAfter implements HookInterface
         }
 
         if (!$cartRule instanceof \CartRule) {
-            throw InvalidHookParamException::unexpectedType('return', $cartRule, \CartRule::class);
+            throw InvalidHookParamException::unexpectedType('return', $cartRule, \CartRule::class . '|false');
         }
 
         $form = $this->formFactory->create(CartRuleOptionsType::class, new UpdateCartRuleOptionsCommand((int) $cartRule->id), [
@@ -79,40 +78,7 @@ final class ActionAdminCartRuleSaveAfter implements HookInterface
             throw InvalidHookParamException::unexpectedType('controller', $controller, \AdminControllerCore::class);
         }
 
-        $this->setControllerErrors($controller, $form);
-    }
-
-    /**
-     * @see \AdminControllerCore::postProcess()
-     *
-     * @todo: store errors in session and redirect back to the cart rule edit page?
-     */
-    private function setControllerErrors(\AdminControllerCore $controller, FormInterface $form): void
-    {
-        $errors = $this->getFormErrors($form);
-        $error = array_pop($errors);
-        $controller->errors = array_merge($controller->errors, $errors);
-        $controller->setRedirectAfter(null);
-
-        throw new PrestaShopModuleErrorException($error);
-    }
-
-    /**
-     * @return string[]
-     */
-    private function getFormErrors(FormInterface $form): array
-    {
-        $errors = [];
-
-        foreach ($form->getErrors(true) as $error) {
-            if (null === $origin = $error->getOrigin()) {
-                $errors[] = $error->getMessage();
-            } else {
-                $label = $origin->getConfig()->getOption('label') ?? $origin->getName();
-                $errors[] = sprintf('%s: %s', $label, $error->getMessage());
-            }
-        }
-
-        return $errors;
+        // todo: store errors in session and redirect back to the cart rule edit page?
+        ControllerHelper::setFormErrors($controller, $form);
     }
 }

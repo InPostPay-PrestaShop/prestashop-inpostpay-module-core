@@ -32,6 +32,7 @@ use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ContextManager;
 use izi\prestashop\Product\Image\ImageUrlsProvider;
+use izi\prestashop\Product\Image\ImageUrlsProviderInterface;
 use izi\prestashop\Product\Price\BatchLowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceQuery;
@@ -46,6 +47,7 @@ use izi\prestashop\PromoCode\PromoCodeProviderInterface;
 use izi\prestashop\Validator\Product\Unrestricted;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 use PrestaShop\PrestaShop\Core\Cart\Calculator;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -1075,13 +1077,24 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         );
     }
 
-    private function getImageProvider(): ImageUrlsProvider
+    private function getImageProvider(): ImageUrlsProviderInterface
     {
-        return $this->imageProvider ?? $this->imageProvider = ImageUrlsProvider::create(
-            $this->imageRetriever,
-            $this->contextManager->getContext(),
-            $this->productConfiguration
-        );
+        if (isset($this->imageProvider)) {
+            return $this->imageProvider;
+        }
+
+        try {
+            /** @var \InPostIzi $module */
+            $module = \Module::getInstanceByName('inpostizi');
+
+            return $this->imageProvider = $module->get(ImageUrlsProviderInterface::class);
+        } catch (ServiceNotFoundException $e) {
+            return $this->imageProvider = ImageUrlsProvider::create(
+                $this->imageRetriever,
+                $this->contextManager->getContext(),
+                $this->productConfiguration
+            );
+        }
     }
 
     private function willExceedFreeDeliveryThreshold(DeliveryType $deliveryType, Price $productPrice, Quantity $quantity): bool

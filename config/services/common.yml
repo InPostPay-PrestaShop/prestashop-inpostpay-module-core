@@ -1079,6 +1079,13 @@ services:
     arguments:
       - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
 
+  izi\prestashop\ProductOptions\ProductOptionsRepositoryInterface: '@izi\prestashop\ProductOptions\ProductOptionsRepository'
+  izi\prestashop\ProductOptions\ProductOptionsRepository:
+    class: izi\prestashop\ProductOptions\ProductOptionsRepository
+    public: false
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+
   izi\prestashop\PromoCode\AvailablePromotionsProviderInterface: '@izi\prestashop\PromoCode\AvailableCartRulesProvider'
   izi\prestashop\PromoCode\AvailableCartRulesProvider:
     class: izi\prestashop\PromoCode\AvailableCartRulesProvider
@@ -1190,7 +1197,10 @@ services:
       - '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
       - '@inpost.izi.object_model.country_repository'
 
-  izi\prestashop\Product\Image\ImageUrlsProviderInterface: '@izi\prestashop\Product\Image\ImageUrlsProvider'
+  izi\prestashop\Product\Image\ImageUrlsProviderInterface:
+    alias: izi\prestashop\Product\Image\ImageUrlsProvider
+    public: true # todo: refactor and make private
+
   izi\prestashop\Product\Image\ImageUrlsProvider:
     class: izi\prestashop\Product\Image\ImageUrlsProvider
     public: false
@@ -1199,6 +1209,7 @@ services:
       - '@izi\prestashop\Configuration\ProductConfigurationInterface'
       - '@inpost.izi.context'
       - '@izi\prestashop\ObjectModel\Repository\ImageTypeRepository'
+      - '@izi\prestashop\ProductOptions\ProductOptionsRepositoryInterface'
 
   inpost.izi.product.image_retriever:
     class: PrestaShop\PrestaShop\Adapter\Image\ImageRetriever

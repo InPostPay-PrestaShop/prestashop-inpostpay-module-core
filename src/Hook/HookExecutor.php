@@ -41,6 +41,13 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Admin\ActionAdminInPostConfirmedShipmentsControllerAfter::HOOK_NAME => '?' . Admin\ActionAdminInPostConfirmedShipmentsControllerAfter::class,
             Admin\ActionAdminInPostConfirmedShipmentsControllerBefore::HOOK_NAME => '?' . Admin\ActionAdminInPostConfirmedShipmentsControllerBefore::class,
 
+            // admin products form
+            Admin\Product\ActionProductFormBuilderModifier::HOOK_NAME => '?' . Admin\Product\ActionProductFormBuilderModifier::class,
+            Admin\Product\ActionAfterUpdateProductFormHandler::HOOK_NAME => '?' . Admin\Product\ActionAfterUpdateProductFormHandler::class,
+            Legacy\Admin\Product\DisplayAdminProductsExtra::HOOK_NAME => '?' . Legacy\Admin\Product\DisplayAdminProductsExtra::class,
+            Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom::HOOK_NAME => '?' . Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom::class,
+            Legacy\Admin\Product\ActionAdminProductsSaveAfter::HOOK_NAME => '?' . Legacy\Admin\Product\ActionAdminProductsSaveAfter::class,
+
             Common\ActionCartDeleteBefore::HOOK_NAME => Common\ActionCartDeleteBefore::class,
             Common\ActionCartUpdateAfter::HOOK_NAME => Common\ActionCartUpdateAfter::class,
             Common\ActionValidateOrder::HOOK_NAME => Common\ActionValidateOrder::class,

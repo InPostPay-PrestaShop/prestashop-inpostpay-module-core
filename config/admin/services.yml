@@ -14,6 +14,7 @@ services:
       $context: '@inpost.izi.context'
       $assetsProviders: !tagged inpost.izi.admin_assets_provider
       $formFactory: '@=container.has("form.factory") ? service("form.factory") : service("inpost.izi.form_factory")'
+      $debug: '%kernel.debug%'
 
   izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter:
     class: izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter
@@ -35,6 +36,21 @@ services:
 
   izi\prestashop\Hook\Admin\DisplayBackOfficeHeader:
     class: izi\prestashop\Hook\Admin\DisplayBackOfficeHeader
+
+  izi\prestashop\Hook\Admin\Product\ActionProductFormBuilderModifier:
+    class: izi\prestashop\Hook\Admin\Product\ActionProductFormBuilderModifier
+
+  izi\prestashop\Hook\Admin\Product\ActionAfterUpdateProductFormHandler:
+    class: izi\prestashop\Hook\Admin\Product\ActionAfterUpdateProductFormHandler
+
+  izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsExtra:
+    class: izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsExtra
+
+  izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom:
+    class: izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom
+
+  izi\prestashop\Hook\Legacy\Admin\Product\ActionAdminProductsSaveAfter:
+    class: izi\prestashop\Hook\Legacy\Admin\Product\ActionAdminProductsSaveAfter
 
   izi\prestashop\CommandBus:
     class: izi\prestashop\CommandBus
@@ -63,3 +79,5 @@ services:
     arguments:
       - izi\prestashop\Form\Type\CartRuleOptionsType: '@izi\prestashop\Form\Type\CartRuleOptionsType'
         izi\prestashop\Form\Type\ObjectModelType: '@izi\prestashop\Form\Type\ObjectModelType'
+        izi\prestashop\Form\Type\EnumType: '@izi\prestashop\Form\Type\EnumType'
+        izi\prestashop\ProductOptions\Form\ProductOptionsType: '@izi\prestashop\ProductOptions\Form\ProductOptionsType'
