@@ -393,16 +393,6 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             E_RECOVERABLE_ERROR => LogLevel::CRITICAL,
             E_ERROR => LogLevel::CRITICAL,
         ]);
-
-        // do not log deprecation notices triggered by external code
-        /** @var callable $prevHandler */
-        $prevHandler = set_error_handler(function (int $type, string $message, string $file, int $line) use (&$prevHandler) {
-            if ($type & (E_DEPRECATED | E_USER_DEPRECATED) && !str_starts_with($file, $this->module->getLocalPath())) {
-                return false;
-            }
-
-            return $prevHandler($type, $message, $file, $line);
-        });
     }
 
     private function handleOutput(string $buffer, int $phase): string
