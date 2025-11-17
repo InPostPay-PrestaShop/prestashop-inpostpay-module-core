@@ -1,6 +1,6 @@
 # common FO/BO configuration
 parameters:
-  inpost.izi.container_version: '2.3.0'
+  inpost.izi.container_version: '2.4.0'
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
   inpost.izi.logger_config:

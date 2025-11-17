@@ -23,17 +23,19 @@ final class HasUnrestrictedProductValidator extends ConstraintValidator
             throw new UnexpectedTypeException($value, \Cart::class);
         }
 
-        foreach ($value->getProducts() as $product) {
-            $violations = $this->context->getValidator()->startContext()->validate($product, new Unrestricted())->getViolations();
+        $productConstraint = new Unrestricted(['strict' => true]);
 
-            if (0 === count($violations)) {
+        foreach ($value->getProducts() as $product) {
+            $validator = $this->context->getValidator()->startContext();
+            $violations = $validator->validate($product, $productConstraint)->getViolations();
+
+            if (0 === $violations->count()) {
                 return;
             }
         }
 
         $this->context
             ->buildViolation($constraint->message)
-            ->setTranslationDomain('Shop.Notifications.Error')
             ->addViolation();
     }
 }
