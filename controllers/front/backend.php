@@ -397,7 +397,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         // do not log deprecation notices triggered by external code
         /** @var callable $prevHandler */
         $prevHandler = set_error_handler(function (int $type, string $message, string $file, int $line) use (&$prevHandler) {
-            if ($type & (E_DEPRECATED | E_USER_DEPRECATED) && !str_contains($file, $this->module->name)) {
+            if ($type & (E_DEPRECATED | E_USER_DEPRECATED) && !str_starts_with($file, $this->module->getLocalPath())) {
                 return false;
             }
 

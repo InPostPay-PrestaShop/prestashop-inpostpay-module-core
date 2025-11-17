@@ -85,6 +85,31 @@ services:
     tags:
       - { name: inpost.izi.hook }
 
+  izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsExtra:
+    class: izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsExtra
+    public: false
+    autowire: true
+    tags:
+      - { name: inpost.izi.hook }
+
+  izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom:
+    class: izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom
+    public: false
+    autowire: true
+    tags:
+      - { name: inpost.izi.hook }
+
+  izi\prestashop\Hook\Legacy\Admin\Product\ActionAdminProductsSaveAfter:
+    class: izi\prestashop\Hook\Legacy\Admin\Product\ActionAdminProductsSaveAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@inpost.izi.form_factory'
+      - '@izi\prestashop\CommandBusInterface'
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '%kernel.debug%'
+
   inpost.izi.constraint_validator_locator:
     class: izi\prestashop\DependencyInjection\ServiceLocator
     autowire: true

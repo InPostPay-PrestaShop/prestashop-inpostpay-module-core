@@ -30,6 +30,15 @@ services:
     arguments:
       - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
 
+  izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandlerInterface: '@izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandler'
+  izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandler:
+    class: izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandler
+    public: false
+    tags:
+      - { name: inpost.izi.command_handler }
+    arguments:
+      - '@izi\prestashop\ProductOptions\ProductOptionsRepositoryInterface'
+
   izi\prestashop\Form\Type\CartRuleOptionsType:
     class: izi\prestashop\Form\Type\CartRuleOptionsType
     tags:
@@ -45,3 +54,27 @@ services:
     arguments:
       - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
       - '@inpost.izi.context'
+
+  izi\prestashop\Form\Type\EnumType:
+    class: izi\prestashop\Form\Type\EnumType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+
+  izi\prestashop\ProductOptions\Form\ProductOptionsType:
+    class: izi\prestashop\ProductOptions\Form\ProductOptionsType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Configuration\ProductConfigurationInterface'
+      - '@izi\prestashop\Translation\LegacyTranslator'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Hook\Legacy\Admin\Product\ProductOptionsFormRenderer:
+    class: izi\prestashop\Hook\Legacy\Admin\Product\ProductOptionsFormRenderer
+    public: false
+    arguments:
+      - '@izi\prestashop\ProductOptions\ProductOptionsRepositoryInterface'
+      - '@inpost.izi.form_factory'
+      - '@izi\prestashop\View\Templating\RendererInterface'

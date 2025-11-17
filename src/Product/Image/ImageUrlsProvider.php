@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace izi\prestashop\Product\Image;
 
 use izi\prestashop\Common\Product\ProductImage;
+use izi\prestashop\Configuration\ProductConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
+use izi\prestashop\ProductOptions\ProductOptionsRepository;
+use izi\prestashop\ProductOptions\ProductOptionsRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 
 /**
@@ -36,6 +39,11 @@ final class ImageUrlsProvider implements ImageUrlsProviderInterface
     private $imageTypeRepository;
 
     /**
+     * @var ProductOptionsRepositoryInterface
+     */
+    private $productOptionsRepository;
+
+    /**
      * @var array<int, ImageTypes>
      */
     private $imageTypes = [];
@@ -43,12 +51,18 @@ final class ImageUrlsProvider implements ImageUrlsProviderInterface
     /**
      * @param ObjectRepositoryInterface<\ImageType> $imageTypeRepository
      */
-    public function __construct(ImageRetriever $imageRetriever, ProductConfigurationInterface $productConfiguration, \Context $context, ObjectRepositoryInterface $imageTypeRepository)
+    public function __construct(ImageRetriever $imageRetriever, ProductConfigurationInterface $productConfiguration, \Context $context, ObjectRepositoryInterface $imageTypeRepository, ?ProductOptionsRepositoryInterface $productOptionsRepository = null)
     {
+        if (null === $productOptionsRepository) {
+            @trigger_error(sprintf('Not passing a $productOptionsRepository to "%s()" is deprecated since 2.4.0.', __METHOD__), E_USER_DEPRECATED);
+            $productOptionsRepository = ProductOptionsRepository::create();
+        }
+
         $this->imageRetriever = $imageRetriever;
         $this->productConfiguration = $productConfiguration;
         $this->context = $context;
         $this->imageTypeRepository = $imageTypeRepository;
+        $this->productOptionsRepository = $productOptionsRepository;
     }
 
     /**
@@ -67,7 +81,8 @@ final class ImageUrlsProvider implements ImageUrlsProviderInterface
             $imageRetriever,
             $configuration,
             $context,
-            $module->get(ObjectManagerInterface::class)->getRepository(\ImageType::class)
+            $module->get(ObjectManagerInterface::class)->getRepository(\ImageType::class),
+            ProductOptionsRepository::create()
         );
     }
 
@@ -83,38 +98,39 @@ final class ImageUrlsProvider implements ImageUrlsProviderInterface
         }
 
         $shopId = $shopId ?? (int) $this->context->shop->id;
+        $cover = $this->getCover($images);
 
-        $coverUrl = $this->getCoverUrl($images, $shopId);
+        if (ImageGalleryType::OnlyCoverImage() === $this->getGalleryType($productId, $shopId)) {
+            $images = [$cover];
+        } else {
+            array_unshift($images, $cover);
+        }
+
+        $coverUrl = $this->getCoverUrl($cover, $shopId);
         $additionalImages = $this->getAdditionalImages($images, $shopId);
 
         return new ImageUrls($coverUrl, $additionalImages);
     }
 
-    private function getCoverUrl(array $images, int $shopId): ?string
+    private function getCover(array &$images): array
     {
-        if (null === $image = $this->getCover($images)) {
-            return null;
-        }
-
-        $imageType = $this->getImageType($shopId, 'normal');
-        $image = $image['bySize'][$imageType] ?? $image['small'];
-
-        return $image['url'];
-    }
-
-    private function getCover(array $images): ?array
-    {
-        foreach ($images as $image) {
+        foreach ($images as $key => $image) {
             if (!empty($image['cover'])) {
+                unset($images[$key]);
+
                 return $image;
             }
         }
 
-        if (false !== $image = reset($images)) {
-            return $image;
-        }
+        return array_shift($images);
+    }
 
-        return null;
+    private function getCoverUrl(array $image, int $shopId): ?string
+    {
+        $imageType = $this->getImageType($shopId, 'normal');
+        $image = $image['bySize'][$imageType] ?? $image['small'];
+
+        return $image['url'];
     }
 
     /**
@@ -161,5 +177,16 @@ final class ImageUrlsProvider implements ImageUrlsProviderInterface
         }
 
         return $imageType->name ?? $default;
+    }
+
+    private function getGalleryType(int $productId, int $shopId): ImageGalleryType
+    {
+        $options = $this->productOptionsRepository->find($productId);
+
+        if (null !== $options && $galleryType = $options->getImageGalleryType()) {
+            return $galleryType;
+        }
+
+        return ProductConfiguration::getDefaultImageGalleryTypeFromConfig($this->productConfiguration, $shopId);
     }
 }
