@@ -6,13 +6,14 @@ namespace izi\prestashop\Common\Delivery;
 
 use izi\prestashop\Enum\StringEnum;
 use izi\prestashop\Translation\LegacyTranslator;
+use izi\prestashop\Translation\TranslatableInterface;
 
 /**
  * @method static self Apm()
  * @method static self Courier()
  * @method static self Digital()
  */
-final class DeliveryType extends StringEnum
+final class DeliveryType extends StringEnum implements TranslatableInterface
 {
     private const APM = 'APM';
     private const COURIER = 'COURIER';

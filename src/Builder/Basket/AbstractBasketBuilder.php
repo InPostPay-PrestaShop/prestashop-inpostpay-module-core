@@ -939,18 +939,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $hasUnavailable = false;
         $productDeliveryDetails = [];
 
-        $isRestricted = false;
-        if (!empty($this->validator)) {
-            $violations = $this->validator->validate($productData, new Unrestricted((int) $productData['id_shop']));
-            $isRestricted = $violations->count() > 0;
-        }
-
         foreach (DeliveryType::cases() as $deliveryType) {
             if (!$this->hasDigitalDelivery && DeliveryType::Digital() === $deliveryType) {
                 continue;
             }
 
-            if ($isRestricted) {
+            if ($this->isProductRestricted($productData, $deliveryType)) {
                 $productDelivery = new DeliveryProduct($deliveryType, false);
             } else {
                 $productDelivery = $this->createCartProductDeliveryDetails($deliveryType, $product, $price, $quantity, $weight);
@@ -968,6 +962,20 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         }
 
         return $productDeliveryDetails;
+    }
+
+    private function isProductRestricted(array $product, DeliveryType $deliveryType): bool
+    {
+        if (null === $this->validator) {
+            return false;
+        }
+
+        $violations = $this->validator->validate($product, new Unrestricted([
+            'shopId' => (int) $product['id_shop'],
+            'deliveryType' => $deliveryType,
+        ]));
+
+        return 0 !== $violations->count();
     }
 
     private function getDeliveryOption(DeliveryType $deliveryType): ?DeliveryOption

@@ -44,7 +44,7 @@ final class ProductPageDisplayConfigurationType extends AbstractType
             ])
             ->add('productRestrictions', ProductRestrictionsType::class, [
                 'label' => $this->translator->l('Product restrictions', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('Widget will not be rendered on the product page if the product matches any of the below conditions.', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('The restriction will be applied if the product matches any of the below conditions.', self::TRANSLATION_SOURCE),
             ]);
     }
 

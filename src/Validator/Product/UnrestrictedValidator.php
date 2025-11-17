@@ -3,6 +3,7 @@
 namespace izi\prestashop\Validator\Product;
 
 use izi\prestashop\Configuration\ProductRestrictionsConfigurationInterface;
+use izi\prestashop\Product\Restriction\RestrictedAction;
 use izi\prestashop\Validator\Sequentially;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -13,16 +14,11 @@ final class UnrestrictedValidator extends ConstraintValidator
     /**
      * @var ProductRestrictionsConfigurationInterface
      */
-    private $productRestrictionConstraints;
+    private $configuration;
 
-    /**
-     * @var array<int, Constraint[]> constraints by shop ID
-     */
-    private $constraints;
-
-    public function __construct(ProductRestrictionsConfigurationInterface $productRestrictionConstraints)
+    public function __construct(ProductRestrictionsConfigurationInterface $configuration)
     {
-        $this->productRestrictionConstraints = $productRestrictionConstraints;
+        $this->configuration = $configuration;
     }
 
     public function validate($value, Constraint $constraint): void
@@ -39,26 +35,36 @@ final class UnrestrictedValidator extends ConstraintValidator
             throw new UnexpectedTypeException($value, 'array|ArrayAccess');
         }
 
-        $constraints = $this->getConstraints($constraint->shopId);
-        if (empty($constraints)) {
+        $action = $this->getRestrictedAction($constraint->shopId);
+
+        if (!$action->appliesTo($constraint->deliveryType, $constraint->strict)) {
             return;
         }
 
-        $validator = $this->context->getValidator()->inContext($this->context);
-        $validator->validate($value, new Sequentially($constraints));
-    }
-
-    /**
-     * @return Constraint[]
-     */
-    private function getConstraints(?int $shopId): array
-    {
-        $key = (int) $shopId;
-
-        if (!isset($this->constraints[$key])) {
-            $this->constraints[$key] = $this->productRestrictionConstraints->getProductRestrictionConstraints($shopId);
+        if ([] === $constraints = $this->configuration->getProductRestrictionConstraints($constraint->shopId)) {
+            return;
         }
 
-        return $this->constraints[$key];
+        $validator = $this->context->getValidator()->startContext();
+        $violations = $validator->validate($value, new Sequentially($constraints))->getViolations();
+
+        if (0 === $violations->count()) {
+            return;
+        }
+
+        $this->context->buildViolation($constraint->message)
+            ->setCode(RestrictedAction::DisallowOrder() === $action ? Unrestricted::ORDER_DISALLOWED_ERROR : Unrestricted::DELIVERY_DISALLOWED_ERROR)
+            ->addViolation();
+    }
+
+    private function getRestrictedAction(?int $shopId): RestrictedAction
+    {
+        if (is_callable([$this->configuration, 'getProductRestrictedAction'])) {
+            return $this->configuration->getProductRestrictedAction($shopId);
+        }
+
+        @trigger_error(sprintf('Not implementing "getProductRestrictedAction()" in "%s" is deprecated since 2.4.0.', get_class($this->configuration)), E_USER_DEPRECATED);
+
+        return RestrictedAction::DisallowOrder();
     }
 }

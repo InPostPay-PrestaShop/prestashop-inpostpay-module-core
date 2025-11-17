@@ -51,6 +51,10 @@ final class ProductPageDisplayConfiguration implements ProductAwareWidgetDisplay
             return false;
         }
 
+        if ([] === $this->constraints) {
+            return true;
+        }
+
         $violations = $this->validator->validate($product, new Sequentially([
             'constraints' => $this->constraints,
         ]));

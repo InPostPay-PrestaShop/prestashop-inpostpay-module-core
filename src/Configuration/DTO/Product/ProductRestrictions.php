@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration\DTO\Product;
 
 use izi\prestashop\Product\ProductType;
+use izi\prestashop\Product\Restriction\RestrictedAction;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class ProductRestrictions
@@ -39,9 +40,11 @@ final class ProductRestrictions
     private $featureIds = [];
 
     /**
-     * @var bool
+     * @var RestrictedAction
+     *
+     * @Assert\NotNull()
      */
-    private $blockOrder = false;
+    private $restrictedAction;
 
     /**
      * @return ProductType[]
@@ -143,17 +146,40 @@ final class ProductRestrictions
         return $this;
     }
 
+    /**
+     * @deprecated use {@see getRestrictedAction()} instead
+     */
     public function isBlockOrder(): bool
     {
-        return $this->blockOrder;
+        @trigger_error(sprintf('Method "%s()" is deprecated since 2.4.0, use "%s::getRestrictedAction()" instead.', __METHOD__, self::class), E_USER_DEPRECATED);
+
+        return RestrictedAction::DisallowOrder() === $this->restrictedAction;
+    }
+
+    /**
+     * @deprecated use {@see setRestrictedAction()} instead
+     *
+     * @return $this
+     */
+    public function setBlockOrder(bool $blockOrder): self
+    {
+        @trigger_error(sprintf('Method "%s()" is deprecated since 2.4.0, use "%s::setRestrictedAction()" instead.', __METHOD__, self::class), E_USER_DEPRECATED);
+        $this->restrictedAction = $blockOrder ? RestrictedAction::DisallowOrder() : RestrictedAction::HideWidget();
+
+        return $this;
+    }
+
+    public function getRestrictedAction(): ?RestrictedAction
+    {
+        return $this->restrictedAction;
     }
 
     /**
      * @return $this
      */
-    public function setBlockOrder(bool $blockOrder): self
+    public function setRestrictedAction(?RestrictedAction $restrictedAction): self
     {
-        $this->blockOrder = $blockOrder;
+        $this->restrictedAction = $restrictedAction;
 
         return $this;
     }

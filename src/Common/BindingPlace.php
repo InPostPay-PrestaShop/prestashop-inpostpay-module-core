@@ -7,6 +7,7 @@ namespace izi\prestashop\Common;
 use izi\prestashop\Enum\StringEnum;
 use izi\prestashop\Form\Type\GuiConfigurationType;
 use izi\prestashop\Translation\LegacyTranslator;
+use izi\prestashop\Translation\TranslatableInterface;
 
 /**
  * @method static self ProductCard()
@@ -19,7 +20,7 @@ use izi\prestashop\Translation\LegacyTranslator;
  * @method static self CheckoutPage()
  * @method static self MiniCartPage()
  */
-final class BindingPlace extends StringEnum
+final class BindingPlace extends StringEnum implements TranslatableInterface
 {
     private const PRODUCT_CARD = 'PRODUCT_CARD';
     private const BASKET_SUMMARY = 'BASKET_SUMMARY';
