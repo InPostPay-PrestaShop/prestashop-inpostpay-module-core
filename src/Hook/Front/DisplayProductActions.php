@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
+use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Configuration\ProductAwareWidgetDisplayConfigurationInterface;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
@@ -50,21 +52,22 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
      */
     public function execute(array $parameters): string
     {
-        $product = $parameters['product'] ?? null;
+        $product = $this->getProduct($parameters);
 
-        if (!isset($product['id_product']) || !is_numeric($product['id_product'])) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "product" to be an instance of "%s", "%s" given.', ProductLazyArray::class, get_debug_type($product)));
+        /**
+         * @var $configuration ProductAwareWidgetDisplayConfigurationInterface
+         */
+        $configuration = $this->configuration->getDisplayConfiguration(BindingPlace::ProductCard());
+
+        if (self::HOOK_NAME === $this->generalConfiguration->getProductCardDisplayHook() && $configuration->isDisplayed($product)) {
+            return $this->renderer->render('module:inpostizi/views/templates/front/productButtonWidget.tpl', [
+                'widget' => $this->renderWidget($product, $parameters, self::HOOK_NAME),
+                'styles' => $this->getHtmlStyles(),
+                'hookName' => self::HOOK_NAME,
+                'idProduct' => $product['id_product'],
+            ]);
         }
 
-        if (self::HOOK_NAME !== $this->generalConfiguration->getProductCardDisplayHook()) {
-            return '';
-        }
-
-        return $this->renderer->render('module:inpostizi/views/templates/front/productButtonWidget.tpl', [
-            'widget' => $this->renderWidget($product, $parameters, self::HOOK_NAME),
-            'styles' => $this->getHtmlStyles(),
-            'hookName' => self::HOOK_NAME,
-            'idProduct' => $product['id_product'],
-        ]);
+        return '';
     }
 }

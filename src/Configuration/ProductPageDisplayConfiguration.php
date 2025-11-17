@@ -33,7 +33,7 @@ final class ProductPageDisplayConfiguration implements ProductAwareWidgetDisplay
     public function __construct(WidgetDisplayConfigurationInterface $configuration, ValidatorInterface $validator, array $constraints)
     {
         if (BindingPlace::ProductCard() !== $bindingPlace = $configuration->getWidgetConfiguration()->getBindingPlace()) {
-            throw new \DomainException('Expected binding place to be "%s", "%s" given', BindingPlace::ProductCard()->value, $bindingPlace->value);
+            throw new \DomainException(sprintf('Expected binding place to be "%s", "%s" given', BindingPlace::ProductCard()->value, $bindingPlace->value));
         }
 
         $this->configuration = $configuration;
@@ -49,6 +49,10 @@ final class ProductPageDisplayConfiguration implements ProductAwareWidgetDisplay
 
         if (!$this->configuration->isDisplayed($product)) {
             return false;
+        }
+
+        if ([] === $this->constraints) {
+            return true;
         }
 
         $violations = $this->validator->validate($product, new Sequentially([

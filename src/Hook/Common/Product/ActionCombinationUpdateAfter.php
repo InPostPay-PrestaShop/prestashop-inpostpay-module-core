@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Common\Product;
 
 use izi\prestashop\Event\EventDispatcherInterface;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Product\Event\CombinationEvent;
 
@@ -35,7 +36,7 @@ final class ActionCombinationUpdateAfter implements HookInterface
         $combination = $parameters['object'] ?? null;
 
         if (!$combination instanceof \Combination) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \Combination::class, get_debug_type($combination)));
+            throw InvalidHookParamException::unexpectedType('object', $combination, \Combination::class);
         }
 
         $this->dispatcher->dispatch(new CombinationEvent($combination), CombinationEvent::UPDATED);

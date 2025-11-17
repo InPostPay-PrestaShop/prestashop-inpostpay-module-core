@@ -8,6 +8,7 @@ use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Event\ValidateOrderEvent;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 
 final class ActionValidateOrder implements HookInterface
@@ -52,7 +53,7 @@ final class ActionValidateOrder implements HookInterface
         $order = $parameters['order'] ?? null;
 
         if (!$order instanceof \Order) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "order" to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($order)));
+            throw InvalidHookParamException::unexpectedType('order', $order, \Order::class);
         }
 
         $this->dispatcher->dispatch(new ValidateOrderEvent($order), ValidateOrderEvent::class);

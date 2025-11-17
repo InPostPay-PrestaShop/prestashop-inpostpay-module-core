@@ -6,6 +6,7 @@ namespace izi\prestashop\Hook;
 
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\Security\Voter\BindingWidgetVoter;
 use izi\prestashop\Validator\Cart\Bindable;
@@ -59,7 +60,7 @@ final class WidgetParametersProvider implements WidgetParametersProviderInterfac
         $request = $parameters['request'] ?? null;
 
         if (!$request instanceof Request) {
-            throw new \InvalidArgumentException(sprintf('Parameter "request" expected to be an instance of "%s", "%s" given.', Request::class, get_debug_type($request)));
+            throw InvalidHookParamException::unexpectedType('request', $request, Request::class);
         }
 
         if (!$this->authorizationChecker->isGranted(BindingWidgetVoter::VIEW, $request)) {
@@ -69,7 +70,7 @@ final class WidgetParametersProvider implements WidgetParametersProviderInterfac
         $cart = $parameters['cart'] ?? null;
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Parameter "cart" expected to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
+            throw InvalidHookParamException::unexpectedType('cart', $cart, \Cart::class);
         }
 
         $widgetConfiguration = $this->resolver->resolve($parameters);

@@ -6,6 +6,7 @@ namespace izi\prestashop\Hook\Common;
 
 use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Event\OrderStatusUpdatedEvent;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 
 final class ActionOrderStatusPostUpdate implements HookInterface
@@ -47,13 +48,13 @@ final class ActionOrderStatusPostUpdate implements HookInterface
         $orderId = $parameters['id_order'] ?? null;
 
         if (!is_int($orderId)) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "id_order" to be an integer, "%s" given.', get_debug_type($orderId)));
+            throw InvalidHookParamException::unexpectedType('id_order', $orderId, 'int');
         }
 
         $newOrderStatus = $parameters['newOrderStatus'] ?? null;
 
         if (!$newOrderStatus instanceof \OrderState) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "newOrderStatus" to be an instance of "%s", "%s" given.', \OrderState::class, get_debug_type($newOrderStatus)));
+            throw InvalidHookParamException::unexpectedType('newOrderStatus', $newOrderStatus, \OrderState::class);
         }
 
         if ($this->context->controller instanceof \ModuleFrontControllerCore && $this->module === $this->context->controller->module) {

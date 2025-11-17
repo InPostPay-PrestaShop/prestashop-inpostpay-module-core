@@ -169,7 +169,7 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
             $this->manager->removePromoCode($cart, $promoCode);
         } catch (CouldNotRemovePromoCodeException $e) {
             $this->logger->error('Could not remove code "{code}" from cart #{cartId}.', [
-                'code' => $code,
+                'code' => $promoCode->getCode(),
                 'cartId' => $cart->id,
                 'exception' => $e->getPrevious(),
             ]);

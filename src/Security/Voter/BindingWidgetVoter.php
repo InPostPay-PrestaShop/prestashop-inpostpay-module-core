@@ -44,7 +44,7 @@ final class BindingWidgetVoter extends Voter
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token): bool
     {
         if (!$subject instanceof Request) {
-            throw new \InvalidArgumentException('Expected an instance of "%s", "%s" given.', Request::class, get_debug_type($subject));
+            throw new \InvalidArgumentException(sprintf('Expected an instance of "%s", "%s" given.', Request::class, get_debug_type($subject)));
         }
 
         if ($this->configuration->isEnabledForEveryone()) {

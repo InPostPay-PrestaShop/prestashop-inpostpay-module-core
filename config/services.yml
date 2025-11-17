@@ -423,6 +423,13 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\Translation\LegacyTranslator'
 
+  izi\prestashop\Form\Type\EnumType:
+    class: izi\prestashop\Form\Type\EnumType
+    tags:
+      - { name: form.type }
+    arguments:
+      - '@izi\prestashop\Translation\LegacyTranslator'
+
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
   izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
     class: izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler

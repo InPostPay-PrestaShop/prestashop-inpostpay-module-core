@@ -6,14 +6,13 @@ namespace izi\prestashop\Form\Type\Product;
 
 use izi\prestashop\Configuration\DTO\Product\ProductRestrictions;
 use izi\prestashop\Form\Type\Compatibility\CategoryChoiceTreeType as CategoryChoiceTreeTypePolyfill;
+use izi\prestashop\Form\Type\EnumType;
 use izi\prestashop\Form\Type\ObjectModelType;
-use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 use izi\prestashop\Product\ProductType;
+use izi\prestashop\Product\Restriction\RestrictedAction;
 use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\CategoryChoiceTreeType;
-use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -46,24 +45,18 @@ final class ProductRestrictionsType extends AbstractType
             ? CategoryChoiceTreeType::class
             : CategoryChoiceTreeTypePolyfill::class;
 
-        $switchType = class_exists(SwitchType::class)
-            ? SwitchType::class
-            : SwitchTypePolyfill::class;
-
         $builder
-            ->add('blockOrder', $switchType, [
-                'empty_data' => false,
-                'label' => $this->translator->l('Disallow orders', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('If enabled, placing an order via the mobile app will not be possible if the cart contains  a product that meets any of the conditions below.', self::TRANSLATION_SOURCE),
+            ->add('restrictedAction', EnumType::class, [
+                'class' => RestrictedAction::class,
+                'label' => $this->translator->l('Restricted action', self::TRANSLATION_SOURCE),
+                'help' => sprintf(
+                    $this->translator->l('If either the "%s" or "%s" option is selected, the widget will not be displayed on the product page.', self::TRANSLATION_SOURCE),
+                    RestrictedAction::HideWidget()->trans($this->translator),
+                    RestrictedAction::DisallowOrder()->trans($this->translator)
+                ),
             ])
-            ->add('productTypes', ChoiceType::class, [
-                'choices' => ProductType::cases(),
-                'choice_value' => function (ProductType $productType): string {
-                    return $productType->value;
-                },
-                'choice_label' => function (ProductType $productType): string {
-                    return $productType->trans($this->translator);
-                },
+            ->add('productTypes', EnumType::class, [
+                'class' => ProductType::class,
                 'multiple' => true,
                 'expanded' => true,
                 'required' => false,
@@ -90,7 +83,7 @@ final class ProductRestrictionsType extends AbstractType
                 'expanded' => true,
                 'required' => false,
                 'label' => $this->context->getTranslator()->trans('Attribute group', [], 'Admin.Catalog.Feature'),
-                'help' => $this->translator->l('Widget will not be render if the product combination has an attribute from the selected groups.', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('The restriction will be applied if the product combination has an attribute from the selected groups.', self::TRANSLATION_SOURCE),
             ])
             ->add('featureIds', ObjectModelType::class, [
                 'class' => \Feature::class,
@@ -99,7 +92,7 @@ final class ProductRestrictionsType extends AbstractType
                 'expanded' => true,
                 'required' => false,
                 'label' => $this->context->getTranslator()->trans('Feature', [], 'Admin.Catalog.Feature'),
-                'help' => $this->translator->l('Widget will not be render if the product has any of the selected features.', self::TRANSLATION_SOURCE),
+                'help' => $this->translator->l('The restriction will be applied if the product has any of the selected features.', self::TRANSLATION_SOURCE),
             ])
             ->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
                 $form = $event->getForm();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Common\Product;
 
 use izi\prestashop\Event\EventDispatcherInterface;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Product\Event\ImageEvent;
 
@@ -35,7 +36,7 @@ final class ActionImageAddAfter implements HookInterface
         $image = $parameters['object'] ?? null;
 
         if (!$image instanceof \Image) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \Image::class, get_debug_type($image)));
+            throw InvalidHookParamException::unexpectedType('object', $image, \Image::class);
         }
 
         $this->dispatcher->dispatch(new ImageEvent($image), ImageEvent::CREATED);

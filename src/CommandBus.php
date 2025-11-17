@@ -73,6 +73,8 @@ use izi\prestashop\MerchantApi\Handler\GetOrderHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\GetProductsHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface;
 use izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface;
+use izi\prestashop\ProductOptions\Message\UpdateProductOptionsCommand;
+use izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandlerInterface;
 use Psr\Container\ContainerInterface;
 
 final class CommandBus implements CommandBusInterface, ServiceSubscriberInterface
@@ -126,6 +128,7 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             DownloadModuleDataCommand::class => '?' . DownloadModuleDataHandlerInterface::class,
             InstallExtensionCommand::class => '?' . InstallExtensionHandler::class,
             UpdateCartRuleOptionsCommand::class => '?' . UpdateCartRuleOptionsHandlerInterface::class,
+            UpdateProductOptionsCommand::class => '?' . UpdateProductOptionsHandlerInterface::class,
 
             CreateHotProductCommand::class => '?' . CreateHotProductHandlerInterface::class,
             ImportHotProductCommand::class => '?' . ImportHotProductHandlerInterface::class,

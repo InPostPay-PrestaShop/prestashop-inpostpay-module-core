@@ -6,6 +6,7 @@ namespace izi\prestashop\Hook\Common;
 
 use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Event\OrderEvent;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 
 final class ActionObjectOrderUpdateBefore implements HookInterface
@@ -38,7 +39,7 @@ final class ActionObjectOrderUpdateBefore implements HookInterface
         $order = $parameters['object'] ?? null;
 
         if (!$order instanceof \Order) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "object" to be an instance of "%s", "%s" given.', \Order::class, get_debug_type($order)));
+            throw InvalidHookParamException::unexpectedType('object', $order, \Order::class);
         }
 
         $controller = $this->context->controller;

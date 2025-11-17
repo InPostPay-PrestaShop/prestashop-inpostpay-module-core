@@ -6,6 +6,7 @@ namespace izi\prestashop\Hook\Front;
 
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Payment\PaymentCurrencyChecker;
 use izi\prestashop\View\Templating\RendererInterface;
@@ -64,7 +65,7 @@ final class ActionGetPaymentOptions implements HookInterface
         $cart = $parameters['cart'] ?? null;
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter "cart" to be an instance of "%s", "%s" given.', \Cart::class, get_debug_type($cart)));
+            throw InvalidHookParamException::unexpectedType('cart', $cart, \Cart::class);
         }
 
         if (0 >= (int) $cart->id || !$this->currencyChecker->check($this->paymentModule, (int) $cart->id_currency)) {

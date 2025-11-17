@@ -6,6 +6,7 @@ namespace izi\prestashop\View\Widget;
 
 use izi\prestashop\Enum\StringEnum;
 use izi\prestashop\Translation\LegacyTranslator;
+use izi\prestashop\Translation\TranslatableInterface;
 
 /**
  * @method static self ExtraSmall()
@@ -14,7 +15,7 @@ use izi\prestashop\Translation\LegacyTranslator;
  * @method static self Large()
  * @method static self ExtraLarge()
  */
-final class Size extends StringEnum
+final class Size extends StringEnum implements TranslatableInterface
 {
     private const EXTRA_SMALL = 'size-xs';
     private const SMALL = 'size-sm';

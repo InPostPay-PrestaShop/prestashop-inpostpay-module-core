@@ -31,10 +31,12 @@ use izi\prestashop\MerchantApi\Model\Order\Response\OrderDetails;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Order\Address\AddressDataMapper;
 use izi\prestashop\Product\Image\ImageUrlsProvider;
+use izi\prestashop\Product\Image\ImageUrlsProviderInterface;
 use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Product\Util\AttributeListParser;
 use izi\prestashop\Product\Util\DescriptionFormatter;
 use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 /**
  * @internal
@@ -460,8 +462,16 @@ class PrestashopOrder
         );
     }
 
-    private function getImageProvider(): ImageUrlsProvider
+    private function getImageProvider(): ImageUrlsProviderInterface
     {
-        return $this->imageProvider ?? $this->imageProvider = ImageUrlsProvider::create();
+        if (isset($this->imageProvider)) {
+            return $this->imageProvider;
+        }
+
+        try {
+            return $this->imageProvider = $this->module->get(ImageUrlsProviderInterface::class);
+        } catch (ServiceNotFoundException $e) {
+            return $this->imageProvider = ImageUrlsProvider::create();
+        }
     }
 }

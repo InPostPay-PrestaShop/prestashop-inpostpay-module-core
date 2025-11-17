@@ -622,10 +622,20 @@ class Create
                 throw new CannotCreateOrderException($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', ['%product%' => $product['name'], '%quantity%' => $product['minimal_quantity']], 'Shop.Notifications.Error'));
             }
 
-            $violations = $this->validator->validate($product, new Unrestricted((int) $product['id_shop']));
-            if (count($violations) > 0) {
-                throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
+            $violations = $this->validator->validate($product, new Unrestricted([
+                'shopId' => (int) $product['id_shop'],
+                'deliveryType' => $request->getDelivery()->getType(),
+            ]));
+
+            if (0 === $violations->count()) {
+                continue;
             }
+
+            if (Unrestricted::DELIVERY_DISALLOWED_ERROR === $violations->get(0)->getCode()) {
+                throw new CannotCreateOrderException($this->module->l('The selected delivery option is not available.', self::TRANSLATION_SOURCE));
+            }
+
+            throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
         }
 
         if (true === $product = $cart->checkQuantities(true)) {

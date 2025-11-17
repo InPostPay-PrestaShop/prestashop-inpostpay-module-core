@@ -6,6 +6,7 @@ namespace izi\prestashop\Product;
 
 use izi\prestashop\Enum\StringEnum;
 use izi\prestashop\Translation\LegacyTranslator;
+use izi\prestashop\Translation\TranslatableInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 
 /**
@@ -15,7 +16,7 @@ use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
  * @method static self Pack()
  * @method static self Virtual()
  */
-final class ProductType extends StringEnum
+final class ProductType extends StringEnum implements TranslatableInterface
 {
     private const STANDARD = 'standard';
     private const COMBINATION = 'combination';
