@@ -15,7 +15,7 @@ class AddressDataMapper
             $this->getAddressLine($address),
             $address->city,
             $address->postcode,
-            sprintf('%s %s', $address->firstname, $address->lastname),
+            trim(sprintf('%s %s', $address->firstname, $address->lastname)),
             'PL'
         );
     }
