@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace izi\prestashop\DependencyInjection\Compiler;
 
 use izi\prestashop\DependencyInjection\Argument\ServiceClosureArgument;
-use izi\prestashop\DependencyInjection\TypedReference;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -56,16 +55,9 @@ final class ProvideServiceLocatorFactoriesPass implements CompilerPassInterface
         $refMap = array_merge(...$refMaps);
         ksort($refMap);
 
-        return array_map(static function (Reference $reference) use ($container, $aliases) {
+        return array_map(static function (Reference $reference) use ($aliases) {
             $id = (string) $reference;
-            $definition = $container->getDefinition($id);
             $reference = isset($aliases[$id]) ? new Reference($aliases[$id]) : $reference;
-
-            $class = $definition->getClass();
-
-            if (null !== $class && (class_exists($class) || interface_exists($class))) {
-                $reference = new TypedReference((string) $reference, $class);
-            }
 
             return new ServiceClosureArgument($reference);
         }, $refMap);
