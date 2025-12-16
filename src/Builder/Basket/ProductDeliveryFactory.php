@@ -204,12 +204,36 @@ class ProductDeliveryFactory
             return true;
         }
 
-        $shippingCost = (\Closure::bind(function () use ($carrier) {
-            $products = $this->getProducts();
+        return false !== $this->getModuleShippingCost($carrier, $cart);
+    }
 
-            return $this->getPackageShippingCostFromModule($carrier, 10., $products);
-        }, $cart, \Cart::class))();
+    /**
+     * @return float|false
+     */
+    private function getModuleShippingCost(\Carrier $carrier, \Cart $cart)
+    {
+        if (\Tools::version_compare(_PS_VERSION_, '1.7.4', '>=')) {
+            return (\Closure::bind(function () use ($carrier) {
+                $products = $this->getProducts();
 
-        return false !== $shippingCost;
+                return $this->getPackageShippingCostFromModule($carrier, 10., $products);
+            }, $cart, \Cart::class))();
+        }
+
+        if (false === $module = \Module::getInstanceByName((string) $carrier->external_module_name)) {
+            return false;
+        }
+
+        if (property_exists($module, 'id_carrier')) {
+            $module->id_carrier = $carrier->id;
+        }
+
+        if (!$carrier->need_range) {
+            return $module->getOrderShippingCostExternal($cart);
+        }
+
+        return method_exists($module, 'getPackageShippingCost')
+            ? $module->getPackageShippingCost($cart, 10., $cart->getProducts())
+            : $module->getOrderShippingCost($cart, 10.);
     }
 }
