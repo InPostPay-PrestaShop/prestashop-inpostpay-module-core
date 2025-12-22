@@ -156,7 +156,7 @@ class DeliveryFactory
 
             $servicePrice = $this->getServicePrice($serviceOptions, $cart, $carrier, $defaultCarrier, $isFreeShipping);
 
-            if (0 > $servicePrice->getNet()) {
+            if (0 > $servicePrice->getNet() || 0 > $servicePrice->getVat()) {
                 continue;
             }
 
