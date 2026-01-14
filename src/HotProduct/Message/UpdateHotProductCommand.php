@@ -31,7 +31,7 @@ final class UpdateHotProductCommand
     /**
      * @var \DateTimeImmutable|null
      *
-     * @!Assert\GreaterThan(propertyPath="availableFrom") TODO
+     * @Assert\GreaterThan(propertyPath="availableFrom")
      */
     private $availableTo;
 
@@ -94,20 +94,6 @@ final class UpdateHotProductCommand
         $this->availableTo = $availableTo;
 
         return $this;
-    }
-
-    /**
-     * @internal
-     *
-     * @Assert\IsTrue(message="Please choose a valid date interval.")
-     */
-    public function hasValidAvailabilityDates(): bool
-    {
-        if (null === $this->availableFrom || null === $this->availableTo) {
-            return true;
-        }
-
-        return $this->availableFrom < $this->availableTo;
     }
 
     public function createIfNotFound(): bool

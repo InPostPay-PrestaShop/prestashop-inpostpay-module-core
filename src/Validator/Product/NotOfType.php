@@ -20,17 +20,17 @@ final class NotOfType extends Constraint
         parent::__construct($options);
 
         $types = $this->types;
-        if (!is_array($types)) {
+        if (!\is_array($types)) {
             $types = [$types];
         }
 
         foreach ($types as $type) {
             if (!$type instanceof ProductType) {
-                throw new InvalidArgumentException(sprintf('The "types" option must be a list of "%s" cases, "%s" given.', ProductType::class, get_debug_type($type)));
+                throw new InvalidArgumentException(\sprintf('The "types" option must be a list of "%s" cases, "%s" given.', ProductType::class, get_debug_type($type)));
             }
         }
 
-        $this->types = array_unique($types, SORT_REGULAR);
+        $this->types = array_unique($types, \SORT_REGULAR);
     }
 
     public function getDefaultOption(): string

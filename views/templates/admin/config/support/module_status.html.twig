@@ -5,7 +5,7 @@
 {% block support_block_header_content %}
   <i class="material-icons mr-2">check_circle</i>
   <span>
-    {{ 'Module status'|legacy_trans }}:
+    {{ 'Module status'|trans({}, 'Modules.Inpostizi.Status') }}:
 
     {% if status.OK %}
       <span class="text-success text-uppercase">OK</span>
@@ -24,7 +24,7 @@
         <div class="p-3">
           <ul class="pl-3 mb-0">
             {% for error in status.errors %}
-              <li>{{ error|raw }}</li>
+              <li>{{ error }}</li>
             {% endfor %}
           </ul>
         </div>
@@ -34,7 +34,7 @@
       <div class="p-3">
         <a href="{{ path('admin_inpost_izi_config_download_data') }}" class="btn btn-sm btn-block px-0 d-flex justify-content-center align-items-center btn-link">
           <span class="material-icons btn-icon">content_copy</span>
-          {{ 'Download logs and module data'|legacy_trans }}
+          {{ 'Download logs and module data'|trans({}, 'Modules.Inpostizi.Status') }}
         </a>
       </div>
     </div>

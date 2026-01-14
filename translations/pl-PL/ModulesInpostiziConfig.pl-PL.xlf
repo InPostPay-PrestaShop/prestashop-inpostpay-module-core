@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziConfig.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="192bdd5b10a4a1f19a7594b94dd209ba">
+        <source>Consents</source>
+        <target>Zgody</target>
+      </trans-unit>
+      <trans-unit id="f98053ea5c75db6df542ec23268c5895">
+        <source>GUI configuration</source>
+        <target>Ustawienia GUI</target>
+      </trans-unit>
+      <trans-unit id="2616299606176e7b6e90b07fafe19602">
+        <source>Hot products</source>
+        <target>Promowane produkty</target>
+      </trans-unit>
+      <trans-unit id="b402654b91b7b5a76b41566d150ae823">
+        <source>Loading more results...</source>
+        <target>Ładowanie kolejnych wyników...</target>
+      </trans-unit>
+      <trans-unit id="2397bd5fd0c284abbd5d2ca6aba59d78">
+        <source>No more results</source>
+        <target>Brak większej ilości wyników</target>
+      </trans-unit>
+      <trans-unit id="e576c23d915755d83e2d1f47bd9f6c22">
+        <source>No results found</source>
+        <target>Brak wyników</target>
+      </trans-unit>
+      <trans-unit id="7565f5b67d49eec396df536862f2752d">
+        <source>Select all options</source>
+        <target>Zaznacz wszystkie opcje</target>
+      </trans-unit>
+      <trans-unit id="de8edbdcaeccb4d6b00eff59dd90155e">
+        <source>Select options from the list</source>
+        <target>Wybierz opcje z listy</target>
+      </trans-unit>
+      <trans-unit id="f96dc2a8464fd861701e2203a789dca2">
+        <source>Select the translation language</source>
+        <target>Wybierz język tłumaczenia</target>
+      </trans-unit>
+      <trans-unit id="43f65a2f8564bcc183502e2b35c9a560">
+        <source>Shipping configuration</source>
+        <target>Cena transportu</target>
+      </trans-unit>
+      <trans-unit id="db5eb84117d06047c97c9a0191b5fffe">
+        <source>Support</source>
+        <target>Support</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

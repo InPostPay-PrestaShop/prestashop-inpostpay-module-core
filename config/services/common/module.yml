@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Extension\EventListener\ClearCacheListener:
+    class: izi\prestashop\Extension\EventListener\ClearCacheListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@izi\prestashop\CacheClearer\SymfonyCacheClearer'
+
+  izi\prestashop\Module\ModuleRepository:
+    class: izi\prestashop\Module\ModuleRepository

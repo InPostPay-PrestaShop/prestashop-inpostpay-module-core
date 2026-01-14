@@ -18,7 +18,7 @@ abstract class Uuid implements \JsonSerializable
             $version = preg_match('/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/Di', $uuid) ? (int) $uuid[14] : false;
 
             if (false === $version || $version !== static::getVersion()) {
-                throw new \DomainException(sprintf('Invalid UUIDv%d: "%s".', static::getVersion(), $uuid));
+                throw new \DomainException(\sprintf('Invalid UUIDv%d: "%s".', static::getVersion(), $uuid));
             }
 
             $this->uuid = strtolower($uuid);

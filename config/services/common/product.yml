@@ -1,0 +1,58 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepository'
+  izi\prestashop\Repository\ProductRestrictionsRepository:
+    class: izi\prestashop\Repository\ProductRestrictionsRepository
+    tags:
+      - { name: inpost.izi.gui_configuration_dependency, key: izi\prestashop\Repository\ProductRestrictionsRepositoryInterface }
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+
+  izi\prestashop\ProductOptions\ProductOptionsRepositoryInterface: '@izi\prestashop\ProductOptions\ProductOptionsRepository'
+  izi\prestashop\ProductOptions\ProductOptionsRepository:
+    class: izi\prestashop\ProductOptions\ProductOptionsRepository
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+
+  izi\prestashop\Product\Price\PriceCalculatorInterface: '@izi\prestashop\Product\Price\PriceCalculator'
+  izi\prestashop\Product\Price\PriceCalculator:
+    class: izi\prestashop\Product\Price\PriceCalculator
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\ObjectModel\Repository\CurrencyRepository'
+      - '@inpost.izi.object_model.country_repository'
+
+  izi\prestashop\Product\Price\LowestPriceProviderFactory:
+    class: izi\prestashop\Product\Price\LowestPriceProviderFactory
+    arguments:
+      - '@izi\prestashop\Module\ModuleRepository'
+      - '@inpost.izi.logger'
+
+  izi\prestashop\Product\Price\LowestPriceProviderInterface:
+    class: izi\prestashop\Product\Price\LowestPriceProviderInterface
+    factory: [ '@izi\prestashop\Product\Price\LowestPriceProviderFactory', create ]
+
+  # todo: make private after refactoring cart/order data mappers
+  izi\prestashop\Product\Image\ImageUrlsProviderInterface:
+    alias: izi\prestashop\Product\Image\ImageUrlsProvider
+    public: true
+
+  izi\prestashop\Product\Image\ImageUrlsProvider:
+    class: izi\prestashop\Product\Image\ImageUrlsProvider
+    arguments:
+      - '@inpost.izi.product.image_retriever'
+      - '@izi\prestashop\Configuration\ProductConfigurationInterface'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\Repository\ImageTypeRepository'
+      - '@izi\prestashop\ProductOptions\ProductOptionsRepositoryInterface'
+
+  inpost.izi.product.image_retriever:
+    class: PrestaShop\PrestaShop\Adapter\Image\ImageRetriever
+    arguments:
+      - '@=service("inpost.izi.context").link'

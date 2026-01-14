@@ -1,0 +1,15 @@
+services:
+  _defaults:
+    public: false
+
+  inpost.izi.security.access.decision_manager:
+    class: Symfony\Component\Security\Core\Authorization\AccessDecisionManager
+    arguments:
+      - !tagged inpost.izi.security_voter
+
+  inpost.izi.security.authorization_checker:
+    class: izi\prestashop\Security\AuthorizationChecker
+    arguments:
+      - '@inpost.izi.security.access.decision_manager'
+      - '@?security.authorization_checker'
+      - '@?security.token_storage'

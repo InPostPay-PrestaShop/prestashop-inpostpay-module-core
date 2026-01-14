@@ -24,6 +24,7 @@ final class UpdateConsentsConfigurationCommand implements ConsentsConfigurationI
      *
      * @Assert\Valid
      * @Assert\Count(max = UpdateConsentsConfigurationCommand::CONSENTS_COUNT_MAX)
+     *
      * @Unique(normalizer = {Consent::class, "normalize"})
      */
     private $consents;

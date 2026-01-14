@@ -119,7 +119,9 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
             $availability = new ProductAvailability(null, new \DateTimeImmutable('yesterday'));
         }
 
-        $ean = $combination && $combination->ean13 ? $combination->ean13 : $product->ean13;
+        $ean = $combination && '' !== (string) $combination->ean13
+            ? (string) $combination->ean13
+            : (string) $product->ean13;
 
         return new Product(
             \Tools::substr($product->name ?? '', 0, 255),
@@ -128,11 +130,11 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
             $price,
             $currency,
             Quantity::integer($quantity),
-            (string) $ean,
+            $ean,
+            $this->context->link->getProductLink($product, null, null, $ean, $languageId, $shopId, $combinationId),
             $availability,
             $imageUrls->getAdditionalImages(),
-            $this->getAttributes($combination, $languageId),
-            $this->context->link->getProductLink($product, null, null, null, $languageId, $shopId, $combinationId)
+            $this->getAttributes($combination, $languageId)
         );
     }
 
@@ -202,7 +204,7 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
 
     private function getPolishLanguage(int $shopId): \Language
     {
-        if (!array_key_exists($shopId, $this->languages)) {
+        if (!\array_key_exists($shopId, $this->languages)) {
             $this->languages[$shopId] = $this->languageRepository->findOneBy([
                 'iso_code' => 'pl',
                 'id_shop' => $shopId,

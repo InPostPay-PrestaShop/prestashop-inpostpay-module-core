@@ -1,36 +1,34 @@
 <?php
 
-use izi\prestashop\AdminKernel;
+use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Common\Currency;
 use izi\prestashop\Configuration\AdvancedConfigurationInterface;
-use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
-use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
-use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
 use izi\prestashop\DependencyInjection\ContainerFactory;
 use izi\prestashop\DependencyInjection\Exception\ContainerNotFoundException;
 use izi\prestashop\Hook\Exception\HookNotFoundException;
 use izi\prestashop\Hook\Exception\HookNotImplementedException;
 use izi\prestashop\Hook\Exception\InvalidHookParamException;
-use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
-use izi\prestashop\Installer\DatabaseInstaller;
+use izi\prestashop\HttpFoundation\RequestStackProvider;
+use izi\prestashop\Installer\Exception\CoreInstallationException;
+use izi\prestashop\Installer\Exception\InstallerException;
+use izi\prestashop\Installer\Installer;
+use izi\prestashop\Installer\InstallerInterface;
+use izi\prestashop\Installer\UninstallerInterface;
 use izi\prestashop\Module\Exception\ModuleErrorInterface;
+use izi\prestashop\Translation\Util\TranslationFinder;
 use PrestaShop\PrestaShop\Adapter\ContainerBuilder as PrestaShopContainerBuilder;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
 use PrestaShop\PrestaShop\Core\Exception\ContainerNotFoundException as PrestaShopContainerNotFoundException;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Config\Resource\FileResource;
-use Symfony\Component\DependencyInjection\Compiler\PassConfig;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
-use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\HttpKernel\TerminableInterface;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
@@ -44,18 +42,6 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 
 class InPostIzi extends PaymentModule implements WidgetInterface
 {
-    private static $loggerServiceId = 'inpost.izi.general_logger';
-
-    /**
-     * @var ContainerInterface|null
-     */
-    private $legacyContainer;
-
-    /**
-     * @var KernelInterface|null
-     */
-    private $adminKernel;
-
     /**
      * @var RequestStack
      */
@@ -69,83 +55,82 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '2.4.0';
+        $this->version = '3.0.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
         $this->ps_versions_compliancy = [
-            'min' => '1.7.1.0',
-            'max' => '8.2.99',
+            'min' => '1.7.6.0',
+            'max' => '9.0.99',
         ];
 
         parent::__construct();
 
-        $this->displayName = $this->l('InPost Pay');
+        try {
+            $this->initTranslations();
+        } catch (Exception $e) {
+            // ignore silently
+        }
+        $this->displayName = $this->trans('InPost Pay', [], 'Modules.Inpostizi.Admin');
+        $this->description = $this->trans('Official InPost Pay integration module for PrestaShop', [], 'Modules.Inpostizi.Admin');
+        $this->confirmUninstall = $this->trans('Are you sure you want to uninstall this module?', [], 'Admin.Notifications.Warning');
     }
 
     /**
-     * @return false
+     * @return self
      */
-    public function isUsingNewTranslationSystem()
+    public static function getInstance(): Module
     {
-        return false;
+        return self::getInstanceByName('inpostizi');
     }
 
     /**
-     * @return bool
+     * @return true
      */
-    public function install()
+    public function isUsingNewTranslationSystem(): bool
     {
-        if (70103 > PHP_VERSION_ID) {
-            $this->_errors[] = $this->l('This module requires PHP 7.1.3 or later.');
+        return true;
+    }
+
+    public function install(): bool
+    {
+        if (70205 > PHP_VERSION_ID) {
+            $this->_errors[] = $this->trans('This module requires PHP {min_version} or later.', ['{min_version}' => '7.2.5'], 'Modules.Inpostizi.Installer');
 
             return false;
         }
 
         try {
-            (new DatabaseInstaller())->install($this);
-        } catch (Exception $e) {
-            $this->getLogger()->critical('Could not update the database schema.', [
-                'exception' => $e,
-            ]);
+            $this->getInstaller()->install($this);
 
-            if (_PS_MODE_DEV_) {
-                throw $e;
-            }
-
-            $this->_errors[] = $this->l('Could not update the database schema.');
+            return true;
+        } catch (CoreInstallationException $e) {
+            // the core `install()` method should have already added errors
+            return false;
+        } catch (InstallerException $e) {
+            $this->_errors[] = $e->getMessage();
 
             return false;
         }
-
-        $this->setUpRoutingLoaderResolver();
-
-        return parent::install()
-            && $this->registerHook(HookExecutor::getHooksToInstall(_PS_VERSION_));
     }
 
-    /**
-     * @return bool
-     */
-    public function uninstall()
+    public function uninstall(?bool $keepData = null): bool
     {
-        $this->setUpRoutingLoaderResolver();
+        try {
+            $this->getUninstaller()->uninstall($this, $keepData ?? $this->isResetAction());
 
-        if (!parent::uninstall()) {
+            return true;
+        } catch (CoreInstallationException $e) {
+            // the core `uninstall()` method should have already added errors
+            return false;
+        } catch (InstallerException $e) {
+            $this->_errors[] = $e->getMessage();
+
             return false;
         }
-
-        if (\Tools::version_compare(_PS_VERSION_, '1.7.8')) {
-            Hook::exec('actionModuleUninstallAfter', ['object' => $this]);
-        }
-
-        return true;
     }
 
-    /**
-     * @return array
-     */
-    public function runUpgradeModule()
+    public function runUpgradeModule(): array
     {
         try {
             $result = parent::runUpgradeModule();
@@ -176,10 +161,8 @@ class InPostIzi extends PaymentModule implements WidgetInterface
 
     /**
      * @param int[] $shops shop IDs
-     *
-     * @return bool
      */
-    public function addCheckboxCurrencyRestrictionsForModule(array $shops = [])
+    public function addCheckboxCurrencyRestrictionsForModule(array $shops = []): bool
     {
         if ([] === $shops) {
             $shops = Shop::getShops(true, null, true);
@@ -204,25 +187,23 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         return Db::getInstance()->insert('module_currency', $data);
     }
 
-    public function getContent()
+    public function getContent(): void
     {
         if ($this->isContainerCacheStale() && $this->isContainerConfigLoaded()) {
             $this->clearCacheAndRedirectBackToConfigPage();
         }
 
-        try {
-            /** @var UrlGeneratorInterface $router */
-            $router = $this->get('router');
+        /** @var UrlGeneratorInterface $router */
+        $router = $this->get('router');
 
+        try {
             Tools::redirectAdmin($router->generate('admin_inpost_izi_config_general'));
-        } catch (ServiceNotFoundException $e) {
-            $this->handleConfigPageRequest();
         } catch (RouteNotFoundException $e) {
             if ($this->isContainerConfigLoaded()) {
                 throw $e;
             }
 
-            $this->addFlash($this->l('To access the configuration page, the module must be active.'));
+            $this->addFlash($this->trans('To access the configuration page, the module must be active.', [], 'Modules.Inpostizi.Admin'));
             Tools::redirectAdmin($router->generate('admin_module_manage'));
         }
     }
@@ -230,22 +211,18 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     /**
      * Handles hook calls.
      *
-     * @param string $methodName
-     *
      * @return mixed hook result
      */
-    public function __call($methodName, array $arguments)
+    public function __call(string $methodName, array $arguments)
     {
-        $hookName = 0 === strpos($methodName, 'hook')
+        $hookName = str_starts_with($methodName, 'hook')
             ? lcfirst(Tools::substr($methodName, 4))
             : $methodName;
 
         try {
-            $parameters = $this->normalizeHookParameters(isset($arguments[0]) ? $arguments[0] : []);
+            $parameters = $this->normalizeHookParameters($arguments[0] ?? []);
 
-            return $this
-                ->get(HookExecutorInterface::class)
-                ->execute($hookName, $parameters);
+            return $this->get(HookExecutorInterface::class)->execute($hookName, $parameters);
         } catch (ModuleErrorInterface $e) {
             throw $e;
         } catch (InvalidHookParamException $e) {
@@ -292,100 +269,17 @@ class InPostIzi extends PaymentModule implements WidgetInterface
      *
      * @param string|class-string<T> $serviceName
      *
-     * @phpstan-return ($serviceName is class-string<T> ? T : object)
-     *
      * @return T|object
-     */
-    public function get($serviceName)
-    {
-        return $this->doGetContainer()->get($serviceName);
-    }
-
-    /**
-     * @param string|null $hookName
      *
-     * @return string
+     * @phpstan-return ($serviceName is class-string<T> ? T : object)
      */
-    public function renderWidget($hookName, array $configuration)
+    public function get($serviceName): object
     {
-        $configuration = $this->normalizeHookParameters($configuration);
-
-        return $this->getWidget()->renderWidget($hookName, $configuration);
+        return $this->getContainer()->get($serviceName);
     }
 
-    /**
-     * @param string|null $hookName
-     *
-     * @return array
-     */
-    public function getWidgetVariables($hookName, array $configuration)
+    public function getContainer(): ContainerInterface
     {
-        $configuration = $this->normalizeHookParameters($configuration);
-
-        return $this->getWidget()->getWidgetVariables($hookName, $configuration);
-    }
-
-    /**
-     * @return Request
-     *
-     * @internal
-     */
-    public function getCurrentRequest()
-    {
-        return $this->getRequestStack()->getCurrentRequest() ?: Request::createFromGlobals();
-    }
-
-    /**
-     * @return RequestStack
-     *
-     * @internal
-     */
-    public function getRequestStack()
-    {
-        if (isset($this->requestStack)) {
-            return $this->requestStack;
-        }
-
-        try {
-            /** @var RequestStack $requestStack */
-            $requestStack = $this->get('request_stack');
-            if (null !== $requestStack->getCurrentRequest()) {
-                return $this->requestStack = $requestStack;
-            }
-        } catch (ServiceNotFoundException $e) {
-        }
-
-        $this->requestStack = new RequestStack();
-        $this->requestStack->push(Request::createFromGlobals());
-
-        return $this->requestStack;
-    }
-
-    /**
-     * @return LoggerInterface
-     *
-     * @internal
-     */
-    public function getLogger()
-    {
-        try {
-            return $this->get(self::$loggerServiceId);
-        } catch (ContainerNotFoundException $e) {
-            return $this->getLegacyContainer()->get(self::$loggerServiceId);
-        } catch (Exception $e) {
-            return new Psr\Log\NullLogger();
-        }
-    }
-
-    /**
-     * @return ContainerInterface
-     */
-    private function doGetContainer()
-    {
-        if (Tools::version_compare(_PS_VERSION_, '1.7.6')) {
-            return $this->getLegacyContainer();
-        }
-
         if (Tools::version_compare(_PS_VERSION_, '1.7.7')) {
             return $this->getPS176Container();
         }
@@ -395,127 +289,122 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         }
 
         try {
-            return $this->getContainer();
+            return parent::getContainer();
         } catch (PrestaShopContainerNotFoundException $e) {
             return $this->getFrontOfficeLegacyContainer();
         }
     }
 
     /**
-     * @return ContainerInterface
+     * @param string|null $hookName
      */
-    private function getLegacyContainer()
+    public function renderWidget($hookName, array $configuration): string
     {
-        if (!isset($this->legacyContainer)) {
-            $this->legacyContainer = $this->createContainer();
-        }
+        $configuration = $this->normalizeHookParameters($configuration);
 
-        return $this->legacyContainer;
+        return $this->getWidget()->renderWidget($hookName, $configuration);
     }
 
     /**
-     * @return ContainerInterface
+     * @param string|null $hookName
+     * @param array<string, mixed> $configuration
+     *
+     * @return array<string, mixed>
      */
-    private function createContainer()
+    public function getWidgetVariables($hookName, array $configuration): array
     {
-        $cacheDir = sprintf('%s/inpost/izi/', rtrim(_PS_CACHE_DIR_, '/'));
+        $configuration = $this->normalizeHookParameters($configuration);
 
-        if (Tools::version_compare(_PS_VERSION_, '1.7.4')) {
-            $type = 'sf28';
-            $className = sprintf('InPost\\Izi\\Container_%s', str_replace('.', '_', $this->version));
-            $resources = $this->getSf28ConfigResources();
-        } else {
-            $type = $this->context->controller instanceof AdminControllerCore ? 'admin' : 'front';
-            $className = sprintf('InPost\\Izi\\%sContainer_%s', ucfirst($type), str_replace('.', '_', $this->version));
-            $resources = [sprintf('%s/config/%s/services.yml', rtrim($this->getLocalPath(), '/'), $type)];
-        }
-
-        return (new ContainerFactory($cacheDir))->create($className, $resources, $type);
+        return $this->getWidget()->getWidgetVariables($hookName, $configuration);
     }
 
     /**
-     * @return iterable
+     * @internal
      */
-    private function getSf28ConfigResources()
+    public function getCurrentRequest(): ?Request
     {
-        yield sprintf('%s/config/services/sf28.yml', rtrim($this->getLocalPath(), '/'));
-        yield static function (ContainerBuilder $container) {
-            $container->addResource(new FileResource(__FILE__));
-            $container->addCompilerPass(new RegisterListenersPass('inpost.izi.event_dispatcher'), PassConfig::TYPE_BEFORE_REMOVING);
-            $container->addCompilerPass(new ProvideServiceLocatorFactoriesPass('inpost.izi.service_locator'));
-            $container->addCompilerPass(new TaggedIteratorsCollectorPass());
-            AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
-        };
+        return $this->getRequestStack()->getCurrentRequest();
     }
 
     /**
-     * Accesses the public "routing.loader" service to provide a @see \Symfony\Component\Config\Loader\LoaderResolverInterface
-     * to the routing configuration loader used by @see \PrestaShop\PrestaShop\Adapter\Module\Tab\ModuleTabRegister
+     * @internal
      */
-    private function setUpRoutingLoaderResolver()
+    public function getRequestStack(): RequestStack
     {
-        if (Tools::version_compare(_PS_VERSION_, '1.7.7')) {
-            return;
-        }
+        return $this->requestStack
+            ?? $this->requestStack = (new RequestStackProvider($this->getContainer()))->getRequestStack();
+    }
 
+    /**
+     * @internal
+     */
+    public function getLogger(): LoggerInterface
+    {
         try {
-            $this->get('routing.loader');
+            return $this->get('inpost.izi.logger');
         } catch (Exception $e) {
-            // ignore silently
+            return new Psr\Log\NullLogger();
         }
     }
 
-    private function handleConfigPageRequest()
+    private function getInstaller(): InstallerInterface
     {
-        $request = $this->getCurrentRequest();
-        $request->query->remove('controllerUri');
-
-        $kernel = $this->getAdminKernel();
-        $response = $kernel->handle($request);
-
-        $this->context->cookie->write();
-        $response->send();
-
-        if ($kernel instanceof TerminableInterface) {
-            $kernel->terminate($request, $response);
+        try {
+            return $this->get(InstallerInterface::class);
+        } catch (ServiceNotFoundException $e) {
+            return $this->createInstaller();
         }
+    }
 
-        exit;
+    private function getUninstaller(): UninstallerInterface
+    {
+        try {
+            return $this->get(UninstallerInterface::class);
+        } catch (ServiceNotFoundException $e) {
+            return $this->createInstaller();
+        }
     }
 
     /**
-     * @return KernelInterface
+     * @return (InstallerInterface&UninstallerInterface)
      */
-    private function getAdminKernel()
+    private function createInstaller(): object
     {
-        if (isset($this->adminKernel)) {
-            return $this->adminKernel;
+        /** @var Container|null $container */
+        $container = SymfonyContainer::getInstance();
+
+        if (null === $container) {
+            throw new RuntimeException('Cannot create installer: kernel container is not available.');
         }
 
-        global $kernel;
+        $installer = (new ContainerFactory($container))
+            ->buildContainer([
+                $this->getLocalPath() . 'config/services/installer.yml',
+            ], Installer::REQUIRED_CONTAINER_PARAMS)
+            ->get(Installer::class);
 
-        if (!$kernel instanceof KernelInterface) {
-            throw new RuntimeException('PS application kernel instance was not found.');
-        }
+        $container->set(InstallerInterface::class, $installer);
+        $container->set(UninstallerInterface::class, $installer);
 
-        $this->adminKernel = new AdminKernel($kernel, _PS_VERSION_);
-        $this->adminKernel->boot();
-
-        $psContainer = $kernel->getContainer();
-        foreach (AdminKernel::SYNTHETIC_SERVICE_IDS as $id) {
-            $this->adminKernel->getContainer()->set($id, $psContainer->get($id));
-        }
-
-        // In some very early 1.7 versions, the session may not have yet been started by PS application.
-        $psContainer->get('session')->start();
-
-        return $this->adminKernel;
+        return $installer;
     }
 
-    /**
-     * @return bool
-     */
-    private function isDebugEnabled()
+    private function isResetAction(): bool
+    {
+        if (null !== $request = $this->getCurrentRequest()) {
+            return 'admin_module_manage_action' === $request->attributes->get('_route') && 'reset' === $request->attributes->get('action');
+        }
+
+        if ('cli' !== PHP_SAPI) {
+            return false;
+        }
+
+        $input = new ArgvInput();
+
+        return 'prestashop:module' === $input->getFirstArgument() && 'reset' === $input->getArgument('action');
+    }
+
+    private function isDebugEnabled(): bool
     {
         try {
             return $this->get(AdvancedConfigurationInterface::class)->isDebugEnabled();
@@ -525,11 +414,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     }
 
     /**
-     * {@see \Module::get()} does not check if {@see \Controller::$container} is set on PS 1.7.6.
-     *
-     * @return ContainerInterface
+     * {@see Module::get()} does not check if {@see Controller::$container} is set on PS 1.7.6.
      */
-    private function getPS176Container()
+    private function getPS176Container(): ContainerInterface
     {
         if (isset($this->context->container)) {
             return $this->context->container;
@@ -547,11 +434,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     }
 
     /**
-     * Access container before {@see \FrontController::$container} is set in {@see \Controller::init()}.
-     *
-     * @return ContainerInterface
+     * Access container before {@see FrontController::$container} is set in {@see Controller::init()}.
      */
-    private function getFrontOfficeLegacyContainer()
+    private function getFrontOfficeLegacyContainer(): ContainerInterface
     {
         if (!class_exists(PrestaShopContainerBuilder::class)) {
             throw ContainerNotFoundException::create();
@@ -565,9 +450,11 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     }
 
     /**
-     * @return array
+     * @param array<string, mixed> $parameters
+     *
+     * @return array<string, mixed>
      */
-    private function normalizeHookParameters(array $parameters)
+    private function normalizeHookParameters(array $parameters): array
     {
         if (!isset($parameters['request'])) {
             $parameters['request'] = $this->getCurrentRequest();
@@ -580,22 +467,12 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         return $parameters;
     }
 
-    /**
-     * @return WidgetInterface
-     */
-    private function getWidget()
+    private function getWidget(): WidgetInterface
     {
-        if (isset($this->widget)) {
-            return $this->widget;
-        }
-
-        return $this->widget = $this->get('inpost.izi.widget');
+        return $this->widget ?? $this->widget = $this->get('inpost.izi.widget');
     }
 
-    /**
-     * @return bool
-     */
-    private function isContainerCacheRelated(Throwable $e)
+    private function isContainerCacheRelated(Throwable $e): bool
     {
         if (!$e instanceof HookNotFoundException && !$e instanceof ServiceNotFoundException && !$e instanceof TypeError) {
             return false;
@@ -604,13 +481,10 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         return $this->isContainerCacheStale();
     }
 
-    /**
-     * @return bool
-     */
-    private function isContainerCacheStale()
+    private function isContainerCacheStale(): bool
     {
         try {
-            $container = $this->doGetContainer();
+            $container = $this->getContainer();
         } catch (ContainerNotFoundException $e) {
             return false; // fingers crossed
         }
@@ -625,7 +499,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     /**
      * @return bool whether PS automatically loads the module's container configuration
      */
-    private function isContainerConfigLoaded()
+    private function isContainerConfigLoaded(): bool
     {
         if ($this->active) {
             return true;
@@ -638,35 +512,52 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         return $this->hasShopAssociations();
     }
 
-    private function clearCacheAndRedirectBackToConfigPage()
+    private function clearCacheAndRedirectBackToConfigPage(): void
     {
-        if (Tools::getValue('cache_cleared')) {
-            $this->addFlash($this->l('An attempt to clear the cache may have failed. Please try to clear the cache manually.'));
+        if ($this->getCurrentRequest()->query->getBoolean('cache_cleared')) {
+            $this->addFlash($this->trans('An attempt to clear the Symfony container cache may have failed. If you continue to experience problems, try clearing the cache manually.', [], 'Modules.Inpostizi.Admin'));
 
             return;
         }
 
         $this->getLogger()->warning('Container cache is stale, attempting to clear.');
+        SymfonyCacheClearer::getInstance()->clear();
 
-        Tools::clearSf2Cache();
-        Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, null, [
+        Tools::redirectAdmin($this->context->link->getAdminLink('AdminModules', true, [], [
             'configure' => $this->name,
             'cache_cleared' => true,
         ]));
     }
 
-    /**
-     * @param string $message
-     * @param string $type
-     */
-    private function addFlash($message, $type = 'error')
+    private function addFlash(string $message, string $type = 'error'): void
     {
-        try {
-            /** @var Session $session */
-            $session = $this->get('session');
-            $session->getFlashBag()->add($type, $message);
-        } catch (ServiceNotFoundException $e) {
-            // ignore silently
+        $request = $this->getCurrentRequest();
+
+        if (null === $request || !$request->hasSession()) {
+            return;
         }
+
+        /** @var Session $session */
+        $session = $request->getSession();
+        $session->getFlashBag()->add($type, $message);
+    }
+
+    /**
+     * Loads translations if the module is not installed.
+     */
+    private function initTranslations(): void
+    {
+        if (null !== $this->id) {
+            return;
+        }
+
+        $translator = $this->getTranslator();
+        $catalogue = (new TranslationFinder())->getCatalogue($this->getLocalPath() . 'translations', $translator->getLocale());
+
+        if (null === $catalogue) {
+            return;
+        }
+
+        $translator->getCatalogue()->addCatalogue($catalogue);
     }
 }

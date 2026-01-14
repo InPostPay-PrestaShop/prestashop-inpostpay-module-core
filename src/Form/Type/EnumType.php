@@ -6,7 +6,6 @@ namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Enum\Enum;
 use izi\prestashop\Form\DataTransformer\EnumDataTransformer;
-use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Translation\TranslatableInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -14,21 +13,18 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\ReversedTransformer;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
-if (!defined('_PS_VERSION_')) {
-    exit;
-}
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class EnumType extends AbstractType
 {
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
-    public function __construct(?LegacyTranslator $translator = null)
+    public function __construct(TranslatorInterface $translator)
     {
-        $this->translator = $translator ?? new LegacyTranslator('inpostizi');
+        $this->translator = $translator;
     }
 
     /**

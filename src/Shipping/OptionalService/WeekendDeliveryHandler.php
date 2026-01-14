@@ -26,7 +26,7 @@ final class WeekendDeliveryHandler implements OptionalServiceHandlerInterface
     public function handle(\Cart $cart, string $serviceCode, DeliveryType $deliveryType, bool $selected): void
     {
         if ('PWW' !== $serviceCode) {
-            throw new \DomainException(sprintf('Unsupported service "%s".', $serviceCode));
+            throw new \DomainException(\sprintf('Unsupported service "%s".', $serviceCode));
         }
 
         if (!$selected) {

@@ -29,25 +29,17 @@ use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
-use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ContextManager;
-use izi\prestashop\Product\Image\ImageUrlsProvider;
 use izi\prestashop\Product\Image\ImageUrlsProviderInterface;
 use izi\prestashop\Product\Price\BatchLowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceQuery;
-use izi\prestashop\Product\Price\NullLowestPriceProvider;
 use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Product\Util\AttributeListParser;
 use izi\prestashop\Product\Util\DescriptionFormatter;
 use izi\prestashop\PromoCode\AvailablePromotionsProviderInterface;
-use izi\prestashop\PromoCode\CartRulePromoCodeProvider;
-use izi\prestashop\PromoCode\NullAvailablePromotionsProvider;
 use izi\prestashop\PromoCode\PromoCodeProviderInterface;
 use izi\prestashop\Validator\Product\Unrestricted;
-use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
-use PrestaShop\PrestaShop\Core\Cart\Calculator;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -71,11 +63,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $consentsConfiguration;
 
     /**
-     * @var ProductConfigurationInterface
-     */
-    private $productConfiguration;
-
-    /**
      * @var DeliveryFactory
      */
     private $deliveryFactory;
@@ -84,11 +71,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      * @var ProductDeliveryFactory
      */
     private $productDeliveryFactory;
-
-    /**
-     * @var ImageRetriever|null
-     */
-    private $imageRetriever;
 
     /**
      * @var LowestPriceProviderInterface
@@ -111,7 +93,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private $attributeListParser;
 
     /**
-     * @var ImageUrlsProvider
+     * @var ImageUrlsProviderInterface
      */
     private $imageProvider;
 
@@ -164,25 +146,21 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         \Cart $cart,
         ContextManager $contextManager,
         ConsentsConfigurationInterface $consentsConfiguration,
-        ProductConfigurationInterface $productConfiguration,
         DeliveryFactory $deliveryFactory,
         ProductDeliveryFactory $deliveryRelatedProductFactory,
-        ?ImageRetriever $imageRetriever = null,
-        ?LowestPriceProviderInterface $lowestPriceProvider = null,
-        ?PromoCodeProviderInterface $promoCodeProvider = null,
-        ?AvailablePromotionsProviderInterface $availablePromotionsProvider = null,
-        ?ValidatorInterface $validator = null
+        LowestPriceProviderInterface $lowestPriceProvider,
+        PromoCodeProviderInterface $promoCodeProvider,
+        AvailablePromotionsProviderInterface $availablePromotionsProvider,
+        ValidatorInterface $validator
     ) {
         $this->cart = $cart;
         $this->contextManager = $contextManager;
         $this->consentsConfiguration = $consentsConfiguration;
         $this->deliveryFactory = $deliveryFactory;
-        $this->productConfiguration = $productConfiguration;
         $this->productDeliveryFactory = $deliveryRelatedProductFactory;
-        $this->imageRetriever = $imageRetriever;
-        $this->lowestPriceProvider = $lowestPriceProvider ?? new NullLowestPriceProvider();
-        $this->promoCodeProvider = $promoCodeProvider ?? CartRulePromoCodeProvider::create();
-        $this->availablePromotionsProvider = $availablePromotionsProvider ?? new NullAvailablePromotionsProvider();
+        $this->lowestPriceProvider = $lowestPriceProvider;
+        $this->promoCodeProvider = $promoCodeProvider;
+        $this->availablePromotionsProvider = $availablePromotionsProvider;
         $this->validator = $validator;
         $this->shopId = (int) $this->cart->id_shop;
     }
@@ -256,7 +234,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      * @param Product[] $relatedProducts
      * @param AvailablePromotion[] $availablePromotions
      */
-    abstract protected function doBuild(Summary $summary, array $delivery, array $products, array $consents, array $promoCodes, array $relatedProducts/*, array $availablePromotions = []*/);
+    abstract protected function doBuild(Summary $summary, array $delivery, array $products, array $consents, array $promoCodes, array $relatedProducts, array $availablePromotions = []);
 
     /**
      * @return Product[]
@@ -349,9 +327,9 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function createProduct(\Product $model, array $product, Quantity $quantity, Price $basePrice, ?Price $promoPrice, bool $related = false): Product
     {
-        $combinationId = array_key_exists('id_product_attribute', $product) ? (int) $product['id_product_attribute'] : null;
-        $customizationId = array_key_exists('id_customization', $product) ? (int) $product['id_customization'] : 0;
-        $shopId = array_key_exists('id_shop', $product) ? (int) $product['id_shop'] : null;
+        $combinationId = \array_key_exists('id_product_attribute', $product) ? (int) $product['id_product_attribute'] : null;
+        $customizationId = \array_key_exists('id_customization', $product) ? (int) $product['id_customization'] : 0;
+        $shopId = \array_key_exists('id_shop', $product) ? (int) $product['id_shop'] : null;
 
         $category = $model->id_category_default ?: $model->getDefaultCategory();
         $description = DescriptionFormatter::formatDescription($model);
@@ -363,7 +341,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $product['name'],
             $basePrice,
             $quantity,
-            is_array($category) ? (string) current($category) : (string) $category,
+            \is_array($category) ? (string) current($category) : (string) $category,
             $product['ean13'] ?? $model->ean13,
             $description,
             $link,
@@ -410,12 +388,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
         $attributes = $product['attributes'] ?? null;
 
-        if (is_array($attributes)) {
+        if (\is_array($attributes)) {
             return array_values($attributes);
         }
 
         /* @see \CartCore::cacheSomeAttributesLists() */
-        if (!is_string($attributes) || '' === $attributes) {
+        if (!\is_string($attributes) || '' === $attributes) {
             return [];
         }
 
@@ -514,11 +492,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function getFinalPrice(): Price
     {
-        // between PS 1.7.4 and 1.7.6 \Cart::BOTH_WITHOUT_SHIPPING calculation type does not take cart rules into the account
-        if (\Tools::version_compare(_PS_VERSION_, '1.7.4', '>=') && \Tools::version_compare(_PS_VERSION_, '1.7.6')) {
-            return $this->getCartTotalWithoutShipping();
-        }
-
         $gross = (float) $this->cart->getOrderTotal(true, \Cart::BOTH_WITHOUT_SHIPPING, null, null, false, true);
         $net = (float) $this->cart->getOrderTotal(false, \Cart::BOTH_WITHOUT_SHIPPING, null, null, false, true);
 
@@ -705,9 +678,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      */
     private function getPaymentOptions(): array
     {
-        /** @var \InPostIzi $module */
-        $module = \Module::getInstanceByName('inpostizi');
-        $configuration = $module->get(OrdersConfigurationInterface::class);
+        $configuration = $this->get(OrdersConfigurationInterface::class);
 
         return array_values($configuration->getAvailablePaymentOptions((int) $this->shopId));
     }
@@ -760,11 +731,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     {
         $context = $this->contextManager->getContext();
 
-        if (is_callable([$context, 'getComputingPrecision'])) {
+        if (\is_callable([$context, 'getComputingPrecision'])) {
+            // PS 1.7.7 or later
             return $context->getComputingPrecision();
         }
 
-        if (defined('_PS_PRICE_COMPUTE_PRECISION_')) {
+        if (\defined('_PS_PRICE_COMPUTE_PRECISION_')) {
             return (int) _PS_PRICE_COMPUTE_PRECISION_;
         }
 
@@ -842,36 +814,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $config = $this->getConfiguration('INPOST_PAY_related_count');
 
         return false === $config || '' === $config ? null : (int) $config;
-    }
-
-    private function getCartTotalWithoutShipping(): Price
-    {
-        $calculator = $this->getCartCalculator();
-
-        $calculator->calculateRows();
-        $calculator->calculateCartRules();
-
-        $amount = $calculator->getRowTotal();
-
-        return PriceFactory::create(
-            $amount->getTaxExcluded(),
-            $amount->getTaxIncluded()
-        );
-    }
-
-    private function getCartCalculator(): Calculator
-    {
-        return (\Closure::bind(function (): Calculator {
-            $products = $this->getProducts();
-            $cartRules = $this->getTotalCalculationCartRules(self::BOTH_WITHOUT_SHIPPING, false);
-
-            /** @var array{obj: \CartRule} $cartRule */
-            foreach ($cartRules as $cartRule) {
-                $cartRule['obj']->free_shipping = false;
-            }
-
-            return $this->newCalculator($products, $cartRules, null);
-        }, $this->cart, \CartCore::class))();
     }
 
     /**
@@ -968,10 +910,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function isProductRestricted(array $product, DeliveryType $deliveryType): bool
     {
-        if (null === $this->validator) {
-            return false;
-        }
-
         $violations = $this->validator->validate($product, new Unrestricted([
             'shopId' => (int) $product['id_shop'],
             'deliveryType' => $deliveryType,
@@ -1041,7 +979,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $productId = (int) $product['id_product'];
             $combinationId = 0 < $product['id_product_attribute'] ? (int) $product['id_product_attribute'] : null;
 
-            $idShop = array_key_exists('id_shop', $product) ? (int) $product['id_shop'] : null;
+            $idShop = \array_key_exists('id_shop', $product) ? (int) $product['id_shop'] : null;
 
             $queries[] = $this->createLowestPriceQuery($productId, $combinationId, $idShop);
         }
@@ -1079,22 +1017,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
 
     private function getImageProvider(): ImageUrlsProviderInterface
     {
-        if (isset($this->imageProvider)) {
-            return $this->imageProvider;
-        }
-
-        try {
-            /** @var \InPostIzi $module */
-            $module = \Module::getInstanceByName('inpostizi');
-
-            return $this->imageProvider = $module->get(ImageUrlsProviderInterface::class);
-        } catch (ServiceNotFoundException $e) {
-            return $this->imageProvider = ImageUrlsProvider::create(
-                $this->imageRetriever,
-                $this->contextManager->getContext(),
-                $this->productConfiguration
-            );
-        }
+        return $this->imageProvider ?? $this->imageProvider = $this->get(ImageUrlsProviderInterface::class);
     }
 
     private function willExceedFreeDeliveryThreshold(DeliveryType $deliveryType, Price $productPrice, Quantity $quantity): bool
@@ -1107,5 +1030,17 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $newBasketPrice = $basketPrice->add($productPrice->multiply($quantity->getQuantity()));
 
         return $freeDeliveryAmount <= $newBasketPrice->getGross();
+    }
+
+    /**
+     * @template T of object
+     *
+     * @param class-string<T> $name
+     *
+     * @return T
+     */
+    private function get(string $name): object
+    {
+        return \InPostIzi::getInstance()->get($name);
     }
 }

@@ -1,0 +1,98 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Configuration\LanguageAwareConfigurationInterface: '@izi\prestashop\Configuration\Adapter\Configuration'
+  izi\prestashop\Configuration\ShopAwareConfigurationInterface: '@izi\prestashop\Configuration\Adapter\Configuration'
+  izi\prestashop\Configuration\ConfigurationInterface: '@izi\prestashop\Configuration\Adapter\Configuration'
+  izi\prestashop\Configuration\Adapter\Configuration:
+    class: izi\prestashop\Configuration\Adapter\Configuration
+    arguments:
+      - '@inpost.izi.db'
+
+  izi\prestashop\Configuration\PrestaShopConfiguration:
+    class: izi\prestashop\Configuration\PrestaShopConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  izi\prestashop\Configuration\ApiConfigurationInterface: '@izi\prestashop\Configuration\ApiConfiguration'
+  izi\prestashop\Configuration\ApiConfiguration:
+    class: izi\prestashop\Configuration\ApiConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+      - '@izi\prestashop\Environment\EnvironmentFactoryInterface'
+
+  # todo: make private after refactoring basket data mapper and order creation handler
+  izi\prestashop\Configuration\OrdersConfigurationInterface:
+    alias: izi\prestashop\Configuration\OrdersConfiguration
+    public: true
+
+  izi\prestashop\Configuration\OrdersConfiguration:
+    class: izi\prestashop\Configuration\OrdersConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+
+  izi\prestashop\Configuration\GeneralConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
+  izi\prestashop\Configuration\PromoCodesConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
+
+  izi\prestashop\Configuration\GeneralConfiguration:
+    class: izi\prestashop\Configuration\GeneralConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  # todo: make private after refactoring basket and order data mappers
+  izi\prestashop\Configuration\ProductConfigurationInterface:
+    alias: izi\prestashop\Configuration\ProductConfiguration
+    public: true
+
+  izi\prestashop\Configuration\ProductConfiguration:
+    class: izi\prestashop\Configuration\ProductConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  # todo: make private after refactoring order creation handler
+  izi\prestashop\Configuration\ShippingConfigurationInterface:
+    alias: izi\prestashop\Configuration\ShippingConfiguration
+    public: true
+
+  izi\prestashop\Configuration\ShippingConfiguration:
+    class: izi\prestashop\Configuration\ShippingConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+
+  izi\prestashop\Configuration\ConsentsConfigurationInterface: '@izi\prestashop\Configuration\ConsentsConfiguration'
+  izi\prestashop\Configuration\ConsentsConfiguration:
+    class: izi\prestashop\Configuration\ConsentsConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+
+  izi\prestashop\Configuration\AdvancedConfigurationInterface:
+    alias: izi\prestashop\Configuration\AdvancedConfiguration
+    public: true
+
+  izi\prestashop\Configuration\AdvancedConfiguration:
+    class: izi\prestashop\Configuration\AdvancedConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  izi\prestashop\Configuration\ProductRestrictionsConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfigurationInterface: '@izi\prestashop\Configuration\GuiConfiguration'
+  izi\prestashop\Configuration\GuiConfiguration:
+    class: izi\prestashop\Configuration\GuiConfiguration
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+      - '@inpost.izi.gui_configuration_locator'
+
+  inpost.izi.gui_configuration_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+      - validator: '@inpost.izi.validator'
+        context: '@inpost.izi.shop_context'
+        izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepositoryInterface'

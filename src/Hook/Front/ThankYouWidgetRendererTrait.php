@@ -18,12 +18,6 @@ trait ThankYouWidgetRendererTrait
      */
     private $paymentModule;
 
-    /**
-     * @param string $hookName
-     * @param \Order $order
-     *
-     * @return bool
-     */
     private function shouldBeRendered(string $hookName, \Order $order): bool
     {
         return $this->paymentModule->name === $order->module
@@ -35,9 +29,6 @@ trait ThankYouWidgetRendererTrait
         return $this->configuration->getThankYouDisplayHook() === $hookName;
     }
 
-    /**
-     * @return string
-     */
     private function renderWidgetBlock(): string
     {
         return '<inpost-thank-you></inpost-thank-you>';

@@ -27,7 +27,7 @@ final class NotInRestrictedCategoryValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, NotInRestrictedCategory::class);
         }
 
-        if (!is_array($value) && !$value instanceof \ArrayAccess) {
+        if (!\is_array($value) && !$value instanceof \ArrayAccess) {
             throw new UnexpectedTypeException($value, 'array|ArrayAccess');
         }
 

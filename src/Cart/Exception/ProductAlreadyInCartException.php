@@ -11,7 +11,7 @@ final class ProductAlreadyInCartException extends \RuntimeException
      */
     private $product;
 
-    public function __construct(array $product, string $message = '', int $code = 0, \Throwable $previous = null)
+    public function __construct(array $product, string $message = '', int $code = 0, ?\Throwable $previous = null)
     {
         parent::__construct($message, $code, $previous);
         $this->product = $product;

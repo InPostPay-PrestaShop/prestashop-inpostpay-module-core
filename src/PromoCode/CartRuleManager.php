@@ -77,7 +77,7 @@ final class CartRuleManager implements PromoCodeManagerInterface
     public function removePromoCode(\Cart $cart, PromoCodeInterface $promoCode): void
     {
         if (!$promoCode instanceof CartRulePromoCode) {
-            throw new \InvalidArgumentException(sprintf('Expected an instance of "%s", "%s" given.', CartRulePromoCode::class, get_debug_type($promoCode)));
+            throw new \InvalidArgumentException(\sprintf('Expected an instance of "%s", "%s" given.', CartRulePromoCode::class, get_debug_type($promoCode)));
         }
 
         $cartRuleId = (int) $promoCode->getCartRule()->id;

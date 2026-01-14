@@ -18,6 +18,7 @@ use Psr\Container\ContainerInterface;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -25,8 +26,6 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 final class WidgetController implements ServiceSubscriberInterface
 {
-    public const TRANSLATION_SOURCE = 'widgetcontroller';
-
     /**
      * @var \InPostIzi
      */
@@ -72,9 +71,9 @@ final class WidgetController implements ServiceSubscriberInterface
 
             if (!\Validate::isLoadedObject($this->context->cart)) {
                 return new JsonResponse([
-                    'message' => $this->module->l('Cart does not exist.', self::TRANSLATION_SOURCE),
+                    'message' => $this->trans('Cart does not exist.', [], 'Modules.Inpostizi.Errors'),
                     'error_code' => 'CART_NOT_FOUND',
-                ], 404);
+                ], Response::HTTP_NOT_FOUND);
             }
 
             $command = new GetBasketBindingKeyCommand(
@@ -109,7 +108,7 @@ final class WidgetController implements ServiceSubscriberInterface
     private function createBasket(): BasketInterface
     {
         if (!\Validate::isLoadedObject($this->context->cart)) {
-            throw new BadRequestHttpException($this->module->l('Cart does not exist.', self::TRANSLATION_SOURCE));
+            throw new BadRequestHttpException($this->trans('Cart does not exist.', [], 'Modules.Inpostizi.Errors'));
         }
 
         return new Cart($this->context->cart);
@@ -125,14 +124,14 @@ final class WidgetController implements ServiceSubscriberInterface
 
         if ($e instanceof NetworkExceptionInterface || $e instanceof BasketAppException || $e instanceof BasketAppHttpException) {
             return new JsonResponse([
-                'message' => $this->module->l('There was a problem communicating with the mobile application. Please try again later.', self::TRANSLATION_SOURCE),
-            ], 502);
+                'message' => $this->trans('There was a problem communicating with the mobile application. Please try again later.', [], 'Modules.Inpostizi.Errors'),
+            ], Response::HTTP_BAD_GATEWAY);
         }
 
         if ($e instanceof \DomainException) {
             return new JsonResponse([
-                'message' => $this->module->l('Your request could not be processed.', self::TRANSLATION_SOURCE),
-            ], 422);
+                'message' => $this->trans('Your request could not be processed.', [], 'Modules.Inpostizi.Errors'),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $this->module->getLogger()->critical('An error occurred while processing widget request.', [
@@ -140,8 +139,8 @@ final class WidgetController implements ServiceSubscriberInterface
         ]);
 
         return new JsonResponse([
-            'message' => $this->module->l('Something went wrong. Please try again later.', self::TRANSLATION_SOURCE),
-        ], 500);
+            'message' => $this->trans('Something went wrong. Please try again later.', [], 'Modules.Inpostizi.Errors'),
+        ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -180,5 +179,10 @@ final class WidgetController implements ServiceSubscriberInterface
         }
 
         return $this->container->get($name);
+    }
+
+    private function trans(string $message, array $parameters, string $domain): string
+    {
+        return $this->context->getTranslator()->trans($message, $parameters, $domain);
     }
 }

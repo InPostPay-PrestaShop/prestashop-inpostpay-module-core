@@ -1,0 +1,8 @@
+imports:
+  - { resource: front/analytics.yml }
+  - { resource: front/asset.yml }
+  - { resource: front/cart.yml }
+  - { resource: front/hook.yml }
+  - { resource: front/merchant_api.yml }
+  - { resource: front/shipping.yml }
+  - { resource: front/widget.yml }

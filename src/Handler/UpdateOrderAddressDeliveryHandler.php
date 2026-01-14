@@ -60,7 +60,7 @@ final class UpdateOrderAddressDeliveryHandler implements UpdateOrderAddressDeliv
         $eventId = $this->generateEventId($command->getOrderId(), $eventTime);
 
         if (null === $order = $this->objectManager->find(\Order::class, (int) $orderId)) {
-            throw new \DomainException(sprintf('Order "%s" does not exist.', $orderId));
+            throw new \DomainException(\sprintf('Order "%s" does not exist.', $orderId));
         }
 
         $delivery = $this->getDeliveryData((int) $order->id_address_delivery);
@@ -77,7 +77,7 @@ final class UpdateOrderAddressDeliveryHandler implements UpdateOrderAddressDeliv
 
     private function generateEventId(string $orderId, \DateTimeImmutable $eventTime): string
     {
-        return sprintf('DA_%s_%d', $orderId, $eventTime->getTimestamp());
+        return \sprintf('DA_%s_%d', $orderId, $eventTime->getTimestamp());
     }
 
     private function getDeliveryData(int $deliveryAddressId): Delivery
@@ -85,7 +85,7 @@ final class UpdateOrderAddressDeliveryHandler implements UpdateOrderAddressDeliv
         $address = $this->objectManager->find(\Address::class, $deliveryAddressId);
 
         if (null === $address) {
-            throw new \DomainException(sprintf('Address "%d" does not exist.', $deliveryAddressId));
+            throw new \DomainException(\sprintf('Address "%d" does not exist.', $deliveryAddressId));
         }
 
         $deliveryAddress = $this->addressDataMapper->mapDeliveryAddress($address);

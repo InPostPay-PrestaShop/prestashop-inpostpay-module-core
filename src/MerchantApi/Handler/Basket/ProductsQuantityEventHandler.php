@@ -11,22 +11,17 @@ use izi\prestashop\MerchantApi\Exception\MalformedRequestException;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
+use izi\prestashop\ObjectModel\Repository\ProductRepository;
 use izi\prestashop\Product\ReferenceId;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
 {
-    private const TRANSLATION_SOURCE = 'productsquantityeventhandler';
-
     /**
-     * @var \Module
+     * @var TranslatorInterface
      */
-    private $module;
-
-    /**
-     * @var \Context
-     */
-    private $context;
+    private $translator;
 
     /**
      * @var ObjectManagerInterface
@@ -38,10 +33,9 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
      */
     private $logger;
 
-    public function __construct(\Module $module, \Context $context, ObjectManagerInterface $manager, LoggerInterface $logger)
+    public function __construct(TranslatorInterface $translator, ObjectManagerInterface $manager, LoggerInterface $logger)
     {
-        $this->module = $module;
-        $this->context = $context;
+        $this->translator = $translator;
         $this->manager = $manager;
         $this->logger = $logger;
     }
@@ -54,13 +48,13 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
     public function handle(BasketInterface $basket, BasketEvent $event): ?Notice
     {
         if (EventType::ProductsQuantity() !== $type = $event->getType()) {
-            throw new \DomainException(sprintf('Unsupported event type "%s".', $type->value));
+            throw new \DomainException(\sprintf('Unsupported event type "%s".', $type->value));
         }
 
         $cart = $basket->getEntity();
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Expected basket entity to be an instance of "%s", "%s" given.', \Cart::class, get_class($cart)));
+            throw new \InvalidArgumentException(\sprintf('Expected basket entity to be an instance of "%s", "%s" given.', \Cart::class, \get_class($cart)));
         }
 
         foreach ($event->getQuantityEventData() as $data) {
@@ -87,7 +81,7 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
         $currentQuantity = ProductHelper::getCartQuantity($cart, $productId, $combinationId, $customizationId);
 
         if (0 === $currentQuantity) {
-            return 0 >= $quantity ? null : $this->module->l('Product is no longer in your cart.', self::TRANSLATION_SOURCE);
+            return 0 >= $quantity ? null : $this->translator->trans('This product is no longer in your cart.', [], 'Modules.Inpostizi.Errors');
         }
 
         if (0 >= $quantity) {
@@ -104,7 +98,7 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
 
         $availableQuantity = $this->getAvailableQuantity($cart, $productId, $combinationId, $customizationId);
         if (null !== $availableQuantity && $deltaQuantity > $availableQuantity) {
-            return $this->context->getTranslator()->trans('The available purchase order quantity for this product is %quantity%.', [
+            return $this->translator->trans('The available purchase order quantity for this product is %quantity%.', [
                 '%quantity%' => $availableQuantity + $currentQuantity,
             ], 'Shop.Notifications.Error');
         }
@@ -134,7 +128,7 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
             'exception' => $e ?? null,
         ]);
 
-        return $this->module->l('Could not update product quantity.', self::TRANSLATION_SOURCE);
+        return $this->translator->trans('Could not update product quantity.', [], 'Modules.Inpostizi.Errors');
     }
 
     private function deleteProduct(\Cart $cart, int $productId, int $combinationId, int $customizationId): ?string
@@ -155,7 +149,7 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
             'exception' => $e ?? null,
         ]);
 
-        return $this->module->l('Could delete the product from your cart.', self::TRANSLATION_SOURCE);
+        return $this->translator->trans('Could not delete the product from your cart.', [], 'Modules.Inpostizi.Errors');
     }
 
     private function checkMinimalQuantity(int $productId, int $combinationId, int $quantity, int $languageId): ?string
@@ -178,20 +172,24 @@ final class ProductsQuantityEventHandler implements BasketEventHandlerInterface
             return null;
         }
 
-        return $this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
+        return $this->translator->trans('The minimum purchase order quantity for the product %product% is %quantity%.', [
             '%product%' => $product->name,
             '%quantity%' => $minimalQuantity,
         ], 'Shop.Notifications.Error');
     }
 
-    // TODO refactor static calls
+    /**
+     * @return int|null quantity or null if product is available out of stock
+     */
     private function getAvailableQuantity(\Cart $cart, int $productId, int $combinationId, int $customizationId): ?int
     {
-        $outOfStock = \StockAvailable::outOfStock($productId);
-        if (\Product::isAvailableWhenOutOfStock($outOfStock)) {
+        /** @var ProductRepository $repository */
+        $repository = $this->manager->getRepository(\Product::class);
+
+        if ($repository->isAvailableOutOfStock($productId)) {
             return null;
         }
 
-        return \Product::getQuantity($productId, $combinationId, null, $cart, $customizationId);
+        return $repository->getAvailableQuantity($productId, $combinationId, $cart, $customizationId);
     }
 }

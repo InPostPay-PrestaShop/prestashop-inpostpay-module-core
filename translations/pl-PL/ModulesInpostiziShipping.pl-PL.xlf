@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziShipping.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="a25eac9fbba5c5aace5aa74ac02fabae">
+        <source>Additional cost</source>
+        <target>Dodatkowy koszt</target>
+      </trans-unit>
+      <trans-unit id="1432596d084873bee8df589b0b01448c">
+        <source>Available from</source>
+        <target>Dostępna od</target>
+      </trans-unit>
+      <trans-unit id="0a0b945c925ac8eb94a4ad328fc54840">
+        <source>Available to</source>
+        <target>Dostępna do</target>
+      </trans-unit>
+      <trans-unit id="cbbd3439308c58e0773f34e9f9954a9b">
+        <source>Carrier mapping</source>
+        <target>Mapowanie przewoźnika</target>
+      </trans-unit>
+      <trans-unit id="594745971d73c1154505efcf31498883">
+        <source>Cost will not be applied if the "{option}" option is not enabled for the carrier.</source>
+        <target>Koszt nie zostanie doliczony w przypadku, gdy opcja "{option}" nie jest włączona dla przewoźnika.</target>
+      </trans-unit>
+      <trans-unit id="87da0313e4cc6479bc9be71dc02788a7">
+        <source>Net value of the amount to be added to the carrier's price if the service is selected.</source>
+        <target>Wartość netto kwoty do doliczenia do ceny przewoźnika w przypadku, gdy usługa zostanie wybrana.</target>
+      </trans-unit>
+      <trans-unit id="a4293995cfbfa9ce60ce71ade2ff75f7">
+        <source>exclusive</source>
+        <target>wyłącznie</target>
+      </trans-unit>
+      <trans-unit id="62628cfd1cdd77d02c32812f048bada3">
+        <source>inclusive</source>
+        <target>włącznie</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

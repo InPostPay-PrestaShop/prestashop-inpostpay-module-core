@@ -7,10 +7,7 @@ namespace izi\prestashop\Installer\Database;
 use izi\prestashop\Analytics\BasketAnalyticsRepository;
 use izi\prestashop\ObjectModel\Entity\InPostIziBasketSession;
 
-/**
- * @final
- */
-class Version_2_2_0 extends AbstractMigration
+final class Version_2_2_0 extends AbstractMigration
 {
     private const BS_SHOP_ID_FK = InPostIziBasketSession::TABLE_NAME . '-shop_id';
     private const BASKET_ANALYTICS_CART_ID_FK = BasketAnalyticsRepository::TABLE_NAME . '-cart_id';

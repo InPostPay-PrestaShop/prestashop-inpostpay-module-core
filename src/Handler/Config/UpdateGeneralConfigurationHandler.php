@@ -76,8 +76,11 @@ final class UpdateGeneralConfigurationHandler implements UpdateGeneralConfigurat
         $this->generalConfiguration->persist($command->getGeneralConfiguration());
         $this->productConfiguration->persist($command->getProductConfiguration());
 
-        $this->module->registerHook($command->getGeneralConfiguration()->getProductCardDisplayHook());
-        $this->module->registerHook($command->getGeneralConfiguration()->getCheckoutButtonDisplayHook());
+        $this->module->registerHook([
+            $command->getGeneralConfiguration()->getProductCardDisplayHook(),
+            $command->getGeneralConfiguration()->getCheckoutButtonDisplayHook(),
+            $command->getGeneralConfiguration()->getThankYouDisplayHook(),
+        ]);
 
         if ($this->didApiConfigChange($oldApiConfig, $command->getApiConfiguration())) {
             $this->cacheClearer->clear();

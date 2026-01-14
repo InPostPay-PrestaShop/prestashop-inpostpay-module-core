@@ -16,8 +16,8 @@ final class GoogleClientIdCookie implements CookieExtractorInterface
             $gaCookie = $request->cookies->get(self::COOKIE_NAME);
             $parts = explode('.', $gaCookie);
 
-            if (count($parts) >= 3) {
-                return implode('.', array_slice($parts, 2));
+            if (\count($parts) >= 3) {
+                return implode('.', \array_slice($parts, 2));
             }
         }
 

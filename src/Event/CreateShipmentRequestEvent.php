@@ -2,13 +2,12 @@
 
 namespace izi\prestashop\Event;
 
-use AdminInPostConfirmedShipmentsController;
 use Symfony\Component\HttpFoundation\Request;
 
 final class CreateShipmentRequestEvent extends Event
 {
     /**
-     * @var AdminInPostConfirmedShipmentsController
+     * @var \AdminInPostConfirmedShipmentsController
      */
     private $controller;
 
@@ -17,13 +16,13 @@ final class CreateShipmentRequestEvent extends Event
      */
     private $request;
 
-    public function __construct(Request $request, AdminInPostConfirmedShipmentsController $controller)
+    public function __construct(Request $request, \AdminInPostConfirmedShipmentsController $controller)
     {
         $this->controller = $controller;
         $this->request = $request;
     }
 
-    public function getController(): AdminInPostConfirmedShipmentsController
+    public function getController(): \AdminInPostConfirmedShipmentsController
     {
         return $this->controller;
     }

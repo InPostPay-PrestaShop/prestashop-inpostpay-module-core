@@ -33,7 +33,7 @@ final class Unrestricted extends Constraint
         parent::__construct($options);
 
         if (null !== $this->deliveryType && !$this->deliveryType instanceof DeliveryType) {
-            throw new InvalidArgumentException(sprintf('Expected option "deliveryType" of type "%s|null", "%s" given.', DeliveryType::class, get_debug_type($this->deliveryType)));
+            throw new InvalidArgumentException(\sprintf('Expected option "deliveryType" of type "%s|null", "%s" given.', DeliveryType::class, get_debug_type($this->deliveryType)));
         }
     }
 

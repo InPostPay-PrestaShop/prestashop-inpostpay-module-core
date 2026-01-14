@@ -80,7 +80,7 @@ final class ObjectModelChoiceLoader implements ChoiceLoaderInterface
         foreach ($choices as $i => $choice) {
             if ($choice instanceof $this->class) {
                 $values[$i] = (string) $choice->id;
-            } elseif (is_int($choice)) {
+            } elseif (\is_int($choice)) {
                 $values[$i] = (string) $choice;
             }
         }

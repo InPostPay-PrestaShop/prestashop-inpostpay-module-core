@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\View\Asset;
 
-use izi\prestashop\View\Asset\VersionStrategy\JsonManifestVersionStrategy as VersionStrategyPolyfill;
 use Symfony\Component\Asset\VersionStrategy\JsonManifestVersionStrategy;
 use Symfony\Component\Asset\VersionStrategy\VersionStrategyInterface;
 
@@ -40,7 +39,7 @@ final class FrontAssetManager extends AbstractAssetManager
 
     protected function getBasePath(): string
     {
-        return sprintf('modules/%s/views', $this->module->name);
+        return \sprintf('modules/%s/views', $this->module->name);
     }
 
     private function resolveOptions(string &$path, array $options): array
@@ -62,7 +61,7 @@ final class FrontAssetManager extends AbstractAssetManager
 
     private function getAssetId(string $path): string
     {
-        return sprintf('modules-%s-%s', $this->module->name, pathinfo($path, PATHINFO_FILENAME));
+        return \sprintf('modules-%s-%s', $this->module->name, pathinfo($path, \PATHINFO_FILENAME));
     }
 
     private function isAbsoluteUrl(string $url): bool
@@ -72,10 +71,8 @@ final class FrontAssetManager extends AbstractAssetManager
 
     private function createVersionStrategy(\Module $module): VersionStrategyInterface
     {
-        $manifestPath = sprintf('%s/views/manifest.json', rtrim($module->getLocalPath(), '/'));
+        $manifestPath = \sprintf('%s/views/manifest.json', rtrim($module->getLocalPath(), '/'));
 
-        return class_exists(JsonManifestVersionStrategy::class)
-            ? new JsonManifestVersionStrategy($manifestPath)
-            : new VersionStrategyPolyfill($manifestPath);
+        return new JsonManifestVersionStrategy($manifestPath);
     }
 }

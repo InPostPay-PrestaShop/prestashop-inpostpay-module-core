@@ -21,8 +21,8 @@ final class GenericStrategy implements ProductDimensionsDeliveryStrategyInterfac
 
     private function checkMaxDimensions(Dimensions $carrierMaxDimensions, Dimensions $productDimension): bool
     {
-        return $carrierMaxDimensions->getWidth() >= $productDimension->getWidth() &&
-            $carrierMaxDimensions->getHeight() >= $productDimension->getHeight() &&
-            $carrierMaxDimensions->getDepth() >= $productDimension->getDepth();
+        return $carrierMaxDimensions->getWidth() >= $productDimension->getWidth()
+            && $carrierMaxDimensions->getHeight() >= $productDimension->getHeight()
+            && $carrierMaxDimensions->getDepth() >= $productDimension->getDepth();
     }
 }

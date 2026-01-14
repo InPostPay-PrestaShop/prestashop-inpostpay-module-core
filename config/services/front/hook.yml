@@ -1,0 +1,154 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Hook\Front\ActionFrontControllerSetMedia:
+    class: izi\prestashop\Hook\Front\ActionFrontControllerSetMedia
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\View\Asset\FrontAssetManager'
+      - '@inpost.izi.security.authorization_checker'
+      - !tagged inpost.izi.front_assets_provider
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+
+  izi\prestashop\Hook\Front\DisplayHeader:
+    class: izi\prestashop\Hook\Front\DisplayHeader
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Front\ActionGetPaymentOptions:
+    class: izi\prestashop\Hook\Front\ActionGetPaymentOptions
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@inpost.izi.module'
+      - '@izi\prestashop\Payment\PaymentCurrencyChecker'
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayIziThankYou:
+    class: izi\prestashop\Hook\Front\DisplayIziThankYou
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@inpost.izi.module'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
+
+  izi\prestashop\Hook\Front\DisplayOrderConfirmation:
+    class: izi\prestashop\Hook\Front\DisplayOrderConfirmation
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@inpost.izi.context'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
+
+  izi\prestashop\Hook\Front\DisplayPaymentReturn:
+    class: izi\prestashop\Hook\Front\DisplayPaymentReturn
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@inpost.izi.module'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
+
+  izi\prestashop\Hook\Front\DisplayProductActions:
+    class: izi\prestashop\Hook\Front\DisplayProductActions
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+
+  izi\prestashop\Hook\Front\DisplayProductAdditionalInfo:
+    class: izi\prestashop\Hook\Front\DisplayProductAdditionalInfo
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+
+  izi\prestashop\Hook\Front\DisplayShoppingCart:
+    class: izi\prestashop\Hook\Front\DisplayShoppingCart
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayShoppingCartFooter:
+    class: izi\prestashop\Hook\Front\DisplayShoppingCartFooter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayExpressCheckout:
+    class: izi\prestashop\Hook\Front\DisplayExpressCheckout
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop:
+    class: izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop:
+    class: izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter:
+    class: izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayIziCartPreviewButton:
+    class: izi\prestashop\Hook\Front\DisplayIziCartPreviewButton
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'
+
+  izi\prestashop\Hook\Front\DisplayIziCheckoutButton:
+    class: izi\prestashop\Hook\Front\DisplayIziCheckoutButton
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfiguration'
+      - '@izi\prestashop\Configuration\GeneralConfiguration'
+      - '@inpost.izi.module'
+      - '@izi\prestashop\View\Templating\RendererInterface'

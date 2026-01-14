@@ -19,7 +19,6 @@ use izi\prestashop\MerchantApi\Model\Order\Request\Delivery;
 use izi\prestashop\MerchantApi\Model\Order\Request\DeliveryAddress;
 use izi\prestashop\MerchantApi\Model\Order\Request\OrderDetails;
 use izi\prestashop\Order\Message\MessageFormatterInterface;
-use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Uuid\Uuid;
 use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Symfony\Component\Validator\Constraint;
@@ -28,22 +27,14 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 final class ProcessableMessageFormatValidator extends ConstraintValidator
 {
-    public const TRANSLATION_SOURCE = 'processablemessageformatvalidator';
-
     /**
      * @var MessageFormatterInterface
      */
     private $formatter;
 
-    /**
-     * @var LegacyTranslator
-     */
-    private $translator;
-
-    public function __construct(MessageFormatterInterface $formatter, LegacyTranslator $translator)
+    public function __construct(MessageFormatterInterface $formatter)
     {
         $this->formatter = $formatter;
-        $this->translator = $translator;
     }
 
     public function validate($value, Constraint $constraint): void
@@ -56,7 +47,7 @@ final class ProcessableMessageFormatValidator extends ConstraintValidator
             return;
         }
 
-        if (!is_string($value)) {
+        if (!\is_string($value)) {
             throw new UnexpectedTypeException($value, 'string');
         }
 
@@ -66,7 +57,9 @@ final class ProcessableMessageFormatValidator extends ConstraintValidator
             }
         } catch (SyntaxError|\LogicException $e) {
             $this->context
-                ->buildViolation(sprintf($this->translator->l('Invalid message format. %s', self::TRANSLATION_SOURCE), $e->getMessage()))
+                ->buildViolation('Invalid message format. {{ error }}')
+                ->setParameter('{{ error }}', $e->getMessage())
+                ->setTranslationDomain('Modules.Inpostizi.Validators')
                 ->addViolation();
 
             return;
@@ -79,7 +72,7 @@ final class ProcessableMessageFormatValidator extends ConstraintValidator
         $orderDetails = new OrderDetails((string) Uuid::v4(), Currency::Pln(), new Price(0., 0., 0.), PaymentType::Card(), 'comment');
         $accountInfo = new AccountInfo('firstname', 'lastname', $phoneNumber, 'test@example.com', new ClientAddress('PL', 'address', 'city', '12-123'));
         $consents = [new Consent('1', '1', true)];
-        $invoiceDetails = new InvoiceDetails(LegalForm::Company(), 'PL', 'city', 'street', '1', '12-123', 'PL', '0123456789', 'company');
+        $invoiceDetails = new InvoiceDetails(LegalForm::Company(), 'PL', 'city', 'street', '1', '12-123', 'PL', '1234567890', 'company');
 
         $deliveryType = DeliveryType::Apm();
 

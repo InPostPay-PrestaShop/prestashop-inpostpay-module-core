@@ -16,7 +16,7 @@ trait ConfigUpdaterTrait
         $sql = (new \DbQuery())
             ->select('c.*')
             ->from('configuration', 'c')
-            ->where(sprintf('c.name IN ("%s")', implode('","', $keys)));
+            ->where(\sprintf('c.name IN ("%s")', implode('","', $keys)));
 
         return $this->db->executeS($sql) ?: [];
     }

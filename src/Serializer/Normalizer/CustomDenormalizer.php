@@ -23,12 +23,12 @@ final class CustomDenormalizer implements DenormalizerInterface
             return null;
         }
 
-        if (!is_array($data)) {
-            throw new InvalidArgumentException(sprintf('Data expected to be an array, "%s" given.', get_debug_type($data)));
+        if (!\is_array($data)) {
+            throw new InvalidArgumentException(\sprintf('Data expected to be an array, "%s" given.', get_debug_type($data)));
         }
 
         if (!is_subclass_of($type, DenormalizableInterface::class)) {
-            throw new UnexpectedValueException(sprintf('Unsupported type: "%s".', $type));
+            throw new UnexpectedValueException(\sprintf('Unsupported type: "%s".', $type));
         }
 
         return $type::denormalize($data);
@@ -37,5 +37,10 @@ final class CustomDenormalizer implements DenormalizerInterface
     public function supportsDenormalization($data, $type, $format = null): bool
     {
         return is_subclass_of($type, DenormalizableInterface::class);
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [DenormalizableInterface::class => true];
     }
 }

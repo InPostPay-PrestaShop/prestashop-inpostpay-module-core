@@ -1,0 +1,76 @@
+parameters:
+  inpost.izi.basket_app_logger_options:
+    max_response_body_size: 1000
+
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\BasketApp\BasketAppClientInterface:
+    alias: izi\prestashop\BasketApp\BasketAppClient
+    public: true
+
+  izi\prestashop\BasketApp\Basket\BasketsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+  izi\prestashop\BasketApp\Order\OrdersApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+  izi\prestashop\BasketApp\Signature\SigningKeysApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+  izi\prestashop\BasketApp\Payment\PaymentsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+  izi\prestashop\BasketApp\Product\ProductsApiClientInterface: '@izi\prestashop\BasketApp\BasketAppClient'
+
+  izi\prestashop\BasketApp\BasketAppClient:
+    class: izi\prestashop\BasketApp\BasketAppClient
+    arguments:
+      - '@inpost.izi.http_client.basket_app'
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.serializer'
+      - '@=service("inpost.izi.environment").getBasketAppApiUri()'
+
+  izi\prestashop\BasketApp\BasketAppClientFactory:
+    class: izi\prestashop\BasketApp\BasketAppClientFactory
+    arguments:
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.serializer'
+      - '@izi\prestashop\Http\Client\Factory\ClientFactoryInterface'
+      - '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
+
+  inpost.izi.http_client.basket_app:
+    class: Psr\Http\Client\ClientInterface
+    factory: [ '@izi\prestashop\Http\Client\Factory\ClientFactoryInterface', create ]
+
+  inpost.izi.http_client.basket_app.authorizing:
+    class: izi\prestashop\Http\Client\AuthorizingClient
+    decorates: inpost.izi.http_client.basket_app
+    arguments:
+      - '@inpost.izi.http_client.basket_app.authorizing.inner'
+      - '@inpost.izi.oauth2.auth_provider'
+
+  inpost.izi.http_client.basket_app.logging:
+    class: izi\prestashop\Http\Client\LoggingClient
+    decorates: inpost.izi.http_client.basket_app
+    arguments:
+      - '@inpost.izi.http_client.basket_app.logging.inner'
+      - '@inpost.izi.logger.basket_app'
+      - '%inpost.izi.basket_app_logger_options%'
+
+  inpost.izi.http_client.basket_app.module_version_info_providing:
+    class: izi\prestashop\Http\Client\ModuleVersionInfoProvidingClient
+    decorates: inpost.izi.http_client.basket_app
+    arguments:
+      - '@inpost.izi.http_client.basket_app.module_version_info_providing.inner'
+      - '@inpost.izi.module'
+
+  inpost.izi.oauth2.auth_provider:
+    class: izi\prestashop\OAuth2\LazyAuthorizationProvider
+    arguments:
+      - '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
+      - '@izi\prestashop\Environment\AuthServerUriCollection'
+      - '@izi\prestashop\Configuration\ApiConfiguration'
+      - '@izi\prestashop\Configuration\ApiConfiguration'
+
+  izi\prestashop\BasketApp\AuthorizationProviderFactory:
+    class: izi\prestashop\BasketApp\AuthorizationProviderFactory
+    arguments:
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.psr17_factory'
+      - '@izi\prestashop\Http\Client\Factory\ClientFactoryInterface'

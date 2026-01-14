@@ -80,7 +80,7 @@ class BasketAnalyticsRepository implements BasketAnalyticsRepositoryInterface
     protected function hydrate(array $row): BasketAnalytics
     {
         return new BasketAnalytics(
-            (int)$row['cart_id'],
+            (int) $row['cart_id'],
             $row['gclid'],
             $row['fbclid'],
             $row['client_id']

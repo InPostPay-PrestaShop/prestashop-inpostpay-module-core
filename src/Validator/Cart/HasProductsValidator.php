@@ -30,7 +30,6 @@ final class HasProductsValidator extends ConstraintValidator
 
         $this->context
             ->buildViolation($constraint->message)
-            ->setTranslationDomain('Shop.Notifications.Error')
             ->addViolation();
     }
 }

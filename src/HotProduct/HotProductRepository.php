@@ -222,7 +222,9 @@ class HotProductRepository implements HotProductRepositoryInterface
     private function setPropertyValue(HotProduct $product, string $name, $value): void
     {
         $property = $this->reflection->getProperty($name);
-        $property->setAccessible(true);
+        if (80100 > \PHP_VERSION_ID) {
+            $property->setAccessible(true);
+        }
         $property->setValue($product, $value);
     }
 }

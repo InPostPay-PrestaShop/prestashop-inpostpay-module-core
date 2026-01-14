@@ -10,10 +10,13 @@ use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+/**
+ * Carrier by reference ID choice form.
+ */
 final class CarrierChoiceType extends AbstractType
 {
     /**
-     * @var ChoiceLoaderInterface
+     * @var CarrierChoiceLoader
      */
     private $choiceLoader;
 
@@ -35,9 +38,7 @@ final class CarrierChoiceType extends AbstractType
         $resolver->setDefaults([
             'choice_loader' => $this->choiceLoader,
             'choice_value' => 'id_reference',
-            'choice_label' => function (\Carrier $carrier): string {
-                return $carrier->name ?? '';
-            },
+            'choice_label' => 'name',
         ]);
     }
 }

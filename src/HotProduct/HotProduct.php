@@ -92,12 +92,12 @@ class HotProduct
         return $this->referenceId;
     }
 
-    public function getAvailableFrom(): ?\DateTimeInterface
+    public function getAvailableFrom(): ?\DateTimeImmutable
     {
         return $this->availableFrom;
     }
 
-    public function getAvailableTo(): ?\DateTimeInterface
+    public function getAvailableTo(): ?\DateTimeImmutable
     {
         return $this->availableTo;
     }

@@ -63,7 +63,7 @@ final class X13PriceHistoryLowestPriceProvider implements BatchLowestPriceProvid
         /** @var \x13pricehistory\Providers\BatchLowestPriceProvider $priceProvider */
         $priceProvider = $module->batchLowestPriceProvider;
 
-        if (!is_callable([$priceProvider, 'getPricesForProductList'])) {
+        if (!\is_callable([$priceProvider, 'getPricesForProductList'])) {
             return null;
         }
 

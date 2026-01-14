@@ -40,7 +40,7 @@ class OrderStatusDescriptionProvider
     private function getOrderStateName(int $orderStateId, int $languageId): string
     {
         if (null === $orderState = $this->repository->find($orderStateId, $languageId)) {
-            throw new \RuntimeException(sprintf('Order state #%d does not exist.', $orderStateId));
+            throw new \RuntimeException(\sprintf('Order state #%d does not exist.', $orderStateId));
         }
 
         return (string) $orderState->name;

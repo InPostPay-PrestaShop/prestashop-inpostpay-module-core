@@ -37,7 +37,7 @@ final class OrderEventBuilderFactory implements OrderEventBuilderFactoryInterfac
     public function create(int $orderId): OrderEventBuilderInterface
     {
         if (null === $order = $this->repository->find($orderId)) {
-            throw new \DomainException(sprintf('Order "%s" does not exist.', $orderId));
+            throw new \DomainException(\sprintf('Order "%s" does not exist.', $orderId));
         }
 
         return new OrderEventBuilder($order, $this->clock, $this->statusDescriptionProvider);

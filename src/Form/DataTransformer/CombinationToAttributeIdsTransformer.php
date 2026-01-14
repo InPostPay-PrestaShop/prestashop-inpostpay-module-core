@@ -42,11 +42,11 @@ final class CombinationToAttributeIdsTransformer implements DataTransformerInter
         }
 
         if (!$value instanceof \Combination) {
-            throw new TransformationFailedException(sprintf('Expected an instance of %s.', \Combination::class));
+            throw new TransformationFailedException(\sprintf('Expected an instance of %s.', \Combination::class));
         }
 
         if ($this->productId !== (int) $this->productId) {
-            throw new TransformationFailedException(sprintf('Expected a combination of product #%d.', $this->productId));
+            throw new TransformationFailedException(\sprintf('Expected a combination of product #%d.', $this->productId));
         }
 
         $attributes = $this->repository->getSimpleAttributesByCombinationId((int) $value->id);
@@ -65,7 +65,7 @@ final class CombinationToAttributeIdsTransformer implements DataTransformerInter
             return null;
         }
 
-        if (!is_array($value)) {
+        if (!\is_array($value)) {
             throw new TransformationFailedException('Expected an array.');
         }
 

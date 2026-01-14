@@ -1,0 +1,43 @@
+services:
+  _defaults:
+    public: false
+
+  # todo: make private after refactoring order creation handler
+  izi\prestashop\Shipping\OptionalService\OptionalServiceHandlerInterface:
+    alias: izi\prestashop\Shipping\OptionalService\ChainHandler
+    public: true
+
+  izi\prestashop\Shipping\OptionalService\ChainHandler:
+    class: izi\prestashop\Shipping\OptionalService\ChainHandler
+    arguments:
+      - !tagged inpost.izi.shipping.optional_service_handler
+
+  izi\prestashop\Shipping\OptionalService\GiftWrappingHandler:
+    class: izi\prestashop\Shipping\OptionalService\GiftWrappingHandler
+    tags:
+      - inpost.izi.shipping.optional_service_handler
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@inpost.izi.translator'
+
+  izi\prestashop\Shipping\OptionalService\CashOnDeliveryHandler:
+    class: izi\prestashop\Shipping\OptionalService\CashOnDeliveryHandler
+    tags:
+      - inpost.izi.shipping.optional_service_handler
+    arguments:
+      - '@izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster'
+
+  izi\prestashop\Shipping\OptionalService\WeekendDeliveryHandler:
+    class: izi\prestashop\Shipping\OptionalService\WeekendDeliveryHandler
+    tags:
+      - inpost.izi.shipping.optional_service_handler
+    arguments:
+      - '@izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster'
+
+  izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster:
+    class: izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Configuration\ShippingConfigurationInterface'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'

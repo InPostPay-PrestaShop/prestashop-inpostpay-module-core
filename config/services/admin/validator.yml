@@ -1,0 +1,31 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+
+  izi\prestashop\Validator\InPostApiCredentialsValidator:
+    class: izi\prestashop\Validator\InPostApiCredentialsValidator
+    tags:
+      - validator.constraint_validator
+    arguments:
+      - '@izi\prestashop\BasketApp\AuthorizationProviderFactory'
+
+  izi\prestashop\Validator\NotBlankInDefaultLanguageValidator:
+    class: izi\prestashop\Validator\NotBlankInDefaultLanguageValidator
+    tags:
+      - validator.constraint_validator
+
+  izi\prestashop\Validator\ProcessableMessageFormatValidator:
+    class: izi\prestashop\Validator\ProcessableMessageFormatValidator
+    tags:
+      - validator.constraint_validator
+
+  izi\prestashop\Validator\Consent\DescriptionUsesIdPlaceholdersValidator:
+    class: izi\prestashop\Validator\Consent\DescriptionUsesIdPlaceholdersValidator
+    tags:
+      - validator.constraint_validator
+
+  izi\prestashop\Validator\Consent\UniqueIdentifiersValidator:
+    class: izi\prestashop\Validator\Consent\UniqueIdentifiersValidator
+    tags:
+      - validator.constraint_validator

@@ -6,8 +6,6 @@ namespace izi\prestashop\Form\Type\Widget;
 
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
-use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
-use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -16,14 +14,16 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class WidgetDisplayConfigurationType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'widgetdisplayconfigurationtype';
-
+    /**
+     * @var TranslatorInterface
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -36,15 +36,11 @@ final class WidgetDisplayConfigurationType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $switchClass = class_exists(SwitchType::class)
-            ? SwitchType::class
-            : SwitchTypePolyfill::class;
-
         $builder
-            ->add('displayed', $switchClass, [
+            ->add('displayed', SwitchType::class, [
                 'required' => false,
-                'label' => $this->translator->l('Displayed', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Displayed', [], 'Modules.Inpostizi.Gui'),
+                'help' => $this->translator->trans('In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.', [], 'Modules.Inpostizi.Gui'),
             ])
             ->add('htmlStyles', HtmlStylesType::class, [
                 'label' => false,

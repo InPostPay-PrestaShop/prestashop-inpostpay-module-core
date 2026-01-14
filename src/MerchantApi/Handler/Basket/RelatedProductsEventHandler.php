@@ -16,48 +16,25 @@ use izi\prestashop\MerchantApi\Exception\ProductOutOfStockException;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
 use izi\prestashop\MerchantApi\Model\Basket\Request\RelatedProductData;
-use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Product\ReferenceId;
-use izi\prestashop\Translation\LegacyTranslator;
-use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class RelatedProductsEventHandler implements BasketEventHandlerInterface
 {
-    /**
-     * @internal
-     *
-     * @deprecated
-     */
-    public const TRANSLATION_SOURCE = 'relatedproductseventhandler';
-
     /**
      * @var CommandBusInterface
      */
     private $bus;
 
     /**
-     * @var \Context
+     * @var TranslatorInterface
      */
-    private $context;
+    private $translator;
 
-    /**
-     * @param CommandBusInterface $bus
-     * @param \Context $context
-     */
-    public function __construct($bus, \Context $context/*, ObjectManagerInterface $manager, LoggerInterface $logger*/)
+    public function __construct(CommandBusInterface $bus, TranslatorInterface $translator)
     {
-        $this->context = $context;
-
-        if ($bus instanceof \Module) {
-            $args = func_get_args();
-            $bus = $this->createCommandBus($context, $bus, $args[2], $args[3]);
-        }
-
-        if (!$bus instanceof CommandBusInterface) {
-            throw new \InvalidArgumentException(sprintf('Expected parameter $bus to be an instance of "%s", "%s" given.', CommandBusInterface::class, get_debug_type($bus)));
-        }
-
         $this->bus = $bus;
+        $this->translator = $translator;
     }
 
     public static function getHandledEventType(): string
@@ -68,13 +45,13 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
     public function handle(BasketInterface $basket, BasketEvent $event): ?Notice
     {
         if (EventType::RelatedProducts() !== $type = $event->getType()) {
-            throw new \DomainException(sprintf('Unsupported event type "%s".', $type->value));
+            throw new \DomainException(\sprintf('Unsupported event type "%s".', $type->value));
         }
 
         $cart = $basket->getEntity();
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Expected basket entity to be an instance of "%s", "%s" given.', \Cart::class, get_class($cart)));
+            throw new \InvalidArgumentException(\sprintf('Expected basket entity to be an instance of "%s", "%s" given.', \Cart::class, \get_class($cart)));
         }
 
         foreach ($event->getRelatedProductsEventData() as $relatedProduct) {
@@ -83,9 +60,9 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
             } catch (ProductAlreadyInCartException $e) {
                 // ignore silently
             } catch (ProductNotFoundException $e) {
-                return Notice::error($this->context->getTranslator()->trans('Product not found', [], 'Shop.Notifications.Error'));
+                return Notice::error($this->translator->trans('Product not found', [], 'Shop.Notifications.Error'));
             } catch (ProductOutOfStockException $e) {
-                return Notice::error($this->context->getTranslator()->trans('The available purchase order quantity for this product is %quantity%.', [
+                return Notice::error($this->translator->trans('The available purchase order quantity for this product is %quantity%.', [
                     '%quantity%' => $e->getAvailableQuantity(),
                 ], 'Shop.Notifications.Error'));
             } catch (CannotAddProductException $e) {
@@ -113,34 +90,5 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
         $quantity = (int) $relatedProduct->getQuantity()->getQuantity();
 
         $this->bus->handle(new AddProductToCartCommand($cart, $productId, $combinationId, $quantity));
-    }
-
-    private function createCommandBus(\Context $context, \Module $module, ObjectManagerInterface $manager, LoggerInterface $logger): CommandBusInterface
-    {
-        @trigger_error(sprintf('Passing $module, $manager, and $logger as arguments for "%s::__construct()" is deprecated.', __CLASS__), E_USER_DEPRECATED);
-
-        $handler = new AddProductToCartHandler(
-            $context,
-            $manager->getRepository(\Product::class),
-            new LegacyTranslator($module->name),
-            $logger
-        );
-
-        return new class($handler) implements CommandBusInterface {
-            /**
-             * @var callable
-             */
-            private $handler;
-
-            public function __construct(callable $handler)
-            {
-                $this->handler = $handler;
-            }
-
-            public function handle($command)
-            {
-                return ($this->handler)($command);
-            }
-        };
     }
 }

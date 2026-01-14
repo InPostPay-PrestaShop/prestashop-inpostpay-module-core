@@ -20,6 +20,9 @@ use izi\prestashop\Shipping\CartWeight\CartWeightDeliveryStrategyInterface;
 use izi\prestashop\Shipping\ProductDimensions\ProductDimensionsDeliveryStrategyInterface;
 use izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDeliveryInterface;
 
+/**
+ * @todo: refactor
+ */
 class ProductDeliveryFactory
 {
     private $cartBaseWeight = [];
@@ -30,7 +33,7 @@ class ProductDeliveryFactory
     private $configuration;
 
     /**
-     * @var ObjectRepositoryInterface<\Carrier>
+     * @var CarrierRepository
      */
     private $carrierRepository;
 

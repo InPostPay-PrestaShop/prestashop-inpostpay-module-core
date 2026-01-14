@@ -8,14 +8,12 @@ use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\ObjectModel\Repository\CarrierRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
-use izi\prestashop\Translation\LegacyTranslator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class DeliveryOptionsStatusChecker implements StatusCheckerInterface
 {
-    private const TRANSLATION_SOURCE = 'deliveryoptionsstatuschecker';
-
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
@@ -32,7 +30,7 @@ final class DeliveryOptionsStatusChecker implements StatusCheckerInterface
     /**
      * @param CarrierRepository $carrierRepository
      */
-    public function __construct(LegacyTranslator $translator, ObjectRepositoryInterface $carrierRepository, ShippingConfigurationInterface $configuration)
+    public function __construct(TranslatorInterface $translator, ObjectRepositoryInterface $carrierRepository, ShippingConfigurationInterface $configuration)
     {
         $this->translator = $translator;
         $this->carrierRepository = $carrierRepository;
@@ -49,7 +47,7 @@ final class DeliveryOptionsStatusChecker implements StatusCheckerInterface
             return [];
         }
 
-        return [$this->translator->l('No delivery option is available.', self::TRANSLATION_SOURCE)];
+        return [$this->translator->trans('No delivery option is available.', [], 'Modules.Inpostizi.Status')];
     }
 
     private function isDeliveryOptionAvailable(ShippingOptions $options): bool

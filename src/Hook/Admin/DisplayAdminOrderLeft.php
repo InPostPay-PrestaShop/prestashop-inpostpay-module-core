@@ -9,17 +9,17 @@ use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\Repository\OrderDataRepositoryInterface;
-use izi\prestashop\Translation\LegacyTranslator;
-use izi\prestashop\View\Templating\RendererInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
 
 final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
 {
     public const HOOK_NAME = 'displayAdminOrderLeft';
 
     /**
-     * @var RendererInterface
+     * @var Environment
      */
-    private $renderer;
+    private $twig;
 
     /**
      * @var OrderDataRepositoryInterface
@@ -27,15 +27,15 @@ final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
     private $repository;
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
-    public function __construct(RendererInterface $renderer, OrderDataRepositoryInterface $repository, ?LegacyTranslator $translator = null)
+    public function __construct(Environment $twig, OrderDataRepositoryInterface $repository, TranslatorInterface $translator)
     {
-        $this->renderer = $renderer;
+        $this->twig = $twig;
         $this->repository = $repository;
-        $this->translator = $translator ?? new LegacyTranslator('inpostizi');
+        $this->translator = $translator;
     }
 
     public static function getHookName(): string
@@ -55,7 +55,7 @@ final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
     {
         $orderId = $parameters['id_order'] ?? null;
 
-        if (!is_int($orderId)) {
+        if (!\is_int($orderId)) {
             throw InvalidHookParamException::unexpectedType('id_order', $parameters['id_order'], 'int');
         }
 
@@ -65,9 +65,9 @@ final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
 
         $deliveryType = $data->getDelivery()->getType();
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/legacy/admin/order_details.tpl', [
+        return $this->twig->render('@Modules/inpostizi/views/templates/hook/legacy/admin/order_details.html.twig', [
             'delivery' => $deliveryType->trans($this->translator),
-            'apm' => DeliveryType::Apm() === $deliveryType ? $data->getDelivery()->getPoint() : '',
+            'apm' => DeliveryType::Apm() === $deliveryType ? (string) $data->getDelivery()->getPoint() : '',
             'issue_invoice' => null !== $data->getInvoiceDetails(),
         ]);
     }

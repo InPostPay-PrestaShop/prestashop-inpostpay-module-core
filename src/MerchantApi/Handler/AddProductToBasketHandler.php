@@ -101,7 +101,7 @@ final class AddProductToBasketHandler implements AddProductToBasketHandlerInterf
             try {
                 $this->bus->handle($command);
             } catch (ProductAlreadyInCartException $e) {
-                assert($command instanceof AddProductToCartCommand && null === $combinationId);
+                \assert($command instanceof AddProductToCartCommand && null === $combinationId);
                 $cartProduct = $e->getProduct();
                 $this->bus->handle(new IncrementCartQuantityCommand($cart, $productId, (int) $cartProduct['id_product_attribute']));
             }
@@ -150,7 +150,7 @@ final class AddProductToBasketHandler implements AddProductToBasketHandlerInterf
     {
         $now = new \DateTimeImmutable();
 
-        $session->updatedBy(new BasketEvent(sprintf('AP_%d', $now->getTimestamp()), $now, EventType::ProductsQuantity()));
+        $session->updatedBy(new BasketEvent(\sprintf('AP_%d', $now->getTimestamp()), $now, EventType::ProductsQuantity()));
         $this->repository->persist($session);
     }
 

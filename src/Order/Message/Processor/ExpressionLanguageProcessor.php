@@ -25,15 +25,15 @@ final class ExpressionLanguageProcessor implements ProcessorInterface
             return $message;
         }
 
-        if (!preg_match_all('/\{\{\s*(.*)?\s*}}/', $result, $matches, PREG_SET_ORDER)) {
+        if (!preg_match_all('/\{\{\s*(.*)?\s*}}/', $result, $matches, \PREG_SET_ORDER)) {
             return $message;
         }
 
         $newParameters = $parameters = $message->getParameters();
 
         foreach ($matches as $i => $match) {
-            $key = sprintf('expression_%d', $i);
-            $result = str_replace($match[0], sprintf('{%s}', $key), $result);
+            $key = \sprintf('expression_%d', $i);
+            $result = str_replace($match[0], \sprintf('{%s}', $key), $result);
             $newParameters[$key] = $this->expressionLanguage->evaluate($match[1], $parameters);
         }
 

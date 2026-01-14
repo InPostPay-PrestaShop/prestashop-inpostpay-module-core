@@ -41,7 +41,7 @@ trait AccessTokenFactoryTrait
             throw new UnexpectedValueException('Negative access token expiration time.');
         }
 
-        return $this->clock->now()->add(new \DateInterval(sprintf('PT%dS', $expiresIn)));
+        return $this->clock->now()->add(new \DateInterval(\sprintf('PT%dS', $expiresIn)));
     }
 
     private function getScopes(array $data): ?array

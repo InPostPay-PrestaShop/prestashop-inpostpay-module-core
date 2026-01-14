@@ -8,8 +8,5 @@ use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 
 interface ProductAwareWidgetDisplayConfigurationInterface extends WidgetDisplayConfigurationInterface
 {
-    /**
-     * @param array|ProductLazyArray $product product presentation data
-     */
-    public function isDisplayed($product = null): bool;
+    public function isDisplayed(?ProductLazyArray $product = null): bool;
 }

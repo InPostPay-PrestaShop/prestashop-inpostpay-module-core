@@ -48,13 +48,13 @@ final class ObjectModelCollectionToIdsTransformer implements DataTransformerInte
             return null;
         }
 
-        if (!is_array($value)) {
+        if (!\is_array($value)) {
             throw new TransformationFailedException('Expected an array.');
         }
 
         return array_map(function ($element): int {
             if (!$element instanceof $this->class) {
-                throw new TransformationFailedException(sprintf('Expected an instance of "%s".', $this->class));
+                throw new TransformationFailedException(\sprintf('Expected an instance of "%s".', $this->class));
             }
 
             return (int) $element->id;
@@ -70,7 +70,7 @@ final class ObjectModelCollectionToIdsTransformer implements DataTransformerInte
             return null;
         }
 
-        if (!is_array($value)) {
+        if (!\is_array($value)) {
             throw new TransformationFailedException('Expected an array.');
         }
 

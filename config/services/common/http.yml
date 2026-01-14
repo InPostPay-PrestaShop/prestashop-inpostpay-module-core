@@ -1,0 +1,25 @@
+services:
+  _defaults:
+    public: false
+
+  inpost.izi.psr17_factory:
+    class: Nyholm\Psr7\Factory\Psr17Factory
+
+  izi\prestashop\Http\Client\Factory\ClientFactoryInterface: '@izi\prestashop\Http\Client\Factory\ClientFactory'
+  izi\prestashop\Http\Client\Factory\ClientFactory:
+    class: izi\prestashop\Http\Client\Factory\ClientFactory
+    arguments:
+      - '@inpost.izi.http.client_factory.service_locator'
+
+  izi\prestashop\Http\Client\Factory\GuzzleClientFactory:
+    class: izi\prestashop\Http\Client\Factory\GuzzleClientFactory
+
+  inpost.izi.http.client_factory.service_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+      - Psr\Http\Client\ClientInterface: '@?Psr\Http\Client\ClientInterface'
+        izi\prestashop\Http\Client\Factory\GuzzleClientFactory: '@izi\prestashop\Http\Client\Factory\GuzzleClientFactory'
+        Psr\Http\Message\ResponseFactoryInterface: '@inpost.izi.psr17_factory'
+        Psr\Http\Message\StreamFactoryInterface: '@inpost.izi.psr17_factory'

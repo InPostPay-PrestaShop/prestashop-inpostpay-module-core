@@ -1,0 +1,54 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $context: '@inpost.izi.context'
+      $shopContext: '@inpost.izi.shop_context'
+      $translator: '@inpost.izi.translator'
+      $debug: '%kernel.debug%'
+
+  izi\prestashop\Controller\Admin\HotProductController:
+    class: izi\prestashop\Controller\Admin\HotProductController
+    tags:
+      - controller.service_arguments
+      - container.service_subscriber
+      - { name: container.service_subscriber, key: security.authorization_checker, id: inpost.izi.security.authorization_checker }
+    bind:
+      $configInitializers: !tagged inpost.izi.config_initializer
+    calls:
+      - { method: setLogger, arguments: [ '@inpost.izi.logger' ] }
+
+  izi\prestashop\HotProduct\Form\UpdateHotProductType:
+    class: izi\prestashop\HotProduct\Form\UpdateHotProductType
+    tags:
+      - form.type
+
+  izi\prestashop\HotProduct\Form\CreateHotProductType:
+    class: izi\prestashop\HotProduct\Form\CreateHotProductType
+    tags:
+      - form.type
+
+  izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\HotProduct\View\HotProductViewDataFactory:
+    class: izi\prestashop\HotProduct\View\HotProductViewDataFactory
+    bind:
+      $productRepository: '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      $shopRepository: '@inpost.izi.object_model.shop_repository'

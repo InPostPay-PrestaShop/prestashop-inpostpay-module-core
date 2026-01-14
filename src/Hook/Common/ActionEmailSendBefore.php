@@ -44,7 +44,7 @@ final class ActionEmailSendBefore implements HookInterface
     {
         $event = new SendEmailEvent($parameters['template'], $parameters['templateVars']);
 
-        if (is_array($parameters['to'])) {
+        if (\is_array($parameters['to'])) {
             $event->setRecipients(...$parameters['to']);
         } else {
             $event->setRecipients($parameters['to']);
@@ -54,7 +54,7 @@ final class ActionEmailSendBefore implements HookInterface
             return $event;
         }
 
-        if (is_array($parameters['bcc'])) {
+        if (\is_array($parameters['bcc'])) {
             $event->setBcc(...$parameters['bcc']);
         } else {
             $event->setBcc($parameters['bcc']);

@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziGui.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="a63706eecfa33f67b315f978392ad7ae">
+        <source>Alignment</source>
+        <target>Wyrównanie</target>
+      </trans-unit>
+      <trans-unit id="a9ded1e5ce5d75814730bb4caaf49419">
+        <source>Background</source>
+        <target>Tło</target>
+      </trans-unit>
+      <trans-unit id="e90dfb84e30edf611e326eeb04d680de">
+        <source>Black</source>
+        <target>Czarny</target>
+      </trans-unit>
+      <trans-unit id="9c15669ba55d94ca08b6c4cfaab10a13">
+        <source>Button preview</source>
+        <target>Podgląd przycisku</target>
+      </trans-unit>
+      <trans-unit id="4f1f6016fc9f3f2353c0cc7c67b292bd">
+        <source>Center</source>
+        <target>Wyśrodkowany</target>
+      </trans-unit>
+      <trans-unit id="a18366b217ebf811ad1886e4f4f865b2">
+        <source>Dark</source>
+        <target>Ciemne</target>
+      </trans-unit>
+      <trans-unit id="655cbb1ba91331bec86af143c7c510fb">
+        <source>Determines whether the widget is displayed on a light or dark background in your store. This setting affects the font color - make sure it is visible.</source>
+        <target>Określa, czy widget jest w Twoim sklepie wyświetlany na jasnym, czy ciemnym tle. To ustawienie ma wpływ na kolor czcionki – zadbaj o to, aby była widoczna.</target>
+      </trans-unit>
+      <trans-unit id="86754577897acfb25deb69039d49d9a7">
+        <source>Displayed</source>
+        <target>Wyświetlany</target>
+      </trans-unit>
+      <trans-unit id="e6d401dcbb3d4b9f64c12fb1ecf266a6">
+        <source>Extra large</source>
+        <target>Bardzo duży</target>
+      </trans-unit>
+      <trans-unit id="4c7c5ab57475a86d54c99e99e8cbb5e7">
+        <source>Extra small</source>
+        <target>Bardzo mały</target>
+      </trans-unit>
+      <trans-unit id="d3058eb8a80e6516dd3ab5eaaebc318a">
+        <source>Frame style</source>
+        <target>Styl ramki</target>
+      </trans-unit>
+      <trans-unit id="8f9c69d4c862988dda622763e0882186">
+        <source>In order for the widget preview to be displayed, a valid merchant client ID must be provided in the "{tab_name}" tab.</source>
+        <target>Aby podgląd został wyświetlony, poprawne merchant client ID musi zostać uzupełnione w zakładce "{tab_name}".</target>
+      </trans-unit>
+      <trans-unit id="27bc9eb9abc57172f8620ed18e376ea8">
+        <source>In order to increase conversions, we recommend displaying InPost Pay on both the shopping cart tab and the product tab.</source>
+        <target>Aby zwiększyć konwersje, zalecamy wyświetlać widget InPost Pay na stronie koszyka jak i karcie produktu</target>
+      </trans-unit>
+      <trans-unit id="3a69b34ce86dacb205936a8094f6c743">
+        <source>Large</source>
+        <target>Duży</target>
+      </trans-unit>
+      <trans-unit id="945d5e233cf7d6240f6b783b36a374ff">
+        <source>Left</source>
+        <target>Do lewej</target>
+      </trans-unit>
+      <trans-unit id="9914a0ce04a7b7b6a8e39bec55064b82">
+        <source>Light</source>
+        <target>Jasne</target>
+      </trans-unit>
+      <trans-unit id="c9254e027bb4bc070f417493b43f9dc1">
+        <source>Margin bottom</source>
+        <target>Margines dolny</target>
+      </trans-unit>
+      <trans-unit id="af1c33bd64cf61f9245b75131e2e06f1">
+        <source>Margin left</source>
+        <target>Margines lewy</target>
+      </trans-unit>
+      <trans-unit id="08d4382960e54a51b0225995753fb95c">
+        <source>Margin right</source>
+        <target>Margines prawy</target>
+      </trans-unit>
+      <trans-unit id="9d768809cb57b85ec5e4e4693839692e">
+        <source>Margin top</source>
+        <target>Margines górny</target>
+      </trans-unit>
+      <trans-unit id="477964da3b7a710156efc82fc4bc72e2">
+        <source>Max width</source>
+        <target>Maksymalna szerokość</target>
+      </trans-unit>
+      <trans-unit id="87f8a6ab85c9ced3702b4ea641ad4bb5">
+        <source>Medium</source>
+        <target>Średni</target>
+      </trans-unit>
+      <trans-unit id="7545c5d3ad246a683a197a2903a4d5e6">
+        <source>Rectangular</source>
+        <target>Prostokątne</target>
+      </trans-unit>
+      <trans-unit id="4e771f875ed94220e99f1e55faf1b607">
+        <source>Remember to click the "{button}" button after you finish configuring the button styles</source>
+        <target>Pamiętaj by kliknąć przycisk "{button}" gdy skończysz konfigurować wygląd przycisku</target>
+      </trans-unit>
+      <trans-unit id="92b09c7c48c520c3c55e497875da437c">
+        <source>Right</source>
+        <target>Do prawej</target>
+      </trans-unit>
+      <trans-unit id="b7f41fc1412ad2ee75e9b2635d3b9d5c">
+        <source>Round</source>
+        <target>Okrągłe</target>
+      </trans-unit>
+      <trans-unit id="bef2481eda40bd121482f1814d72314f">
+        <source>Rounded</source>
+        <target>Zaokrąglone</target>
+      </trans-unit>
+      <trans-unit id="6f6cb72d544962fa333e2e34ce64f719">
+        <source>Size</source>
+        <target>Rozmiar</target>
+      </trans-unit>
+      <trans-unit id="2660064e68655415da2628c2ae2f7592">
+        <source>Small</source>
+        <target>Mały</target>
+      </trans-unit>
+      <trans-unit id="59948a1a9743ccef9725e835fc5d8464">
+        <source>Specifies the orientation of the widget in the space available for it. If your template allocates a narrow space for the widget the setting will not affect the appearance.</source>
+        <target>Określa orientację widżetu w dostępnej dla niego przestrzeni. Jeśli szablon przydziela wąską przestrzeń dla widżetu, ustawienie to nie wpłynie na jego wygląd.</target>
+      </trans-unit>
+      <trans-unit id="778f6618324a5296a12a11eee46fac83">
+        <source>The widget is available in 2 color variants. Choose the one more suitable for your store's color scheme.</source>
+        <target>Widget dostępny jest w 2 wariantach kolorystycznych. Wybierz wariant bardziej odpowiadający kolorystyce Twojego sklepu.</target>
+      </trans-unit>
+      <trans-unit id="d006a45ed0a363f5e9053ba93a63144a">
+        <source>The widget will be displayed in the cart preview. To use this location, a custom hook call must be added in the template file: `{code}`.</source>
+        <target>Widget będzie wyświetlany w podglądzie koszyka. Aby użyć tego miejsca, w pliku szablonu musi zostać dodane wywołanie niestandardowego hooka: `{code}`.</target>
+      </trans-unit>
+      <trans-unit id="c4fbcbe361b9ffd85d69bb835216feda">
+        <source>The widget will be displayed on the cart page, below the "{button}" button.</source>
+        <target>Widget będzie wyświetlany na stronie koszyka, poniżej przycisku przejścia do realizacji zamówienia.</target>
+      </trans-unit>
+      <trans-unit id="3c84188a901173604da0241ca35b3191">
+        <source>The widget will be displayed on the checkout page, above the order summary.</source>
+        <target>Widget będzie wyświetlany na stronie realizacji zamówienia, powyżej podsumowania zamówienia.</target>
+      </trans-unit>
+      <trans-unit id="6bdbb6d73a674d23c8b06399fdab663a">
+        <source>The widget will be displayed on the login page, below the login form.</source>
+        <target>Widget będzie wyświetlany na stronie logowania, pod formularzem logowania.</target>
+      </trans-unit>
+      <trans-unit id="1aa6f06788394782b158a731c9d202f3">
+        <source>The widget will be displayed on the product page.</source>
+        <target>Widget będzie wyświetlany na stronie produktu.</target>
+      </trans-unit>
+      <trans-unit id="038cd44a54075c17e5d86d02ba45bb7d">
+        <source>The widget will be displayed on the registration page, above the registration form.</source>
+        <target>Widget będzie wyświetlany na stronie rejestracji, nad formularzem rejestracji.</target>
+      </trans-unit>
+      <trans-unit id="e3d8c3c476e13d21d790fa419b195598">
+        <source>This widget is not configured correctly, please correct the values in the form.</source>
+        <target>Ten widget nie jest poprawnie skonfigurowany, popraw wartości w formularzu.</target>
+      </trans-unit>
+      <trans-unit id="492f18b60811bf85ce118c0c6a1a5c4a">
+        <source>Variant</source>
+        <target>Wariant</target>
+      </trans-unit>
+      <trans-unit id="51e6cd92b6c45f9affdc158ecca2b8b8">
+        <source>Yellow</source>
+        <target>Żółty</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

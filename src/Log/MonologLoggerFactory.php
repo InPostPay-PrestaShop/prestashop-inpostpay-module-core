@@ -48,7 +48,7 @@ final class MonologLoggerFactory implements LoggerFactoryInterface
 
     private function createHandler(array $options): HandlerInterface
     {
-        if (!isset($options['type']) || !is_string($options['type'])) {
+        if (!isset($options['type']) || !\is_string($options['type'])) {
             throw new \InvalidArgumentException('A required "type" option is missing.');
         }
 
@@ -56,7 +56,7 @@ final class MonologLoggerFactory implements LoggerFactoryInterface
             ->getHandlerFactory($options['type'])
             ->create($this->filterHandlerOptions($options));
 
-        if (is_array($options['channels'] ?? null)) {
+        if (\is_array($options['channels'] ?? null)) {
             foreach ($options['channels'] as $channel) {
                 $this->handlers[$channel] = $handler;
             }
@@ -92,7 +92,7 @@ final class MonologLoggerFactory implements LoggerFactoryInterface
             }
         }
 
-        throw new \RuntimeException(sprintf('No log handler factory registered for type "%s".', $type));
+        throw new \RuntimeException(\sprintf('No log handler factory registered for type "%s".', $type));
     }
 
     private function includeStacktraces(HandlerInterface $handler): void
@@ -127,7 +127,7 @@ final class MonologLoggerFactory implements LoggerFactoryInterface
             return self::$decoratePsrProcessor = true;
         }
 
-        return self::$decoratePsrProcessor = 2 > count($constructor->getParameters());
+        return self::$decoratePsrProcessor = 2 > \count($constructor->getParameters());
     }
 }
 

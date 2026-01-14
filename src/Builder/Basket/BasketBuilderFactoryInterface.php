@@ -10,7 +10,7 @@ use izi\prestashop\Entities\BasketInterface;
 
 interface BasketBuilderFactoryInterface
 {
-    public function createRequestBuilder(BasketInterface $basket): RequestBuilder;
+    public function createRequestBuilder(BasketInterface $basket, ?int $shopId = null): RequestBuilder;
 
-    public function createResponseBuilder(BasketInterface $basket): ResponseBuilder;
+    public function createResponseBuilder(BasketInterface $basket, ?int $shopId = null): ResponseBuilder;
 }

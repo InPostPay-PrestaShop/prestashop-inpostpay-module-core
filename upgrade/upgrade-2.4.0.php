@@ -6,7 +6,6 @@ use izi\prestashop\Database\Connection;
 use izi\prestashop\Hook\Admin\Product\ActionAfterUpdateProductFormHandler;
 use izi\prestashop\Hook\Admin\Product\ActionProductFormBuilderModifier;
 use izi\prestashop\Hook\Legacy\Admin\Product\ActionAdminProductsSaveAfter;
-use izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsExtra;
 use izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Installer\Database\Version_2_4_0;
@@ -20,7 +19,6 @@ class InPostIziUpdater_2_4_0
 {
     private const NEW_HOOKS = [
         DisplayAdminProductsOptionsStepBottom::class,
-        DisplayAdminProductsExtra::class,
         ActionAdminProductsSaveAfter::class,
         ActionProductFormBuilderModifier::class,
         ActionAfterUpdateProductFormHandler::class,
@@ -57,9 +55,9 @@ class InPostIziUpdater_2_4_0
     public static function create(Module $module): self
     {
         $db = Db::getInstance();
-        $dbInstaller = new DatabaseInstaller(new Configuration($db), [
+        $dbInstaller = new DatabaseInstaller([
             new Version_2_4_0(new Connection($db)),
-        ]);
+        ], new Configuration($db));
 
         return new self($module, $db, $dbInstaller, _PS_VERSION_);
     }

@@ -26,6 +26,6 @@ final class PaymentCurrencyChecker
             return $currencyId === (int) $currencies->id;
         }
 
-        return in_array($currencyId, array_map('intval', array_column($currencies, 'id_currency')), true);
+        return \in_array($currencyId, array_map('intval', array_column($currencies, 'id_currency')), true);
     }
 }

@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace izi\prestashop\Security;
 
 use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
+use Symfony\Component\Security\Core\Authentication\Token\NullToken;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 /**
- * Simplified implementation for the FO. To be replaced with @see \Symfony\Component\Security\Core\Authorization\AuthorizationChecker
- * when PS migrates FO security to Sf or a need to authenticate user arises.
- *
  * @internal
  */
 final class AuthorizationChecker implements AuthorizationCheckerInterface
@@ -24,18 +22,20 @@ final class AuthorizationChecker implements AuthorizationCheckerInterface
     private $accessDecisionManager;
 
     /**
-     * @var TokenInterface|null
+     * @var AuthorizationCheckerInterface|null
      */
-    private $token;
+    private $authorizationChecker;
 
-    public function __construct(AccessDecisionManagerInterface $accessDecisionManager)
+    /**
+     * @var TokenStorageInterface|null
+     */
+    private $tokenStorage;
+
+    public function __construct(AccessDecisionManagerInterface $accessDecisionManager, ?AuthorizationCheckerInterface $authorizationChecker = null, ?TokenStorageInterface $tokenStorage = null)
     {
         $this->accessDecisionManager = $accessDecisionManager;
-    }
-
-    public static function create(iterable $voters = []): self
-    {
-        return new self(new AccessDecisionManager($voters));
+        $this->authorizationChecker = $authorizationChecker;
+        $this->tokenStorage = $tokenStorage;
     }
 
     /**
@@ -43,18 +43,36 @@ final class AuthorizationChecker implements AuthorizationCheckerInterface
      */
     public function isGranted($attributes, $subject = null): bool
     {
-        if (!is_array($attributes)) {
-            $attributes = [$attributes];
+        if (null !== $this->authorizationChecker && $this->authorizationChecker->isGranted($attributes, $subject)) {
+            return true;
         }
 
         $token = $this->getToken();
 
+        if (!\is_array($attributes)) {
+            $attributes = [$attributes];
+        }
+
         return $this->accessDecisionManager->decide($token, $attributes, $subject);
     }
 
-    // we don't care about authentication for now
     private function getToken(): TokenInterface
     {
-        return $this->token ?? ($this->token = new AnonymousToken('secret', 'anon'));
+        if (null === $this->tokenStorage) {
+            return $this->createNullToken();
+        }
+
+        $token = $this->tokenStorage->getToken();
+
+        if (null !== $token && null !== $token->getUser()) {
+            return $token;
+        }
+
+        return $this->createNullToken();
+    }
+
+    private function createNullToken(): TokenInterface
+    {
+        return class_exists(NullToken::class) ? new NullToken() : new AnonymousToken('secret', 'anon');
     }
 }

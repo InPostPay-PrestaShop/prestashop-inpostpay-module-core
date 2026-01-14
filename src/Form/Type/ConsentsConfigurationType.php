@@ -8,7 +8,6 @@ use izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand;
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Form\EventListener\ReindexDataListener;
 use izi\prestashop\Form\Type\Consent\ConsentType;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -16,22 +15,26 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\GroupSequence;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ConsentsConfigurationType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'consentsconfigurationtype';
-
+    /**
+     * @var TranslatorInterface
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options): void
     {
-        $view['consents']->vars['add_entry_label'] = $this->translator->l('Add another consent', self::TRANSLATION_SOURCE);
-        $view['consents']->vars['max_count_message'] = sprintf($this->translator->l('The maximum number of consents is %d.', self::TRANSLATION_SOURCE), UpdateConsentsConfigurationCommand::CONSENTS_COUNT_MAX);
+        $view['consents']->vars['add_entry_label'] = $this->translator->trans('Add another consent', [], 'Modules.Inpostizi.Consent');
+        $view['consents']->vars['max_count_message'] = $this->translator->trans('The maximum number of consents is {max}.', [
+            '{max}' => UpdateConsentsConfigurationCommand::CONSENTS_COUNT_MAX,
+        ], 'Modules.Inpostizi.Consent');
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

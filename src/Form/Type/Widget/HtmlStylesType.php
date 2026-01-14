@@ -5,20 +5,21 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type\Widget;
 
 use izi\prestashop\Configuration\DTO\HtmlStyles;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class HtmlStylesType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'htmlstylestype';
-
+    /**
+     * @var TranslatorInterface
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -28,32 +29,32 @@ final class HtmlStylesType extends AbstractType
         $builder
             ->add('marginTop', IntegerType::class, [
                 'required' => false,
-                'label' => $this->translator->l('Margin top', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Margin top', [], 'Modules.Inpostizi.Gui'),
                 'unit' => 'px',
             ])
             ->add('marginLeft', IntegerType::class, [
                 'required' => false,
-                'label' => $this->translator->l('Margin left', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Margin left', [], 'Modules.Inpostizi.Gui'),
                 'unit' => 'px',
             ])
             ->add('marginRight', IntegerType::class, [
                 'required' => false,
-                'label' => $this->translator->l('Margin right', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Margin right', [], 'Modules.Inpostizi.Gui'),
                 'unit' => 'px',
             ])
             ->add('marginBottom', IntegerType::class, [
                 'required' => false,
-                'label' => $this->translator->l('Margin bottom', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Margin bottom', [], 'Modules.Inpostizi.Gui'),
                 'unit' => 'px',
             ])
             ->add('justifyContent', ChoiceType::class, [
                 'choices' => [
-                    $this->translator->l('Left', self::TRANSLATION_SOURCE) => 'start',
-                    $this->translator->l('Center', self::TRANSLATION_SOURCE) => 'center',
-                    $this->translator->l('Right', self::TRANSLATION_SOURCE) => 'end',
+                    $this->translator->trans('Left', [], 'Modules.Inpostizi.Gui') => 'start',
+                    $this->translator->trans('Center', [], 'Modules.Inpostizi.Gui') => 'center',
+                    $this->translator->trans('Right', [], 'Modules.Inpostizi.Gui') => 'end',
                 ],
-                'label' => $this->translator->l('Alignment', 'widgetconfigurationtype'),
-                'help' => $this->translator->l('Specifies the orientation of the widget in the space available for it. If your template allocates a narrow space for the widget the setting will not affect the appearance.', 'widgetconfigurationtype'),
+                'label' => $this->translator->trans('Alignment', [], 'Modules.Inpostizi.Gui'),
+                'help' => $this->translator->trans('Specifies the orientation of the widget in the space available for it. If your template allocates a narrow space for the widget the setting will not affect the appearance.', [], 'Modules.Inpostizi.Gui'),
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
                 ],

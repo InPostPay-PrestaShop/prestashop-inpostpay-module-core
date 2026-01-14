@@ -49,7 +49,7 @@ abstract class Enum implements \JsonSerializable
         $cases = self::casesByName();
 
         if (!isset($cases[$name])) {
-            throw new \DomainException(sprintf('Case "%s" does not exist in "%s".', $name, static::class));
+            throw new \DomainException(\sprintf('Case "%s" does not exist in "%s".', $name, static::class));
         }
 
         return $cases[$name];
@@ -79,7 +79,7 @@ abstract class Enum implements \JsonSerializable
             case 'value':
                 return $this->_value;
             default:
-                trigger_error(sprintf('Undefined property: %s::$%s', static::class, $property), E_USER_WARNING);
+                trigger_error(\sprintf('Undefined property: %s::$%s', static::class, $property), \E_USER_WARNING);
 
                 return null;
         }
@@ -90,9 +90,9 @@ abstract class Enum implements \JsonSerializable
         switch ($property) {
             case 'name':
             case 'value':
-                throw new \Error(sprintf('Cannot redefine readonly property %s::$%s', static::class, $property));
+                throw new \Error(\sprintf('Cannot redefine readonly property %s::$%s', static::class, $property));
             default:
-                throw new \Error(sprintf('Cannot create dynamic property %s::$%s', static::class, $property));
+                throw new \Error(\sprintf('Cannot create dynamic property %s::$%s', static::class, $property));
         }
     }
 
@@ -112,7 +112,7 @@ abstract class Enum implements \JsonSerializable
         switch ($property) {
             case 'name':
             case 'value':
-                throw new \Error(sprintf('Cannot unset readonly property %s::$%s', static::class, $property));
+                throw new \Error(\sprintf('Cannot unset readonly property %s::$%s', static::class, $property));
             default:
                 break;
         }

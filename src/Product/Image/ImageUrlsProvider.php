@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Product\Image;
 
 use izi\prestashop\Common\Product\ProductImage;
-use izi\prestashop\Configuration\ProductConfiguration;
 use izi\prestashop\Configuration\ProductConfigurationInterface;
-use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
-use izi\prestashop\ProductOptions\ProductOptionsRepository;
 use izi\prestashop\ProductOptions\ProductOptionsRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Image\ImageRetriever;
 
@@ -51,39 +48,13 @@ final class ImageUrlsProvider implements ImageUrlsProviderInterface
     /**
      * @param ObjectRepositoryInterface<\ImageType> $imageTypeRepository
      */
-    public function __construct(ImageRetriever $imageRetriever, ProductConfigurationInterface $productConfiguration, \Context $context, ObjectRepositoryInterface $imageTypeRepository, ?ProductOptionsRepositoryInterface $productOptionsRepository = null)
+    public function __construct(ImageRetriever $imageRetriever, ProductConfigurationInterface $productConfiguration, \Context $context, ObjectRepositoryInterface $imageTypeRepository, ProductOptionsRepositoryInterface $productOptionsRepository)
     {
-        if (null === $productOptionsRepository) {
-            @trigger_error(sprintf('Not passing a $productOptionsRepository to "%s()" is deprecated since 2.4.0.', __METHOD__), E_USER_DEPRECATED);
-            $productOptionsRepository = ProductOptionsRepository::create();
-        }
-
         $this->imageRetriever = $imageRetriever;
         $this->productConfiguration = $productConfiguration;
         $this->context = $context;
         $this->imageTypeRepository = $imageTypeRepository;
         $this->productOptionsRepository = $productOptionsRepository;
-    }
-
-    /**
-     * @internal
-     */
-    public static function create(?ImageRetriever $imageRetriever = null, \Context $context = null, ?ProductConfigurationInterface $configuration = null): self
-    {
-        /** @var \InPostIzi $module */
-        $module = \Module::getInstanceByName('inpostizi');
-
-        $context = $context ?? \Context::getContext();
-        $imageRetriever = $imageRetriever ?? new ImageRetriever($context->link);
-        $configuration = $configuration ?? $module->get(ProductConfigurationInterface::class);
-
-        return new self(
-            $imageRetriever,
-            $configuration,
-            $context,
-            $module->get(ObjectManagerInterface::class)->getRepository(\ImageType::class),
-            ProductOptionsRepository::create()
-        );
     }
 
     public function getImageUrls(int $productId, ?int $combinationId, ?\Language $language = null, ?int $shopId = null): ImageUrls
@@ -138,7 +109,7 @@ final class ImageUrlsProvider implements ImageUrlsProviderInterface
      */
     private function getAdditionalImages(array $images, int $shopId): array
     {
-        $images = array_slice($images, 0, 10);
+        $images = \array_slice($images, 0, 10);
         $imageTypes = $this->getImageTypes($shopId);
 
         return array_map(static function (array $image) use ($imageTypes): ProductImage {
@@ -187,6 +158,6 @@ final class ImageUrlsProvider implements ImageUrlsProviderInterface
             return $galleryType;
         }
 
-        return ProductConfiguration::getDefaultImageGalleryTypeFromConfig($this->productConfiguration, $shopId);
+        return $this->productConfiguration->getDefaultImageGalleryType($shopId);
     }
 }

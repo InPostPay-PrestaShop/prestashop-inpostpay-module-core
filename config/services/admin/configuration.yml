@@ -1,0 +1,219 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $module: '@inpost.izi.module'
+      $context: '@inpost.izi.context'
+      $translator: '@inpost.izi.translator'
+      $clock: '@inpost.izi.clock'
+      $debug: '%kernel.debug%'
+
+  izi\prestashop\Controller\Admin\ConfigurationController:
+    class: izi\prestashop\Controller\Admin\ConfigurationController
+    tags:
+      - controller.service_arguments
+      - container.service_subscriber
+      - { name: container.service_subscriber, key: security.authorization_checker, id: inpost.izi.security.authorization_checker }
+    bind:
+      $configInitializers: !tagged inpost.izi.config_initializer
+    calls:
+      - { method: setLogger, arguments: [ '@inpost.izi.logger' ] }
+
+  izi\prestashop\Form\BasketAppClientProvider:
+    class: izi\prestashop\Form\BasketAppClientProvider
+    tags:
+      - kernel.event_subscriber
+
+  izi\prestashop\Form\Type\GeneralConfigurationType:
+    class: izi\prestashop\Form\Type\GeneralConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\ApiConfigurationType:
+    class: izi\prestashop\Form\Type\ApiConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\OrdersConfigurationType:
+    class: izi\prestashop\Form\Type\OrdersConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\ConsentsConfigurationType:
+    class: izi\prestashop\Form\Type\ConsentsConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\GuiConfigurationType:
+    class: izi\prestashop\Form\Type\GuiConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\ShippingConfigurationType:
+    class: izi\prestashop\Form\Type\ShippingConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\AdvancedConfigurationType:
+    class: izi\prestashop\Form\Type\AdvancedConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\ClientCredentialsType:
+    class: izi\prestashop\Form\Type\ClientCredentialsType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Order\AvailablePaymentOptionsChoiceType:
+    class: izi\prestashop\Form\Type\Order\AvailablePaymentOptionsChoiceType
+    tags:
+      - form.type
+    bind:
+      $choiceLoader: '@izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader'
+
+  izi\prestashop\Form\Type\Order\MessageOptionsType:
+    class: izi\prestashop\Form\Type\Order\MessageOptionsType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Shipping\CarrierMappingsType:
+    class: izi\prestashop\Form\Type\Shipping\CarrierMappingsType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Shipping\CarrierMappingType:
+    class: izi\prestashop\Form\Type\Shipping\CarrierMappingType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Shipping\OptionalServicesType:
+    class: izi\prestashop\Form\Type\Shipping\OptionalServicesType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Shipping\ServiceOptionsType:
+    class: izi\prestashop\Form\Type\Shipping\ServiceOptionsType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Shipping\ShippingOptionsType:
+    class: izi\prestashop\Form\Type\Shipping\ShippingOptionsType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\OrderStatusDescriptionMapType:
+    class: izi\prestashop\Form\Type\OrderStatusDescriptionMapType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\ProductConfigurationType:
+    class: izi\prestashop\Form\Type\ProductConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Product\ProductRestrictionsType:
+    class: izi\prestashop\Form\Type\Product\ProductRestrictionsType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader
+
+  izi\prestashop\Form\Type\Consent\ConsentType:
+    class: izi\prestashop\Form\Type\Consent\ConsentType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Consent\ConsentLinkType:
+    class: izi\prestashop\Form\Type\Consent\ConsentLinkType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Widget\WidgetDisplayConfigurationType:
+    class: izi\prestashop\Form\Type\Widget\WidgetDisplayConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Widget\ProductPageDisplayConfigurationType:
+    class: izi\prestashop\Form\Type\Widget\ProductPageDisplayConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Widget\HtmlStylesType:
+    class: izi\prestashop\Form\Type\Widget\HtmlStylesType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Widget\WidgetConfigurationType:
+    class: izi\prestashop\Form\Type\Widget\WidgetConfigurationType
+    tags:
+      - form.type
+
+  izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateGuiConfigurationHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateShippingConfigurationHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandlerInterface: '@izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler'
+  izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler:
+    class: izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\Handler\Config\DownloadModuleDataHandlerInterface: '@izi\prestashop\Handler\Config\DownloadModuleDataHandler'
+  izi\prestashop\Handler\Config\DownloadModuleDataHandler:
+    class: izi\prestashop\Handler\Config\DownloadModuleDataHandler
+    tags:
+      - inpost.izi.command_handler
+    bind:
+      $logsDirectory: '%inpost.izi.logs_dir%'
+
+  izi\prestashop\Handler\Config\CheckStatusHandlerInterface: '@izi\prestashop\Handler\Config\CheckStatusHandler'
+  izi\prestashop\Handler\Config\CheckStatusHandler:
+    class: izi\prestashop\Handler\Config\CheckStatusHandler
+    tags:
+      - inpost.izi.command_handler
+    arguments:
+      - !tagged inpost.izi.status_checker
+
+  izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory:
+    class: izi\prestashop\Command\Config\UpdateGeneralConfigurationCommandFactory
+
+  izi\prestashop\Handler\Config\Status\ConfigurationStatusChecker:
+    class: izi\prestashop\Handler\Config\Status\ConfigurationStatusChecker
+    tags:
+      - inpost.izi.status_checker
+
+  izi\prestashop\Handler\Config\Status\DeliveryOptionsStatusChecker:
+    class: izi\prestashop\Handler\Config\Status\DeliveryOptionsStatusChecker
+    tags:
+      - inpost.izi.status_checker
+    bind:
+      $carrierRepository: '@izi\prestashop\ObjectModel\Repository\CarrierRepository'
+
+  izi\prestashop\Handler\Config\Status\CacheStatusChecker:
+    class: izi\prestashop\Handler\Config\Status\CacheStatusChecker
+    tags:
+      - inpost.izi.status_checker
+    bind:
+      $container: '@service_container'

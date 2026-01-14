@@ -26,7 +26,7 @@ class ConfigurationRepository extends ObjectRepository
             ->select('cl.*, c.*, COALESCE(cl.`value`, c.`value`) AS `value`')
             ->from('configuration', 'c')
             ->leftJoin('configuration_lang', 'cl', 'cl.id_configuration = c.id_configuration')
-            ->where(sprintf('c.name LIKE "%s%%"', pSQL($prefix)))
+            ->where(\sprintf('c.name LIKE "%s%%"', pSQL($prefix)))
             ->orderBy('c.id_configuration')
             ->build()
             ->getResult();

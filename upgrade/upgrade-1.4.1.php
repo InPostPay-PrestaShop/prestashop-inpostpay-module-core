@@ -36,7 +36,7 @@ function upgrade_module_1_4_1(Module $module)
                 continue;
             }
 
-            $osId = (int) filter_var($row['name'], FILTER_SANITIZE_NUMBER_INT);
+            $osId = (int) filter_var($row['name'], \FILTER_SANITIZE_NUMBER_INT);
             $mappings[(int) $row['id_shop_group']][(int) $row['id_shop']][(int) $row['id_lang']][$osId] = $row['value'];
         }
 

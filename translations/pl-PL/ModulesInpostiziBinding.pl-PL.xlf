@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziBinding.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="64071d5bd2bb2c941c216728d3145589">
+        <source>"Thank you" page</source>
+        <target>Strona potwierdzenia zamówienia</target>
+      </trans-unit>
+      <trans-unit id="727181e3568eb1966db5bfa277c3d0fd">
+        <source>Add to cart confirmation popup</source>
+        <target>Popup z potwierdzeniem dodania do koszyka</target>
+      </trans-unit>
+      <trans-unit id="bb54cce5a0fb4e80d1b2dce5a28d6efb">
+        <source>Cart page</source>
+        <target>Strona koszyka</target>
+      </trans-unit>
+      <trans-unit id="3a76dfe4d90c1f5622a12f85901fba21">
+        <source>Cart preview</source>
+        <target>Podgląd koszyka</target>
+      </trans-unit>
+      <trans-unit id="30ae44c4afa98b529400daa23dfc0202">
+        <source>Checkout page</source>
+        <target>Strona zamówienia</target>
+      </trans-unit>
+      <trans-unit id="024588fa3c938f335a36fec9f17624f4">
+        <source>Login page</source>
+        <target>Strona logowania</target>
+      </trans-unit>
+      <trans-unit id="2cd47b560190ae33d8391b0f011b3f49">
+        <source>Payment method selection step</source>
+        <target>Krok wyboru metody płatności</target>
+      </trans-unit>
+      <trans-unit id="e6f28601734051de0cef66878bac1c0e">
+        <source>Product card</source>
+        <target>Strona produktu</target>
+      </trans-unit>
+      <trans-unit id="ee737dcb18ce5177dc8a2a54681c8950">
+        <source>Registration page</source>
+        <target>Strona rejestracji</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -4,26 +4,14 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Validator\Consent;
 
+use izi\prestashop\Common\Basket\ConsentLink;
 use izi\prestashop\Configuration\DTO\Consent;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 final class DescriptionUsesIdPlaceholdersValidator extends ConstraintValidator
 {
-    private const TRANSLATION_SOURCE = 'descriptionusesidplaceholdersvalidator';
-
-    /**
-     * @var LegacyTranslator
-     */
-    private $translator;
-
-    public function __construct(LegacyTranslator $translator)
-    {
-        $this->translator = $translator;
-    }
-
     public function validate($value, Constraint $constraint): void
     {
         if (!$constraint instanceof DescriptionUsesIdPlaceholders) {
@@ -53,11 +41,14 @@ final class DescriptionUsesIdPlaceholdersValidator extends ConstraintValidator
         }
     }
 
+    /**
+     * @param string[] $placeholders
+     */
     private function validateDescription(string $description, int $languageId, array $placeholders, bool $hasAdditionalLinks): void
     {
         $duplicated = [];
 
-        foreach ($placeholders as $id => $placeholder) {
+        foreach ($placeholders as $key => $placeholder) {
             $count = substr_count($description, $placeholder);
 
             $description = strtr($description, [
@@ -68,7 +59,7 @@ final class DescriptionUsesIdPlaceholdersValidator extends ConstraintValidator
                 continue;
             }
 
-            unset($placeholders[$id]);
+            unset($placeholders[$key]);
 
             if (1 === $count) {
                 continue;
@@ -79,26 +70,30 @@ final class DescriptionUsesIdPlaceholdersValidator extends ConstraintValidator
 
         if ([] !== $placeholders && $hasAdditionalLinks) {
             $this->context
-                ->buildViolation(sprintf($this->translator->l('Unused ID placeholders: %s.', self::TRANSLATION_SOURCE), sprintf('"%s"', implode('", "', $placeholders))))
+                ->buildViolation('Unused ID placeholders: "{{ placeholders}}".')
+                ->setTranslationDomain('Modules.Inpostizi.Validators')
+                ->setParameter('{{ placeholders }}', implode('", "', $placeholders))
                 ->atPath('descriptions[' . $languageId . ']')
                 ->addViolation();
         } elseif ([] !== $duplicated) {
             $this->context
-                ->buildViolation(sprintf($this->translator->l('Duplicated ID placeholders: %s.', self::TRANSLATION_SOURCE), sprintf('"%s"', implode('", "', $duplicated))))
+                ->buildViolation('Duplicated ID placeholders: "{{ placeholders }}".')
+                ->setTranslationDomain('Modules.Inpostizi.Validators')
+                ->setParameter('{{ placeholders }}', implode('", "', $duplicated))
                 ->atPath('descriptions[' . $languageId . ']')
                 ->addViolation();
         }
     }
 
     /**
-     * @return array<string, string> placeholders by link ID
+     * @return string[]
      */
     private function collectIdPlaceholders(Consent $consent): array
     {
         $ids = [];
 
         if ('' !== $id = (string) $consent->getId()) {
-            $ids[$id] = '#' . $id;
+            $ids[$id] = ConsentLink::PLACEHOLDER_PREFIX . $id;
         }
 
         foreach ($consent->getAdditionalLinks() as $link) {
@@ -106,11 +101,11 @@ final class DescriptionUsesIdPlaceholdersValidator extends ConstraintValidator
                 continue;
             }
 
-            $ids[$id] = '#' . $id;
+            $ids[$id] = ConsentLink::PLACEHOLDER_PREFIX . $id;
         }
 
         usort($ids, static function ($a, $b) {
-            return strlen($b) - strlen($a);
+            return \strlen($b) - \strlen($a);
         });
 
         return $ids;

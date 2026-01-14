@@ -9,10 +9,10 @@
 </p>
 
 {% if not ordersConfigurationForm.vars.hide_locales %}
-  <div class="row mt-n1 align-items-center mx-n1 mb-1">
+  <div class="row mt-n1 align-items-center mx-n1 mb-2">
     <div class="col-xs-12 col-auto mt-1 px-1">
       <p class="mb-0 font-weight-bold">
-        {{ 'Choose a translation for your language'|legacy_trans }}:
+        {{ 'Select the translation language'|trans({}, 'Modules.Inpostizi.Config') }}:
       </p>
     </div>
     <div class="col-xs-12 col-auto mt-1 px-1">

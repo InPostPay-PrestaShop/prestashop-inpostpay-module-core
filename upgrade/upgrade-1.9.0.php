@@ -51,9 +51,9 @@ class InPostIziUpdater_1_9_0
 function upgrade_module_1_9_0(Module $module): bool
 {
     $db = Db::getInstance();
-    $dbInstaller = new DatabaseInstaller(new Configuration($db), [
+    $dbInstaller = new DatabaseInstaller([
         new Version_1_9_0(new Connection($db)),
-    ]);
+    ], new Configuration($db));
 
     return (new InPostIziUpdater_1_9_0($module, $dbInstaller))->upgrade();
 }

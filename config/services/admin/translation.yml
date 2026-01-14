@@ -1,0 +1,17 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+
+  inpost.izi.translator:
+    class: izi\prestashop\Translation\Adapter\Translator
+
+  izi\prestashop\Translation\MessageHandler\ImportTranslationsHandler:
+    class: izi\prestashop\Translation\MessageHandler\ImportTranslationsHandler
+    tags:
+      - inpost.izi.command_handler
+    bind:
+      $loader: '@prestashop.translation.database_loader'
+
+  izi\prestashop\Translation\Util\TranslationFinder:
+    class: izi\prestashop\Translation\Util\TranslationFinder

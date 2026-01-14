@@ -1,0 +1,5 @@
+services:
+  inpost.izi.serializer:
+    class: Symfony\Component\Serializer\SerializerInterface
+    public: false
+    factory: [ izi\prestashop\Serializer\SerializerFactory, create ]

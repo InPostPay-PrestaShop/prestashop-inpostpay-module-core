@@ -34,9 +34,9 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
      */
     public function getTypes($class, $property, array $context = []): ?array
     {
-        $key = sprintf('%s::%s', $class, $property);
+        $key = \sprintf('%s::%s', $class, $property);
 
-        if (array_key_exists($key, $this->types)) {
+        if (\array_key_exists($key, $this->types)) {
             return $this->types[$key];
         }
 
@@ -69,7 +69,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
             return null;
         }
 
-        return is_array($type) ? $type : [$type];
+        return \is_array($type) ? $type : [$type];
     }
 
     /**
@@ -77,7 +77,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
      */
     private function getNamespaceContext(\ReflectionClass $class): array
     {
-        if (array_key_exists($className = $class->getName(), $this->namespaces)) {
+        if (\array_key_exists($className = $class->getName(), $this->namespaces)) {
             return $this->namespaces[$className];
         }
 
@@ -95,7 +95,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
 
         /* Depending on the PS version, the available library version might not be able to parse PHP >=7.1 syntax.
         To circumvent that, we try to limit parsing to the code preceding the first class declaration found in the file. */
-        if (preg_match('/\n(?:(?:final|abstract)\s+)?class\s+/', $fileContents, $matches, PREG_OFFSET_CAPTURE)) {
+        if (preg_match('/\n(?:(?:final|abstract)\s+)?class\s+/', $fileContents, $matches, \PREG_OFFSET_CAPTURE)) {
             $fileContents = substr($fileContents, 0, (int) $matches[0][1]);
         }
 
@@ -124,7 +124,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
             foreach ($node->uses as $use) {
                 if (null === $use->alias) {
                     $alias = $use->name->getLast();
-                } elseif (is_string($use->alias)) {
+                } elseif (\is_string($use->alias)) {
                     $alias = $use->alias;
                 } else {
                     $alias = $use->alias->name;
@@ -146,7 +146,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
             return null;
         }
 
-        if (in_array($type, Type::$builtinTypes)) {
+        if (\in_array($type, Type::$builtinTypes)) {
             return new Type($type, $nullable);
         }
 
@@ -173,7 +173,7 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
     private function resolveCompoundType(string $value, array $context): array
     {
         $types = explode('|', $value);
-        $nullable = in_array(Type::BUILTIN_TYPE_NULL, $types, true);
+        $nullable = \in_array(Type::BUILTIN_TYPE_NULL, $types, true);
 
         $result = [];
 
@@ -218,6 +218,6 @@ final class PropertyDocBlockTypeExtractor implements PropertyTypeExtractorInterf
 
         return '' === $namespace
             ? $type
-            : sprintf('%s\\%s', $namespace, $type);
+            : \sprintf('%s\\%s', $namespace, $type);
     }
 }

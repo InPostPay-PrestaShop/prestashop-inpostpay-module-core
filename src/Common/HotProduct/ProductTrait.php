@@ -137,22 +137,4 @@ trait ProductTrait
     {
         return get_object_vars($this);
     }
-
-    private function setLink(string $link): void
-    {
-        if ('' === $link) {
-            @trigger_error('Passing a product link will be required in the future version of InPost Pay.', E_USER_DEPRECATED);
-        }
-
-        $this->product_link = $link;
-    }
-
-    private function setEan(?string $ean): void
-    {
-        if ('' === $ean = (string) $ean) {
-            @trigger_error('Passing an EAN code will be required in the future version of InPost Pay.', E_USER_DEPRECATED);
-        }
-
-        $this->ean = $ean;
-    }
 }

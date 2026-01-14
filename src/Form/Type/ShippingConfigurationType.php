@@ -7,18 +7,19 @@ namespace izi\prestashop\Form\Type;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Configuration\DTO\ShippingConfiguration;
 use izi\prestashop\Form\Type\Shipping\ShippingOptionsType;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ShippingConfigurationType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'shippingconfigurationtype';
-
+    /**
+     * @var TranslatorInterface
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -27,11 +28,11 @@ final class ShippingConfigurationType extends AbstractType
     {
         $builder
             ->add('courierShippingOptions', ShippingOptionsType::class, [
-                'label' => $this->translator->l('Courier', self::TRANSLATION_SOURCE),
+                'label' => DeliveryType::Courier()->trans($this->translator),
                 'delivery_type' => DeliveryType::Courier(),
             ])
             ->add('apmShippingOptions', ShippingOptionsType::class, [
-                'label' => $this->translator->l('Parcel Locker', self::TRANSLATION_SOURCE),
+                'label' => DeliveryType::Apm()->trans($this->translator),
                 'delivery_type' => DeliveryType::Apm(),
             ]);
     }

@@ -27,7 +27,7 @@ final class DescriptionFormatter
             return '';
         }
 
-        $description = htmlentities($description, ENT_HTML401, 'utf-8', false);
+        $description = htmlentities($description, \ENT_HTML401, 'utf-8', false);
         $description = htmlspecialchars_decode($description);
         $description = preg_replace('/&(?:#\d+|[a-zA-Z]+);/', '', $description);
 

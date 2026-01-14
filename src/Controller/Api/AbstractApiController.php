@@ -10,6 +10,7 @@ use izi\prestashop\MerchantApi\Exception\InternalServerErrorException;
 use izi\prestashop\MerchantApi\Exception\MalformedRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\Exception\MissingConstructorArgumentsException;
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -45,10 +46,10 @@ abstract class AbstractApiController
                 'datetime_format' => BasketAppClientInterface::DATETIME_FORMAT,
                 'datetime_timezone' => BasketAppClientInterface::DATETIME_ZONE,
             ]);
-        } catch (UnexpectedValueException $e) {
-            throw new MalformedRequestException('Could not decode request.', 0, $e);
+        } catch (UnexpectedValueException|MissingConstructorArgumentsException $e) {
+            throw new MalformedRequestException('Could not decode the request.', 0, $e);
         } catch (ExceptionInterface $e) {
-            throw new InternalServerErrorException('Could not decode request.', 0, $e);
+            throw new InternalServerErrorException('Could not decode the request.', 0, $e);
         }
     }
 }

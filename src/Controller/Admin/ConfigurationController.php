@@ -28,7 +28,6 @@ use izi\prestashop\Form\Type\ConsentsConfigurationType;
 use izi\prestashop\Form\Type\GeneralConfigurationType;
 use izi\prestashop\Form\Type\GuiConfigurationType;
 use izi\prestashop\Form\Type\ShippingConfigurationType;
-use PrestaShopBundle\Security\Voter\PageVoter;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,11 +40,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 final class ConfigurationController extends AbstractConfigurationController
 {
-    /**
-     * @internal
-     */
-    public const TRANSLATION_SOURCE = 'configurationcontroller';
-
     /**
      * @Route(path="/general", name="admin_inpost_izi_config_general", methods={"GET", "POST"})
      */
@@ -71,8 +65,8 @@ final class ConfigurationController extends AbstractConfigurationController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/general.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => $this->translator->l('Configuration', self::TRANSLATION_SOURCE),
-            'headerTabContent' => $this->renderNav($request),
+            'layoutTitle' => $this->translator->trans('Settings', [], 'Admin.Global'),
+            'headerTabContent' => $this->getNavBar(),
         ]);
     }
 
@@ -101,8 +95,8 @@ final class ConfigurationController extends AbstractConfigurationController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/consents.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => $this->translator->l('Consents', self::TRANSLATION_SOURCE),
-            'headerTabContent' => $this->renderNav($request),
+            'layoutTitle' => $this->translator->trans('Consents', [], 'Modules.Inpostizi.Config'),
+            'headerTabContent' => $this->getNavBar(),
         ]);
     }
 
@@ -133,8 +127,8 @@ final class ConfigurationController extends AbstractConfigurationController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/gui.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => $this->translator->l('GUI configuration', self::TRANSLATION_SOURCE),
-            'headerTabContent' => $this->renderNav($request),
+            'layoutTitle' => $this->translator->trans('GUI configuration', [], 'Modules.Inpostizi.Config'),
+            'headerTabContent' => $this->getNavBar(),
             'widget_js_uri' => $this->apiConfiguration->getEnvironment()->getWidgetJavaScriptUri(),
             'merchant_client_id' => $this->apiConfiguration->getMerchantClientId(),
         ]);
@@ -167,8 +161,8 @@ final class ConfigurationController extends AbstractConfigurationController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/shipping.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => $this->translator->l('Shipping configuration', self::TRANSLATION_SOURCE),
-            'headerTabContent' => $this->renderNav($request),
+            'layoutTitle' => $this->translator->trans('Shipping configuration', [], 'Modules.Inpostizi.Config'),
+            'headerTabContent' => $this->getNavBar(),
         ]);
     }
 
@@ -186,7 +180,7 @@ final class ConfigurationController extends AbstractConfigurationController
         ]);
 
         $extensions = null;
-        if (null !== $extensionsViewFactory && $this->isGranted(PageVoter::CREATE, 'AdminModulesSf_')) {
+        if (null !== $extensionsViewFactory && $this->isGranted('create', 'AdminModulesSf')) {
             try {
                 $extensions = $extensionsViewFactory->getView();
             } catch (ExtensionServiceException $e) {
@@ -199,8 +193,8 @@ final class ConfigurationController extends AbstractConfigurationController
         }
 
         return $this->render('@Modules/inpostizi/views/templates/admin/config/support.html.twig', [
-            'layoutTitle' => $this->translator->l('Support', self::TRANSLATION_SOURCE),
-            'headerTabContent' => $this->renderNav($request),
+            'layoutTitle' => $this->translator->trans('Support', [], 'Modules.Inpostizi.Config'),
+            'headerTabContent' => $this->getNavBar(),
             'form' => $form->createView(),
             'status' => $bus->handle(new CheckStatusCommand()),
             'extensions' => $extensions,
@@ -218,7 +212,7 @@ final class ConfigurationController extends AbstractConfigurationController
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Access Denied.',
-            ], 403);
+            ], Response::HTTP_FORBIDDEN);
         }
 
         $form = $this->createForm(AdvancedConfigurationType::class, $configuration->copy());
@@ -228,14 +222,14 @@ final class ConfigurationController extends AbstractConfigurationController
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Malformed request.',
-            ], 400);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         if (!$form->isValid()) {
             return new JsonResponse([
                 'success' => false,
                 'message' => (string) $form->getErrors(),
-            ], 422);
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $command = new UpdateAdvancedConfigurationCommand($form->getData());
@@ -251,7 +245,7 @@ final class ConfigurationController extends AbstractConfigurationController
             return new JsonResponse([
                 'success' => false,
                 'message' => $this->trans('Oops... looks like an unexpected error occurred', [], 'Admin.Notifications.Error'),
-            ], 500);
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -283,7 +277,7 @@ final class ConfigurationController extends AbstractConfigurationController
         $this->checkAccess();
 
         if (!$this->isCsrfTokenValid('inpost-izi-install-extension', $request->request->get('_csrf_token'))) {
-            $this->addFlash('error', $this->translator->l('The CSRF token is invalid.', HotProductController::TRANSLATION_SOURCE));
+            $this->addFlash('error', $this->translator->trans('The CSRF token is invalid.', [], 'Modules.Inpostizi.Validators'));
 
             return $this->redirectToRoute('admin_inpost_izi_products_index');
         }
@@ -292,12 +286,14 @@ final class ConfigurationController extends AbstractConfigurationController
             $command = new InstallExtensionCommand($name, $version);
             $bus->handle($command);
 
-            $this->addFlash('success', $this->translator->l('Extensions have been successfully updated.', self::TRANSLATION_SOURCE));
+            $this->addFlash('success', $this->translator->trans('Extensions have been successfully updated.', [], 'Modules.Inpostizi.Extension'));
         } catch (ExtensionServiceException $e) {
             $this->getLogger()->error('Could not retrieve extensions data. {message}', [
                 'message' => $e->getMessage(),
             ]);
-            $this->addFlash('error', sprintf($this->translator->l('Could not retrieve extensions data: %s', self::TRANSLATION_SOURCE), $e->getMessage()));
+            $this->addFlash('error', $this->translator->trans('Could not retrieve extensions data: {error}', [
+                '{error}' => $e->getMessage(),
+            ], 'Modules.Inpostizi.Extension'));
         } catch (ExtensionExceptionInterface $e) {
             $this->getLogger()->error('Could not install extension "{name}" version "{version}". {message}', [
                 'name' => $name,

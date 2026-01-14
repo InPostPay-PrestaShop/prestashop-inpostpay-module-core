@@ -79,7 +79,7 @@ final class MessageOptions implements \JsonSerializable
             return MessageFormatterInterface::DEFAULT_FORMAT;
         }
 
-        return sprintf("%s\n\n{%% if \"APM\" == delivery_type %%}\n%s\n{%% endif %%}", MessageFormatterInterface::DEFAULT_FORMAT, $this->message);
+        return \sprintf("%s\n\n{%% if \"APM\" == delivery_type %%}\n%s\n{%% endif %%}", MessageFormatterInterface::DEFAULT_FORMAT, $this->message);
     }
 
     public function jsonSerialize(): array

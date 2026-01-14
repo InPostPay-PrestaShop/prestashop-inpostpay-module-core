@@ -6,9 +6,8 @@ namespace izi\prestashop\Repository;
 
 use izi\prestashop\Configuration\DTO\Product\ProductRestrictions;
 use izi\prestashop\Database\Connection;
-use izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface;
 
-final class ProductRestrictionsRepository implements ProductRestrictionsRepositoryInterface, FeatureRestrictionsRepositoryInterface
+final class ProductRestrictionsRepository implements ProductRestrictionsRepositoryInterface
 {
     public const CATEGORY_RESTRICTIONS_TABLE = 'inpostizi_prod_category_bl';
     public const MANUFACTURER_RESTRICTIONS_TABLE = 'inpostizi_prod_manufacturer_bl';
@@ -73,7 +72,7 @@ final class ProductRestrictionsRepository implements ProductRestrictionsReposito
 
         $subQuery = $this
             ->createByShopIdQueryBuilder(self::ATTRIBUTE_GROUP_RESTRICTIONS_TABLE, $shopId)
-            ->where(sprintf('id_attribute_group IN (%s)', implode(',', array_map('intval', $attributeGroupIds))));
+            ->where(\sprintf('id_attribute_group IN (%s)', implode(',', array_map('intval', $attributeGroupIds))));
 
         return $this->exists($subQuery);
     }
@@ -93,7 +92,7 @@ final class ProductRestrictionsRepository implements ProductRestrictionsReposito
 
         $subQuery = $this
             ->createByShopIdQueryBuilder(self::FEATURE_RESTRICTIONS_TABLE, $shopId)
-            ->where(sprintf('id_feature IN (%s)', implode(',', array_map('intval', $featureIds))));
+            ->where(\sprintf('id_feature IN (%s)', implode(',', array_map('intval', $featureIds))));
 
         return $this->exists($subQuery);
     }

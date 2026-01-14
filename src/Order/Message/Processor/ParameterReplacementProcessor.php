@@ -31,7 +31,7 @@ final class ParameterReplacementProcessor implements ProcessorInterface
         $parameters = $message->getParameters();
 
         foreach ($parameters as $name => $value) {
-            $placeholder = sprintf('{%s}', $name);
+            $placeholder = \sprintf('{%s}', $name);
             if (!str_contains($originalMessage, $placeholder)) {
                 continue;
             }
@@ -44,11 +44,11 @@ final class ParameterReplacementProcessor implements ProcessorInterface
 
     private function formatReplacement($value): string
     {
-        if (is_bool($value)) {
+        if (\is_bool($value)) {
             return $value ? 'true' : 'false';
         }
 
-        if (null === $value || is_scalar($value)) {
+        if (null === $value || \is_scalar($value)) {
             return (string) $value;
         }
 
@@ -64,19 +64,19 @@ final class ParameterReplacementProcessor implements ProcessorInterface
             return json_encode($value);
         }
 
-        if (is_array($value)) {
+        if (\is_array($value)) {
             return $this->formatArray($value);
         }
 
-        return sprintf('[%s]', get_debug_type($value));
+        return \sprintf('[%s]', get_debug_type($value));
     }
 
     private function formatArray(array $value): string
     {
-        if (is_int(key($value)) || false === $json = json_encode($value)) {
+        if (\is_int(key($value)) || false === $json = json_encode($value)) {
             $formatted = array_map([$this, 'formatReplacement'], $value);
 
-            return sprintf('[%s]', implode(', ', $formatted));
+            return \sprintf('[%s]', implode(', ', $formatted));
         }
 
         return $json;

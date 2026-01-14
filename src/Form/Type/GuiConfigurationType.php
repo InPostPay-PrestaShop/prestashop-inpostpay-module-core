@@ -11,23 +11,22 @@ use izi\prestashop\Configuration\GuiConfigurationInterface;
 use izi\prestashop\Configuration\ProductRestrictionsProviderInterface;
 use izi\prestashop\Form\Type\Widget\ProductPageDisplayConfigurationType;
 use izi\prestashop\Form\Type\Widget\WidgetDisplayConfigurationType;
-use izi\prestashop\Translation\LegacyTranslator;
+use izi\prestashop\Hook\Front\DisplayIziCartPreviewButton;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class GuiConfigurationType extends AbstractType
 {
     /**
-     * @internal
+     * @var TranslatorInterface
      */
-    public const TRANSLATION_SOURCE = 'guiconfigurationtype';
-
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -73,7 +72,7 @@ final class GuiConfigurationType extends AbstractType
                 'data_class' => DTO\GuiConfiguration::class,
                 'binding_places' => GuiConfiguration::getConfigurableBindingPlaces(),
             ])
-            ->setAllowedTypes('binding_places', ['array'/*, BindingPlace::class . '[]'*/])
+            ->setAllowedTypes('binding_places', [BindingPlace::class . '[]'])
             ->setAllowedValues('binding_places', static function (array $value) {
                 foreach ($value as $bindingPlace) {
                     if (!$bindingPlace instanceof BindingPlace) {
@@ -93,27 +92,23 @@ final class GuiConfigurationType extends AbstractType
     {
         switch ($bindingPlace) {
             case BindingPlace::ProductCard():
-                return $this->translator->l('This widget will be displayed in the product page.', self::TRANSLATION_SOURCE);
+                return $this->translator->trans('The widget will be displayed on the product page.', [], 'Modules.Inpostizi.Gui');
             case BindingPlace::BasketSummary():
-                return $this->translator->l('This widget will be displayed in the cart page, under submit button.', self::TRANSLATION_SOURCE);
+                return $this->translator->trans('The widget will be displayed on the cart page, below the "{button}" button.', [
+                    '{button}' => $this->translator->trans('Proceed to checkout', [], 'Shop.Theme.Actions'),
+                ], 'Modules.Inpostizi.Gui');
             case BindingPlace::LoginPage():
-                return $this->translator->l('This widget will be displayed in the login page, under form submit button.', self::TRANSLATION_SOURCE);
+                return $this->translator->trans('The widget will be displayed on the login page, below the login form.', [], 'Modules.Inpostizi.Gui');
             case BindingPlace::RegisterFormPage():
-                return $this->translator->l('This widget will be displayed in the register page, above register form.', self::TRANSLATION_SOURCE);
+                return $this->translator->trans('The widget will be displayed on the registration page, above the registration form.', [], 'Modules.Inpostizi.Gui');
             case BindingPlace::CheckoutPage():
-                return $this->translator->l('This widget will be displayed in the checkout page, above products summary.', self::TRANSLATION_SOURCE);
+                return $this->translator->trans('The widget will be displayed on the checkout page, above the order summary.', [], 'Modules.Inpostizi.Gui');
             case BindingPlace::MiniCartPage():
-                return $this->translator->l('This widget will be displayed in the cart preview. To display this hook you have to register custom hook in your template "{hook h=\'displayIziCartPreviewButton\'}"', self::TRANSLATION_SOURCE);
+                return $this->translator->trans('The widget will be displayed in the cart preview. To use this location, a custom hook call must be added in the template file: `{code}`.', [
+                    '{code}' => \sprintf('{hook h="%s"}', DisplayIziCartPreviewButton::HOOK_NAME),
+                ], 'Modules.Inpostizi.Gui');
             default:
                 return '';
         }
-
-        // translations moved to BindingPlace enum, kept for AdminModuleTranslations message discovery
-        // ->l('Cart page', self::TRANSLATION_SOURCE),
-        // ->l('Product card', self::TRANSLATION_SOURCE),
-        // ->l('Login page', self::TRANSLATION_SOURCE),
-        // ->l('Register page', self::TRANSLATION_SOURCE),
-        // ->l('Checkout page', self::TRANSLATION_SOURCE),
-        // ->l('Cart preview', self::TRANSLATION_SOURCE),
     }
 }

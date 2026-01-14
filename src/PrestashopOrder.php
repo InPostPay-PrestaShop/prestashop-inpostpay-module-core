@@ -36,7 +36,6 @@ use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Product\Util\AttributeListParser;
 use izi\prestashop\Product\Util\DescriptionFormatter;
 use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 /**
  * @internal
@@ -390,7 +389,7 @@ class PrestashopOrder
         $model = new \Product((int) $data['product_id'], false, $this->order->id_lang, (int) $data['id_shop']);
 
         if (\Validate::isLoadedObject($model)) {
-            $category = $model->id_category_default;
+            $category = (string) $model->id_category_default;
             $description = DescriptionFormatter::formatDescription($model);
             $link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->order->id_lang, $this->order->id_shop, $data['product_attribute_id']);
 
@@ -464,14 +463,6 @@ class PrestashopOrder
 
     private function getImageProvider(): ImageUrlsProviderInterface
     {
-        if (isset($this->imageProvider)) {
-            return $this->imageProvider;
-        }
-
-        try {
-            return $this->imageProvider = $this->module->get(ImageUrlsProviderInterface::class);
-        } catch (ServiceNotFoundException $e) {
-            return $this->imageProvider = ImageUrlsProvider::create();
-        }
+        return $this->imageProvider ?? $this->imageProvider = $this->module->get(ImageUrlsProviderInterface::class);
     }
 }

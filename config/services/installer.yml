@@ -1,0 +1,59 @@
+imports:
+  - { resource: common.yml }
+  - { resource: installer/autoconfiguration.php }
+  - { resource: installer/factories.php }
+  - { resource: admin/translation.yml }
+  - { resource: admin/translation.php }
+
+services:
+  _defaults:
+    public: false
+    autowire: true
+    autoconfigure: true
+    bind:
+      $psVersion: !php/const _PS_VERSION_
+      $translator: '@inpost.izi.translator'
+
+  izi\prestashop\Installer\:
+    resource: ../../src/Installer
+    exclude: ../../src/Installer/**/index.php
+
+  izi\prestashop\Installer\Installer:
+    public: true
+    autoconfigure: false
+    bind:
+      $installers: !tagged inpost.izi.installer
+      $uninstallers: !tagged inpost.izi.uninstaller
+
+  izi\prestashop\Installer\RuntimeConfigAdjustingInstaller:
+    decorates: izi\prestashop\Installer\Installer
+    autoconfigure: false
+    arguments:
+      - '@izi\prestashop\Installer\RuntimeConfigAdjustingInstaller.inner'
+
+  izi\prestashop\Installer\LoggingInstaller:
+    decorates: izi\prestashop\Installer\Installer
+    decoration_priority: -100
+    autoconfigure: false
+    arguments:
+      - '@izi\prestashop\Installer\LoggingInstaller.inner'
+      - '@inpost.izi.logger.installer'
+
+  izi\prestashop\Installer\CoreInstaller:
+    tags:
+      - { name: inpost.izi.installer, priority: 100 }
+
+  izi\prestashop\Installer\DatabaseInstaller:
+    bind:
+      $migrations: !tagged inpost.izi.db_migration
+
+  izi\prestashop\Installer\HookDispatchingUninstaller:
+    tags:
+      - { name: inpost.izi.uninstaller, priority: -1000 } # last
+
+  inpost.izi.logger.installer:
+    class: Psr\Log\LoggerInterface
+    factory: [ '@izi\prestashop\Log\LoggerFactoryInterface', create ]
+    arguments:
+      - installer
+      - '%inpost.izi.logger_config%'

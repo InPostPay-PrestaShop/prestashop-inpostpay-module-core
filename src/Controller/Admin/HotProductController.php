@@ -24,26 +24,20 @@ use izi\prestashop\HotProduct\View\HotProductViewDataFactory;
 use izi\prestashop\Http\Exception\HttpExceptionInterface;
 use izi\prestashop\OAuth2\Exception\OAuth2ExceptionInterface;
 use izi\prestashop\ObjectModel\Repository\ProductRepository;
-use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
-use PrestaShopBundle\Security\Voter\PageVoter;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route(path="hot-products", defaults={"_inpost_izi_hot_product_page"=true})
  */
 final class HotProductController extends AbstractConfigurationController
 {
-    /**
-     * @internal
-     */
-    public const TRANSLATION_SOURCE = 'hotproductcontroller';
-
     /**
      * @var Context
      */
@@ -52,7 +46,7 @@ final class HotProductController extends AbstractConfigurationController
     /**
      * @param iterable<ConfigurationInitializerInterface> $configInitializers
      */
-    public function __construct(Context $shopContext, LegacyTranslator $translator, \Context $context, ApiConfigurationInterface $apiConfiguration, iterable $configInitializers, bool $debug = false)
+    public function __construct(Context $shopContext, TranslatorInterface $translator, \Context $context, ApiConfigurationInterface $apiConfiguration, iterable $configInitializers, bool $debug = false)
     {
         parent::__construct($translator, $context, $configInitializers, $apiConfiguration, $debug);
         $this->shopContext = $shopContext;
@@ -61,7 +55,7 @@ final class HotProductController extends AbstractConfigurationController
     /**
      * @Route(name="admin_inpost_izi_products_index", methods={"GET"})
      */
-    public function index(Request $request, HotProductRepositoryInterface $repository, HotProductViewDataFactory $viewDataFactory): Response
+    public function index(HotProductRepositoryInterface $repository, HotProductViewDataFactory $viewDataFactory): Response
     {
         $this->checkAccess();
 
@@ -77,15 +71,15 @@ final class HotProductController extends AbstractConfigurationController
         $viewData = $viewDataFactory->createForProducts($products);
 
         if (!$statusAvailable = $viewData->isStatusAvailable()) {
-            $this->addFlash('warning', $this->translator->l('Failed to fetch product statuses from the API.', self::TRANSLATION_SOURCE));
+            $this->addFlash('warning', $this->translator->trans('Failed to fetch product statuses from the API.', [], 'Modules.Inpostizi.Hotproduct'));
         }
 
         return $this->render('@Modules/inpostizi/views/templates/admin/hot_products/index.html.twig', [
             'products' => $viewData->getProducts(),
             'is_status_available' => $statusAvailable,
             'is_multistore_context' => null === $shopId,
-            'layoutTitle' => $this->translator->l('Hot products', self::TRANSLATION_SOURCE),
-            'headerTabContent' => $this->renderNav($request),
+            'layoutTitle' => $this->translator->trans('Hot products', [], 'Modules.Inpostizi.Config'),
+            'headerTabContent' => $this->getNavBar(),
         ]);
     }
 
@@ -103,7 +97,7 @@ final class HotProductController extends AbstractConfigurationController
         if (null !== $shopId = $this->shopContext->getContextShopID()) {
             $shopId = (int) $shopId;
         } else {
-            $this->addFlash('warning', $this->translator->l('You are creating a hot product in a multistore context. Product data associated with the default shop will be sent to the Basket App.', self::TRANSLATION_SOURCE));
+            $this->addFlash('warning', $this->translator->trans('You are creating a hot product in a multistore context. Product data associated with the default shop will be sent to the Basket App.', [], 'Modules.Inpostizi.Hotproduct'));
         }
 
         $form = $this->createForm(CreateHotProductType::class, new CreateHotProductCommand($shopId));
@@ -112,11 +106,11 @@ final class HotProductController extends AbstractConfigurationController
         if ($form->isSubmitted() && $form->isValid()) {
             try {
                 $bus->handle($form->getData());
-                $this->addFlash('success', $this->translator->l('Hot product has been created successfully and will be awaiting approval.', self::TRANSLATION_SOURCE));
+                $this->addFlash('success', $this->translator->trans('Hot product has been created successfully and will be awaiting approval.', [], 'Modules.Inpostizi.Hotproduct'));
 
                 return $this->redirectToRoute('admin_inpost_izi_products_index');
             } catch (HotProductExistsException $e) {
-                $this->addFlash('error', $this->translator->l('There already exists a hot product for product and combination.', self::TRANSLATION_SOURCE));
+                $this->addFlash('error', $this->translator->trans('There already exists a hot product for product and combination.', [], 'Modules.Inpostizi.Hotproduct'));
             } catch (\Throwable $e) {
                 $this->handleUpdateError($e, $request);
             }
@@ -124,9 +118,8 @@ final class HotProductController extends AbstractConfigurationController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/hot_products/create.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => $this->translator->l('New hot product', self::TRANSLATION_SOURCE),
-            'headerTabContent' => $this->renderNav($request),
-            'is_ps_176' => str_starts_with(_PS_VERSION_, '1.7.6'),
+            'layoutTitle' => $this->translator->trans('New hot product', [], 'Modules.Inpostizi.Hotproduct'),
+            'headerTabContent' => $this->getNavBar(),
         ]);
     }
 
@@ -142,7 +135,7 @@ final class HotProductController extends AbstractConfigurationController
         }
 
         if (null === $product = $repository->find($id)) {
-            $this->addFlash('error', $this->translator->l('Hot product was not found.', self::TRANSLATION_SOURCE));
+            $this->addFlash('error', $this->translator->trans('Hot product was not found.', [], 'Modules.Inpostizi.Hotproduct'));
 
             return $this->redirectToRoute('admin_inpost_izi_products_index');
         }
@@ -158,7 +151,7 @@ final class HotProductController extends AbstractConfigurationController
                 if (Status::Active() === $status) {
                     $this->addFlash('success', $this->trans('Successful update.', [], 'Admin.Notifications.Success'));
                 } else {
-                    $this->addFlash('success', $this->translator->l('Hot product has been updated successfully and will be awaiting approval.', self::TRANSLATION_SOURCE));
+                    $this->addFlash('success', $this->translator->trans('Hot product has been updated successfully and will be awaiting approval.', [], 'Modules.Inpostizi.Hotproduct'));
                 }
 
                 return $this->redirectToRoute('admin_inpost_izi_products_index');
@@ -169,11 +162,10 @@ final class HotProductController extends AbstractConfigurationController
 
         return $this->render('@Modules/inpostizi/views/templates/admin/hot_products/edit.html.twig', [
             'form' => $form->createView(),
-            'layoutTitle' => sprintf(
-                $this->translator->l('Edit hot product: %s', self::TRANSLATION_SOURCE),
-                $productRepository->getProductNameByProductId($product->getProductId(), (int) $this->context->language->id, $product->getCombinationId())
-            ),
-            'headerTabContent' => $this->renderNav($request),
+            'layoutTitle' => $this->translator->trans('Edit hot product: {product}', [
+                '{product}' => $productRepository->getProductNameByProductId($product->getProductId(), (int) $this->context->language->id, $product->getCombinationId()),
+            ], 'Modules.Inpostizi.Hotproduct'),
+            'headerTabContent' => $this->getNavBar(),
         ]);
     }
 
@@ -189,7 +181,7 @@ final class HotProductController extends AbstractConfigurationController
         }
 
         if (!$this->isCsrfTokenValid('inpost-izi-delete-product', $request->request->get('_csrf_token'))) {
-            $this->addFlash('error', $this->translator->l('The CSRF token is invalid.', self::TRANSLATION_SOURCE));
+            $this->addFlash('error', $this->translator->trans('The CSRF token is invalid.', [], 'Modules.Inpostizi.Validators'));
 
             return $this->redirectToRoute('admin_inpost_izi_products_index');
         }
@@ -198,7 +190,7 @@ final class HotProductController extends AbstractConfigurationController
 
         try {
             $bus->handle($command);
-            $this->addFlash('success', $this->translator->l('Hot product has been deleted successfully.', self::TRANSLATION_SOURCE));
+            $this->addFlash('success', $this->translator->trans('Hot product has been deleted successfully.', [], 'Modules.Inpostizi.Hotproduct'));
         } catch (\Throwable $e) {
             $this->handleUpdateError($e, $request);
         }
@@ -218,7 +210,7 @@ final class HotProductController extends AbstractConfigurationController
         }
 
         if (!$this->isCsrfTokenValid('inpost-izi-import-product', $request->request->get('_csrf_token'))) {
-            $this->addFlash('error', $this->translator->l('The CSRF token is invalid.', self::TRANSLATION_SOURCE));
+            $this->addFlash('error', $this->translator->trans('The CSRF token is invalid.', [], 'Modules.Inpostizi.Validators'));
 
             return $this->redirectToRoute('admin_inpost_izi_products_index');
         }
@@ -231,9 +223,9 @@ final class HotProductController extends AbstractConfigurationController
             $command = new ImportHotProductCommand($referenceId, $shopId);
             $bus->handle($command);
 
-            $this->addFlash('success', $this->translator->l('Product has been imported successfully.', self::TRANSLATION_SOURCE));
+            $this->addFlash('success', $this->translator->trans('Product has been imported successfully.', [], 'Modules.Inpostizi.Hotproduct'));
         } catch (HotProductExistsException $e) {
-            $this->addFlash('error', $this->translator->l('There already exists a hot product for product and combination.', self::TRANSLATION_SOURCE));
+            $this->addFlash('error', $this->translator->trans('There already exists a hot product for product and combination.', [], 'Modules.Inpostizi.Hotproduct'));
         } catch (\Throwable $e) {
             $this->handleUpdateError($e, $request);
         }
@@ -253,7 +245,7 @@ final class HotProductController extends AbstractConfigurationController
         }
 
         if (!$this->isCsrfTokenValid('inpost-izi-delete-remote-product', $request->request->get('_csrf_token'))) {
-            $this->addFlash('error', $this->translator->l('The CSRF token is invalid.', self::TRANSLATION_SOURCE));
+            $this->addFlash('error', $this->translator->trans('The CSRF token is invalid.', [], 'Modules.Inpostizi.Validators'));
 
             return $this->redirectToRoute('admin_inpost_izi_products_index');
         }
@@ -262,7 +254,7 @@ final class HotProductController extends AbstractConfigurationController
             $command = new DeleteRemoteProductCommand($referenceId);
             $bus->handle($command);
 
-            $this->addFlash('success', $this->translator->l('Product has been deleted from API successfully.', self::TRANSLATION_SOURCE));
+            $this->addFlash('success', $this->translator->trans('Product has been deleted from API successfully.', [], 'Modules.Inpostizi.Hotproduct'));
         } catch (\Throwable $e) {
             $this->handleUpdateError($e, $request);
         }
@@ -332,8 +324,7 @@ final class HotProductController extends AbstractConfigurationController
 
     private static function getProductsReadPermission(): array
     {
-        // appending underscore to controller name was required before PS 1.7.5
-        return [PageVoter::READ, 'AdminProducts_'];
+        return ['read', 'AdminProducts'];
     }
 
     private function handleUpdateError(\Throwable $e, Request $request): void
@@ -341,13 +332,13 @@ final class HotProductController extends AbstractConfigurationController
         if ($e instanceof HotProductExceptionInterface) {
             $this->addFlash('error', $e->getMessage());
         } elseif ($e instanceof MaxProductLimitReachedException) {
-            $this->addFlash('error', $this->translator->l('Maximum number of hot products reached.', self::TRANSLATION_SOURCE));
+            $this->addFlash('error', $this->translator->trans('Maximum number of hot products reached.', [], 'Modules.Inpostizi.Hotproduct'));
         } elseif ($e instanceof BasketAppException) {
-            $this->addFlash('error', sprintf('Basket App API error "%s": "%s".', $e->getError()->getCode(), $e->getMessage()));
+            $this->addFlash('error', \sprintf('Basket App API error "%s": "%s".', $e->getError()->getCode(), $e->getMessage()));
         } elseif ($e instanceof NetworkExceptionInterface || $e instanceof OAuth2ExceptionInterface) {
             $this->addFlash('error', 'API connection error.');
         } elseif ($e instanceof HttpExceptionInterface) {
-            $this->addFlash('error', sprintf('Unexpected Basket App API response status code: %d.', $e->getResponse()->getStatusCode()));
+            $this->addFlash('error', \sprintf('Unexpected Basket App API response status code: %d.', $e->getResponse()->getStatusCode()));
         } else {
             $this->handleError($e, $request);
         }

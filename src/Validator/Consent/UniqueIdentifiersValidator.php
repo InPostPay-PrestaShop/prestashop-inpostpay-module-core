@@ -6,25 +6,12 @@ namespace izi\prestashop\Validator\Consent;
 
 use izi\prestashop\Configuration\DTO\Consent;
 use izi\prestashop\Configuration\DTO\ConsentLink;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 final class UniqueIdentifiersValidator extends ConstraintValidator
 {
-    private const TRANSLATION_SOURCE = 'uniqueidentifiersvalidator';
-
-    /**
-     * @var LegacyTranslator
-     */
-    private $translator;
-
-    public function __construct(LegacyTranslator $translator)
-    {
-        $this->translator = $translator;
-    }
-
     public function validate($value, Constraint $constraint): void
     {
         if (!$constraint instanceof UniqueIdentifiers) {
@@ -53,7 +40,8 @@ final class UniqueIdentifiersValidator extends ConstraintValidator
             }
 
             $this->context
-                ->buildViolation($this->translator->l('Identifier should be unique.', self::TRANSLATION_SOURCE))
+                ->buildViolation('Identifier is not unique.')
+                ->setTranslationDomain('Modules.Inpostizi.Validators')
                 ->atPath('link.id')
                 ->addViolation();
 

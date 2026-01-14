@@ -5,18 +5,19 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type\Shipping;
 
 use izi\prestashop\Configuration\DTO\Shipping\TimeOfWeekRange;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class TimeOfWeekRangeType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'timeofweekrangetype';
-
+    /**
+     * @var TranslatorInterface
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -25,12 +26,12 @@ final class TimeOfWeekRangeType extends AbstractType
     {
         $builder
             ->add('start', TimeOfWeekType::class, [
-                'label' => $this->translator->l('Available from', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('inclusive', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Available from', [], 'Modules.Inpostizi.Shipping'),
+                'help' => $this->translator->trans('inclusive', [], 'Modules.Inpostizi.Shipping'),
             ])
             ->add('end', TimeOfWeekType::class, [
-                'label' => $this->translator->l('Available to', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('exclusive', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Available to', [], 'Modules.Inpostizi.Shipping'),
+                'help' => $this->translator->trans('exclusive', [], 'Modules.Inpostizi.Shipping'),
             ]);
     }
 

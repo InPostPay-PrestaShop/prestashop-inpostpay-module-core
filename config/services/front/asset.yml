@@ -1,0 +1,35 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\View\Asset\FrontAssetManager:
+    class: izi\prestashop\View\Asset\FrontAssetManager
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+
+  izi\prestashop\View\Asset\Provider\Front\CommonAssetsProvider:
+    class: izi\prestashop\View\Asset\Provider\Front\CommonAssetsProvider
+    tags:
+      - inpost.izi.front_assets_provider
+    arguments:
+      - '@inpost.izi.context'
+      - '@inpost.izi.environment'
+
+  izi\prestashop\View\Asset\Provider\Front\ProductPageAssetsProvider:
+    class: izi\prestashop\View\Asset\Provider\Front\ProductPageAssetsProvider
+    tags:
+      - inpost.izi.front_assets_provider
+    arguments:
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\View\Asset\Provider\Front\WidgetConfigurationProvider:
+    class: izi\prestashop\View\Asset\Provider\Front\WidgetConfigurationProvider
+    tags:
+      - inpost.izi.front_assets_provider
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@izi\prestashop\Repository\BasketSessionRepository'

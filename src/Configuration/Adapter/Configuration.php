@@ -55,7 +55,7 @@ final class Configuration implements LanguageAwareConfigurationInterface
             return;
         }
 
-        throw new \RuntimeException(sprintf('Could not remove configuration values for key "%s".', $key));
+        throw new \RuntimeException(\sprintf('Could not remove configuration values for key "%s".', $key));
     }
 
     public function has(string $key): bool
@@ -65,7 +65,7 @@ final class Configuration implements LanguageAwareConfigurationInterface
 
     public function isValidKey(string $key): bool
     {
-        return strlen($key) <= \Configuration::$definition['fields']['name']['size']
+        return \strlen($key) <= \Configuration::$definition['fields']['name']['size']
             && \Validate::isConfigName($key);
     }
 
@@ -79,7 +79,7 @@ final class Configuration implements LanguageAwareConfigurationInterface
         }, $keyPatterns)));
 
         if (false === $result) {
-            throw new \RuntimeException(sprintf('Could not remove configuration values matching pattern "%s".', $keyPattern));
+            throw new \RuntimeException(\sprintf('Could not remove configuration values matching pattern "%s".', $keyPattern));
         }
     }
 
@@ -119,6 +119,6 @@ final class Configuration implements LanguageAwareConfigurationInterface
             return;
         }
 
-        throw new \RuntimeException(sprintf('Could not update the configuration value for key "%s".', $key));
+        throw new \RuntimeException(\sprintf('Could not update the configuration value for key "%s".', $key));
     }
 }
