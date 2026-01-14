@@ -5,27 +5,25 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Form\ChoiceList\LazyChoiceLoader;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @experimental
  */
 final class ObjectModelAutocompleteType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'objectmodelautocompletetype';
-
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -65,9 +63,9 @@ final class ObjectModelAutocompleteType extends AbstractType
                 'autocomplete_url',
             ])
             ->setDefaults([
-                'loading_more_text' => $this->translator->l('Loading more results...', self::TRANSLATION_SOURCE),
-                'no_results_found_text' => $this->translator->l('No results found', self::TRANSLATION_SOURCE),
-                'no_more_results_text' => $this->translator->l('No more results', self::TRANSLATION_SOURCE),
+                'loading_more_text' => $this->translator->trans('Loading more results...', [], 'Modules.Inpostizi.Config'),
+                'no_results_found_text' => $this->translator->trans('No results found', [], 'Modules.Inpostizi.Config'),
+                'no_more_results_text' => $this->translator->trans('No more results', [], 'Modules.Inpostizi.Config'),
                 'min_characters' => null,
                 'choice_loader' => static function (Options $options, ?ChoiceLoaderInterface $loader): ?ChoiceLoaderInterface {
                     if (null === $loader) {

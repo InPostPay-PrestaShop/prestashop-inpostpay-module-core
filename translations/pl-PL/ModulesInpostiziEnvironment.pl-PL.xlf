@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziEnvironment.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="76525f0f34b48475e5ca33f71d296f3b">
+        <source>Client ID</source>
+        <target>Client ID</target>
+      </trans-unit>
+      <trans-unit id="1b4739e491387ef5d8a546854308e5fe">
+        <source>Client secret</source>
+        <target>Client secret</target>
+      </trans-unit>
+      <trans-unit id="0ba29c6a1afacf586b03a26162c72274">
+        <source>Environment</source>
+        <target>Środowisko</target>
+      </trans-unit>
+      <trans-unit id="992df61ae3c07b78525503698a832e3a">
+        <source>Merchant client ID</source>
+        <target>Merchant client ID</target>
+      </trans-unit>
+      <trans-unit id="3d865941fd10f1dd273c314a222e981f">
+        <source>Merchant client ID is a value assigned by InPost. In order to obtain the value for the sandbox environment, send a request to {email}. The value for the production environment can be obtained in the merchant panel.</source>
+        <target>Merchant client ID jest wartością nadawaną przez InPost. W celu otrzymania wartości dla środowiska sandbox należy wysłać zgłoszenie na integracjapay@inpost.pl. Wartość dla środowiska produkcyjnego można uzyskać w panelu merchanta.</target>
+      </trans-unit>
+      <trans-unit id="1b637f945837fb395aed01149e5adaf7">
+        <source>Please note that configuration varies depending on the selected environment. To obtain a value for the sandbox environment, please contact us via the contact form. To obtain a production value, log in to InPost and provide your store details.</source>
+        <target>Pamiętaj, że konfiguracja różni się w zależności od wybranego środowiska. Aby uzyskać wartość dla środowiska sandbox, skontaktuj się z nami przez formularz kontaktowy. Aby uzyskać wartość produkcyjną, zaloguj się do InPost i uzupełnij dane sklepu.</target>
+      </trans-unit>
+      <trans-unit id="756d97bb256b8580d4d71ee0c547804e">
+        <source>Production</source>
+        <target>Produkcja</target>
+      </trans-unit>
+      <trans-unit id="2652eec977dcb2a5aea85f5bec235b05">
+        <source>Sandbox</source>
+        <target>Sandbox</target>
+      </trans-unit>
+      <trans-unit id="0f860522f3ee4ebba280cf78e53fafec">
+        <source>Select the environment in which you want the InPost Pay service to run. Remember to ensure the service is working properly in your store before switching to the production environment.</source>
+        <target>Wybierz środowisko, w którym ma działać usługa InPost Pay. Pamiętaj, aby przed przełączaniem na środowisko produkcyjne upewnić się, że usługa działa prawidłowo w Twoim sklepie.</target>
+      </trans-unit>
+      <trans-unit id="c05ee35d61895aa08b7df30c62f391bc">
+        <source>To obtain a value for the sandbox environment, please contact InPost. Production environment value can be obtained in the merchant panel.</source>
+        <target>Aby uzyskać wartość dla środowiska sandbox, skontaktuj się z InPost. Wartość dla środowiska produkcyjnego można uzyskać w panelu merchanta.</target>
+      </trans-unit>
+      <trans-unit id="19dd6c1cec504ac854645f352eb03209">
+        <source>UAT</source>
+        <target>UAT</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

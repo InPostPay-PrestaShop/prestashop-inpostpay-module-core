@@ -43,7 +43,7 @@ final class ConfigurationCache implements CacheInterface
 
     public static function getConfigKeyPrefix(): string
     {
-        return sprintf(self::CONFIG_KEY_PATTERN, '');
+        return \sprintf(self::CONFIG_KEY_PATTERN, '');
     }
 
     /**
@@ -111,7 +111,7 @@ final class ConfigurationCache implements CacheInterface
     public function clear(): bool
     {
         try {
-            $this->configuration->removeMatching(sprintf(self::CONFIG_KEY_PATTERN, '*'));
+            $this->configuration->removeMatching(\sprintf(self::CONFIG_KEY_PATTERN, '*'));
 
             return true;
         } catch (\Exception $e) {
@@ -136,7 +136,7 @@ final class ConfigurationCache implements CacheInterface
     public function setMultiple($values, $ttl = null): bool
     {
         if (!is_iterable($values)) {
-            throw new InvalidArgumentException(sprintf('Cache values must be an array or a Traversable, "%s" given.', get_debug_type($values)));
+            throw new InvalidArgumentException(\sprintf('Cache values must be an array or a Traversable, "%s" given.', get_debug_type($values)));
         }
 
         $success = true;
@@ -168,18 +168,18 @@ final class ConfigurationCache implements CacheInterface
 
     private function validateKey($key): string
     {
-        if (!is_string($key)) {
-            throw new InvalidArgumentException(sprintf('Cache key must be a string, "%s" given.', get_debug_type($key)));
+        if (!\is_string($key)) {
+            throw new InvalidArgumentException(\sprintf('Cache key must be a string, "%s" given.', get_debug_type($key)));
         }
 
         if ('' === $key) {
             throw new InvalidArgumentException('Cache key length must be greater than zero.');
         }
 
-        $configKey = sprintf(self::CONFIG_KEY_PATTERN, $key);
+        $configKey = \sprintf(self::CONFIG_KEY_PATTERN, $key);
 
         if (!$this->configuration->isValidKey($configKey)) {
-            throw new InvalidArgumentException(sprintf('Cache key "%s" is invalid.', $key));
+            throw new InvalidArgumentException(\sprintf('Cache key "%s" is invalid.', $key));
         }
 
         return $configKey;
@@ -191,15 +191,15 @@ final class ConfigurationCache implements CacheInterface
             return;
         }
 
-        throw new InvalidArgumentException(sprintf('Cache keys must be an array or a Traversable, "%s" given.', get_debug_type($keys)));
+        throw new InvalidArgumentException(\sprintf('Cache keys must be an array or a Traversable, "%s" given.', get_debug_type($keys)));
     }
 
     private function createCacheItem($value, $ttl): array
     {
         $expiry = $this->getExpiry($ttl);
 
-        if (is_object($value)) {
-            $class = get_class($value);
+        if (\is_object($value)) {
+            $class = \get_class($value);
             $value = $this->serializeValue($value);
         } else {
             $class = null;
@@ -227,10 +227,10 @@ final class ConfigurationCache implements CacheInterface
             return null;
         }
 
-        if (is_int($ttl)) {
-            $ttl = new \DateInterval(sprintf('PT%dS', $ttl));
+        if (\is_int($ttl)) {
+            $ttl = new \DateInterval(\sprintf('PT%dS', $ttl));
         } elseif (!$ttl instanceof \DateInterval) {
-            throw new InvalidArgumentException(sprintf('TTL must be an integer, a DateInterval or null, "%s" given.', get_debug_type($ttl)));
+            throw new InvalidArgumentException(\sprintf('TTL must be an integer, a DateInterval or null, "%s" given.', get_debug_type($ttl)));
         }
 
         return $this->clock->now()->add($ttl);
@@ -244,7 +244,7 @@ final class ConfigurationCache implements CacheInterface
 
         $item = json_decode((string) $value, true);
 
-        if (!is_array($item)) {
+        if (!\is_array($item)) {
             return null;
         }
 

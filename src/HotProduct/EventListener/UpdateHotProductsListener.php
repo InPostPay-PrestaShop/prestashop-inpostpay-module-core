@@ -15,7 +15,6 @@ use izi\prestashop\HotProduct\HotProductValidator;
 use izi\prestashop\HotProduct\Message\DeleteRemoteProductCommand;
 use izi\prestashop\HotProduct\Message\UpdateHotProductCommand;
 use izi\prestashop\OAuth2\Exception\OAuth2ExceptionInterface;
-use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Product\Event\CombinationEvent;
 use izi\prestashop\Product\Event\ImageEvent;
 use izi\prestashop\Product\Event\ProductEvent;
@@ -104,14 +103,14 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
      */
     private $toUpdate = [];
 
-    public function __construct(Context $context, HotProductRepositoryInterface $repository, PriceCalculatorInterface $calculator, CommandBusInterface $bus, LoggerInterface $logger, ?HotProductValidator $validator = null)
+    public function __construct(Context $context, HotProductRepositoryInterface $repository, PriceCalculatorInterface $calculator, CommandBusInterface $bus, LoggerInterface $logger, HotProductValidator $validator)
     {
         $this->context = $context;
         $this->repository = $repository;
         $this->calculator = $calculator;
         $this->bus = $bus;
         $this->logger = $logger;
-        $this->validator = $validator ?? self::createValidator();
+        $this->validator = $validator;
     }
 
     public static function getSubscribedEvents(): array
@@ -174,7 +173,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         }
 
         foreach ($hotProducts as $hotProduct) {
-            if (array_key_exists($hotProduct->getId(), $this->toDelete)) {
+            if (\array_key_exists($hotProduct->getId(), $this->toDelete)) {
                 return;
             }
 
@@ -238,7 +237,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         $combinationId = (int) $combination->id;
 
         foreach ($this->getHotProducts($productId) as $hotProduct) {
-            if (array_key_exists($hotProduct->getId(), $this->toDelete)) {
+            if (\array_key_exists($hotProduct->getId(), $this->toDelete)) {
                 return;
             }
 
@@ -260,7 +259,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         $productId = (int) $image->id_product;
 
         foreach ($this->getHotProducts($productId) as $hotProduct) {
-            if (array_key_exists($hotProduct->getId(), $this->toDelete)) {
+            if (\array_key_exists($hotProduct->getId(), $this->toDelete)) {
                 return;
             }
 
@@ -283,7 +282,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         $productId = (int) $price->id_product;
 
         foreach ($this->getHotProducts($productId) as $hotProduct) {
-            if (array_key_exists($hotProduct->getId(), $this->toDelete)) {
+            if (\array_key_exists($hotProduct->getId(), $this->toDelete)) {
                 return;
             }
 
@@ -303,9 +302,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
 
         $combinationId = $event->getCombinationId();
         $updatedShopId = $event->getShopId();
-        $shopGroup = is_callable([$this->context, 'getContextShopGroup'])
-            ? $this->context->getContextShopGroup()
-            : \Shop::getContextShopGroup();
+        $shopGroup = $this->context->getContextShopGroup();
 
         foreach ($this->getHotProducts($event->getProductId()) as $hotProduct) {
             if ((int) $hotProduct->getCombinationId() !== $combinationId) {
@@ -424,7 +421,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
 
         $shopIds = $model->id_shop_list ?: $this->context->getContextListShopID();
 
-        return in_array($shopId, $shopIds, false);
+        return \in_array($shopId, $shopIds, false);
     }
 
     private function doesAffectProduct(HotProduct $product, \SpecificPrice $price): bool
@@ -469,23 +466,12 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
 
     private function getUpdatedFields(\ObjectModel $model): ?array
     {
-        if (is_callable([$model, 'getFieldsToUpdate'])) {
+        if (\is_callable([$model, 'getFieldsToUpdate'])) {
             return $model->getFieldsToUpdate();
         }
 
         return (\Closure::bind(function () {
             return $this->update_fields;
         }, $model, \ObjectModel::class))();
-    }
-
-    private static function createValidator(): HotProductValidator
-    {
-        @trigger_error(sprintf('Not passing a $validator to "%s::__construct()" is deprecated since version 2.2.2.', __CLASS__), E_USER_DEPRECATED);
-
-        /** @var \InPostIzi $module */
-        $module = \Module::getInstanceByName('inpostizi');
-        $repository = $module->get(ObjectManagerInterface::class)->getRepository(\Product::class);
-
-        return new HotProductValidator($repository);
     }
 }

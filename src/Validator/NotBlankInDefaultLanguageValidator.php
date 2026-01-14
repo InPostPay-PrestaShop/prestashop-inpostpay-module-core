@@ -36,7 +36,7 @@ final class NotBlankInDefaultLanguageValidator extends ConstraintValidator
             return;
         }
 
-        if (!is_array($value)) {
+        if (!\is_array($value)) {
             throw new UnexpectedTypeException($value, 'array');
         }
 

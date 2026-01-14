@@ -23,15 +23,15 @@
                 <tr class="column-headers">
                   <th scope="col">{{ 'ID'|trans({}, 'Admin.Global') }}</th>
                   <th scope="col">{{ 'Product'|trans({}, 'Admin.Global') }}</th>
-                  <th scope="col">{{ 'Available from'|legacy_trans('updatehotproducttype') }}</th>
-                  <th scope="col">{{ 'Available to'|legacy_trans('updatehotproducttype') }}</th>
+                  <th scope="col">{{ 'Available from'|trans({}, 'Modules.Inpostizi.Hotproduct') }}</th>
+                  <th scope="col">{{ 'Available to'|trans({}, 'Modules.Inpostizi.Hotproduct') }}</th>
 
                   {% if is_multistore_context %}
                     <th scope="col">{{ 'Shop'|trans({}, 'Admin.Global') }}</th>
                   {% endif %}
 
                   {% if is_status_available %}
-                    <th scope="col">{{ 'Status'|legacy_trans }}</th>
+                    <th scope="col">{{ 'Status'|trans({}, 'Modules.Inpostizi.Hotproduct') }}</th>
                   {% endif %}
 
                   <th scope="col" class="text-right">{{ 'Actions'|trans({}, 'Admin.Global') }}</th>
@@ -53,37 +53,32 @@
                       <td>
                         {% if product.active %}
                           {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
-                              'content': 'Active'|legacy_trans,
+                              'content': 'Active'|trans({}, 'Modules.Inpostizi.Hotproduct'),
                               'state': 'success',
-                              'is_legacy': is_legacy_admin_page
                             }
                           %}
                         {% elseif product.active is same as(false) %}
                           {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
-                            'content': 'Awaiting approval'|legacy_trans,
+                            'content': 'Awaiting approval'|trans({}, 'Modules.Inpostizi.Hotproduct'),
                             'state': 'info',
-                            'is_legacy': is_legacy_admin_page
                           } %}
                         {% else %}
                           {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
-                            'content': 'Not found in API'|legacy_trans,
+                            'content': 'Not found in API'|trans({}, 'Modules.Inpostizi.Hotproduct'),
                             'state': 'warning',
-                            'is_legacy': is_legacy_admin_page
                           } %} {# TODO: popover with info that export can be retried by item edition? #}
                         {% endif %}
 
                         {% if product.id is same as(null) %}
                           {% if product.importable %}
                             {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
-                              'content': 'Importable'|legacy_trans,
+                              'content': 'Importable'|trans({}, 'Modules.Inpostizi.Hotproduct'),
                               'state': 'warning',
-                              'is_legacy': is_legacy_admin_page
                             } %} {# TODO: popover with info that unless imported, API data will not be updated after PS data changes? #}
                           {% else %}
                             {% include '@Modules/inpostizi/views/templates/admin/hot_products/components/badge.html.twig' with {
-                              'content': 'Product does not exist or is not available for order'|legacy_trans,
+                              'content': 'Product does not exist or is not available for order'|trans({}, 'Modules.Inpostizi.Hotproduct'),
                               'state': 'danger',
-                              'is_legacy': is_legacy_admin_page
                             } %}
                           {% endif %}
                         {% endif %}
@@ -140,7 +135,7 @@
                 {% else %}
                   <tr>
                     <td colspan="{{ 5 + is_multistore_context + is_status_available }}" class="text-center">
-                      {{ 'No products found.'|legacy_trans }}
+                      {{ 'No products found.'|trans({}, 'Modules.Inpostizi.Hotproduct') }}
                     </td>
                   </tr>
                 {% endfor %}

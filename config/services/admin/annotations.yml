@@ -1,0 +1,6 @@
+services:
+  izi\prestashop\Configuration\Initializer\AnnotationsConfigInitializer:
+    class: izi\prestashop\Configuration\Initializer\AnnotationsConfigInitializer
+    public: false
+    tags:
+      - inpost.izi.config_initializer

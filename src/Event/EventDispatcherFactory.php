@@ -4,96 +4,81 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Event;
 
-use izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener;
-use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
-use izi\prestashop\EventListener\CartListener;
-use izi\prestashop\EventListener\CreateShipmentListener;
-use izi\prestashop\EventListener\OrderListener;
-use izi\prestashop\EventListener\ShipmentListener;
-use izi\prestashop\Extension\EventListener\ClearCacheListener;
-use izi\prestashop\Form\BasketAppClientProvider;
-use izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener;
-use izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener;
-use izi\prestashop\Mail\EventListener\ReplaceOrderNotificationRecipientListener;
-use izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener;
-use Psr\Container\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\Service\ServiceProviderInterface;
 
 /**
  * @internal
  */
-final class EventDispatcherFactory implements ServiceSubscriberInterface
+final class EventDispatcherFactory
 {
-    /**
-     * @var ContainerInterface
-     */
-    private $locator;
-
-    public function __construct(ContainerInterface $locator)
-    {
-        $this->locator = $locator;
-    }
-
-    public static function getSubscribedServices(): array
-    {
-        return [
-            CartListener::class,
-            OrderListener::class,
-            ShipmentListener::class,
-            UpdateHotProductsListener::class,
-            ReplaceOrderNotificationRecipientListener::class,
-            AddDigitalDeliveryRecipientListener::class,
-            UpdateBasketAnalyticsListener::class,
-            '?' . BasketAppClientProvider::class,
-            '?' . UpdateCartRulesListener::class,
-            '?' . CreateShipmentListener::class,
-            ClearCacheListener::class,
-        ];
-    }
-
-    public function create(): EventDispatcherInterface
+    public static function create(ServiceProviderInterface $locator): EventDispatcherInterface
     {
         $dispatcher = new EventDispatcher();
 
-        foreach (self::getSubscribedServices() as $serviceId) {
-            $className = '?' === $serviceId[0] ? \Tools::substr($serviceId, 1) : $serviceId;
-
-            $this->addListeners($dispatcher, $className);
+        foreach ($locator->getProvidedServices() as $id => $type) {
+            self::registerServiceSubscriber($dispatcher, $locator, (string) $id, $type);
         }
 
         return $dispatcher;
     }
 
-    /**
-     * @param class-string<EventSubscriberInterface> $className
-     */
-    private function addListeners(EventDispatcherInterface $dispatcher, string $className): void
+    private static function registerServiceSubscriber(EventDispatcher $dispatcher, ServiceProviderInterface $container, string $id, string $type): void
     {
-        foreach ($className::getSubscribedEvents() as $eventName => $parameters) {
-            foreach ($this->normalizeListeners($parameters) as $listener) {
+        if ('?' === $type) {
+            $class = $id;
+        } else {
+            $class = '?' === $type[0] ? substr($type, 1) : $type;
+        }
+
+        if (!is_subclass_of($class, EventSubscriberInterface::class)) {
+            throw new InvalidArgumentException(\sprintf('Service "%s" must implement interface "%s".', $id, EventSubscriberInterface::class));
+        }
+
+        foreach (self::getSubscribedEvents($class) as $eventName => $listeners) {
+            foreach (self::normalizeListeners($listeners) as $listener) {
                 [$method, $priority] = $listener;
 
-                $dispatcher->addListener($eventName, function ($event) use ($className, $method) {
-                    return $this->locator->get($className)->{$method}($event);
-                }, $priority);
+                $listener = static function ($event) use ($container, $id, $method) {
+                    return $container->get($id)->{$method}($event);
+                };
+
+                $dispatcher->addListener($eventName, $listener, $priority);
             }
         }
     }
 
-    private function normalizeListeners($parameters): array
+    /**
+     * @param class-string<EventSubscriberInterface> $class
+     */
+    private static function getSubscribedEvents(string $class): array
     {
-        if (is_string($parameters)) {
-            return [[$parameters, 0]];
+        /** @var iterable $subscribedEvents */
+        $subscribedEvents = $class::getSubscribedEvents();
+
+        return \is_array($subscribedEvents) ? $subscribedEvents : iterator_to_array($subscribedEvents);
+    }
+
+    /**
+     * @param string|array{0: string, 1: int}|list<array{0: string, 1?: int}> $listeners
+     *
+     * @return list<array{0: string, 1: int}>
+     */
+    private static function normalizeListeners($listeners): array
+    {
+        if (\is_string($listeners)) {
+            return [[$listeners, 0]];
         }
 
-        if (is_string($parameters[0])) {
-            return [[$parameters[0], $parameters[1] ?? 0]];
+        if (\is_string($listeners[0])) {
+            return [[$listeners[0], $listeners[1]]];
         }
 
         return array_map(static function ($listener) {
             return [$listener[0], $listener[1] ?? 0];
-        }, $parameters);
+        }, $listeners);
     }
 }

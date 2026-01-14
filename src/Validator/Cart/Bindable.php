@@ -20,7 +20,7 @@ final class Bindable extends Constraint
         parent::__construct($options);
 
         if (!$this->bindingPlace instanceof BindingPlace) {
-            throw new InvalidArgumentException(sprintf('The "bindingPlace" option must be a "%s" case, "%s" given.', BindingPlace::class, get_debug_type($this->bindingPlace)));
+            throw new InvalidArgumentException(\sprintf('The "bindingPlace" option must be a "%s" case, "%s" given.', BindingPlace::class, get_debug_type($this->bindingPlace)));
         }
     }
 

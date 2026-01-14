@@ -8,6 +8,7 @@ use izi\prestashop\Common\Currency;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\ObjectModel\Repository\CurrencyRepository;
+use PrestaShop\PrestaShop\Core\Localization\Locale\RepositoryInterface;
 
 final class ContextManager
 {
@@ -26,13 +27,19 @@ final class ContextManager
      */
     private $configuration;
 
+    /**
+     * @var RepositoryInterface
+     */
+    private $localeRepository;
+
     private $stack = [];
 
-    public function __construct(\Context $context, ObjectManagerInterface $manager, PrestaShopConfiguration $configuration)
+    public function __construct(\Context $context, ObjectManagerInterface $manager, PrestaShopConfiguration $configuration, RepositoryInterface $localeRepository)
     {
         $this->context = $context;
         $this->manager = $manager;
         $this->configuration = $configuration;
+        $this->localeRepository = $localeRepository;
     }
 
     public function getContext(): \Context
@@ -47,6 +54,7 @@ final class ContextManager
      *         delivery: string,
      *         invoice: string,
      *     },
+     *     shop_id?: int,
      * } $options
      */
     public function changeContext(\Cart $cart, array $options = []): void
@@ -149,7 +157,9 @@ final class ContextManager
         $this->context->{$name} = $value;
 
         if ('language' === $name) {
-            $this->context->getTranslator()->setLocale($this->context->language->locale);
+            $locale = $this->context->language->getLocale();
+            $this->context->getTranslator()->setLocale($locale);
+            $this->context->currentLocale = $this->localeRepository->getLocale($locale);
         }
     }
 
@@ -234,7 +244,10 @@ final class ContextManager
 
         $language = $this->manager->getRepository(\Language::class)->find($languageId);
         $this->context->language = $language;
-        $this->context->getTranslator()->setLocale($this->context->language->locale);
+
+        $locale = $language->getLocale();
+        $this->context->getTranslator()->setLocale($locale);
+        $this->context->currentLocale = $this->localeRepository->getLocale($locale);
 
         return $contextLanguage;
     }
@@ -278,9 +291,7 @@ final class ContextManager
             $countryId = $this->configuration->getDefaultCountryId($shopId);
         }
 
-        return $this->manager
-            ->getRepository(\Country::class)
-            ->find($countryId, (int) $cart->id_lang);
+        return $this->manager->getRepository(\Country::class)->find($countryId, (int) $cart->id_lang);
     }
 
     private function getCountryByIsoCode(string $isoCode, int $languageId): \Country
@@ -296,6 +307,6 @@ final class ContextManager
             return $country;
         }
 
-        throw new \RuntimeException(sprintf('Country "%s" not found.', $isoCode)); // TODO specific exception
+        throw new \RuntimeException(\sprintf('Country "%s" not found.', $isoCode)); // TODO specific exception
     }
 }

@@ -99,6 +99,6 @@ final class WidgetParametersProvider implements WidgetParametersProviderInterfac
 
         $violations = $this->validator->validate($cart, new Bindable($bindingPlace));
 
-        return 0 === count($violations);
+        return 0 === \count($violations);
     }
 }

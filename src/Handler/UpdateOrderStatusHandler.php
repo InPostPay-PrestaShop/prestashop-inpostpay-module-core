@@ -56,6 +56,6 @@ final class UpdateOrderStatusHandler implements UpdateOrderStatusHandlerInterfac
 
     private function generateEventId(string $orderId, \DateTimeImmutable $eventTime): string
     {
-        return sprintf('OS_%s_%d', $orderId, $eventTime->getTimestamp());
+        return \sprintf('OS_%s_%d', $orderId, $eventTime->getTimestamp());
     }
 }

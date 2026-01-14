@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook\Legacy\Admin\Product;
 
 use izi\prestashop\CommandBusInterface;
-use izi\prestashop\Hook\Admin\Product\ActionAfterUpdateProductFormHandler;
 use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\Legacy\ControllerHelper;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
@@ -13,11 +12,10 @@ use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\Module\Exception\PrestaShopModuleErrorException;
 use izi\prestashop\ProductOptions\Form\ProductOptionsType;
 use izi\prestashop\ProductOptions\Message\UpdateProductOptionsCommand;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-/* IGNORE_THIS_FILE_FOR_TRANSLATION */
 final class ActionAdminProductsSaveAfter implements PrestaShopVersionAwareHookInterface
 {
     public const HOOK_NAME = 'actionAdminProductsControllerSaveAfter';
@@ -33,7 +31,7 @@ final class ActionAdminProductsSaveAfter implements PrestaShopVersionAwareHookIn
     private $bus;
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
@@ -42,7 +40,7 @@ final class ActionAdminProductsSaveAfter implements PrestaShopVersionAwareHookIn
      */
     private $debug;
 
-    public function __construct(FormFactoryInterface $formFactory, CommandBusInterface $bus, LegacyTranslator $translator, bool $debug = false)
+    public function __construct(FormFactoryInterface $formFactory, CommandBusInterface $bus, TranslatorInterface $translator, bool $debug = false)
     {
         $this->formFactory = $formFactory;
         $this->bus = $bus;
@@ -105,7 +103,7 @@ final class ActionAdminProductsSaveAfter implements PrestaShopVersionAwareHookIn
                 throw $e;
             }
 
-            throw new PrestaShopModuleErrorException($this->translator->l('An error occurred while updating InPost Pay options.', strtolower(ActionAfterUpdateProductFormHandler::HOOK_NAME)), 0, $e);
+            throw new PrestaShopModuleErrorException($this->translator->trans('An error occurred while updating InPost Pay options.', [], 'Modules.Inpostizi.Errors'), 0, $e);
         }
     }
 }

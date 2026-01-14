@@ -8,8 +8,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 final class CacheStatusChecker implements StatusCheckerInterface
 {
-    private const TRANSLATION_SOURCE = 'cachestatuschecker';
-
     /**
      * @var \Module
      */
@@ -35,7 +33,7 @@ final class CacheStatusChecker implements StatusCheckerInterface
             return [];
         }
 
-        return [$this->module->l('Container cache is stale.', self::TRANSLATION_SOURCE)];
+        return [$this->module->getTranslator()->trans('Symfony container cache is stale.', [], 'Modules.Inpostizi.Status')];
     }
 
     private function checkContainerVersion(): bool

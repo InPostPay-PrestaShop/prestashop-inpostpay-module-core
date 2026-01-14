@@ -7,11 +7,15 @@ namespace izi\prestashop\Hook\Front;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
+use izi\prestashop\Configuration\ProductAwareWidgetDisplayConfigurationInterface;
 use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 
+/**
+ * @internal
+ */
 trait ProductWidgetRendererTrait
 {
     /**
@@ -39,16 +43,13 @@ trait ProductWidgetRendererTrait
      */
     private $basketSessionRepository;
 
-    /**
-     * @param ProductLazyArray|array{id_product: int} $product
-     */
-    private function renderWidget($product, array $parameters, string $hookName): string
+    private function renderWidget(ProductLazyArray $product, array $parameters, string $hookName): string
     {
         if (0 >= $productId = (int) $product['id_product']) {
             return '';
         }
 
-        if (!$this->shouldDisplayWidget($hookName, $product)) {
+        if (!$this->shouldDisplayWidget($product)) {
             return '';
         }
 
@@ -65,18 +66,12 @@ trait ProductWidgetRendererTrait
         ]);
     }
 
-    /**
-     * @param ProductLazyArray|array $product
-     */
-    private function shouldDisplayWidget(string $hookName, $product): bool
+    private function shouldDisplayWidget(ProductLazyArray $product): bool
     {
         return $this->checkProductAvailability($product) || $this->isCartBound();
     }
 
-    /**
-     * @param ProductLazyArray|array $product
-     */
-    private function checkProductAvailability($product): bool
+    private function checkProductAvailability(ProductLazyArray $product): bool
     {
         if (!$product['available_for_order']) {
             return false;
@@ -103,32 +98,30 @@ trait ProductWidgetRendererTrait
             ->getDisplayConfiguration(BindingPlace::ProductCard())
             ->getHtmlStyles();
 
-        if ($styles instanceof \Traversable) {
+        if (!\is_array($styles)) {
             $styles = iterator_to_array($styles);
         }
 
         return $styles;
     }
 
-    /**
-     * @return array|\ArrayAccess
-     */
-    private function getProduct(array $parameters)
+    private function getProduct(array $parameters): ProductLazyArray
     {
         $product = $parameters['product'] ?? null;
 
-        if (!is_array($product) && !$product instanceof \ArrayAccess) {
-            throw InvalidHookParamException::unexpectedType('product', $product, 'array|ArrayAccess');
-        }
-
-        if (!isset($product['id_product'])) {
-            throw new InvalidHookParamException('Expected offset "id_product" in parameter "product".');
-        }
-
-        if (!is_numeric($product['id_product'])) {
-            throw new InvalidHookParamException('Expected offset "id_product" of parameter "product" to be numeric.');
+        if (!$product instanceof ProductLazyArray) {
+            throw InvalidHookParamException::unexpectedType('product', $product, ProductLazyArray::class);
         }
 
         return $product;
+    }
+
+    private function isWidgetDisplayed(ProductLazyArray $product): bool
+    {
+        $configuration = $this->configuration->getDisplayConfiguration(BindingPlace::ProductCard());
+
+        return $configuration instanceof ProductAwareWidgetDisplayConfigurationInterface
+            ? $configuration->isDisplayed($product)
+            : $configuration->isDisplayed();
     }
 }

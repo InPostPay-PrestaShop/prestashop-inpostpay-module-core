@@ -108,15 +108,15 @@ class ObjectRepository implements ObjectRepositoryInterface
             $langTable = $this->metadata['table'] . '_lang';
 
             $joinConditions = [
-                sprintf('%s.%s = %s.%s', $langAlias, $identifier, $alias, $identifier),
+                \sprintf('%s.%s = %s.%s', $langAlias, $identifier, $alias, $identifier),
             ];
 
             if (null !== $languageId) {
-                $joinConditions[] = sprintf('%s.id_lang = %d', $langAlias, $languageId);
+                $joinConditions[] = \sprintf('%s.id_lang = %d', $langAlias, $languageId);
             }
 
             if (null !== $shopId && $this->metadata['multilang_shop']) {
-                $joinConditions[] = sprintf('%s.id_shop = %d', $langAlias, $shopId);
+                $joinConditions[] = \sprintf('%s.id_shop = %d', $langAlias, $shopId);
             }
 
             $qb
@@ -132,8 +132,8 @@ class ObjectRepository implements ObjectRepositoryInterface
             $shopTable = $this->metadata['table'] . '_shop';
 
             $joinConditions = [
-                sprintf('%s.%s = %s.%s', $shopAlias, $identifier, $alias, $identifier),
-                sprintf('%s.id_shop = %d', $shopAlias, $shopId),
+                \sprintf('%s.%s = %s.%s', $shopAlias, $identifier, $alias, $identifier),
+                \sprintf('%s.id_shop = %d', $shopAlias, $shopId),
             ];
 
             $qb
@@ -204,7 +204,7 @@ class ObjectRepository implements ObjectRepositoryInterface
         }
 
         if (!isset($this->metadata['fields'][$field])) {
-            throw new \InvalidArgumentException(sprintf('Field "%s" does not exist in %s.', $field, $this->class));
+            throw new \InvalidArgumentException(\sprintf('Field "%s" does not exist in %s.', $field, $this->class));
         }
 
         return $this->metadata['fields'][$field]['type'];
@@ -226,15 +226,15 @@ class ObjectRepository implements ObjectRepositoryInterface
             $alias = $this->generateAlias($field, 'a', $shopId);
 
             if (null === $value) {
-                $qb->where(sprintf('%s.%s IS NULL', $alias, $field));
-            } elseif (is_array($value)) {
+                $qb->where(\sprintf('%s.%s IS NULL', $alias, $field));
+            } elseif (\is_array($value)) {
                 $value = implode(',', array_map(static function ($value) use ($type) {
                     return self::escapeQueryParam($value, $type);
                 }, $value));
-                $qb->where(sprintf('%s.%s IN (%s)', $alias, $field, $value));
+                $qb->where(\sprintf('%s.%s IN (%s)', $alias, $field, $value));
             } else {
                 $value = self::escapeQueryParam($value, $type);
-                $qb->where(sprintf('%s.%s = %s', $alias, $field, $value));
+                $qb->where(\sprintf('%s.%s = %s', $alias, $field, $value));
             }
         }
     }
@@ -244,7 +244,7 @@ class ObjectRepository implements ObjectRepositoryInterface
         foreach ($orderBy as $field => $order) {
             $order = \Tools::strtoupper($order);
             if ('ASC' !== $order && 'DESC' !== $order) {
-                throw new \InvalidArgumentException(sprintf('"%s" is not a valid order.', $order));
+                throw new \InvalidArgumentException(\sprintf('"%s" is not a valid order.', $order));
             }
 
             if ('id' === $field) {
@@ -255,7 +255,7 @@ class ObjectRepository implements ObjectRepositoryInterface
             $this->getFieldType($field);
 
             $alias = $this->generateAlias($field, 'a', $shopId);
-            $qb->orderBy(sprintf('%s.%s %s', $alias, $field, $order));
+            $qb->orderBy(\sprintf('%s.%s %s', $alias, $field, $order));
         }
     }
 }

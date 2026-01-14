@@ -6,11 +6,19 @@ namespace izi\prestashop\Installer;
 
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ShopAwareConfigurationInterface;
-use izi\prestashop\Database\Connection;
+use izi\prestashop\Installer\Database\MigrationInterface;
+use izi\prestashop\Installer\Exception\InstallerException;
+use Symfony\Component\Translation\IdentityTranslator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class DatabaseInstaller
+final class DatabaseInstaller implements InstallerInterface
 {
     private const SCHEMA_VERSION_CONFIG_KEY = 'INPOST_PAY_DB_SCHEMA_VERSION';
+
+    /**
+     * @var iterable<MigrationInterface>
+     */
+    private $migrations;
 
     /**
      * @var ShopAwareConfigurationInterface
@@ -18,17 +26,18 @@ final class DatabaseInstaller
     private $configuration;
 
     /**
-     * @var iterable<DatabaseMigrationInterface>
+     * @var TranslatorInterface|IdentityTranslator
      */
-    private $migrations;
+    private $translator;
 
     /**
-     * @param iterable<DatabaseMigrationInterface>|null $migrations
+     * @param iterable<MigrationInterface> $migrations
      */
-    public function __construct(?ShopAwareConfigurationInterface $configuration = null, ?iterable $migrations = null)
+    public function __construct(iterable $migrations, ?ShopAwareConfigurationInterface $configuration = null, ?TranslatorInterface $translator = null)
     {
+        $this->migrations = $migrations;
         $this->configuration = $configuration ?? new Configuration();
-        $this->migrations = $migrations ?? $this->getDefaultMigrations();
+        $this->translator = $translator ?? new IdentityTranslator();
     }
 
     public function install(\Module $module): void
@@ -57,39 +66,25 @@ final class DatabaseInstaller
             $migrations = iterator_to_array($migrations);
         }
 
-        usort($migrations, static function (DatabaseMigrationInterface $m1, DatabaseMigrationInterface $m2): int {
+        usort($migrations, static function (MigrationInterface $m1, MigrationInterface $m2): int {
             return version_compare($m1->getVersion(), $m2->getVersion());
         });
 
         return $migrations;
     }
 
-    private function migrateUp(DatabaseMigrationInterface $migration): void
+    private function migrateUp(MigrationInterface $migration): void
     {
-        $migration->up();
-        $this->updateSchemaVersion($migration->getVersion());
+        try {
+            $migration->up();
+            $this->updateSchemaVersion($migration->getVersion());
+        } catch (\Exception $e) {
+            throw new InstallerException($this->translator->trans('Could not update the database schema.', [], 'Modules.Inpostizi.Installer'), 0, $e);
+        }
     }
 
     private function updateSchemaVersion(?string $version): void
     {
         $this->configuration->setGlobal(self::SCHEMA_VERSION_CONFIG_KEY, $version);
-    }
-
-    /**
-     * @return DatabaseMigrationInterface[]
-     */
-    private function getDefaultMigrations(): array
-    {
-        $connection = new Connection(\Db::getInstance());
-
-        return [
-            new Database\Version_1_4_0($connection),
-            new Database\Version_1_9_0($connection),
-            new Database\Version_1_11_0($connection),
-            new Database\Version_2_0_0($connection),
-            new Database\Version_2_1_0($connection),
-            new Database\Version_2_2_0($connection),
-            new Database\Version_2_4_0($connection),
-        ];
     }
 }

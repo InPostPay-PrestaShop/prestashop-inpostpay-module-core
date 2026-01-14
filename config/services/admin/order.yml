@@ -1,0 +1,11 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $translator: '@inpost.izi.translator'
+
+  izi\prestashop\EventListener\CreateShipmentListener:
+    class: izi\prestashop\EventListener\CreateShipmentListener
+    tags:
+      - kernel.event_subscriber

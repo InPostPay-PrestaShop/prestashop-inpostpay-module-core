@@ -1,0 +1,58 @@
+services:
+  _defaults:
+    public: false
+  
+  izi\prestashop\CommandBusInterface:
+    alias: izi\prestashop\CommandBus
+    public: true
+
+  izi\prestashop\CommandBus:
+    class: izi\prestashop\CommandBus
+    arguments:
+      - '@inpost.izi.command_bus.handler_locator'
+
+  inpost.izi.command_bus.handler_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+        # common
+      - izi\prestashop\Command\UpdateOrderTrackingNumbersCommand: '@izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface'
+        izi\prestashop\Command\UpdateOrderStatusCommand: '@izi\prestashop\Handler\UpdateOrderStatusHandlerInterface'
+        izi\prestashop\Command\UpdateBasketCommand: '@izi\prestashop\Handler\UpdateBasketHandlerInterface'
+        izi\prestashop\Command\UnbindBasketCommand: '@izi\prestashop\Handler\UnbindBasketHandlerInterface'
+        izi\prestashop\Command\UpdateOrderAddressDeliveryCommand: '@izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface'
+        izi\prestashop\HotProduct\Message\DeleteRemoteProductCommand: '@izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandlerInterface'
+        izi\prestashop\HotProduct\Message\UpdateHotProductCommand: '@izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandlerInterface'
+        izi\prestashop\Translation\Message\ImportTranslationsCommand: '@?izi\prestashop\Translation\MessageHandler\ImportTranslationsHandler'
+        # front
+        izi\prestashop\Command\GetBasketBindingKeyCommand: '@?izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface'
+        izi\prestashop\Command\GetOrderConfirmationUrlCommand: '@?izi\prestashop\Handler\GetOrderConfirmationUrlHandlerInterface'
+        izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand: '@?izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface'
+        izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand: '@?izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface'
+        izi\prestashop\MerchantApi\Command\GetBasketCommand: '@?izi\prestashop\MerchantApi\Handler\GetBasketHandlerInterface'
+        izi\prestashop\MerchantApi\Command\UpdateBasketCommand: '@?izi\prestashop\MerchantApi\Handler\UpdateBasketHandlerInterface'
+        izi\prestashop\MerchantApi\Command\GetProductsCommand: '@?izi\prestashop\MerchantApi\Handler\GetProductsHandlerInterface'
+        izi\prestashop\MerchantApi\Command\AddProductToBasketCommand: '@?izi\prestashop\MerchantApi\Handler\AddProductToBasketHandlerInterface'
+        izi\prestashop\MerchantApi\Command\CreateOrderCommand: '@?izi\prestashop\MerchantApi\Handler\CreateOrderHandlerInterface'
+        izi\prestashop\MerchantApi\Command\GetOrderCommand: '@?izi\prestashop\MerchantApi\Handler\GetOrderHandlerInterface'
+        izi\prestashop\MerchantApi\Command\UpdateOrderCommand: '@?izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface'
+        izi\prestashop\MerchantApi\Command\Basket\CreateCartCommand: '@?izi\prestashop\MerchantApi\Handler\Basket\CreateCartHandlerInterface'
+        izi\prestashop\MerchantApi\Command\Basket\AddProductToCartCommand: '@?izi\prestashop\MerchantApi\Handler\Basket\AddProductToCartHandlerInterface'
+        izi\prestashop\MerchantApi\Command\Basket\IncrementCartQuantityCommand: '@?izi\prestashop\MerchantApi\Handler\Basket\IncrementCartQuantityHandlerInterface'
+        izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand: '@?izi\prestashop\MerchantApi\Handler\Order\UpdateCartMessageHandlerInterface'
+        izi\prestashop\Analytics\Command\UpdateCartAnalyticsCommand: '@?izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandlerInterface'
+        # admin
+        izi\prestashop\Command\Config\UpdateGeneralConfigurationCommand: '@?izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandlerInterface'
+        izi\prestashop\Command\Config\UpdateConsentsConfigurationCommand: '@?izi\prestashop\Handler\Config\UpdateConsentsConfigurationHandlerInterface'
+        izi\prestashop\Command\Config\UpdateGuiConfigurationCommand: '@?izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface'
+        izi\prestashop\Command\Config\UpdateShippingConfigurationCommand: '@?izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface'
+        izi\prestashop\Command\Config\UpdateAdvancedConfigurationCommand: '@?izi\prestashop\Handler\Config\UpdateAdvancedConfigurationHandlerInterface'
+        izi\prestashop\Command\Config\CheckStatusCommand: '@?izi\prestashop\Handler\Config\CheckStatusHandlerInterface'
+        izi\prestashop\Command\Config\DownloadModuleDataCommand: '@?izi\prestashop\Handler\Config\DownloadModuleDataHandlerInterface'
+        izi\prestashop\Extension\Message\InstallExtensionCommand: '@?izi\prestashop\Extension\MessageHandler\InstallExtensionHandler'
+        izi\prestashop\Command\Config\UpdateCartRuleOptionsCommand: '@?izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandlerInterface'
+        izi\prestashop\ProductOptions\Message\UpdateProductOptionsCommand: '@?izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandlerInterface'
+        izi\prestashop\HotProduct\Message\CreateHotProductCommand: '@?izi\prestashop\HotProduct\MessageHandler\CreateHotProductHandlerInterface'
+        izi\prestashop\HotProduct\Message\ImportHotProductCommand: '@?izi\prestashop\HotProduct\MessageHandler\ImportHotProductHandlerInterface'
+        izi\prestashop\HotProduct\Message\DeleteHotProductCommand: '@?izi\prestashop\HotProduct\MessageHandler\DeleteHotProductHandlerInterface'

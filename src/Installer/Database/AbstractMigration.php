@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Installer\Database;
 
 use izi\prestashop\Database\Connection;
-use izi\prestashop\Installer\DatabaseMigrationInterface;
 
-abstract class AbstractMigration implements DatabaseMigrationInterface
+abstract class AbstractMigration implements MigrationInterface
 {
     /**
      * @var Connection
@@ -104,7 +103,7 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
         try {
             $this->connection->executeStatement($sql);
         } catch (\PrestaShopDatabaseException $e) {
-            if (in_array($e->getCode(), [1005, 1215], true)) {
+            if (\in_array($e->getCode(), [1005, 1215], true)) {
                 // ignore silently: possible column types mismatch (e.g. due to migration from earlier PS versions)
                 return;
             }

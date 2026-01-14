@@ -40,7 +40,7 @@ final class InstallExtensionHandler
     public function __construct(ExtensionsServiceInterface $service, Filesystem $filesystem, $moduleManager)
     {
         if (!$moduleManager instanceof ModuleManagerInterface && !$moduleManager instanceof AddonManagerInterface) {
-            throw new \InvalidArgumentException(sprintf('Expected $moduleManager to be an instance of "%s" or "%s", "%s" given".', ModuleManagerInterface::class, AddonManagerInterface::class, get_debug_type($moduleManager)));
+            throw new \InvalidArgumentException(\sprintf('Expected $moduleManager to be an instance of "%s" or "%s", "%s" given".', ModuleManagerInterface::class, AddonManagerInterface::class, get_debug_type($moduleManager)));
         }
 
         $this->service = $service;
@@ -71,7 +71,7 @@ final class InstallExtensionHandler
             }
         }
 
-        throw new ExtensionNotFoundException(sprintf('Could not find extension "%s" version "%s".', $name, $version));
+        throw new ExtensionNotFoundException(\sprintf('Could not find extension "%s" version "%s".', $name, $version));
     }
 
     /**

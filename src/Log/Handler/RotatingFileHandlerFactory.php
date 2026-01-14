@@ -44,11 +44,11 @@ final class RotatingFileHandlerFactory extends AbstractHandlerFactory
                 'date_format' => 'Y-m-d',
             ])
             ->setNormalizer('file_permission', static function (Options $options, $value) {
-                if (!is_string($value)) {
+                if (!\is_string($value)) {
                     return $value;
                 }
 
-                if (0 === strpos($value, '0')) {
+                if (str_starts_with($value, '0')) {
                     return octdec($value);
                 }
 

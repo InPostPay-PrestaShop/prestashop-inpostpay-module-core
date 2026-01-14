@@ -27,7 +27,7 @@ final class DisplayIziThankYou implements HookInterface
     }
 
     /**
-     * @param array{order?: OrderLazyArray|array} $parameters
+     * @param array{order?: OrderLazyArray} $parameters
      *
      * @return string
      */
@@ -35,18 +35,15 @@ final class DisplayIziThankYou implements HookInterface
     {
         $order = $parameters['order'] ?? null;
 
-        if (!is_array($order) && !$order instanceof \ArrayAccess) {
-            throw InvalidHookParamException::unexpectedType('order', $order, 'array|ArrayAccess');
+        if (!$order instanceof OrderLazyArray) {
+            throw InvalidHookParamException::unexpectedType('order', $order, OrderLazyArray::class);
         }
 
-        if (!isset($order['details']['module'])) {
-            throw new InvalidHookParamException('Expected offset "details[module]" in parameter "order".');
+        if ($this->paymentModule->name !== $order->getDetails()->getModule()) {
+            return '';
         }
 
-        if (
-            $this->paymentModule->name !== $order['details']['module']
-            || !$this->shouldDisplayHook(self::HOOK_NAME)
-        ) {
+        if (!$this->shouldDisplayHook(self::HOOK_NAME)) {
             return '';
         }
 

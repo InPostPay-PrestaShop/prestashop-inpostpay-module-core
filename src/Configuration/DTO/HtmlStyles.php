@@ -129,19 +129,19 @@ final class HtmlStyles implements \IteratorAggregate, \JsonSerializable
     public function getIterator(): \Generator
     {
         if (null !== $this->marginLeft) {
-            yield 'margin-left' => sprintf('%dpx', $this->marginLeft);
+            yield 'margin-left' => \sprintf('%dpx', $this->marginLeft);
         }
 
         if (null !== $this->marginRight) {
-            yield 'margin-right' => sprintf('%dpx', $this->marginRight);
+            yield 'margin-right' => \sprintf('%dpx', $this->marginRight);
         }
 
         if (null !== $this->marginTop) {
-            yield 'margin-top' => sprintf('%dpx', $this->marginTop);
+            yield 'margin-top' => \sprintf('%dpx', $this->marginTop);
         }
 
         if (null !== $this->marginBottom) {
-            yield 'margin-bottom' => sprintf('%dpx', $this->marginBottom);
+            yield 'margin-bottom' => \sprintf('%dpx', $this->marginBottom);
         }
 
         if (null !== $this->justifyContent) {

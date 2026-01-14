@@ -7,23 +7,23 @@ namespace izi\prestashop\Form\Type\Shipping;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;
-use izi\prestashop\Translation\ServiceNameTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class OptionalServicesType extends AbstractType implements DataMapperInterface
 {
     /**
-     * @var ServiceNameTranslator
+     * @var TranslatorInterface
      */
-    private $serviceNameTranslator;
+    private $translator;
 
-    public function __construct(ServiceNameTranslator $serviceNameTranslator)
+    public function __construct(TranslatorInterface $translator)
     {
-        $this->serviceNameTranslator = $serviceNameTranslator;
+        $this->translator = $translator;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -36,7 +36,7 @@ final class OptionalServicesType extends AbstractType implements DataMapperInter
 
             $builder->add($name, ServiceOptionsType::class, [
                 'service_code' => $serviceCode,
-                'label' => $this->serviceNameTranslator->getName($serviceCode),
+                'label' => $serviceCode->trans($this->translator),
             ]);
         }
 
@@ -58,7 +58,7 @@ final class OptionalServicesType extends AbstractType implements DataMapperInter
             return;
         }
 
-        if (!is_array($viewData)) {
+        if (!\is_array($viewData)) {
             throw new UnexpectedTypeException($viewData, 'array');
         }
 

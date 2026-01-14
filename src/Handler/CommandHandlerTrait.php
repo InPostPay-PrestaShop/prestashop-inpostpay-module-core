@@ -13,7 +13,7 @@ trait CommandHandlerTrait
         $parameters = $method->getParameters();
 
         if ([] === $parameters || null === $commandClass = $parameters[0]->getClass()) {
-            throw new \LogicException(sprintf('Cannot determine handled command class for %s.', static::class));
+            throw new \LogicException(\sprintf('Cannot determine handled command class for %s.', static::class));
         }
 
         return $commandClass->getName();

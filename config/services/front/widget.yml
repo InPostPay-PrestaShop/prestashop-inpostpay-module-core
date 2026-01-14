@@ -1,0 +1,52 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Controller\WidgetController:
+    class: izi\prestashop\Controller\WidgetController
+    public: true
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\CommandBus'
+      - '@inpost.izi.widget_controller_locator'
+
+  izi\prestashop\Security\Voter\BindingWidgetVoter:
+    class: izi\prestashop\Security\Voter\BindingWidgetVoter
+    tags:
+      - inpost.izi.security_voter
+    arguments:
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface: '@izi\prestashop\Handler\GetBasketBindingKeyHandler'
+  izi\prestashop\Handler\GetBasketBindingKeyHandler:
+    class: izi\prestashop\Handler\GetBasketBindingKeyHandler
+    tags:
+      - inpost.izi.command_handler
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\BasketApp\Basket\BasketsApiClientInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Handler\GetOrderConfirmationUrlHandlerInterface: '@izi\prestashop\Handler\GetOrderConfirmationUrlHandler'
+  izi\prestashop\Handler\GetOrderConfirmationUrlHandler:
+    class: izi\prestashop\Handler\GetOrderConfirmationUrlHandler
+    tags:
+      - inpost.izi.command_handler
+    arguments:
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\Order\ContextCustomerUpdater'
+
+  izi\prestashop\Order\ContextCustomerUpdater:
+    class: izi\prestashop\Order\ContextCustomerUpdater
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  inpost.izi.widget_controller_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+      - Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface: '@inpost.izi.security.authorization_checker'

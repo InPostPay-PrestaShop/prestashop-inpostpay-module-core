@@ -16,6 +16,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @UniqueIdentifiers(groups = {Consent::VALIDATION_GROUP})
+ *
  * @DescriptionUsesIdPlaceholders(groups = {Consent::VALIDATION_GROUP})
  */
 final class Consent implements \JsonSerializable, DenormalizableInterface
@@ -49,6 +50,7 @@ final class Consent implements \JsonSerializable, DenormalizableInterface
      *
      * @Assert\Count(max = Consent::ADDITIONAL_LINKS_COUNT_MAX)
      * @Assert\Valid
+     *
      * @Unique(normalizer = {ConsentLink::class, "normalize"})
      */
     private $additionalLinks;
@@ -150,7 +152,7 @@ final class Consent implements \JsonSerializable, DenormalizableInterface
 
     public function addAdditionalLink(ConsentLink $link): self
     {
-        if (!in_array($link, $this->additionalLinks, true)) {
+        if (!\in_array($link, $this->additionalLinks, true)) {
             $this->dirty = true;
             $this->additionalLinks[] = $link;
         }
@@ -207,7 +209,7 @@ final class Consent implements \JsonSerializable, DenormalizableInterface
 
     public function denormalize(DenormalizerInterface $denormalizer, $data, $format = null, array $context = []): void
     {
-        if (!is_array($data)) {
+        if (!\is_array($data)) {
             throw new UnexpectedValueException('Expected data to be an array.');
         }
 

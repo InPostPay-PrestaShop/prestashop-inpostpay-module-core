@@ -42,11 +42,11 @@ final class ReferenceId implements \Stringable
     {
         $parts = explode('.', $referenceId);
 
-        if (1 === count($parts)) {
+        if (1 === \count($parts)) {
             $result = is_numeric($parts[0]) ? self::create((int) $parts[0]) : null;
-        } elseif (2 === count($parts)) {
+        } elseif (2 === \count($parts)) {
             $result = is_numeric($parts[0]) && is_numeric($parts[1]) ? self::create((int) $parts[0], (int) $parts[1]) : null;
-        } elseif (3 === count($parts) && is_numeric($parts[0]) && is_numeric($parts[1]) && is_numeric($parts[2])) {
+        } elseif (3 === \count($parts) && is_numeric($parts[0]) && is_numeric($parts[1]) && is_numeric($parts[2])) {
             $result = self::create((int) $parts[0], (int) $parts[1], (int) $parts[2]);
         } else {
             $result = null;
@@ -66,10 +66,10 @@ final class ReferenceId implements \Stringable
         }
 
         if (null === $this->customizationId) {
-            return sprintf('%d.%d', $this->productId, $this->combinationId);
+            return \sprintf('%d.%d', $this->productId, $this->combinationId);
         }
 
-        return sprintf('%d.%d.%d', $this->productId, $this->combinationId, $this->customizationId);
+        return \sprintf('%d.%d.%d', $this->productId, $this->combinationId, $this->customizationId);
     }
 
     public function getProductId(): int

@@ -26,20 +26,6 @@ final class ProductConfiguration implements ProductConfigurationInterface, Persi
         $this->configuration = $configuration;
     }
 
-    /**
-     * @internal
-     */
-    public static function getDefaultImageGalleryTypeFromConfig(ProductConfigurationInterface $configuration, ?int $shopId = null): ImageGalleryType
-    {
-        if (is_callable([$configuration, 'getDefaultImageGalleryType'])) {
-            return $configuration->getDefaultImageGalleryType($shopId);
-        }
-
-        @trigger_error(sprintf('Not implementing "getDefaultImageGalleryType()" in "%s" is deprecated since 2.4.0.', get_class($configuration)), E_USER_DEPRECATED);
-
-        return ImageGalleryType::AllImages();
-    }
-
     public function getNormalImageTypeId(?int $shopId = null): ?int
     {
         return (int) $this->configuration->get(self::IMAGE_NORMAL_TYPE, $shopId);
@@ -77,13 +63,6 @@ final class ProductConfiguration implements ProductConfigurationInterface, Persi
         $this->configuration->set(self::IMAGE_NORMAL_TYPE, $configuration->getNormalImageTypeId());
         $this->configuration->set(self::IMAGE_SMALL_TYPE, $configuration->getSmallImageTypeId());
         $this->configuration->set(self::IMAGE_LARGE_TYPE, $configuration->getLargeImageTypeId());
-        $this->setDefaultImageGalleryType($configuration);
-    }
-
-    private function setDefaultImageGalleryType(ProductConfigurationInterface $configuration): void
-    {
-        $galleryType = self::getDefaultImageGalleryTypeFromConfig($configuration);
-
-        $this->configuration->set(self::DEFAULT_IMAGE_GALLERY_TYPE, $galleryType->value);
+        $this->configuration->set(self::DEFAULT_IMAGE_GALLERY_TYPE, $configuration->getDefaultImageGalleryType()->value);
     }
 }

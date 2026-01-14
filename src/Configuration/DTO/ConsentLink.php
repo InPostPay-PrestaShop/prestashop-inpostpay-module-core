@@ -70,10 +70,8 @@ final class ConsentLink implements \JsonSerializable
         return $this->cmsPageId;
     }
 
-    public function setCmsPageId(?\CMS $cmsPage): self
+    public function setCmsPageId(?int $cmsPageId): self
     {
-        $cmsPageId = null === $cmsPage ? null : (int) $cmsPage->id;
-
         $this->dirty = $this->dirty || $this->cmsPageId !== $cmsPageId;
         $this->cmsPageId = $cmsPageId;
 

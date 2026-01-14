@@ -15,6 +15,10 @@ final class ControllerHelper
 
     /**
      * @see \AdminControllerCore::postProcess()
+     *
+     * @return never
+     *
+     * @throws PrestaShopModuleErrorException
      */
     public static function setFormErrors(\AdminControllerCore $controller, FormInterface $form): void
     {
@@ -38,7 +42,7 @@ final class ControllerHelper
                 $errors[] = $error->getMessage();
             } else {
                 $label = $origin->getConfig()->getOption('label') ?? $origin->getName();
-                $errors[] = sprintf('%s: %s', $label, $error->getMessage());
+                $errors[] = \sprintf('%s: %s', $label, $error->getMessage());
             }
         }
 

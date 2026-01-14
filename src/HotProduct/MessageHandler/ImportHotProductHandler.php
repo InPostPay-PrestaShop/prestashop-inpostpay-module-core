@@ -16,8 +16,6 @@ use izi\prestashop\HotProduct\HotProductDataMapperInterface;
 use izi\prestashop\HotProduct\HotProductRepositoryInterface;
 use izi\prestashop\HotProduct\HotProductValidator;
 use izi\prestashop\HotProduct\Message\ImportHotProductCommand;
-use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
-use izi\prestashop\ObjectModel\Repository\ProductRepository;
 use izi\prestashop\Product\ReferenceId;
 
 final class ImportHotProductHandler implements ImportHotProductHandlerInterface
@@ -44,15 +42,12 @@ final class ImportHotProductHandler implements ImportHotProductHandlerInterface
      */
     private $validator;
 
-    /**
-     * @param ProductRepository $productRepository
-     */
-    public function __construct(HotProductRepositoryInterface $repository, ObjectRepositoryInterface $productRepository, ProductsApiClientInterface $client, HotProductDataMapperInterface $dataMapper)
+    public function __construct(HotProductRepositoryInterface $repository, ProductsApiClientInterface $client, HotProductDataMapperInterface $dataMapper, HotProductValidator $validator)
     {
         $this->repository = $repository;
         $this->client = $client;
         $this->dataMapper = $dataMapper;
-        $this->validator = new HotProductValidator($productRepository);
+        $this->validator = $validator;
     }
 
     public function __invoke(ImportHotProductCommand $command): HotProduct

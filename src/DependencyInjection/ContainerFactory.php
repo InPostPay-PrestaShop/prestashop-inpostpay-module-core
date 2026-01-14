@@ -4,115 +4,93 @@ declare(strict_types=1);
 
 namespace izi\prestashop\DependencyInjection;
 
-use izi\prestashop\DependencyInjection\Dumper\PhpDumper;
-use izi\prestashop\Hook\Adapter\HookDispatcher;
-use izi\prestashop\Hook\HookDispatcherInterface;
-use Symfony\Component\Config\ConfigCache;
-use Symfony\Component\Config\ConfigCacheInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Loader\LoaderResolver;
-use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
+use Symfony\Component\DependencyInjection\Loader\DirectoryLoader;
+use Symfony\Component\DependencyInjection\Loader\GlobFileLoader;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\DependencyInjection\ParameterBag\EnvPlaceholderParameterBag;
 
-/**
- * @internal
- */
 final class ContainerFactory
 {
-    private $cacheDir;
-    private $hookDispatcher;
+    /**
+     * @var Container
+     */
+    private $container;
 
-    public function __construct(string $cacheDir, ?HookDispatcherInterface $hookDispatcher = null)
+    /**
+     * @param Container $container app container
+     */
+    public function __construct(ContainerInterface $container)
     {
-        $this->cacheDir = rtrim($cacheDir, '/');
-        $this->hookDispatcher = $hookDispatcher ?? new HookDispatcher();
+        $this->container = $container;
     }
 
     /**
-     * @template T of ContainerInterface
-     *
-     * @param class-string<T> $className
-     *
-     * @return T
+     * @param string[] $requiredParams params to copy from the app container
      */
-    public function create(string $className, iterable $resources, string $type): ContainerInterface
+    public function buildContainer(iterable $resources, array $requiredParams = [], bool $resolveEnvPlaceholders = true): ContainerInterface
     {
-        [$namespace, $shortName] = $this->resolveClassName($className);
-        $cachePath = sprintf('%s/%s.php', $this->cacheDir, $shortName);
-        $cache = new ConfigCache($cachePath, _PS_MODE_DEV_);
+        $parameters = $this->getParameters($requiredParams);
+        $parameterBag = new EnvPlaceholderParameterBag($parameters);
+        $container = new ContainerBuilder($parameterBag);
 
-        if (!$cache->isFresh()) {
-            $container = $this->buildContainer($resources, $type);
-
-            $this->dumpContainer($container, $cache, $namespace, $shortName);
-        }
-
-        require_once $cachePath;
-
-        return new $className();
-    }
-
-    private function resolveClassName(string $className): array
-    {
-        if (false === $pos = strrpos($className, '\\')) {
-            return ['', $className];
-        }
-
-        return [
-            substr($className, 0, $pos),
-            substr($className, $pos + 1),
-        ];
-    }
-
-    private function buildContainer(iterable $resources, string $type): ContainerBuilder
-    {
-        $container = new ContainerBuilder();
-
-        $container->addResource(new FileResource(__FILE__));
-
-        $container->setParameter('kernel.root_dir', _PS_ROOT_DIR_ . '/app');
-        $container->setParameter('kernel.project_dir', _PS_ROOT_DIR_);
-        $container->setParameter('kernel.cache_dir', _PS_CACHE_DIR_);
-        $container->setParameter('kernel.debug', _PS_MODE_DEV_);
-        $container->setParameter('kernel.environment', _PS_MODE_DEV_ ? 'dev' : 'prod');
-
-        $fileLocator = new FileLocator();
-        $loader = new DelegatingLoader(new LoaderResolver([
-            new YamlFileLoader($container, $fileLocator),
-            new XmlFileLoader($container, $fileLocator),
-            new PhpFileLoader($container, $fileLocator),
-            new ClosureLoader($container),
-        ]));
+        $loader = $this->getContainerLoader($container);
 
         foreach ($resources as $resource) {
             $loader->load($resource);
         }
 
-        $this->hookDispatcher->dispatch('actionInPostIziBuildContainer', [
-            'loader' => $loader,
-            'type' => $type,
-        ]);
+        $container->register('app_container', ContainerInterface::class)
+            ->setSynthetic(true)
+            ->setPublic(true);
 
-        $container->isCompiled() || $container->compile(false);
+        $container->compile($resolveEnvPlaceholders);
+        $container->set('app_container', $this->container);
 
         return $container;
     }
 
-    private function dumpContainer(ContainerBuilder $container, ConfigCacheInterface $cache, string $namespace, string $className): void
+    private function getContainerLoader(ContainerBuilder $container): LoaderInterface
     {
-        $dumper = new PhpDumper($container);
-        $cache->write(
-            $dumper->dump([
-                'namespace' => $namespace,
-                'class' => $className,
-                'debug' => false,
-            ]),
-            $container->getResources()
-        );
+        $locator = new FileLocator();
+        $resolver = new LoaderResolver([
+            new XmlFileLoader($container, $locator),
+            new YamlFileLoader($container, $locator),
+            new PhpFileLoader($container, $locator),
+            new GlobFileLoader($container, $locator),
+            new DirectoryLoader($container, $locator),
+            new ClosureLoader($container),
+        ]);
+
+        return new DelegatingLoader($resolver);
+    }
+
+    /**
+     * The `getParameterBag()` method may fail if parameters depend on env variables that are not set. Some modules
+     * load default values from .env files, but in some cases the related code may not have been executed yet
+     * (e.g. in earlier versions of "ps_edition_basic", the defaults are loaded before module class declaration).
+     *
+     * @param string[] $requiredParams
+     *
+     * @return array<string, mixed>
+     */
+    private function getParameters(array $requiredParams): array
+    {
+        try {
+            return $this->container->getParameterBag()->all();
+        } catch (\Exception $e) {
+            return array_map(function (string $name) {
+                return $this->container->getParameter($name);
+            }, array_combine($requiredParams, $requiredParams));
+        }
     }
 }

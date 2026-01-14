@@ -82,6 +82,6 @@ final class UpdateOrderTrackingNumbersHandler implements UpdateOrderTrackingNumb
 
     private function generateEventId(string $orderId, \DateTimeImmutable $eventTime): string
     {
-        return sprintf('TN_%s_%d', $orderId, $eventTime->getTimestamp());
+        return \sprintf('TN_%s_%d', $orderId, $eventTime->getTimestamp());
     }
 }

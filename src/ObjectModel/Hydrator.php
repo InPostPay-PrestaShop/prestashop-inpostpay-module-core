@@ -17,7 +17,7 @@ final class Hydrator implements HydratorInterface
             throw new \DomainException('Provided data is empty.');
         }
 
-        if (!is_int(key($data))) {
+        if (!\is_int(key($data))) {
             $data = [$data];
         }
 
@@ -26,8 +26,8 @@ final class Hydrator implements HydratorInterface
         }
 
         $collection = $this->hydrateCollection($data, $class, $languageId);
-        if (1 !== $count = count($collection)) {
-            throw new \DomainException(sprintf('Unexpected collection count. Expected: 1, got: %d.', $count));
+        if (1 !== $count = \count($collection)) {
+            throw new \DomainException(\sprintf('Unexpected collection count. Expected: 1, got: %d.', $count));
         }
 
         return current($collection);
@@ -49,7 +49,7 @@ final class Hydrator implements HydratorInterface
 
     private function hydrateObject(\ObjectModel $model, array $data, ?int $languageId = null): \ObjectModel
     {
-        $metadata = $model::getDefinition(get_class($model));
+        $metadata = $model::getDefinition(\get_class($model));
         $data = $this->normalizeData($data, $metadata);
 
         $id = (int) $model->id;

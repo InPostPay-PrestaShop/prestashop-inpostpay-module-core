@@ -99,11 +99,11 @@ final class AuthorizationServerClient implements AuthorizationServerClientInterf
     {
         $data = $this->decodeJsonResponse($response);
 
-        if (!isset($data['token_type']) || !is_string($data['token_type'])) {
+        if (!isset($data['token_type']) || !\is_string($data['token_type'])) {
             throw new UnexpectedValueException('Token type is missing in the response data.');
         }
 
-        if (!isset($data['access_token']) || !is_string($data['access_token'])) {
+        if (!isset($data['access_token']) || !\is_string($data['access_token'])) {
             throw new UnexpectedValueException('Access token is missing in the response data.');
         }
 
@@ -128,7 +128,7 @@ final class AuthorizationServerClient implements AuthorizationServerClientInterf
     private function getAuthorizationUrl(array $parameters): string
     {
         $url = $this->uriCollection->getAuthorizationEndpointUri();
-        $query = http_build_query($parameters, '', '&', PHP_QUERY_RFC3986);
+        $query = http_build_query($parameters, '', '&', \PHP_QUERY_RFC3986);
 
         return false === strpos($url, '?')
             ? $url . '?' . $query
@@ -141,14 +141,14 @@ final class AuthorizationServerClient implements AuthorizationServerClientInterf
             throw new UnexpectedValueException('Response body is empty.');
         }
 
-        $data = json_decode($content, true, 512, JSON_BIGINT_AS_STRING);
+        $data = json_decode($content, true, 512, \JSON_BIGINT_AS_STRING);
 
-        if (null === $data && JSON_ERROR_NONE !== $errorCode = json_last_error()) {
+        if (null === $data && \JSON_ERROR_NONE !== $errorCode = json_last_error()) {
             throw new UnexpectedValueException(json_last_error_msg(), $errorCode);
         }
 
-        if (!is_array($data)) {
-            throw new UnexpectedValueException(sprintf('JSON content was expected to decode to an array, "%s" returned".', gettype($data)));
+        if (!\is_array($data)) {
+            throw new UnexpectedValueException(\sprintf('JSON content was expected to decode to an array, "%s" returned".', \gettype($data)));
         }
 
         return $data;

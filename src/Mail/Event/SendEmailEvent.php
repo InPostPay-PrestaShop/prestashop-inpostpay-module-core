@@ -52,7 +52,7 @@ final class SendEmailEvent extends Event
 
     public function hasParameter(string $name): bool
     {
-        return array_key_exists($name, $this->parameters);
+        return \array_key_exists($name, $this->parameters);
     }
 
     /**
@@ -73,7 +73,7 @@ final class SendEmailEvent extends Event
 
     public function hasRecipient(string $email): bool
     {
-        return in_array($email, $this->recipients, true);
+        return \in_array($email, $this->recipients, true);
     }
 
     public function setRecipients(string $email, string ...$emails): void
@@ -100,7 +100,7 @@ final class SendEmailEvent extends Event
             return false;
         }
 
-        return in_array($email, $this->bcc, true);
+        return \in_array($email, $this->bcc, true);
     }
 
     public function setBcc(string ...$emails): void

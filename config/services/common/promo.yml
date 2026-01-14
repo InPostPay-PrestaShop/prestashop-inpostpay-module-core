@@ -1,0 +1,40 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener:
+    class: izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@inpost.izi.context'
+
+  izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface: '@izi\prestashop\PromoCode\CartRuleOptionsRepository'
+  izi\prestashop\PromoCode\CartRuleOptionsRepository:
+    class: izi\prestashop\PromoCode\CartRuleOptionsRepository
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+
+  izi\prestashop\PromoCode\PromoCodeProviderInterface: '@izi\prestashop\PromoCode\CartRulePromoCodeProvider'
+  izi\prestashop\PromoCode\CartRulePromoCodeProvider:
+    class: izi\prestashop\PromoCode\CartRulePromoCodeProvider
+    arguments:
+      - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
+
+  izi\prestashop\PromoCode\AvailablePromotionsProviderInterface: '@izi\prestashop\PromoCode\AvailableCartRulesProvider'
+  izi\prestashop\PromoCode\AvailableCartRulesProvider:
+    class: izi\prestashop\PromoCode\AvailableCartRulesProvider
+    arguments:
+      - '@izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface'
+      - '@izi\prestashop\Configuration\PromoCodesConfigurationInterface'
+      - '@izi\prestashop\ObjectModel\Repository\CmsPageRepository'
+      - '@izi\prestashop\ObjectModel\Repository\CartRuleRepository'
+      - '@inpost.izi.context'
+
+  izi\prestashop\PromoCode\PromoCodeManagerInterface: '@izi\prestashop\PromoCode\CartRuleManager'
+  izi\prestashop\PromoCode\CartRuleManager:
+    class: izi\prestashop\PromoCode\CartRuleManager
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'

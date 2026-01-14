@@ -51,13 +51,13 @@ class InPostIziUpdater_2_2_2
 
     private function updatePaymentOptionsConfig(): bool
     {
-        if (null === $this->client || !$clientId = \Configuration::get('INPOST_PAY_client_id')) {
+        if (null === $this->client || !$clientId = Configuration::get('INPOST_PAY_client_id')) {
             return true;
         }
 
         try {
             $availableTypes = $this->client->getAvailablePaymentOptions()->getPaymentTypes();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return true;
         }
 
@@ -80,7 +80,7 @@ class InPostIziUpdater_2_2_2
                 $enabledTypes = $this->decodePaymentTypesList($data['INPOST_PAY_AVAILABLE_PAYMENT_OPTIONS']);
                 $value = [] === array_udiff($availableTypes, $enabledTypes, [Enum::class, 'compareValues']);
 
-                if (!\Configuration::updateValue('INPOST_PAY_ENABLE_ALL_PAYMENT_OPTIONS', (int) $value, false, $shopGroupId, $shopId)) {
+                if (!Configuration::updateValue('INPOST_PAY_ENABLE_ALL_PAYMENT_OPTIONS', (int) $value, false, $shopGroupId, $shopId)) {
                     return false;
                 }
             }

@@ -12,6 +12,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 final class BindingWidgetVoter extends Voter
 {
     public const VIEW = 'inpost_izi_widget_view';
+    public const QUERY_PARAM_NAME = 'showIzi';
+    public const QUERY_PARAM_VALUE = 'true';
 
     /**
      * @var GeneralConfigurationInterface
@@ -44,7 +46,7 @@ final class BindingWidgetVoter extends Voter
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token): bool
     {
         if (!$subject instanceof Request) {
-            throw new \InvalidArgumentException(sprintf('Expected an instance of "%s", "%s" given.', Request::class, get_debug_type($subject)));
+            throw new \InvalidArgumentException(\sprintf('Expected an instance of "%s", "%s" given.', Request::class, get_debug_type($subject)));
         }
 
         if ($this->configuration->isEnabledForEveryone()) {
@@ -55,7 +57,7 @@ final class BindingWidgetVoter extends Voter
             return true;
         }
 
-        if ('true' === $subject->query->get('showIzi')) {
+        if (self::QUERY_PARAM_VALUE === $subject->query->get(self::QUERY_PARAM_NAME)) {
             $this->context->cookie->izi_show = true;
 
             return true;

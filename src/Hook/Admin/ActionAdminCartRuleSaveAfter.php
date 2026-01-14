@@ -66,19 +66,17 @@ final class ActionAdminCartRuleSaveAfter implements HookInterface
             return;
         }
 
-        if ($form->isValid()) {
-            $this->bus->handle($form->getData());
+        if (!$form->isValid()) {
+            $controller = $parameters['controller'] ?? null;
 
-            return;
+            if (!$controller instanceof \AdminControllerCore) {
+                throw InvalidHookParamException::unexpectedType('controller', $controller, \AdminControllerCore::class);
+            }
+
+            // todo: store errors in session and redirect back to the cart rule edit page?
+            ControllerHelper::setFormErrors($controller, $form);
         }
 
-        $controller = $parameters['controller'] ?? null;
-
-        if (!$controller instanceof \AdminControllerCore) {
-            throw InvalidHookParamException::unexpectedType('controller', $controller, \AdminControllerCore::class);
-        }
-
-        // todo: store errors in session and redirect back to the cart rule edit page?
-        ControllerHelper::setFormErrors($controller, $form);
+        $this->bus->handle($form->getData());
     }
 }

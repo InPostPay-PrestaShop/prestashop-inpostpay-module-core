@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziNotifications.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="e97e27bc6f85e0dc4079ce3aa1920c36">
+        <source>Voucher has been activated.</source>
+        <target>Kod rabatowy został aktywowany.</target>
+      </trans-unit>
+      <trans-unit id="beea127e34bef05faadb205637d9000a">
+        <source>Voucher has been removed.</source>
+        <target>Kod rabatowy został usunięty.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -5,34 +5,27 @@ namespace izi\prestashop\EventListener;
 use izi\prestashop\Event\CreateShipmentRequestEvent;
 use izi\prestashop\Event\CreateShipmentRequestProcessedEvent;
 use izi\prestashop\Repository\OrderDataRepositoryInterface;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class CreateShipmentListener implements EventSubscriberInterface
 {
-    private const TRANSLATION_SOURCE = 'createshipmentlistener';
-
     /**
      * @var OrderDataRepositoryInterface
      */
     private $orderDataRepository;
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
     /**
-     * @var bool
+     * @var string|null
      */
-    private $processed = false;
+    private $error;
 
-    /**
-     * @var string
-     */
-    private $validMail;
-
-    public function __construct(OrderDataRepositoryInterface $orderDataRepository, LegacyTranslator $translator)
+    public function __construct(OrderDataRepositoryInterface $orderDataRepository, TranslatorInterface $translator)
     {
         $this->orderDataRepository = $orderDataRepository;
         $this->translator = $translator;
@@ -48,40 +41,38 @@ final class CreateShipmentListener implements EventSubscriberInterface
 
     public function onCreateShipmentRequest(CreateShipmentRequestEvent $event): void
     {
-        $idOrder = $event->getRequest()->get('id_order');
-        $email = $event->getRequest()->get('email');
-        if (!$this->isValidParams($idOrder, $email)) {
+        if (!$email = $event->getRequest()->get('email')) {
             return;
         }
 
-        if (null === $orderData = $this->orderDataRepository->getOrderData($idOrder)) {
+        if (0 >= $orderId = (int) $event->getRequest()->get('id_order')) {
             return;
         }
 
-        if (null !== $orderData->getDelivery()->getEmail() && $email !== $orderData->getDelivery()->getEmail()) {
-            $this->validMail = $orderData->getDelivery()->getEmail();
-            $this->removeService();
+        if (null === $orderData = $this->orderDataRepository->getOrderData($orderId)) {
+            return;
         }
-    }
 
-    private function isValidParams($idOrder, $email)
-    {
-        return !empty($idOrder) && !empty($email);
-    }
+        $deliveryEmail = $orderData->getDelivery()->getEmail();
 
-    private function removeService()
-    {
+        if (null === $deliveryEmail || $email === $deliveryEmail) {
+            return;
+        }
+
+        $this->error = $this->translator->trans('In order for the shipment to be processed correctly by InPost Pay, the email address must match the one received when creating the order ({email}).', [
+            '{email}' => $deliveryEmail,
+        ], 'Modules.Inpostizi.Validators');
+
         unset($_POST['service']);
-        $this->processed = true;
     }
 
-    public function onShipmentRequestProcessed(CreateShipmentRequestProcessedEvent $event)
+    public function onShipmentRequestProcessed(CreateShipmentRequestProcessedEvent $event): void
     {
-        if (!$this->processed) {
+        if (null === $this->error) {
             return;
         }
-        $event->getController()->errors = [sprintf($this->translator->l('In order for the shipment to be processed correctly by InPost Pay, the email address must match the one received when creating the order (%s).', self::TRANSLATION_SOURCE), $this->validMail)];
-        $this->processed = false;
-        $this->validMail = null;
+
+        $event->getController()->errors[] = $this->error;
+        $this->error = null;
     }
 }

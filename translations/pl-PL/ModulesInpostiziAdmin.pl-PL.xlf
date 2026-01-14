@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziAdmin.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="0499bac1c9aa6a8398c86eb5e5c5bd60">
+        <source>An attempt to clear the Symfony container cache may have failed. If you continue to experience problems, try clearing the cache manually.</source>
+        <target>Próba wyczyszczenia cache kontenera Symfony mogła się nie powieść. Jeśli występują problemy, spróbuj wyczyścić cache ręcznie.</target>
+      </trans-unit>
+      <trans-unit id="be39a2c31fd39417d193787b0745002d">
+        <source>InPost Pay</source>
+        <target>InPost Pay</target>
+      </trans-unit>
+      <trans-unit id="84508d3b4b571b41ea1536071f1f3e60">
+        <source>Official InPost Pay integration module for PrestaShop</source>
+        <target>Oficjalny moduł integrujący InPost Pay z PrestaShop</target>
+      </trans-unit>
+      <trans-unit id="3b838c5f28dad4dc154d5d1f0e279453">
+        <source>To access the configuration page, the module must be active.</source>
+        <target>Moduł musi być włączony, aby wyświetlić stronę konfiguracji.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

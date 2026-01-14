@@ -6,6 +6,8 @@ namespace izi\prestashop\Common\Basket;
 
 final class ConsentLink implements \JsonSerializable
 {
+    public const PLACEHOLDER_PREFIX = '#';
+
     /**
      * @var string
      */

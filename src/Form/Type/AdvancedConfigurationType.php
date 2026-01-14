@@ -5,36 +5,32 @@ declare(strict_types=1);
 namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\AdvancedConfiguration;
-use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
-use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\SwitchType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class AdvancedConfigurationType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'advancedconfigurationtype';
-
+    /**
+     * @var TranslatorInterface
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $switchClass = class_exists(SwitchType::class)
-            ? SwitchType::class
-            : SwitchTypePolyfill::class;
-
         $builder
-            ->add('debugEnabled', $switchClass, [
+            ->add('debugEnabled', SwitchType::class, [
                 'required' => false,
                 'choices' => [
-                    $this->translator->l('Disable debug mode', self::TRANSLATION_SOURCE) => false,
-                    $this->translator->l('Enable debug mode', self::TRANSLATION_SOURCE) => true,
+                    $this->translator->trans('Debug mode disabled', [], 'Modules.Inpostizi.Status') => false,
+                    $this->translator->trans('Debug mode enabled', [], 'Modules.Inpostizi.Status') => true,
                 ],
             ]);
     }

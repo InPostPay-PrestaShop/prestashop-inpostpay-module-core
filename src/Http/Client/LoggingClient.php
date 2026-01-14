@@ -105,7 +105,7 @@ final class LoggingClient implements ClientInterface
             return;
         }
 
-        if (!isset($this->options['max_response_body_size']) || strlen($body) <= $this->options['max_response_body_size']) {
+        if (!isset($this->options['max_response_body_size']) || \strlen($body) <= $this->options['max_response_body_size']) {
             $this->logger->debug('Response body: "{body}"', ['body' => $body]);
 
             return;
@@ -113,7 +113,7 @@ final class LoggingClient implements ClientInterface
 
         $this->logger->debug('Response body: "{body}"', [
             'body' => \Tools::substr($body, 0, $this->options['max_response_body_size']) . '...',
-            'body_size' => $response->getBody()->getSize(),
+            'body_size' => \strlen($body),
         ]);
     }
 }

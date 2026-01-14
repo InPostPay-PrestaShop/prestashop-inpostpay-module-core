@@ -28,7 +28,7 @@ final class ErrorHandlingLowestPriceProvider implements BatchLowestPriceProvider
 
     public function preparePrices(LowestPriceQuery ...$queries): void
     {
-        if (!$this->provider instanceof LowestPriceProviderInterface) {
+        if (!$this->provider instanceof BatchLowestPriceProviderInterface) {
             return;
         }
 

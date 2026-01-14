@@ -44,7 +44,7 @@ final class EnumDataTransformer implements DataTransformerInterface
             return null;
         }
 
-        if (!is_string($value) && !is_int($value)) {
+        if (!\is_string($value) && !\is_int($value)) {
             throw new TransformationFailedException('Expected a string or an integer.');
         }
 

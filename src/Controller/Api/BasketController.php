@@ -17,6 +17,7 @@ use izi\prestashop\MerchantApi\Model\Basket\Response\Basket;
 use izi\prestashop\MerchantApi\Model\Basket\Response\IdentifiableBasket;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 final class BasketController extends AbstractApiController
 {
@@ -54,7 +55,7 @@ final class BasketController extends AbstractApiController
     {
         $this->bus->handle(new DeleteBasketBindingCommand($basketId));
 
-        return JsonResponse::create()->setContent(null);
+        return new JsonResponse('', Response::HTTP_OK, [], true);
     }
 
     public function addProduct(string $productId, Request $request): JsonResponse
@@ -78,6 +79,6 @@ final class BasketController extends AbstractApiController
             'datetime_timezone' => BasketAppClientInterface::DATETIME_ZONE,
         ]);
 
-        return JsonResponse::create()->setContent($data);
+        return new JsonResponse($data, Response::HTTP_OK, [], true);
     }
 }

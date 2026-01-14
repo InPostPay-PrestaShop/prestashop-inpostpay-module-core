@@ -7,9 +7,7 @@ namespace izi\prestashop\Handler\Config;
 use izi\prestashop\Command\Config\UpdateCartRuleOptionsCommand;
 use izi\prestashop\Handler\CommandHandlerTrait;
 use izi\prestashop\PromoCode\CartRuleOptions;
-use izi\prestashop\PromoCode\CartRuleOptionsRepository;
 use izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface;
-use izi\prestashop\Repository\CartRuleRepositoryInterface;
 
 final class UpdateCartRuleOptionsHandler implements UpdateCartRuleOptionsHandlerInterface
 {
@@ -20,24 +18,9 @@ final class UpdateCartRuleOptionsHandler implements UpdateCartRuleOptionsHandler
      */
     private $repository;
 
-    /**
-     * @var CartRuleRepositoryInterface|null
-     */
-    private $originalRepository;
-
-    /**
-     * @param CartRuleOptionsRepositoryInterface|CartRuleRepositoryInterface $repository
-     */
-    public function __construct(CartRuleRepositoryInterface $repository)
+    public function __construct(CartRuleOptionsRepositoryInterface $repository)
     {
-        if (!$repository instanceof CartRuleOptionsRepositoryInterface) {
-            @trigger_error(sprintf('Passing a $repository that does not implement "%s" to "%s()" is deprecated since 2.1.0.', CartRuleOptionsRepositoryInterface::class, __METHOD__), E_USER_DEPRECATED);
-
-            $this->repository = CartRuleOptionsRepository::create();
-            $this->originalRepository = $repository;
-        } else {
-            $this->repository = $repository;
-        }
+        $this->repository = $repository;
     }
 
     public function __invoke(UpdateCartRuleOptionsCommand $command): void
@@ -48,10 +31,6 @@ final class UpdateCartRuleOptionsHandler implements UpdateCartRuleOptionsHandler
             $this->addOptions($command);
         } else {
             $this->updateOptions($options, $command);
-        }
-
-        if (null !== $this->originalRepository && null !== $isOmnibus = $command->isOmnibus()) {
-            $this->originalRepository->setOmnibus($cartRuleId, $isOmnibus);
         }
     }
 

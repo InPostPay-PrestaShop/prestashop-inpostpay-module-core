@@ -1,12 +1,13 @@
-
-<div id="head_tabs">
-  <ul class="nav nav-pills">
-    {% for id, item in nav_items %}
-      <li class="nav-item">
-        <a href="{{ item.url }}" id="{{ id }}" class="nav-link tab{% if item.active %} active current{% endif %}">
-          {{ item.label }}
-        </a>
-      </li>
-    {% endfor %}
-  </ul>
-</div>
+<ul id="inpost_izi_nav_bar" class="nav nav-pills">
+  {% for item in items %}
+    <li class="nav-item">
+      <a
+          href="{{ path(item.route) }}"
+          id="{{ item.id }}"
+          class="nav-link tab{% if item.active(app.request) %} active current{% endif %}"
+      >
+        {{ item.label }}
+      </a>
+    </li>
+  {% endfor %}
+</ul>

@@ -50,17 +50,14 @@ final class DownloadModuleDataHandler implements DownloadModuleDataHandlerInterf
     public function __invoke(DownloadModuleDataCommand $command): callable
     {
         return function () {
-            $options = new Archive();
-            $options->setFlushOutput(true);
-
-            $zip = new ZipStream(null, $options);
+            $zip = self::createZipStream();
 
             foreach ($this->getLogFiles() as $file) {
                 $zip->addFileFromPath($file->getFilename(), $file->getRealPath());
             }
 
             $configInfo = $this->getConfigInformation();
-            $zip->addFile('config.json', json_encode($configInfo, JSON_PRETTY_PRINT));
+            $zip->addFile('config.json', json_encode($configInfo, \JSON_PRETTY_PRINT));
 
             $zip->finish();
         };
@@ -133,5 +130,28 @@ final class DownloadModuleDataHandler implements DownloadModuleDataHandlerInterf
         }
 
         return $config;
+    }
+
+    private static function createZipStream(): ZipStream
+    {
+        if (self::isZipStreamV3()) {
+            return new ZipStream(...[
+                'sendHttpHeaders' => false,
+                'flushOutput' => true,
+            ]);
+        }
+
+        $options = new Archive();
+        $options->setFlushOutput(true);
+
+        return new ZipStream(null, $options);
+    }
+
+    private static function isZipStreamV3(): bool
+    {
+        $class = new \ReflectionClass(ZipStream::class);
+        $constructor = $class->getConstructor();
+
+        return $constructor->getNumberOfParameters() > 2;
     }
 }

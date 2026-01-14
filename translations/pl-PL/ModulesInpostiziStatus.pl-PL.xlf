@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziStatus.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="d64fff9bf53342093407f32d61b278b1">
+        <source>API access credentials are missing.</source>
+        <target>Dane dostępowe do API nie zostały skonfigurowane.</target>
+      </trans-unit>
+      <trans-unit id="c1df4bf14aef57ff829bb2a39a4bdbf3">
+        <source>API access problem: {error}</source>
+        <target>Problem z dostępem do API: {error}</target>
+      </trans-unit>
+      <trans-unit id="5ee621790ef0808610f382c50e0274b3">
+        <source>Configuration is incomplete - review and submit the form in the "{tab_name}" tab.</source>
+        <target>Konfiguracja nie jest kompletna - zweryfikuj i prześlij formularz w zakładce "{tab_name}".</target>
+      </trans-unit>
+      <trans-unit id="930115e8e2e41bb8c52046b1054da781">
+        <source>Debug mode disabled</source>
+        <target>Tryb debugowania wyłączony</target>
+      </trans-unit>
+      <trans-unit id="bfb416093193d2f68a70236b0c2702f1">
+        <source>Debug mode enabled</source>
+        <target>Tryb debugowania włączony</target>
+      </trans-unit>
+      <trans-unit id="c6219a54f70f66674046336175bb9491">
+        <source>Download logs and module data</source>
+        <target>Pobierz dane wtyczki i log</target>
+      </trans-unit>
+      <trans-unit id="a7030a339317fbdb2af045820a465f79">
+        <source>Merchant client ID configuration is missing. The InPost Pay Widget will not be displayed.</source>
+        <target>Merchant client ID nie zostało skonfigurowane. Widget InPost Pay nie będzie wyświetlany.</target>
+      </trans-unit>
+      <trans-unit id="83b9cd6e2835cc74d06c8cb7a037b8cd">
+        <source>Module status</source>
+        <target>Status wtyczki</target>
+      </trans-unit>
+      <trans-unit id="3194a4d8bc60ba3e66ddd94f10f32889">
+        <source>No delivery option is available.</source>
+        <target>Nie jest dostępna żadna opcja dostawy.</target>
+      </trans-unit>
+      <trans-unit id="406dee722f66b91b686619dd0b62bb4d">
+        <source>Symfony container cache is stale.</source>
+        <target>Cache kontenera Symfony jest nieaktualne.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

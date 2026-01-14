@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 final class ActionCartControllerAjaxUpdateResponse implements HookInterface
 {
-    public const HOOK_NAME = 'actionAjaxDieCartControllerdisplayAjaxUpdateBefore';
+    public const HOOK_NAME = 'actionAjaxDieCartControllerDisplayAjaxUpdateBefore';
 
     /**
      * @var \Context
@@ -46,6 +46,10 @@ final class ActionCartControllerAjaxUpdateResponse implements HookInterface
         $request = $parameters['request'] ?? null;
 
         if (!$request instanceof Request) {
+            return;
+        }
+
+        if ([] !== $this->context->controller->errors) {
             return;
         }
 

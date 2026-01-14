@@ -6,6 +6,7 @@ namespace izi\prestashop\Shipping\CartTotal;
 
 use izi\prestashop\Common\Price;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
+use izi\prestashop\ObjectModel\Repository\RangePriceRepository;
 
 final class PriceRangeStrategy implements CartTotalDeliveryStrategyInterface
 {
@@ -15,10 +16,13 @@ final class PriceRangeStrategy implements CartTotalDeliveryStrategyInterface
     private $genericStrategy;
 
     /**
-     * @var ObjectRepositoryInterface<\RangePrice>
+     * @var RangePriceRepository
      */
     private $rangePriceRepository;
 
+    /**
+     * @param RangePriceRepository $rangePriceRepository
+     */
     public function __construct(CartTotalDeliveryStrategyInterface $genericStrategy, ObjectRepositoryInterface $rangePriceRepository)
     {
         $this->genericStrategy = $genericStrategy;

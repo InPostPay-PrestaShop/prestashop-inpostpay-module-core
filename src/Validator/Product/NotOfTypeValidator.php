@@ -17,7 +17,7 @@ final class NotOfTypeValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, NotOfType::class);
         }
 
-        if (!is_array($value) && !$value instanceof \ArrayAccess) {
+        if (!\is_array($value) && !$value instanceof \ArrayAccess) {
             throw new UnexpectedTypeException($value, 'array|ArrayAccess');
         }
 

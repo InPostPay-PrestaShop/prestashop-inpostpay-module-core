@@ -7,19 +7,36 @@ namespace izi\prestashop\Hook\Legacy\Admin\Product;
 use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
+use izi\prestashop\ProductOptions\Form\ProductOptionsType;
+use izi\prestashop\ProductOptions\Message\UpdateProductOptionsCommand;
+use izi\prestashop\ProductOptions\ProductOptionsRepositoryInterface;
+use Symfony\Component\Form\FormFactoryInterface;
+use Twig\Environment;
 
 final class DisplayAdminProductsOptionsStepBottom implements PrestaShopVersionAwareHookInterface
 {
     public const HOOK_NAME = 'displayAdminProductsOptionsStepBottom';
 
     /**
-     * @var ProductOptionsFormRenderer
+     * @var ProductOptionsRepositoryInterface
      */
-    private $renderer;
+    private $repository;
 
-    public function __construct(ProductOptionsFormRenderer $renderer)
+    /**
+     * @var FormFactoryInterface
+     */
+    private $formFactory;
+
+    /**
+     * @var Environment
+     */
+    private $twig;
+
+    public function __construct(ProductOptionsRepositoryInterface $repository, FormFactoryInterface $formFactory, Environment $twig)
     {
-        $this->renderer = $renderer;
+        $this->repository = $repository;
+        $this->formFactory = $formFactory;
+        $this->twig = $twig;
     }
 
     public static function getHookName(): string
@@ -29,7 +46,7 @@ final class DisplayAdminProductsOptionsStepBottom implements PrestaShopVersionAw
 
     public static function getVersionRange(): VersionRange
     {
-        return new VersionRange('1.7.2', '9.0.0');
+        return new VersionRange(null, '9.0.0');
     }
 
     /**
@@ -39,10 +56,26 @@ final class DisplayAdminProductsOptionsStepBottom implements PrestaShopVersionAw
     {
         $productId = $parameters['id_product'] ?? null;
 
-        if (!is_int($productId) && (!is_string($productId) || !ctype_digit($productId))) {
+        if (!\is_int($productId) && (!\is_string($productId) || !ctype_digit($productId))) {
             throw InvalidHookParamException::unexpectedType('id_product', $productId, 'int');
         }
 
-        return $this->renderer->render((int) $productId, 'module:inpostizi/views/templates/hook/legacy/admin/product/options_form.tpl');
+        $command = $this->createOptionsUpdateCommand((int) $productId);
+        $form = $this->formFactory->create(ProductOptionsType::class, $command, [
+            'csrf_protection' => false,
+        ]);
+
+        return $this->twig->render('@Modules/inpostizi/views/templates/hook/legacy/admin/product/options_form.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    private function createOptionsUpdateCommand(int $productId): UpdateProductOptionsCommand
+    {
+        if (null !== $options = $this->repository->find($productId)) {
+            return UpdateProductOptionsCommand::for($options);
+        }
+
+        return new UpdateProductOptionsCommand($productId);
     }
 }

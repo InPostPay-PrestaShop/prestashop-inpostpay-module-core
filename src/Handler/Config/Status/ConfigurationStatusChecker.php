@@ -7,17 +7,15 @@ namespace izi\prestashop\Handler\Config\Status;
 use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfiguration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
-use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Validator\InPostApiCredentials;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ConfigurationStatusChecker implements StatusCheckerInterface
 {
-    private const TRANSLATION_SOURCE = 'configurationstatuschecker';
-
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
@@ -39,7 +37,7 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
     /**
      * @param OrdersConfiguration $ordersConfiguration
      */
-    public function __construct(LegacyTranslator $translator, OrdersConfigurationInterface $ordersConfiguration, ApiConfigurationInterface $apiConfiguration, ValidatorInterface $validator)
+    public function __construct(TranslatorInterface $translator, OrdersConfigurationInterface $ordersConfiguration, ApiConfigurationInterface $apiConfiguration, ValidatorInterface $validator)
     {
         $this->translator = $translator;
         $this->ordersConfiguration = $ordersConfiguration;
@@ -59,25 +57,29 @@ final class ConfigurationStatusChecker implements StatusCheckerInterface
     {
         $violations = $this->validator->validate($this->ordersConfiguration->copy());
 
-        if (0 !== count($violations)) {
-            yield $this->translator->l('Configuration is incomplete - review and submit the form in the general settings tab.', self::TRANSLATION_SOURCE);
+        if (0 !== \count($violations)) {
+            yield $this->translator->trans('Configuration is incomplete - review and submit the form in the "{tab_name}" tab.', [
+                '{tab_name}' => $this->translator->trans('Settings', [], 'Admin.Global'),
+            ], 'Modules.Inpostizi.Status');
 
             return;
         }
 
         if (null === $this->apiConfiguration->getClientCredentials()) {
-            yield $this->translator->l('API access credentials are missing.', self::TRANSLATION_SOURCE);
+            yield $this->translator->trans('API access credentials are missing.', [], 'Modules.Inpostizi.Status');
         } else {
             $violations = $this->validator->validate($this->apiConfiguration, new InPostApiCredentials());
 
             /** @var ConstraintViolationInterface $violation */
             foreach ($violations as $violation) {
-                yield sprintf($this->translator->l('API access problem: %s', self::TRANSLATION_SOURCE), $violation->getMessage());
+                yield $this->translator->trans('API access problem: {error}', [
+                    '{error}' => $violation->getMessage(),
+                ], 'Modules.Inpostizi.Status');
             }
         }
 
         if (null === $this->apiConfiguration->getMerchantClientId()) {
-            yield $this->translator->l('Merchant client ID configuration is missing. The InPost Pay Widget will not be displayed.', self::TRANSLATION_SOURCE);
+            yield $this->translator->trans('Merchant client ID configuration is missing. The InPost Pay Widget will not be displayed.', [], 'Modules.Inpostizi.Status');
         }
     }
 }

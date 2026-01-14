@@ -1,0 +1,17 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $translator: '@inpost.izi.translator'
+
+  izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandlerInterface: '@izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandler'
+  izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandler:
+    class: izi\prestashop\ProductOptions\MessageHandler\UpdateProductOptionsHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\ProductOptions\Form\ProductOptionsType:
+    class: izi\prestashop\ProductOptions\Form\ProductOptionsType
+    tags:
+      - form.type

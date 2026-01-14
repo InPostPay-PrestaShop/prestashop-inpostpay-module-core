@@ -4,7 +4,6 @@ const { EsbuildPlugin } = require('esbuild-loader');
 
 const entries = [
   'admin',
-  'admin-legacy',
   'consents',
   'gui',
   'support',
@@ -14,6 +13,7 @@ const entries = [
 const getEntries = () => {
   const entry = {
     'cart-rules': './src/js/cart-rules.js',
+    'nav-bar-fix': './src/js/nav-bar-fix.js',
   };
 
   entries.forEach((name) => {
@@ -35,7 +35,7 @@ module.exports = {
     path: path.resolve(moduleDir, 'views/'),
   },
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.js', '.ts'],
     alias: {
       '@components': path.resolve(moduleDir, '../../admin-dev/themes/new-theme/js/components'),
     },

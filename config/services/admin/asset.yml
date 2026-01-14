@@ -1,0 +1,24 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $module: '@inpost.izi.module'
+      $context: '@inpost.izi.context'
+      $requestStack: '@inpost.izi.request_stack'
+
+  izi\prestashop\Configuration\Initializer\AssetPackageInitializer:
+    class: izi\prestashop\Configuration\Initializer\AssetPackageInitializer
+    tags:
+      - inpost.izi.config_initializer
+    bind:
+      $packageName: InPostIzi
+
+  izi\prestashop\View\Asset\AssetManagerInterface: '@izi\prestashop\View\Asset\AdminAssetManager'
+  izi\prestashop\View\Asset\AdminAssetManager:
+    class: izi\prestashop\View\Asset\AdminAssetManager
+
+  izi\prestashop\View\Asset\Provider\Admin\CartRulesAssetsProvider:
+    class: izi\prestashop\View\Asset\Provider\Admin\CartRulesAssetsProvider
+    tags:
+      - inpost.izi.admin_assets_provider

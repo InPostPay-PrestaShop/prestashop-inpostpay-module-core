@@ -16,7 +16,7 @@ abstract class IntEnum extends Enum
         $cases = static::casesByValue();
 
         if (!isset($cases[$value])) {
-            throw new \UnexpectedValueException(sprintf('%d is not a valid backing value for enum "%s"', $value, static::class));
+            throw new \UnexpectedValueException(\sprintf('%d is not a valid backing value for enum "%s"', $value, static::class));
         }
 
         return $cases[$value];

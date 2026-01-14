@@ -1,8 +1,0 @@
-twig:
-  debug: '%kernel.debug%'
-  strict_variables: true
-  form_themes:
-    - '@PrestaShop/Admin/TwigTemplateForm/%twig.ps_form_theme%'
-  paths:
-    '%kernel.root_dir%/../modules': Modules
-    '%kernel.root_dir%/../src/PrestaShopBundle/Resources/views': PrestaShop

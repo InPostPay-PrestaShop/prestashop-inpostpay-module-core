@@ -11,7 +11,6 @@ use izi\prestashop\BasketApp\Basket\Response\UpdateBasketResponse;
 use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\BasketApp\Order\Request\OrderEvent;
 use izi\prestashop\BasketApp\Payment\Response\AvailablePaymentOptions;
-use izi\prestashop\BasketApp\Product\ProductsApiClientInterface;
 use izi\prestashop\BasketApp\Product\Request\CreateProductsRequest;
 use izi\prestashop\BasketApp\Product\Response\CreateProductsResponse;
 use izi\prestashop\BasketApp\Product\Response\Product as ResponseProduct;
@@ -33,7 +32,7 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
-final class BasketAppClient implements BasketAppClientInterface, ProductsApiClientInterface
+final class BasketAppClient implements BasketAppClientInterface
 {
     /**
      * @var ClientInterface
@@ -71,7 +70,7 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
 
     public function updateBasket(string $basketId, Basket $basket): UpdateBasketResponse
     {
-        $request = $this->createRequest('PUT', sprintf('/v2/izi/basket/%s', $basketId), $basket);
+        $request = $this->createRequest('PUT', \sprintf('/v2/izi/basket/%s', $basketId), $basket);
         $response = $this->sendRequest($request);
 
         return $this->deserialize($response, UpdateBasketResponse::class);
@@ -79,7 +78,7 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
 
     public function initializeBasketBinding(string $basketId): BasketBindingKeyResponse
     {
-        $request = $this->createRequest('PUT', sprintf('/v2/izi/basket/%s/binding', $basketId));
+        $request = $this->createRequest('PUT', \sprintf('/v2/izi/basket/%s/binding', $basketId));
         $response = $this->sendRequest($request);
 
         return $this->deserialize($response, BasketBindingKeyResponse::class);
@@ -87,7 +86,7 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
 
     public function deleteBasketBinding(string $basketId, bool $orderCompleted = false): void
     {
-        $uri = sprintf('/v1/izi/basket/%s/binding', $basketId);
+        $uri = \sprintf('/v1/izi/basket/%s/binding', $basketId);
         if ($orderCompleted) {
             $uri .= '?' . self::buildQuery(['if_basket_realized' => (int) $orderCompleted]);
         }
@@ -98,7 +97,7 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
 
     public function getBasketBinding(string $basketId, ?string $browserId = null): BasketBindingResponse
     {
-        $uri = sprintf('/v1/izi/basket/%s/binding', $basketId);
+        $uri = \sprintf('/v1/izi/basket/%s/binding', $basketId);
         if (null !== $browserId) {
             $uri .= '?' . self::buildQuery(['browser_id' => $browserId]);
         }
@@ -111,14 +110,14 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
 
     public function updateOrder(string $orderId, OrderEvent $event): void
     {
-        $request = $this->createRequest('POST', sprintf('/v1/izi/order/%s/event', $orderId), $event);
+        $request = $this->createRequest('POST', \sprintf('/v1/izi/order/%s/event', $orderId), $event);
         // currently the API returns 201 on success instead of 200 given in the documentation
         $this->sendRequest($request, 200, 201);
     }
 
     public function getSigningKey(string $version): SigningKey
     {
-        $request = $this->createRequest('GET', sprintf('/v1/izi/signing-keys/public/%s', $version));
+        $request = $this->createRequest('GET', \sprintf('/v1/izi/signing-keys/public/%s', $version));
         $response = $this->sendRequest($request);
 
         return $this->deserialize($response, SigningKey::class);
@@ -204,7 +203,7 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
 
     public function updateProduct(string $productId, Product $product): ResponseProduct
     {
-        $request = $this->createRequest('PUT', sprintf('/v1/izi/product/%s', $productId), $product);
+        $request = $this->createRequest('PUT', \sprintf('/v1/izi/product/%s', $productId), $product);
         $response = $this->sendRequest($request);
 
         return $this->deserialize($response, ResponseProduct::class);
@@ -212,7 +211,7 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
 
     public function deleteProduct(string $productId): void
     {
-        $request = $this->createRequest('DELETE', sprintf('/v1/izi/product/%s', $productId));
+        $request = $this->createRequest('DELETE', \sprintf('/v1/izi/product/%s', $productId));
         $this->sendRequest($request, 204);
     }
 
@@ -249,11 +248,11 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
             $this->handleUnsuccessfulResponse($request, $response);
         }
 
-        if ($expectedStatusCode === $statusCode || in_array($statusCode, $allowedStatusCodes, true)) {
+        if ($expectedStatusCode === $statusCode || \in_array($statusCode, $allowedStatusCodes, true)) {
             return $response;
         }
 
-        throw new \UnexpectedValueException(sprintf('Unexpected server response code: %d', $statusCode));
+        throw new \UnexpectedValueException(\sprintf('Unexpected server response code: %d', $statusCode));
     }
 
     /**
@@ -293,6 +292,6 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
 
     private static function buildQuery(array $params): string
     {
-        return http_build_query($params, '', '&', PHP_QUERY_RFC3986);
+        return http_build_query($params, '', '&', \PHP_QUERY_RFC3986);
     }
 }

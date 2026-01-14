@@ -13,10 +13,9 @@ use izi\prestashop\MerchantApi\Exception\ProductNotFoundException;
 use izi\prestashop\MerchantApi\Exception\ProductOutOfStockException;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\ObjectModel\Repository\ProductRepository;
-use izi\prestashop\Translation\LegacyTranslator;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-/* IGNORE_THIS_FILE_FOR_TRANSLATION */
 final class AddProductToCartHandler implements AddProductToCartHandlerInterface
 {
     use CommandHandlerTrait;
@@ -32,7 +31,7 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
     private $productRepository;
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
@@ -44,7 +43,7 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
     /**
      * @param ProductRepository $productRepository
      */
-    public function __construct(\Context $context, ObjectRepositoryInterface $productRepository, LegacyTranslator $translator, LoggerInterface $logger)
+    public function __construct(\Context $context, ObjectRepositoryInterface $productRepository, TranslatorInterface $translator, LoggerInterface $logger)
     {
         $this->context = $context;
         $this->productRepository = $productRepository;
@@ -88,7 +87,7 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
         }
 
         if (2 === (int) $product->customizable) {
-            throw CannotAddProductException::create($this->translator->l('This product requires customization. Please add it to your cart via the shop page.', RelatedProductsEventHandler::TRANSLATION_SOURCE));
+            throw CannotAddProductException::create($this->translator->trans('This product requires customization. Please add it to your cart via the shop page.', [], 'Modules.Inpostizi.Errors'));
         }
 
         if ($cartProduct = ProductHelper::findProductInCart($cart, $productId, $combinationId)) {
@@ -132,7 +131,7 @@ final class AddProductToCartHandler implements AddProductToCartHandlerInterface
             'cartId' => $cart->id,
         ]);
 
-        throw $e ?? new CannotAddProductException($this->translator->l('Could not add the product to your cart.', RelatedProductsEventHandler::TRANSLATION_SOURCE));
+        throw $e ?? new CannotAddProductException($this->translator->trans('Could not add the product to your cart.', [], 'Modules.Inpostizi.Errors'));
     }
 
     private function assertQuantityIsAvailable(int $quantity, int $productId, int $combinationId, \Cart $cart): void

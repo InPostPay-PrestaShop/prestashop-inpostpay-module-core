@@ -43,7 +43,7 @@ final class CreateCartHandler implements CreateCartHandlerInterface
         if (null === $shopId = $command->getShopId()) {
             $shop = $this->context->shop;
         } elseif (null === $shop = $this->manager->getRepository(\Shop::class)->find($shopId)) {
-            throw new \DomainException(sprintf('Shop #%d does not exist.', $shopId));
+            throw new \DomainException(\sprintf('Shop #%d does not exist.', $shopId));
         }
 
         $cart = new \Cart();
@@ -64,7 +64,7 @@ final class CreateCartHandler implements CreateCartHandlerInterface
         $currency = $repository->findOneByIsoCode($isoCode = Currency::getDefault()->value);
 
         if (null === $currency) {
-            throw new \RuntimeException(sprintf('Currency "%s" does not exist.', $isoCode));
+            throw new \RuntimeException(\sprintf('Currency "%s" does not exist.', $isoCode));
         }
 
         return $currency;

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziPromo.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="0d6e57c0a330f299f1b38915319dfdc0">
+        <source>Default promotion details page</source>
+        <target>Domyślna strona szczegółów promocji</target>
+      </trans-unit>
+      <trans-unit id="4b77241222efee4f0d7dc4871124c458">
+        <source>Falls under the Omnibus Directive</source>
+        <target>Podlega dyrektywie Omnibus</target>
+      </trans-unit>
+      <trans-unit id="06ab0ff70f691d6dd858798aa89c39c4">
+        <source>If neither the default value nor the cart rule specific value is configured, the available promotion data will not be passed to the mobile app.</source>
+        <target>Jeżeli ani wartość domyślna, ani konkretna wartość dla danego rabatu nie są ustawione, dane promocji nie zostaną przekazane do aplikacji mobilnej.</target>
+      </trans-unit>
+      <trans-unit id="f343b395b535ae0d7ad7457d57a38526">
+        <source>In order for the available promotion data to be passed to the mobile app, the "{option}" option must be enabled for the cart rule.</source>
+        <target>Aby dane promocji zostały przekazane do aplikacji mobilnej, opcja "{option}" musi zostać zaznaczona dla reguły koszyka.</target>
+      </trans-unit>
+      <trans-unit id="a7f7058d98537328c1dbabdcae4169c9">
+        <source>InPost Pay options</source>
+        <target>Opcje InPost Pay</target>
+      </trans-unit>
+      <trans-unit id="441ef43627402a1982dfbccef5318ce8">
+        <source>Promotion details page</source>
+        <target>Strona szczegółów promocji</target>
+      </trans-unit>
+      <trans-unit id="d19c0b524c35b6e1a074137b029da288">
+        <source>The default page can be selected on the module configuration page.</source>
+        <target>Możliwość wyboru domyślnej strony znajduje się na stronie konfiguracji modułu.</target>
+      </trans-unit>
+      <trans-unit id="d2cbf536efce450408feea9f62733c1c">
+        <source>The page to use as the promotion details link for highlighted discounts if no specific page is configured for the cart rule.</source>
+        <target>Strona, której adres powinien zostać przekazany, jeżeli konkretna strona nie została wybrana w konfiguracji wyróżnionego rabatu.</target>
+      </trans-unit>
+      <trans-unit id="303e0f2ef2efb3eda18d3af50ebb7e7c">
+        <source>Use the default page</source>
+        <target>Użyj domyślnej</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

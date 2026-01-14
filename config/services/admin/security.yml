@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+
+  izi\prestashop\Security\EmployeeAccessCheckerInterface: '@izi\prestashop\Security\Adapter\EmployeeAccessChecker'
+  izi\prestashop\Security\Adapter\EmployeeAccessChecker:
+    class: izi\prestashop\Security\Adapter\EmployeeAccessChecker
+
+  izi\prestashop\Security\Voter\EmployeeRoleVoter:
+    class: izi\prestashop\Security\Voter\EmployeeRoleVoter
+    tags:
+      - inpost.izi.security_voter

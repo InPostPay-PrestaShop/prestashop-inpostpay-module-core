@@ -7,7 +7,6 @@ namespace izi\prestashop\Configuration\DTO;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Configuration\DTO\Order\MessageOptions;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
-use izi\prestashop\Enum\Enum;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class OrdersConfiguration implements OrdersConfigurationInterface
@@ -16,7 +15,6 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      * @var int|null
      *
      * @Assert\NotNull()
-     *
      * @Assert\GreaterThan(0)
      */
     private $defaultInitialStatusId;
@@ -25,7 +23,6 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      * @var int|null
      *
      * @Assert\NotNull()
-     *
      * @Assert\GreaterThan(0)
      */
     private $cashOnDeliveryStatusId;
@@ -34,7 +31,6 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      * @var int|null
      *
      * @Assert\NotNull()
-     *
      * @Assert\GreaterThan(0)
      */
     private $paidStatusId;
@@ -107,9 +103,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->defaultInitialStatusId;
     }
 
-    public function setDefaultInitialStatusId(?\OrderState $initialStatus): self
+    public function setDefaultInitialStatusId(?int $initialStatusId): self
     {
-        $this->defaultInitialStatusId = null === $initialStatus ? null : (int) $initialStatus->id;
+        $this->defaultInitialStatusId = $initialStatusId;
 
         return $this;
     }
@@ -119,9 +115,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->cashOnDeliveryStatusId;
     }
 
-    public function setCashOnDeliveryStatusId(?\OrderState $codStatus): self
+    public function setCashOnDeliveryStatusId(?int $codStatusId): self
     {
-        $this->cashOnDeliveryStatusId = null === $codStatus ? null : (int) $codStatus->id;
+        $this->cashOnDeliveryStatusId = $codStatusId;
 
         return $this;
     }
@@ -131,9 +127,9 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->paidStatusId;
     }
 
-    public function setPaidStatusId(?\OrderState $paidStatus): self
+    public function setPaidStatusId(?int $paidStatusId): self
     {
-        $this->paidStatusId = null === $paidStatus ? null : (int) $paidStatus->id;
+        $this->paidStatusId = $paidStatusId;
 
         return $this;
     }
@@ -178,36 +174,6 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
     public function setAllPaymentOptionsEnabled(?bool $enabled): self
     {
         $this->allPaymentOptionsEnabled = $enabled;
-
-        return $this;
-    }
-
-    /**
-     * @deprecated use {@see getAvailablePaymentOptions()} instead
-     */
-    public function isCarrierPaymentEnabled(): bool
-    {
-        @trigger_error(sprintf('Method "%s()" is deprecated. Use "getAvailablePaymentOptions()" instead.', __METHOD__), \E_USER_DEPRECATED);
-
-        return [] !== array_uintersect($this->availablePaymentOptions, PaymentType::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
-    }
-
-    /**
-     * @deprecated use {@see setAvailablePaymentOptions()} instead
-     */
-    public function setCarrierPaymentEnabled(?bool $carrierPaymentEnabled): self
-    {
-        @trigger_error(sprintf('Method "%s()" is deprecated. Use "setAvailablePaymentOptions()" instead.', __METHOD__), \E_USER_DEPRECATED);
-
-        $paymentOptions = PaymentType::getCarrierProvidedPaymentOptions();
-
-        if ($carrierPaymentEnabled) {
-            $this->availablePaymentOptions = array_unique(array_merge($this->availablePaymentOptions, $paymentOptions), SORT_REGULAR);
-        } else {
-            $this->availablePaymentOptions = array_filter($this->availablePaymentOptions, static function (PaymentType $type) use ($paymentOptions): bool {
-                return !in_array($type, $paymentOptions, true);
-            });
-        }
 
         return $this;
     }

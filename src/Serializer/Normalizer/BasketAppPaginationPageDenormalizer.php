@@ -31,12 +31,12 @@ final class BasketAppPaginationPageDenormalizer implements DenormalizerInterface
             return null;
         }
 
-        if (!is_array($data)) {
-            throw new InvalidArgumentException(sprintf('Data expected to be an array, "%s" given.', get_debug_type($data)));
+        if (!\is_array($data)) {
+            throw new InvalidArgumentException(\sprintf('Data expected to be an array, "%s" given.', get_debug_type($data)));
         }
 
         if (PaginationPage::class !== $type) {
-            throw new InvalidArgumentException(sprintf('Unsupported type: "%s".', $type));
+            throw new InvalidArgumentException(\sprintf('Unsupported type: "%s".', $type));
         }
 
         if (!$this->serializer instanceof DenormalizerInterface) {
@@ -58,5 +58,10 @@ final class BasketAppPaginationPageDenormalizer implements DenormalizerInterface
     public function supportsDenormalization($data, $type, $format = null): bool
     {
         return PaginationPage::class === $type;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [PaginationPage::class => true];
     }
 }

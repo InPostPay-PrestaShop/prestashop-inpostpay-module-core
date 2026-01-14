@@ -35,16 +35,11 @@ final class EventDispatcher implements ModuleEventDispatcher
      */
     public function dispatch(Event $event, ?string $eventName = null): Event
     {
-        $eventName = $eventName ?? get_class($event);
+        $eventName = $eventName ?? \get_class($event);
 
         return $this->isLegacyDispatcher
             ? $this->dispatcher->dispatch($eventName, $event)
             : $this->dispatcher->dispatch($event, $eventName);
-    }
-
-    public function addListener(string $eventName, callable $listener, int $priority = 0): void
-    {
-        $this->dispatcher->addListener($eventName, $listener, $priority);
     }
 
     /**

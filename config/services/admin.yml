@@ -1,0 +1,33 @@
+imports:
+  - { resource: admin/annotations.yml }
+  - { resource: admin/asset.yml }
+  - { resource: admin/cache.yml }
+  - { resource: admin/cart_rule.yml }
+  - { resource: admin/configuration.yml }
+  - { resource: admin/extension.yml }
+  - { resource: admin/form.yml }
+  - { resource: admin/form.php, ignore_errors: true }
+  - { resource: admin/hook.yml }
+  - { resource: admin/hot_product.yml }
+  - { resource: admin/order.yml }
+  - { resource: admin/product.yml }
+  - { resource: admin/security.yml }
+  - { resource: admin/translation.yml }
+  - { resource: admin/translation.php, ignore_errors: true }
+  - { resource: admin/validator.yml }
+
+services:
+  _defaults:
+    public: false
+    autowire: true
+
+  inpost.izi.validator: '@validator'
+  inpost.izi.event_dispatcher: '@event_dispatcher'
+  inpost.izi.shop_context: '@prestashop.adapter.shop.context'
+
+  izi\prestashop\Hook\HookExecutor:
+    class: izi\prestashop\Hook\HookExecutor
+    tags:
+     - container.service_subscriber
+    bind:
+      $widget: '@inpost.izi.module'

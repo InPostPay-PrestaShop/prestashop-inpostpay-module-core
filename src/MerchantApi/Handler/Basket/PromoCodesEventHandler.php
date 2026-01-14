@@ -8,8 +8,6 @@ use izi\prestashop\Common\Basket\Notice;
 use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\MerchantApi\Model\Basket\Request\BasketEvent;
 use izi\prestashop\MerchantApi\Model\Basket\Request\EventType;
-use izi\prestashop\ObjectModel\ObjectManagerInterface;
-use izi\prestashop\PromoCode\CartRuleManager;
 use izi\prestashop\PromoCode\Exception\CouldNotAddPromoCodeException;
 use izi\prestashop\PromoCode\Exception\CouldNotRemovePromoCodeException;
 use izi\prestashop\PromoCode\Exception\InvalidPromoCodeException;
@@ -18,48 +16,29 @@ use izi\prestashop\PromoCode\Exception\PromoCodeNotFoundException;
 use izi\prestashop\PromoCode\PromoCodeInterface;
 use izi\prestashop\PromoCode\PromoCodeManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class PromoCodesEventHandler implements BasketEventHandlerInterface
 {
-    private const TRANSLATION_SOURCE = 'promocodeseventhandler';
-
-    /**
-     * @var \Module
-     */
-    private $module;
-
-    /**
-     * @var \Context
-     */
-    private $context;
-
     /**
      * @var PromoCodeManagerInterface
      */
     private $manager;
 
     /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
-    /**
-     * @param PromoCodeManagerInterface $manager
-     */
-    public function __construct(\Module $module, \Context $context, $manager, LoggerInterface $logger)
+    public function __construct(PromoCodeManagerInterface $manager, TranslatorInterface $translator, LoggerInterface $logger)
     {
-        if ($manager instanceof ObjectManagerInterface) {
-            @trigger_error(sprintf('Passing an instance of "%s" as $manager to "%s::__construct()" is deprecated since version 2.3.0. Use "%s" instead.', ObjectManagerInterface::class, self::class, PromoCodeManagerInterface::class), \E_USER_DEPRECATED);
-            $manager = new CartRuleManager($context, $manager);
-        }
-
-        if (!$manager instanceof PromoCodeManagerInterface) {
-            throw new \InvalidArgumentException(sprintf('Expected $manager to be an instance of "%s", "%s" given.', PromoCodeManagerInterface::class, get_debug_type($manager)));
-        }
-
-        $this->module = $module;
-        $this->context = $context;
         $this->manager = $manager;
+        $this->translator = $translator;
         $this->logger = $logger;
     }
 
@@ -71,13 +50,13 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
     public function handle(BasketInterface $basket, BasketEvent $event): ?Notice
     {
         if (EventType::PromoCodes() !== $type = $event->getType()) {
-            throw new \DomainException(sprintf('Unsupported event type "%s".', $type->value));
+            throw new \DomainException(\sprintf('Unsupported event type "%s".', $type->value));
         }
 
         $cart = $basket->getEntity();
 
         if (!$cart instanceof \Cart) {
-            throw new \InvalidArgumentException(sprintf('Expected basket entity to be an instance of "%s", "%s" given.', \Cart::class, get_class($cart)));
+            throw new \InvalidArgumentException(\sprintf('Expected basket entity to be an instance of "%s", "%s" given.', \Cart::class, \get_class($cart)));
         }
 
         $notice = null;
@@ -92,7 +71,7 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
         foreach ($event->getPromoCodesEventData() as $promoCode) {
             $code = trim($promoCode->getCode());
 
-            if (in_array($code, $currentCodes, true)) {
+            if (\in_array($code, $currentCodes, true)) {
                 $appliedCodes[] = $code;
 
                 continue;
@@ -103,7 +82,7 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
             }
 
             $appliedCodes[] = $code;
-            $notice = $notice ?? Notice::attention($this->module->l('Voucher has been activated.', self::TRANSLATION_SOURCE));
+            $notice = $notice ?? Notice::attention($this->translator->trans('Voucher has been activated.', [], 'Modules.Inpostizi.Notifications'));
         }
 
         foreach ($promoCodes as $promoCode) {
@@ -111,7 +90,7 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
                 continue;
             }
 
-            if (in_array($code, $appliedCodes, true)) {
+            if (\in_array($code, $appliedCodes, true)) {
                 continue;
             }
 
@@ -119,7 +98,7 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
                 return Notice::error($error);
             }
 
-            $notice = $notice ?? Notice::attention($this->module->l('Voucher has been removed.', self::TRANSLATION_SOURCE));
+            $notice = $notice ?? Notice::attention($this->translator->trans('Voucher has been removed.', [], 'Modules.Inpostizi.Notifications'));
         }
 
         return $notice;
@@ -131,15 +110,15 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
     private function addPromoCode(\Cart $cart, string $code): ?string
     {
         if ('' === $code) {
-            return $this->context->getTranslator()->trans('You must enter a voucher code.', [], 'Shop.Notifications.Error');
+            return $this->translator->trans('You must enter a voucher code.', [], 'Shop.Notifications.Error');
         }
 
         try {
             $this->manager->addPromoCode($cart, $code);
         } catch (PromoCodeNotFoundException $e) {
-            return $this->context->getTranslator()->trans('This voucher does not exist.', [], 'Shop.Notifications.Error');
+            return $this->translator->trans('This voucher does not exist.', [], 'Shop.Notifications.Error');
         } catch (InvalidPromoCodeException $e) {
-            return $e->getMessage() ?: $this->context->getTranslator()->trans('The voucher code is invalid.', [], 'Shop.Notifications.Error');
+            return $e->getMessage() ?: $this->translator->trans('The voucher code is invalid.', [], 'Shop.Notifications.Error');
         } catch (CouldNotAddPromoCodeException $e) {
             $this->logger->error('Could not add promo code "{code}" to cart #{cartId}.', [
                 'code' => $code,
@@ -147,7 +126,7 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
                 'exception' => $e->getPrevious(),
             ]);
 
-            return $this->module->l('Could not add the voucher to your cart.', self::TRANSLATION_SOURCE);
+            return $this->translator->trans('Could not add the voucher to your cart.', [], 'Modules.Inpostizi.Errors');
         } catch (PromoCodeExceptionInterface $e) {
             return $e->getMessage();
         }
@@ -174,7 +153,7 @@ final class PromoCodesEventHandler implements BasketEventHandlerInterface
                 'exception' => $e->getPrevious(),
             ]);
 
-            return $this->module->l('Could not remove the voucher from your cart.', self::TRANSLATION_SOURCE);
+            return $this->translator->trans('Could not remove the voucher from your cart.', [], 'Modules.Inpostizi.Errors');
         } catch (PromoCodeExceptionInterface $e) {
             return $e->getMessage();
         }

@@ -1,0 +1,52 @@
+parameters:
+  inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
+  inpost.izi.logger_config:
+    type: rotating_file
+    path: '%inpost.izi.logs_dir%/izi.log'
+    max_files: 14
+    bubble: false
+    channels: [ general, basket_app, merchant_api, installer ]
+    process_psr_3_messages:
+      remove_used_context_fields: true
+    include_stacktraces: true
+
+services:
+  _defaults:
+    public: false
+
+  inpost.izi.logger:
+    class: Psr\Log\LoggerInterface
+    public: true
+    factory: [ '@izi\prestashop\Log\LoggerFactoryInterface', create ]
+    arguments:
+      - general
+      - '%inpost.izi.logger_config%'
+
+  inpost.izi.logger.basket_app:
+    class: Psr\Log\LoggerInterface
+    factory: [ '@izi\prestashop\Log\LoggerFactoryInterface', create ]
+    arguments:
+      - basket_app
+      - '%inpost.izi.logger_config%'
+
+  # todo: make private after refactoring the front controller
+  inpost.izi.logger.merchant_api:
+    class: Psr\Log\LoggerInterface
+    public: true
+    factory: [ '@izi\prestashop\Log\LoggerFactoryInterface', create ]
+    arguments:
+      - merchant_api
+      - '%inpost.izi.logger_config%'
+
+  izi\prestashop\Log\LoggerFactoryInterface: '@izi\prestashop\Log\MonologLoggerFactory'
+  izi\prestashop\Log\MonologLoggerFactory:
+    class: izi\prestashop\Log\MonologLoggerFactory
+    arguments:
+      - !tagged inpost.izi.log_handler_factory
+
+  izi\prestashop\Log\Handler\RotatingFileHandlerFactory:
+    class: izi\prestashop\Log\Handler\RotatingFileHandlerFactory
+    tags:
+      - inpost.izi.log_handler_factory
+    arguments:
+      - '@=service("izi\\prestashop\\Configuration\\AdvancedConfigurationInterface").isDebugEnabled() ? "dev" : "prod"'

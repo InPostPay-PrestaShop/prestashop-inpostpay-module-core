@@ -1,11 +1,18 @@
-<div class="inpostizi-btn-preview">
-  <p class="inpostizi-btn-preview__title text-center mb-0">
-    {{ 'Button preview'|legacy_trans }}
+<div class="inpostizi-btn-preview text-center">
+  <p class="inpostizi-btn-preview__title mb-0">
+    {{ 'Button preview'|trans({}, 'Modules.Inpostizi.Gui') }}
   </p>
 
-  <p class="small inpostizi-btn-preview__title-subtitle text-center mb-3">
-    {{ 'In order for the widget preview to be displayed, a valid merchant client ID must be provided in the "Configuration" tab.'|legacy_trans }}
-    {{ 'Remember to click the \'Save\' button after you finish configuring the button styles'|legacy_trans }}
+  <p class="small inpostizi-btn-preview__title-subtitle mb-1">
+    {{ 'In order for the widget preview to be displayed, a valid merchant client ID must be provided in the "{tab_name}" tab.'|trans({
+      '{tab_name}': 'Settings'|trans({}, 'Admin.Global'),
+    }, 'Modules.Inpostizi.Gui') }}
+  </p>
+
+  <p class="small inpostizi-btn-preview__title-subtitle mb-3">
+    {{ 'Remember to click the "{button}" button after you finish configuring the button styles'|trans({
+      '{button}': 'Save'|trans({}, 'Admin.Actions'),
+    }, 'Modules.Inpostizi.Gui') }}
   </p>
 
   {% set btnConfig = form.vars.value %}

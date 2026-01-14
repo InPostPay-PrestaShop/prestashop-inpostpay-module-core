@@ -54,7 +54,7 @@ final class ObjectModelToIdTransformer implements DataTransformerInterface
         }
 
         if (!$value instanceof $this->class) {
-            throw new TransformationFailedException(sprintf('Expected an instance of "%s".', $this->class));
+            throw new TransformationFailedException(\sprintf('Expected an instance of "%s".', $this->class));
         }
 
         return (int) $value->id;
@@ -69,7 +69,7 @@ final class ObjectModelToIdTransformer implements DataTransformerInterface
             return null;
         }
 
-        if (!is_int($value)) {
+        if (!\is_int($value)) {
             throw new TransformationFailedException('Expected an integer.');
         }
 

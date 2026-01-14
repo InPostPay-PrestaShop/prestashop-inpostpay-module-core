@@ -47,7 +47,7 @@ final class ActionOrderStatusPostUpdate implements HookInterface
     {
         $orderId = $parameters['id_order'] ?? null;
 
-        if (!is_int($orderId)) {
+        if (!\is_int($orderId)) {
             throw InvalidHookParamException::unexpectedType('id_order', $orderId, 'int');
         }
 

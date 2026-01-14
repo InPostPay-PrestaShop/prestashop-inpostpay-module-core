@@ -97,14 +97,10 @@ class CombinationRepository extends ObjectRepository
             return null;
         }
 
-        if (method_exists(\Product::class, 'getIdProductAttributeByIdAttributes')) {
-            try {
-                $combinationId = (int) \Product::getIdProductAttributeByIdAttributes($productId, $attributeIds);
-            } catch (\PrestaShopObjectNotFoundException $e) {
-                return null;
-            }
-        } else {
-            $combinationId = (int) \Product::getIdProductAttributesByIdAttributes($productId, $attributeIds);
+        try {
+            $combinationId = (int) \Product::getIdProductAttributeByIdAttributes($productId, $attributeIds);
+        } catch (\PrestaShopObjectNotFoundException $e) {
+            return null;
         }
 
         if (0 >= $combinationId) {
@@ -160,7 +156,7 @@ class CombinationRepository extends ObjectRepository
             $attribute = $this->manager->getHydrator()->hydrate($row, $this->attributeModelClass, null, $languageId);
             $groupId = (int) $attribute->id_attribute_group;
 
-            if (!array_key_exists($groupId, $groups)) {
+            if (!\array_key_exists($groupId, $groups)) {
                 $result[$groupId] = [];
                 $groups[$groupId] = $this->manager->getHydrator()->hydrate(array_merge($row, [
                     'name' => $row['group_name'],

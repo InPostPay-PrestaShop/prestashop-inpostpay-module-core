@@ -11,10 +11,9 @@ use izi\prestashop\MerchantApi\Exception\CannotAddProductException;
 use izi\prestashop\MerchantApi\Exception\ProductOutOfStockException;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\ObjectModel\Repository\ProductRepository;
-use izi\prestashop\Translation\LegacyTranslator;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-/* IGNORE_THIS_FILE_FOR_TRANSLATION */
 final class IncrementCartQuantityHandler implements IncrementCartQuantityHandlerInterface
 {
     use CommandHandlerTrait;
@@ -25,7 +24,7 @@ final class IncrementCartQuantityHandler implements IncrementCartQuantityHandler
     private $productRepository;
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
@@ -37,7 +36,7 @@ final class IncrementCartQuantityHandler implements IncrementCartQuantityHandler
     /**
      * @param ProductRepository $productRepository
      */
-    public function __construct(ObjectRepositoryInterface $productRepository, LegacyTranslator $translator, LoggerInterface $logger)
+    public function __construct(ObjectRepositoryInterface $productRepository, TranslatorInterface $translator, LoggerInterface $logger)
     {
         $this->productRepository = $productRepository;
         $this->translator = $translator;
@@ -96,7 +95,7 @@ final class IncrementCartQuantityHandler implements IncrementCartQuantityHandler
             'cartId' => $cart->id,
         ]);
 
-        throw $e ?? new CannotAddProductException($this->translator->l('Could not add the product to your cart.', RelatedProductsEventHandler::TRANSLATION_SOURCE));
+        throw $e ?? new CannotAddProductException($this->translator->trans('Could not add the product to your cart.', [], 'Modules.Inpostizi.Errors'));
     }
 
     private function assertQuantityIsAvailable(int $quantity, int $productId, int $combinationId, \Cart $cart): void

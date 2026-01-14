@@ -70,7 +70,7 @@ final class ActionUpdateQuantity implements HookInterface
             return null;
         }
 
-        if (!is_int($value) && (!is_string($value) || !ctype_digit($value))) {
+        if (!\is_int($value) && (!\is_string($value) || !ctype_digit($value))) {
             throw InvalidHookParamException::unexpectedType($name, $value, 'int');
         }
 

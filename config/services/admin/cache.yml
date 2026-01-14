@@ -1,0 +1,22 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+
+  izi\prestashop\CacheClearer\CacheClearerInterface: '@izi\prestashop\CacheClearer\ChainCacheClearer'
+  izi\prestashop\CacheClearer\ChainCacheClearer:
+    class: izi\prestashop\CacheClearer\ChainCacheClearer
+    arguments:
+      - !tagged inpost.izi.cache_clearer
+
+  inpost.izi.config_cache_clearer:
+    class: izi\prestashop\CacheClearer\Psr16CacheClearer
+    tags:
+      - inpost.izi.cache_clearer
+    arguments:
+      - '@izi\prestashop\Cache\ConfigurationCache'
+
+  izi\prestashop\CacheClearer\BindingKeysCacheClearer:
+    class: izi\prestashop\CacheClearer\BindingKeysCacheClearer
+    tags:
+      - inpost.izi.cache_clearer

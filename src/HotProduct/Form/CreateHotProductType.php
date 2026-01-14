@@ -7,25 +7,18 @@ namespace izi\prestashop\HotProduct\Form;
 use izi\prestashop\Form\Type\ObjectModelAutocompleteType;
 use izi\prestashop\Form\Type\Product\CombinationByAttributesChoiceType;
 use izi\prestashop\HotProduct\Message\CreateHotProductCommand;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class CreateHotProductType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'createhotproducttype';
-
     /**
-     * @var \Context
-     */
-    private $context;
-
-    /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
@@ -34,9 +27,8 @@ final class CreateHotProductType extends AbstractType
      */
     private $urlGenerator;
 
-    public function __construct(\Context $context, LegacyTranslator $translator, UrlGeneratorInterface $urlGenerator)
+    public function __construct(TranslatorInterface $translator, UrlGeneratorInterface $urlGenerator)
     {
-        $this->context = $context;
         $this->translator = $translator;
         $this->urlGenerator = $urlGenerator;
     }
@@ -51,8 +43,8 @@ final class CreateHotProductType extends AbstractType
         $builder->add('productId', ObjectModelAutocompleteType::class, [
             'class' => \Product::class,
             'input' => 'id',
-            'label' => $this->context->getTranslator()->trans('Product', [], 'Admin.Global'),
-            'placeholder' => $this->translator->l('Search products by name or reference...', self::TRANSLATION_SOURCE),
+            'label' => $this->translator->trans('Product', [], 'Admin.Global'),
+            'placeholder' => $this->translator->trans('Search products by name or reference...', [], 'Modules.Inpostizi.Hotproduct'),
             'autocomplete_url' => $this->urlGenerator->generate('admin_inpost_izi_products_autocomplete'),
             'choice_label' => static function (\Product $product): string {
                 $label = $product->name ?? 'Product #' . $product->id;
@@ -73,7 +65,7 @@ final class CreateHotProductType extends AbstractType
             }
 
             $event->getForm()->getParent()->add('combinationId', CombinationByAttributesChoiceType::class, [
-                'label' => $this->context->getTranslator()->trans('Combination', [], 'Admin.Global'),
+                'label' => $this->translator->trans('Combination', [], 'Admin.Global'),
                 'product_id' => (int) $product->id,
                 'input' => 'id',
             ]);

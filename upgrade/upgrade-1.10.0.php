@@ -50,7 +50,7 @@ class InPostIziUpdater_1_10_0
             return true;
         }
 
-        return \Configuration::updateGlobalValue('INPOST_PAY_COD_OS_ID', $orderStateId);
+        return Configuration::updateGlobalValue('INPOST_PAY_COD_OS_ID', $orderStateId);
     }
 
     private function getCodPaymentOrderStateId(): int

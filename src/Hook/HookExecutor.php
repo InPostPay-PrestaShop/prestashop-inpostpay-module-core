@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Hook;
 
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
+use izi\prestashop\Handler\Config\UpdateGeneralConfigurationHandler;
 use izi\prestashop\Hook\Exception\HookNotFoundException;
 use izi\prestashop\Hook\Exception\HookNotImplementedException;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
@@ -12,7 +13,14 @@ use Psr\Container\ContainerInterface;
 
 final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInterface
 {
-    private const DEPRECATED_HOOKS = [];
+    /**
+     * Not installed by default, registration is handled by {@see UpdateGeneralConfigurationHandler}
+     */
+    private const OPTIONAL_HOOKS = [
+        Front\DisplayProductAdditionalInfo::HOOK_NAME,
+        Front\DisplayIziCheckoutButton::HOOK_NAME,
+        Front\DisplayIziThankYou::HOOK_NAME,
+    ];
 
     /**
      * @var ContainerInterface
@@ -30,6 +38,9 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
         $this->widget = $widget;
     }
 
+    /**
+     * @todo: must stay for now, used to list hooks to install
+     */
     public static function getSubscribedServices(): array
     {
         return [
@@ -44,7 +55,6 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             // admin products form
             Admin\Product\ActionProductFormBuilderModifier::HOOK_NAME => '?' . Admin\Product\ActionProductFormBuilderModifier::class,
             Admin\Product\ActionAfterUpdateProductFormHandler::HOOK_NAME => '?' . Admin\Product\ActionAfterUpdateProductFormHandler::class,
-            Legacy\Admin\Product\DisplayAdminProductsExtra::HOOK_NAME => '?' . Legacy\Admin\Product\DisplayAdminProductsExtra::class,
             Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom::HOOK_NAME => '?' . Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom::class,
             Legacy\Admin\Product\ActionAdminProductsSaveAfter::HOOK_NAME => '?' . Legacy\Admin\Product\ActionAdminProductsSaveAfter::class,
 
@@ -113,7 +123,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
         $hookNames = [];
 
         foreach (self::getSubscribedServices() as $hookName => $serviceName) {
-            if (in_array($hookName, self::DEPRECATED_HOOKS, true)) {
+            if (\in_array($hookName, self::OPTIONAL_HOOKS, true)) {
                 continue;
             }
 

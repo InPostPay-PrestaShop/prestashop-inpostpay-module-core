@@ -32,7 +32,7 @@ final class CarrierMappingType extends AbstractType
                 },
                 'service_codes' => [],
             ])
-            ->setAllowedTypes('service_codes', ['array']) // Sf 2.8 resolver does not understand "FQCN[]" syntax => use normalizer instead
+            ->setAllowedTypes('service_codes', [ServiceCode::class . '[]', 'string[]'])
             ->setNormalizer('service_codes', static function (Options $options, array $value) {
                 return array_map(static function ($value) {
                     if ($value instanceof ServiceCode) {

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace izi\prestashop\Product;
 
 use izi\prestashop\Enum\StringEnum;
-use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Translation\TranslatableInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method static self Standard()
@@ -24,19 +24,19 @@ final class ProductType extends StringEnum implements TranslatableInterface
     private const PACK = 'pack';
     private const VIRTUAL = 'virtual';
 
-    public function trans(LegacyTranslator $translator): string
+    public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
         switch ($this) {
             case self::Standard():
-                return $translator->l('Standard products', 'producttype');
+                return $translator->trans('Standard products', [], 'Modules.Inpostizi.Product', $locale);
             case self::Combination():
-                return $translator->l('Products with combinations', 'producttype');
+                return $translator->trans('Products with combinations', [], 'Modules.Inpostizi.Product', $locale);
             case self::Customizable():
-                return $translator->l('Customizable products', 'producttype');
+                return $translator->trans('Customizable products', [], 'Modules.Inpostizi.Product', $locale);
             case self::Pack():
-                return $translator->l('Packs of products', 'producttype');
+                return $translator->trans('Packs of products', [], 'Modules.Inpostizi.Product', $locale);
             case self::Virtual():
-                return $translator->l('Virtual products', 'producttype');
+                return $translator->trans('Virtual products', [], 'Modules.Inpostizi.Product', $locale);
             default:
                 throw new \LogicException('Unreachable statement.');
         }
@@ -47,8 +47,8 @@ final class ProductType extends StringEnum implements TranslatableInterface
      */
     public static function fromProductData($product): self
     {
-        if (!is_array($product) && !$product instanceof \ArrayAccess) {
-            throw new \InvalidArgumentException(sprintf('Expected $product to be an array or an instance of "%s", "%s" given.', ProductLazyArray::class, get_debug_type($product)));
+        if (!\is_array($product) && !$product instanceof \ArrayAccess) {
+            throw new \InvalidArgumentException(\sprintf('Expected $product to be an array or an instance of "%s", "%s" given.', ProductLazyArray::class, get_debug_type($product)));
         }
 
         if ($product['is_virtual'] ?? false) {

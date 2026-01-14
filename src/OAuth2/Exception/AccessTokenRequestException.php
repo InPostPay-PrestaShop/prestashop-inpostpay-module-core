@@ -31,9 +31,9 @@ final class AccessTokenRequestException extends \RuntimeException implements OAu
         $error = $data['error'];
         $description = $data['error_description'] ?? null;
 
-        $message = sprintf('Access token response error: "%s".', $error);
+        $message = \sprintf('Access token response error: "%s".', $error);
         if (null !== $description) {
-            $message = sprintf('%s Error description: "%s".', $message, $description);
+            $message = \sprintf('%s Error description: "%s".', $message, $description);
         }
 
         return new self($error, $response, $message);

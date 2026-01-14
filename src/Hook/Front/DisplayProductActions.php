@@ -4,19 +4,16 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Hook\Front;
 
-use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Configuration\GuiConfigurationInterface;
-use izi\prestashop\Configuration\ProductAwareWidgetDisplayConfigurationInterface;
-use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
-use izi\prestashop\Hook\VersionRange;
+use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\View\Templating\RendererInterface;
 use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use PrestaShop\PrestaShop\Core\Module\WidgetInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
+final class DisplayProductActions implements HookInterface
 {
     use ProductWidgetRendererTrait;
 
@@ -42,11 +39,6 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
         return self::HOOK_NAME;
     }
 
-    public static function getVersionRange(): VersionRange
-    {
-        return new VersionRange('1.7.6');
-    }
-
     /**
      * @param array{product?: ProductLazyArray, request?: Request} $parameters
      */
@@ -54,20 +46,19 @@ final class DisplayProductActions implements PrestaShopVersionAwareHookInterface
     {
         $product = $this->getProduct($parameters);
 
-        /**
-         * @var $configuration ProductAwareWidgetDisplayConfigurationInterface
-         */
-        $configuration = $this->configuration->getDisplayConfiguration(BindingPlace::ProductCard());
-
-        if (self::HOOK_NAME === $this->generalConfiguration->getProductCardDisplayHook() && $configuration->isDisplayed($product)) {
-            return $this->renderer->render('module:inpostizi/views/templates/front/productButtonWidget.tpl', [
-                'widget' => $this->renderWidget($product, $parameters, self::HOOK_NAME),
-                'styles' => $this->getHtmlStyles(),
-                'hookName' => self::HOOK_NAME,
-                'idProduct' => $product['id_product'],
-            ]);
+        if (self::HOOK_NAME !== $this->generalConfiguration->getProductCardDisplayHook()) {
+            return '';
         }
 
-        return '';
+        if (!$this->isWidgetDisplayed($product)) {
+            return '';
+        }
+
+        return $this->renderer->render('module:inpostizi/views/templates/front/productButtonWidget.tpl', [
+            'widget' => $this->renderWidget($product, $parameters, self::HOOK_NAME),
+            'styles' => $this->getHtmlStyles(),
+            'hookName' => self::HOOK_NAME,
+            'idProduct' => $product['id_product'],
+        ]);
     }
 }

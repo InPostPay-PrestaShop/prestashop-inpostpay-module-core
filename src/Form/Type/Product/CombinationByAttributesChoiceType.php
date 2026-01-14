@@ -11,7 +11,6 @@ use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\ObjectModel\Repository\CombinationRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\Product\ProductAttribute;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Extension\Core\DataTransformer\DataTransformerChain;
@@ -19,11 +18,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\ReversedTransformer;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class CombinationByAttributesChoiceType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'combinationbyattributeschoicetype';
-
     /**
      * @var \Context
      */
@@ -40,11 +38,11 @@ final class CombinationByAttributesChoiceType extends AbstractType
     private $repository;
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
-    public function __construct(ObjectManagerInterface $manager, \Context $context, LegacyTranslator $translator)
+    public function __construct(ObjectManagerInterface $manager, \Context $context, TranslatorInterface $translator)
     {
         $this->manager = $manager;
         $this->context = $context;
@@ -55,7 +53,7 @@ final class CombinationByAttributesChoiceType extends AbstractType
     {
         $repository = $this->getRepository();
 
-        $attributeClass = $this->repository->getAttributeModelClass();
+        $attributeClass = $repository->getAttributeModelClass();
         $attributesByGroupId = $repository->getAvailableAttributesByProductId(
             $options['product_id'],
             $options['language_id']
@@ -89,7 +87,7 @@ final class CombinationByAttributesChoiceType extends AbstractType
                 'language_id' => (int) $this->context->language->id,
                 'input' => 'object',
                 'error_bubbling' => false,
-                'invalid_message' => $this->translator->l('Product combination with selected attributes does not exist.', self::TRANSLATION_SOURCE),
+                'invalid_message' => $this->translator->trans('Product combination with selected attributes does not exist.', [], 'Modules.Inpostizi.Product'),
                 'empty_data' => static function (FormInterface $form): ?array {
                     $data = array_map(static function (FormInterface $child) {
                         return $child->getData();

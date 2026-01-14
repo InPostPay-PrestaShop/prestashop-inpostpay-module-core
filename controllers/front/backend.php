@@ -123,6 +123,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         ob_start([$this, 'handleOutput'], 1);
 
         $request = $this->module->getCurrentRequest();
+        assert(null !== $request);
         $request->attributes->set('_inpost_izi_shop_id', (int) $this->context->shop->id);
 
         $response = $this->handle($request);
@@ -161,7 +162,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 
             return $response;
         } catch (Throwable $e) {
-            http_response_code(500);
+            http_response_code(Response::HTTP_INTERNAL_SERVER_ERROR);
             $this->logError($e);
 
             throw $e;
@@ -182,7 +183,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         $method = $request->getMethod();
 
         /** @var LoggerInterface $logger */
-        $logger = $this->module->get('inpost.izi.merchant_api_logger');
+        $logger = $this->module->get('inpost.izi.logger.merchant_api');
         $logger->info('Request "{method} {path}"', [
             'method' => $method,
             'path' => $path,
@@ -257,7 +258,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             return BadGatewayException::create($e, sprintf('Basket app API error: "%s"', $e->getError()->getCode()));
         }
 
-        if ($e instanceof ServerException && 503 === $e->getCode()) {
+        if ($e instanceof ServerException && Response::HTTP_SERVICE_UNAVAILABLE === $e->getCode()) {
             return ServiceUnavailableException::create($e, 'Basket app API is unavailable');
         }
 
@@ -370,8 +371,8 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             ? new JsonResponse([
                 'error_code' => 'NOT_FOUND',
                 'error_message' => $message,
-            ], 404)
-            : new Response($message, 404);
+            ], Response::HTTP_NOT_FOUND)
+            : new Response($message, Response::HTTP_NOT_FOUND);
     }
 
     private function registerErrorHandler(): void
@@ -386,7 +387,6 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             E_USER_DEPRECATED => LogLevel::DEBUG,
             E_NOTICE => LogLevel::DEBUG,
             E_USER_NOTICE => LogLevel::DEBUG,
-            E_STRICT => LogLevel::DEBUG,
             E_WARNING => LogLevel::DEBUG,
             E_USER_WARNING => LogLevel::DEBUG,
             E_USER_ERROR => LogLevel::CRITICAL,
@@ -414,7 +414,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
         if (PHP_OUTPUT_HANDLER_START & $phase) {
             $this->module->getLogger()->warning(sprintf(
                 "Output started before sending response.\n[stacktrace]\n%s\n",
-                (new \Exception())->getTraceAsString()
+                (new Exception())->getTraceAsString()
             ));
         }
 

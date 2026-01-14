@@ -7,31 +7,23 @@ namespace izi\prestashop\Form\Type\Shipping;
 use izi\prestashop\Common\Currency;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ServiceOptionsType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'serviceoptionstype';
-
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
-    /**
-     * @var \Context
-     */
-    private $context;
-
-    public function __construct(LegacyTranslator $translator, \Context $context = null)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
-        $this->context = $context ?? \Context::getContext();
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -40,10 +32,12 @@ final class ServiceOptionsType extends AbstractType
             'required' => false,
             'currency' => Currency::Pln()->value,
             'scale' => 2,
-            'label' => $this->translator->l('Additional cost', self::TRANSLATION_SOURCE),
+            'label' => $this->translator->trans('Additional cost', [], 'Modules.Inpostizi.Shipping'),
             'help' => nl2br(implode("\n", [
-                $this->translator->l('Net value of the amount to be added to the carrier\'s price if the service is selected.', self::TRANSLATION_SOURCE),
-                sprintf($this->translator->l('Cost will not be applied if the "%s" option is not enabled for the carrier.', self::TRANSLATION_SOURCE), $this->context->getTranslator()->trans('Add handling costs', [], 'Admin.Shipping.Feature')),
+                $this->translator->trans('Net value of the amount to be added to the carrier\'s price if the service is selected.', [], 'Modules.Inpostizi.Shipping'),
+                $this->translator->trans('Cost will not be applied if the "{option}" option is not enabled for the carrier.', [
+                    '{option}' => $this->translator->trans('Add handling costs', [], 'Admin.Shipping.Feature'),
+                ], 'Modules.Inpostizi.Shipping'),
             ])),
         ]);
 

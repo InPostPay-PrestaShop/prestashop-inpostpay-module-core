@@ -1,24 +1,13 @@
 {% extends '@PrestaShop/Admin/layout.html.twig' %}
 
-{% block content_header %}
-  {{ parent() }}
-
-  {# DISABLED FOR NOW, WE ARE WAITING FOR BANNERS TO COME #}
-{#  {% include '@Modules/inpostizi/views/templates/admin/banner.html.twig'%}#}
-{% endblock %}
-
-
 {% block stylesheets %}
   {{ parent() }}
   <link rel="stylesheet" href="{{ asset('css/admin/admin.css', 'InPostIzi') }}" />
-
-  {% if is_legacy_admin_page %}
-    <link rel="stylesheet" href="{{ asset('css/admin/admin-legacy.css', 'InPostIzi') }}" />
-  {% endif %}
 {% endblock %}
 
 {% block javascripts %}
   {{ parent() }}
+  <script type="text/javascript" src="{{ asset('js/admin/nav-bar-fix.js', 'InPostIzi') }}"></script>
   <script type="text/javascript" src="{{ asset('js/admin/admin.js', 'InPostIzi') }}">
   </script>
 {% endblock %}

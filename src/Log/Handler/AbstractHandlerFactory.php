@@ -39,13 +39,13 @@ abstract class AbstractHandlerFactory implements HandlerFactoryInterface
                 }
 
                 $upper = strtoupper($value);
-                $constName = sprintf('%s::%s', Logger::class, $upper);
+                $constName = \sprintf('%s::%s', Logger::class, $upper);
 
-                if (defined($constName)) {
-                    return constant($constName);
+                if (\defined($constName)) {
+                    return \constant($constName);
                 }
 
-                throw new \InvalidArgumentException(sprintf('Could not match "%s" to a log level.', $value));
+                throw new \InvalidArgumentException(\sprintf('Could not match "%s" to a log level.', $value));
             });
     }
 

@@ -1,0 +1,24 @@
+parameters:
+  inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
+
+services:
+  _defaults:
+    public: false
+
+  inpost.izi.cache:
+    class: Symfony\Component\Cache\Adapter\FilesystemAdapter
+    arguments:
+      - ''
+      - 0
+      - '%inpost.izi.cache_dir%'
+
+  izi\prestashop\Cache\ConfigurationCache:
+    class: izi\prestashop\Cache\ConfigurationCache
+    arguments:
+      - '@izi\prestashop\Configuration\Adapter\Configuration'
+      - '@inpost.izi.serializer'
+      - '@inpost.izi.clock'
+
+  izi\prestashop\CacheClearer\SymfonyCacheClearer:
+    class: izi\prestashop\CacheClearer\SymfonyCacheClearer
+    factory: [ izi\prestashop\CacheClearer\SymfonyCacheClearer, getInstance ]

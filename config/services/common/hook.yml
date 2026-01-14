@@ -1,0 +1,262 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Hook\HookExecutorInterface:
+    alias: izi\prestashop\Hook\HookExecutor
+    public: true
+
+  izi\prestashop\Hook\HookExecutor:
+    class: izi\prestashop\Hook\HookExecutor
+    arguments:
+      - '@inpost.izi.hook_locator'
+      - '@inpost.izi.module'
+
+  inpost.izi.widget:
+    class: izi\prestashop\Hook\Widget
+    public: true
+    arguments:
+      - '@izi\prestashop\View\Templating\RendererInterface'
+      - '@izi\prestashop\Hook\WidgetParametersProviderInterface'
+
+  izi\prestashop\Hook\WidgetParametersProviderInterface: '@izi\prestashop\Hook\WidgetParametersProvider'
+  izi\prestashop\Hook\WidgetParametersProvider:
+    class: izi\prestashop\Hook\WidgetParametersProvider
+    arguments:
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - '@inpost.izi.security.authorization_checker'
+      - '@izi\prestashop\View\Widget\WidgetConfigurationResolverInterface'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@inpost.izi.validator'
+
+  izi\prestashop\View\Widget\WidgetConfigurationResolverInterface: '@izi\prestashop\View\Widget\WidgetConfigurationResolver'
+  izi\prestashop\View\Widget\WidgetConfigurationResolver:
+    class: izi\prestashop\View\Widget\WidgetConfigurationResolver
+
+  izi\prestashop\Hook\Common\ActionCartDeleteBefore:
+    class: izi\prestashop\Hook\Common\ActionCartDeleteBefore
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\CommandBusInterface'
+
+  izi\prestashop\Hook\Common\ActionCartUpdateAfter:
+    class: izi\prestashop\Hook\Common\ActionCartUpdateAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  # todo: for whatever reason Sf 3.4 does not remove this service from the admin container and fails to autowire its dependencies
+  izi\prestashop\Hook\Front\ActionCartControllerAjaxUpdateResponse:
+    class: izi\prestashop\Hook\Front\ActionCartControllerAjaxUpdateResponse
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionEmailSendBefore:
+    class: izi\prestashop\Hook\Common\ActionEmailSendBefore
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionShipmentAddAfter:
+    class: izi\prestashop\Hook\Common\ActionShipmentAddAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionShipmentUpdateBefore:
+    class: izi\prestashop\Hook\Common\ActionShipmentUpdateBefore
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionShipmentUpdateAfter:
+    class: izi\prestashop\Hook\Common\ActionShipmentUpdateAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionValidateOrder:
+    class: izi\prestashop\Hook\Common\ActionValidateOrder
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@inpost.izi.module'
+      - '@izi\prestashop\CommandBusInterface'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate:
+    class: izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore:
+    class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter:
+    class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+      - '@inpost.izi.context'
+
+  # Product hooks
+  izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore:
+    class: izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Common\Product\ActionProductUpdateAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionProductUpdateAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionCombinationDeleteBefore:
+    class: izi\prestashop\Hook\Common\Product\ActionCombinationDeleteBefore
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionCombinationDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionCombinationDeleteAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionCombinationUpdateAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionCombinationUpdateAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionImageAddAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionImageAddAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionImageDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionImageDeleteAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionSpecificPriceAddAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionSpecificPriceAddAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionSpecificPriceUpdateAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionSpecificPriceUpdateAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionSpecificPriceDeleteAfter:
+    class: izi\prestashop\Hook\Common\Product\ActionSpecificPriceDeleteAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\Product\ActionUpdateQuantity:
+    class: izi\prestashop\Hook\Common\Product\ActionUpdateQuantity
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Hook\Webservice\AddWebserviceResources:
+    class: izi\prestashop\Hook\Webservice\AddWebserviceResources
+    tags:
+      - inpost.izi.hook
+
+  inpost.izi.hook_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+        # common
+      - actionObjectCartDeleteBefore: '@izi\prestashop\Hook\Common\ActionCartDeleteBefore'
+        actionObjectCartUpdateAfter: '@izi\prestashop\Hook\Common\ActionCartUpdateAfter'
+        actionObjectInPostShipmentModelAddAfter: '@izi\prestashop\Hook\Common\ActionShipmentAddAfter'
+        actionObjectInPostShipmentModelUpdateBefore: '@izi\prestashop\Hook\Common\ActionShipmentUpdateBefore'
+        actionObjectInPostShipmentModelUpdateAfter: '@izi\prestashop\Hook\Common\ActionShipmentUpdateAfter'
+        actionValidateOrder: '@izi\prestashop\Hook\Common\ActionValidateOrder'
+        actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'
+        actionObjectOrderUpdateBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore'
+        actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
+        actionEmailSendBefore: '@izi\prestashop\Hook\Common\ActionEmailSendBefore'
+        # webservice
+        addWebserviceResources: '@izi\prestashop\Hook\Webservice\AddWebserviceResources'
+        # product
+        actionObjectProductDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore'
+        actionObjectProductDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter'
+        actionObjectProductUpdateAfter: '@izi\prestashop\Hook\Common\Product\ActionProductUpdateAfter'
+        actionObjectCombinationDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionCombinationDeleteBefore'
+        actionObjectCombinationDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionCombinationDeleteAfter'
+        actionObjectCombinationUpdateAfter: '@izi\prestashop\Hook\Common\Product\ActionCombinationUpdateAfter'
+        actionObjectImageAddAfter: '@izi\prestashop\Hook\Common\Product\ActionImageAddAfter'
+        actionObjectImageDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionImageDeleteAfter'
+        actionObjectSpecificPriceAddAfter: '@izi\prestashop\Hook\Common\Product\ActionSpecificPriceAddAfter'
+        actionObjectSpecificPriceUpdateAfter: '@izi\prestashop\Hook\Common\Product\ActionSpecificPriceUpdateAfter'
+        actionObjectSpecificPriceDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionSpecificPriceDeleteAfter'
+        actionUpdateQuantity: '@izi\prestashop\Hook\Common\Product\ActionUpdateQuantity'
+        # front
+        actionAjaxDieCartControllerDisplayAjaxUpdateBefore: '@?izi\prestashop\Hook\Front\ActionCartControllerAjaxUpdateResponse'
+        actionFrontControllerSetMedia: '@?izi\prestashop\Hook\Front\ActionFrontControllerSetMedia'
+        displayHeader: '@?izi\prestashop\Hook\Front\DisplayHeader'
+        paymentOptions: '@?izi\prestashop\Hook\Front\ActionGetPaymentOptions'
+        displayOrderConfirmation: '@?izi\prestashop\Hook\Front\DisplayOrderConfirmation'
+        displayIziThankYou: '@?izi\prestashop\Hook\Front\DisplayIziThankYou'
+        displayPaymentReturn: '@?izi\prestashop\Hook\Front\DisplayPaymentReturn'
+        displayProductActions: '@?izi\prestashop\Hook\Front\DisplayProductActions'
+        displayProductAdditionalInfo: '@?izi\prestashop\Hook\Front\DisplayProductAdditionalInfo'
+        displayExpressCheckout: '@?izi\prestashop\Hook\Front\DisplayExpressCheckout'
+        displayShoppingCart: '@?izi\prestashop\Hook\Front\DisplayShoppingCart'
+        displayShoppingCartFooter: '@?izi\prestashop\Hook\Front\DisplayShoppingCartFooter'
+        displayCheckoutSummaryTop: '@?izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop'
+        displayCustomerAccountFormTop: '@?izi\prestashop\Hook\Front\DisplayCustomerAccountFormTop'
+        displayCustomerLoginFormAfter: '@?izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter'
+        displayIziCartPreviewButton: '@?izi\prestashop\Hook\Front\DisplayIziCartPreviewButton'
+        displayIziCheckoutButton: '@?izi\prestashop\Hook\Front\DisplayIziCheckoutButton'

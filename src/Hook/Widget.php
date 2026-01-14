@@ -58,10 +58,10 @@ final class Widget implements WidgetInterface
 
     private function assertIsValidHookName($hookName): void
     {
-        if (null === $hookName || is_string($hookName)) {
+        if (null === $hookName || \is_string($hookName)) {
             return;
         }
 
-        throw new InvalidArgumentException(sprintf('Expected hook name to be a string or null, "%s" given', get_debug_type($hookName)));
+        throw new InvalidArgumentException(\sprintf('Expected hook name to be a string or null, "%s" given', get_debug_type($hookName)));
     }
 }

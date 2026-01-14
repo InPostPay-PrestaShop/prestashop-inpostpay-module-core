@@ -7,12 +7,10 @@ namespace izi\prestashop\Hook\Admin;
 use izi\prestashop\Command\Config\UpdateCartRuleOptionsCommand;
 use izi\prestashop\Form\Type\CartRuleOptionsType;
 use izi\prestashop\Hook\HookInterface;
-use izi\prestashop\PromoCode\CartRuleOptionsRepository;
 use izi\prestashop\PromoCode\CartRuleOptionsRepositoryInterface;
-use izi\prestashop\Repository\CartRuleRepositoryInterface;
-use izi\prestashop\View\Templating\RendererInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Twig\Environment;
 
 final class DisplayBackOfficeHeader implements HookInterface
 {
@@ -34,32 +32,16 @@ final class DisplayBackOfficeHeader implements HookInterface
     private $formFactory;
 
     /**
-     * @var RendererInterface
+     * @var Environment
      */
-    private $renderer;
+    private $twig;
 
-    /**
-     * @var CartRuleRepositoryInterface|null
-     */
-    private $originalRepository;
-
-    /**
-     * @param CartRuleOptionsRepositoryInterface|CartRuleRepositoryInterface $repository
-     */
-    public function __construct(\Context $context, CartRuleRepositoryInterface $repository, FormFactoryInterface $formFactory, RendererInterface $renderer)
+    public function __construct(\Context $context, CartRuleOptionsRepositoryInterface $repository, FormFactoryInterface $formFactory, Environment $twig)
     {
         $this->context = $context;
+        $this->repository = $repository;
         $this->formFactory = $formFactory;
-        $this->renderer = $renderer;
-
-        if (!$repository instanceof CartRuleOptionsRepositoryInterface) {
-            @trigger_error(sprintf('Passing a $repository that does not implement "%s" to "%s()" is deprecated since 2.1.0.', CartRuleOptionsRepositoryInterface::class, __METHOD__), E_USER_DEPRECATED);
-
-            $this->repository = CartRuleOptionsRepository::create();
-            $this->originalRepository = $repository;
-        } else {
-            $this->repository = $repository;
-        }
+        $this->twig = $twig;
     }
 
     public static function getHookName(): string
@@ -91,7 +73,7 @@ final class DisplayBackOfficeHeader implements HookInterface
         ]);
         $form->handleRequest($request);
 
-        return $this->renderer->render('module:inpostizi/views/templates/hook/admin/cart_rule_form.tpl', [
+        return $this->twig->render('@Modules/inpostizi/views/templates/hook/admin/cart_rule_form.html.twig', [
             'form' => $form->createView(),
         ]);
     }
@@ -107,13 +89,7 @@ final class DisplayBackOfficeHeader implements HookInterface
             ];
         }
 
-        $command = $this->createUpdateOptionsCommand($cartRuleId);
-
-        if (null !== $this->originalRepository) {
-            $command->setOmnibus($this->originalRepository->isOmnibus($cartRuleId));
-        }
-
-        return $command;
+        return $this->createUpdateOptionsCommand($cartRuleId);
     }
 
     private function createUpdateOptionsCommand(int $cartRuleId): UpdateCartRuleOptionsCommand

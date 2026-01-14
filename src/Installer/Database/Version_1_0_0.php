@@ -18,6 +18,11 @@ final class Version_1_0_0 extends AbstractMigration
 
     public function up(): void
     {
+        // no-op
+    }
+
+    private function createSessionTable(): void
+    {
         $this->connection->executeStatement('
             CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . InPostIziBasketSession::TABLE_NAME . '` (
                 id MEDIUMINT(9) NOT NULL AUTO_INCREMENT,

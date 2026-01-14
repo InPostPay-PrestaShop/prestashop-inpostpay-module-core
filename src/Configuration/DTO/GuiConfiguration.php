@@ -12,11 +12,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class GuiConfiguration implements GuiConfigurationInterface, \ArrayAccess
 {
     /**
-     * @var array<string, WidgetDisplayConfigurationInterface> configurations by BindingPlace value
+     * @var array<string, WidgetDisplayConfigurationInterface|null> configurations by BindingPlace value
      *
-     * @Assert\Valid
+     * @Assert\Valid()
      * @Assert\All({
-     *     @Assert\NotNull,
+     *     @Assert\NotNull(),
      * })
      */
     private $displayConfigurations = [];
@@ -63,7 +63,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, \ArrayAccess
     }
 
     /**
-     * @return WidgetDisplayConfigurationInterface|null[]
+     * @return array<string, WidgetDisplayConfigurationInterface|null>
      */
     public function getDisplayConfigurations(): array
     {
@@ -80,7 +80,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, \ArrayAccess
     public function offsetGet($offset): ?WidgetDisplayConfigurationInterface
     {
         if (!isset($this[$offset])) {
-            throw new \DomainException(sprintf('Undefined offset: "%s".', $offset));
+            throw new \DomainException(\sprintf('Undefined offset: "%s".', $offset));
         }
 
         return $this->displayConfigurations[$offset] ?? null;
@@ -89,11 +89,11 @@ final class GuiConfiguration implements GuiConfigurationInterface, \ArrayAccess
     public function offsetSet($offset, $value): void
     {
         if (!isset($this[$offset])) {
-            throw new \DomainException(sprintf('Undefined offset: "%s".', $offset));
+            throw new \DomainException(\sprintf('Undefined offset: "%s".', $offset));
         }
 
         if (null !== $value && !$value instanceof WidgetDisplayConfigurationInterface) {
-            throw new \InvalidArgumentException(sprintf('Expected null or an instance of "%s", "%s" given.', WidgetDisplayConfigurationInterface::class, get_debug_type($value)));
+            throw new \InvalidArgumentException(\sprintf('Expected null or an instance of "%s", "%s" given.', WidgetDisplayConfigurationInterface::class, get_debug_type($value)));
         }
 
         $this->displayConfigurations[$offset] = $value;

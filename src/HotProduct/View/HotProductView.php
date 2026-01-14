@@ -154,9 +154,9 @@ final class HotProductView
         }
 
         $attributes = array_map(static function (ProductAttribute $attribute): string {
-            return sprintf('%s - %s', $attribute->getName(), $attribute->getValue());
+            return \sprintf('%s - %s', $attribute->getName(), $attribute->getValue());
         }, $attributes);
 
-        return sprintf('%s : %s', $product->getName(), implode(', ', $attributes));
+        return \sprintf('%s : %s', $product->getName(), implode(', ', $attributes));
     }
 }

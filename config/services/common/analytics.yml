@@ -1,0 +1,75 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Analytics\Cookie\Repository\CookieRepositoryInterface: '@izi\prestashop\Analytics\Cookie\Repository\CookieRepository'
+  izi\prestashop\Analytics\Cookie\Repository\CookieRepository:
+    class: izi\prestashop\Analytics\Cookie\Repository\CookieRepository
+
+  izi\prestashop\Analytics\Cookie\Factory\CookieFactoryInterface: '@izi\prestashop\Analytics\Cookie\Factory\CookieFactory'
+  izi\prestashop\Analytics\Cookie\Factory\CookieFactory:
+    class: izi\prestashop\Analytics\Cookie\Factory\CookieFactory
+
+  izi\prestashop\Analytics\Cookie\FacebookClickIdCookie:
+    class: izi\prestashop\Analytics\Cookie\FacebookClickIdCookie
+    arguments:
+      - '@izi\prestashop\Analytics\Cookie\Factory\CookieFactory'
+      - '@izi\prestashop\Analytics\Cookie\Repository\CookieRepository'
+    tags:
+      - inpost.izi.analytics.cookie_erase
+      - inpost.izi.analytics.cookie_persist
+
+  izi\prestashop\Analytics\Cookie\GoogleClickIdCookie:
+    class: izi\prestashop\Analytics\Cookie\GoogleClickIdCookie
+    arguments:
+      - '@izi\prestashop\Analytics\Cookie\Factory\CookieFactory'
+      - '@izi\prestashop\Analytics\Cookie\Repository\CookieRepository'
+    tags:
+      - inpost.izi.analytics.cookie_erase
+      - inpost.izi.analytics.cookie_persist
+
+  izi\prestashop\Analytics\Cookie\GoogleClientIdCookie:
+    class: izi\prestashop\Analytics\Cookie\GoogleClientIdCookie
+
+  izi\prestashop\Analytics\Cookie\Executor\CookieEraseExecutor:
+    class: izi\prestashop\Analytics\Cookie\Executor\CookieEraseExecutor
+    arguments:
+      - !tagged inpost.izi.analytics.cookie_erase
+
+  izi\prestashop\Analytics\Cookie\Executor\CookiePersisterExecutor:
+    class: izi\prestashop\Analytics\Cookie\Executor\CookiePersisterExecutor
+    arguments:
+      - !tagged inpost.izi.analytics.cookie_persist
+
+  izi\prestashop\Analytics\Factory\BasketAnalyticsFactoryInterface: '@izi\prestashop\Analytics\Factory\BasketAnalyticsFactory'
+  izi\prestashop\Analytics\Factory\BasketAnalyticsFactory:
+    class: izi\prestashop\Analytics\Factory\BasketAnalyticsFactory
+    arguments:
+      - '@izi\prestashop\Analytics\Cookie\GoogleClickIdCookie'
+      - '@izi\prestashop\Analytics\Cookie\FacebookClickIdCookie'
+      - '@izi\prestashop\Analytics\Cookie\GoogleClientIdCookie'
+
+  izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener:
+    class: izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@izi\prestashop\CommandBusInterface'
+      - '@inpost.izi.request_stack'
+      - '@izi\prestashop\Analytics\Factory\BasketAnalyticsFactory'
+      - '@izi\prestashop\Analytics\Cookie\Executor\CookieEraseExecutor'
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+
+  izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandlerInterface: '@izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandler'
+  izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandler:
+    class: izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandler
+    tags:
+      - inpost.izi.command_handler
+    arguments:
+      - '@izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface'
+
+  izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface: '@izi\prestashop\Analytics\BasketAnalyticsRepository'
+  izi\prestashop\Analytics\BasketAnalyticsRepository:
+    class: izi\prestashop\Analytics\BasketAnalyticsRepository
+    arguments:
+      - '@izi\prestashop\Database\Connection'

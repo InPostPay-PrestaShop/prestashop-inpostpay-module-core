@@ -6,6 +6,7 @@ namespace izi\prestashop\Shipping\CartWeight;
 
 use izi\prestashop\Common\Weight;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
+use izi\prestashop\ObjectModel\Repository\RangeWeightRepository;
 
 final class WeightRangeStrategy implements CartWeightDeliveryStrategyInterface
 {
@@ -15,10 +16,13 @@ final class WeightRangeStrategy implements CartWeightDeliveryStrategyInterface
     private $genericStrategy;
 
     /**
-     * @var ObjectRepositoryInterface<\RangeWeight>
+     * @var RangeWeightRepository
      */
     private $rangeWeightRepository;
 
+    /**
+     * @param RangeWeightRepository $rangeWeightRepository
+     */
     public function __construct(CartWeightDeliveryStrategyInterface $genericStrategy, ObjectRepositoryInterface $rangeWeightRepository)
     {
         $this->genericStrategy = $genericStrategy;

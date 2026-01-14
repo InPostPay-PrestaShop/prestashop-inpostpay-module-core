@@ -1,0 +1,29 @@
+<div id="inpostizi_block_backend" class="card">
+  <div class="card-header">
+    <h3 class="card-header-title">InPost Pay</h3>
+  </div>
+
+  <div class="card-body">
+    <div class="row mt-3">
+      <div class="col">
+        <p class="mb-1">
+          <strong>{{ 'Delivery method'|trans({},'Modules.Inpostizi.Order') }}:</strong>
+        </p>
+        <p>{{ delivery }}</p>
+
+        {% if apm is not same as('') %}
+          <p class="mb-1">
+            <strong>{{ 'APM'|trans({},'Modules.Inpostizi.Delivery') }}:</strong>
+          </p>
+          <p>{{ apm }}</p>
+        {% endif %}
+
+        {% if issue_invoice %}
+          <p>
+            <strong>{{ 'The customer requested a VAT invoice'|trans({}, 'Modules.Inpostizi.Order') }}</strong>
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

@@ -28,7 +28,7 @@ trait HttpExceptionTrait
         $this->response = $response;
 
         $statusCode = $response->getStatusCode();
-        $message = sprintf('HTTP %d returned for "%s".', $statusCode, $request->getUri());
+        $message = \sprintf('HTTP %d returned for "%s".', $statusCode, $request->getUri());
 
         parent::__construct($message, $statusCode);
     }

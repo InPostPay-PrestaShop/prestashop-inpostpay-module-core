@@ -1,0 +1,11 @@
+services:
+  inpost.izi.db:
+    class: Db
+    public: false
+    factory: [ Db, getInstance ]
+
+  izi\prestashop\Database\Connection:
+    class: izi\prestashop\Database\Connection
+    public: true
+    arguments:
+      - '@inpost.izi.db'

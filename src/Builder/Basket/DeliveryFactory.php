@@ -10,7 +10,6 @@ use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\OptionalService;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\Price;
-use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
@@ -18,9 +17,12 @@ use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\ObjectModel\Repository\CarrierRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\Shipping\DeliveryPriceCalculatorInterface;
-use izi\prestashop\Translation\ServiceNameTranslator;
 use Psr\Clock\ClockInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @todo: refactor
+ */
 class DeliveryFactory
 {
     /**
@@ -39,9 +41,9 @@ class DeliveryFactory
     private $clock;
 
     /**
-     * @var ServiceNameTranslator
+     * @var TranslatorInterface
      */
-    private $serviceNameTranslator;
+    private $translator;
 
     /**
      * @var DeliveryPriceCalculatorInterface
@@ -54,22 +56,16 @@ class DeliveryFactory
     private $prestashopConfiguration;
 
     /**
-     * @var \Context
-     */
-    private $context;
-
-    /**
      * @param CarrierRepository $carrierRepository
      */
-    public function __construct(ShippingConfigurationInterface $configuration, ObjectRepositoryInterface $carrierRepository, ClockInterface $clock, ServiceNameTranslator $serviceNameTranslator, DeliveryPriceCalculatorInterface $priceCalculator, ?PrestaShopConfiguration $prestashopConfiguration = null, ?\Context $context = null)
+    public function __construct(ShippingConfigurationInterface $configuration, ObjectRepositoryInterface $carrierRepository, ClockInterface $clock, TranslatorInterface $translator, DeliveryPriceCalculatorInterface $priceCalculator, PrestaShopConfiguration $prestashopConfiguration)
     {
         $this->configuration = $configuration;
         $this->carrierRepository = $carrierRepository;
         $this->clock = $clock;
-        $this->serviceNameTranslator = $serviceNameTranslator;
+        $this->translator = $translator;
         $this->priceCalculator = $priceCalculator;
-        $this->prestashopConfiguration = $prestashopConfiguration ?? new PrestaShopConfiguration(new Configuration());
-        $this->context = $context ?? \Context::getContext();
+        $this->prestashopConfiguration = $prestashopConfiguration;
     }
 
     /**
@@ -161,7 +157,7 @@ class DeliveryFactory
             }
 
             $services[] = new OptionalService(
-                $this->serviceNameTranslator->getName($serviceCode),
+                $serviceCode->trans($this->translator),
                 $serviceCode,
                 $servicePrice
             );
@@ -180,9 +176,7 @@ class DeliveryFactory
         $priceTaxExcl = $cart->getGiftWrappingPrice(false);
 
         return new OptionalService(
-            $this->context->getTranslator()->trans('I would like my order to be gift wrapped %cost%', [
-                '%cost%' => '',
-            ], 'Shop.Theme.Checkout'),
+            ServiceCode::Gw()->trans($this->translator),
             ServiceCode::Gw(),
             PriceFactory::create($priceTaxExcl, $priceTaxIncl)
         );
@@ -230,7 +224,7 @@ class DeliveryFactory
         }
 
         foreach ($deliveryOptionList[$addressId] as $option) {
-            if (isset($option['carrier_list'][$carrierId]) && 1 === count($option['carrier_list'])) {
+            if (isset($option['carrier_list'][$carrierId]) && 1 === \count($option['carrier_list'])) {
                 return true;
             }
         }

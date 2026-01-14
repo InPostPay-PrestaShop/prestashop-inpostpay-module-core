@@ -20,6 +20,6 @@ final class ProductRestrictionDelivery implements ProductRestrictionDeliveryInte
             return (int) $carrier['id_reference'];
         }, $carriersRestricted);
 
-        return in_array((int) $carrier->id_reference, $availableCarriers, true);
+        return \in_array((int) $carrier->id_reference, $availableCarriers, true);
     }
 }
