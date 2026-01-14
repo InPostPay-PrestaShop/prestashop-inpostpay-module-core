@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziOrder.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="510e3417f3b9f45ab725ed761aba7cdd">
+        <source>Append custom content to customer message if APM delivery was selected</source>
+        <target>Doklej dodatkową zawartość do komentarza klienta w przypadku dostawy do Paczkomatu</target>
+      </trans-unit>
+      <trans-unit id="5a584bae80c34e6ee9b177aa167eb865">
+        <source>Available parameters</source>
+        <target>Dostępne parametry</target>
+      </trans-unit>
+      <trans-unit id="cf61708dfdb6622b7889571af90d52b9">
+        <source>Click {link} to go to the module documentation and read full instructions on how to configure the message format.</source>
+        <target>Kliknij {link}, aby przejść do naszej dokumentacji i zapoznać się z pełną instrukcją konfiguracji formatu wiadomości.</target>
+      </trans-unit>
+      <trans-unit id="6310f29293c902c64db619c29179d99a">
+        <source>Delivery method</source>
+        <target>Wysyłka</target>
+      </trans-unit>
+      <trans-unit id="8cd8b0f7c9d02973566d70ae96bcf976">
+        <source>Enable all available payment options</source>
+        <target>Włącz wszystkie dostępne metody płatności</target>
+      </trans-unit>
+      <trans-unit id="e8051555e4af6e673fbe93a79a86671f">
+        <source>Enabled payment options</source>
+        <target>Włączone metody płatności</target>
+      </trans-unit>
+      <trans-unit id="e9bcf55beed989e815dcf421b29e29a1">
+        <source>Expressions enclosed in double curly braces are evaluated (e.g. `{conditional}` will result in "{if_true}" if {service} option was selected or "{if_false}" otherwise).</source>
+        <target>Wartość wyrażeń zawartych w podwójnych nawiasach klamrowych jest obliczana (np. `{conditional}` wypisze "{if_true}" jeżeli klient wybrał usługę {service} lub "{if_false}" w przeciwnym wypadku).</target>
+      </trans-unit>
+      <trans-unit id="fd282be0a539046c5c22736ef41f4350">
+        <source>Initial order status</source>
+        <target>Status zamówienia utworzonego przez InPost Pay</target>
+      </trans-unit>
+      <trans-unit id="c59e73ddbd9accb6cceb84986bfb9633">
+        <source>Message format</source>
+        <target>Format wiadomości</target>
+      </trans-unit>
+      <trans-unit id="90fe2e074269621b0618bca43a7ee64b">
+        <source>More details can be found in the module documentation.</source>
+        <target>Bardziej szczegółowe informacje można znaleźć w instrukcji modułu.</target>
+      </trans-unit>
+      <trans-unit id="f13673c7e261fd8d00915c9cb768ad95">
+        <source>Order message</source>
+        <target>Komentarz zamówienia</target>
+      </trans-unit>
+      <trans-unit id="33af8066d3c83110d4bd897f687cedd2">
+        <source>Order statuses</source>
+        <target>Statusy zamówień</target>
+      </trans-unit>
+      <trans-unit id="e9adbbd1cd7eff7e1a588c31f79521d5">
+        <source>POS ID</source>
+        <target>POS ID</target>
+      </trans-unit>
+      <trans-unit id="05a5fcc9d88a553b80b2633aa4556d58">
+        <source>Paid order status</source>
+        <target>Status dla zamówienia opłaconego przez InPost Pay</target>
+      </trans-unit>
+      <trans-unit id="50b5c5b98ff1773e551421f082fed261">
+        <source>Payment methods are specified on the payment gateway contract</source>
+        <target>Metody płatności zostały określone na umowie o obsługę bramki płatniczej.</target>
+      </trans-unit>
+      <trans-unit id="bfa7e2e76dfa5492ab926b3c8d5d5e65">
+        <source>The customer requested a VAT invoice</source>
+        <target>Klient prosi o wystawienie faktury VAT</target>
+      </trans-unit>
+      <trans-unit id="aa38035ab7c137762ca1191f50548cac">
+        <source>codes of selected optional services</source>
+        <target>kody wybranych usług dodatkowych</target>
+      </trans-unit>
+      <trans-unit id="6c92285fa6d3e827b198d120ea3ac674">
+        <source>here</source>
+        <target>tutaj</target>
+      </trans-unit>
+      <trans-unit id="eaa6c7321dcef79322f6e0f3a754a2df">
+        <source>if {option} option was selected</source>
+        <target>czy została wybrana {option}</target>
+      </trans-unit>
+      <trans-unit id="22e0bb894f64fd194c9f4a7603e85af4">
+        <source>the selected APM's identifier</source>
+        <target>numer Paczkomatu</target>
+      </trans-unit>
+      <trans-unit id="ab5b820752e33d7ac7b511e3cad051cb">
+        <source>used payment method code</source>
+        <target>kod użytej metody płatności</target>
+      </trans-unit>
+      <trans-unit id="b9289e792ff410cc65d7dfe14e577b7c">
+        <source>{cash_on_delivery} will be available only if you have an agreement with InPost to provide this service in your store.</source>
+        <target>{cash_on_delivery} będzie dostępna tylko wtedy, kiedy posiadasz podpisaną umowę z InPost na świadczenie tej usługi w Twoim sklepie.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

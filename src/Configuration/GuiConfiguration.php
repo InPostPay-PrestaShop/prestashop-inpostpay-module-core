@@ -11,7 +11,6 @@ use izi\prestashop\Configuration\DTO\Product\ProductRestrictionsCache;
 use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\Product\Restriction\RestrictedAction;
-use izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface;
 use izi\prestashop\Repository\ProductRestrictionsRepositoryInterface;
 use izi\prestashop\Serializer\SafeDeserializerTrait;
 use izi\prestashop\Validator\Product\NotFromRestrictedManufacturer;
@@ -121,7 +120,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
 
     public static function getConfigurableBindingPlaces(): array
     {
-        return array_slice(self::getSupportedBindingPlaces(), 0, -1); // all supported except "ORDER_CREATE"
+        return \array_slice(self::getSupportedBindingPlaces(), 0, -1); // all supported except "ORDER_CREATE"
     }
 
     /**
@@ -130,22 +129,18 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
     public function getDisplayConfiguration(BindingPlace $bindingPlace): WidgetDisplayConfigurationInterface
     {
         if (!$bindingPlace->canDisplayBindingWidget()) {
-            throw new \LogicException(sprintf('Binding widget cannot be displayed in "%s".', $bindingPlace->value));
+            throw new \LogicException(\sprintf('Binding widget cannot be displayed in "%s".', $bindingPlace->value));
         }
 
-        if (!in_array($bindingPlace, self::getSupportedBindingPlaces(), true)) {
-            throw new \DomainException(sprintf('Unsupported binding place: "%s".', $bindingPlace->value));
+        if (!\in_array($bindingPlace, self::getSupportedBindingPlaces(), true)) {
+            throw new \DomainException(\sprintf('Unsupported binding place: "%s".', $bindingPlace->value));
         }
 
         if (BindingPlace::OrderCreate() === $bindingPlace) {
             $configuration = clone $this->getDisplayConfigurationByBindingPlace(BindingPlace::BasketSummary());
-            $configuration->setWidgetConfiguration(
-                $configuration
-                    ->getWidgetConfiguration()
-                    ->withBindingPlace(BindingPlace::OrderCreate())
-            );
+            $widgetConfiguration = $configuration->getWidgetConfiguration()->withBindingPlace(BindingPlace::OrderCreate());
 
-            return $configuration;
+            return $configuration->setWidgetConfiguration($widgetConfiguration);
         }
 
         if (BindingPlace::ProductCard() !== $bindingPlace || !$this->container->has('validator')) {
@@ -202,7 +197,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         $productRestrictions = null;
 
         foreach ($configuration->getSupportedBindingPlaces() as $bindingPlace) {
-            if (!in_array($bindingPlace, $configurablePlaces, true)) {
+            if (!\in_array($bindingPlace, $configurablePlaces, true)) {
                 continue;
             }
 
@@ -293,7 +288,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         $constantName = $bindingPlace->value . '_HTML_STYLES';
         $classNamespace = self::class;
 
-        return constant($classNamespace . '::' . $constantName);
+        return \constant($classNamespace . '::' . $constantName);
     }
 
     private function getDisplayWidgetConfigKey(BindingPlace $bindingPlace): string
@@ -301,7 +296,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         $constantName = $bindingPlace->value . '_WIDGET_DISPLAY';
         $classNamespace = self::class;
 
-        return constant($classNamespace . '::' . $constantName);
+        return \constant($classNamespace . '::' . $constantName);
     }
 
     private function getConfigurationWidgetConfigKey(BindingPlace $bindingPlace): string
@@ -309,7 +304,7 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
         $constantName = $bindingPlace->value . '_WIDGET_CONFIG';
         $classNamespace = self::class;
 
-        return constant($classNamespace . '::' . $constantName);
+        return \constant($classNamespace . '::' . $constantName);
     }
 
     private function setProductRestrictedAction(RestrictedAction $action, ?int $shopId = null): void
@@ -353,15 +348,8 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
                 ->getCachedProductRestrictions($shopId)
                 ->setHasCategoryRestrictions($repository->hasCategoryRestrictions($shopId))
                 ->setHasManufacturerRestrictions($repository->hasManufacturerRestrictions($shopId))
-                ->setHasAttributeGroupRestrictions($repository->hasAttributeGroupRestrictions($shopId));
-
-            if (!$repository instanceof FeatureRestrictionsRepositoryInterface) {
-                @trigger_error(sprintf('Not implementing "%s()" in "%s" is deprecated since version 2.2.0.', FeatureRestrictionsRepositoryInterface::class, get_class($repository)), E_USER_DEPRECATED);
-
-                $cache->setHasFeatureRestrictions(false);
-            } else {
-                $cache->setHasFeatureRestrictions($repository->hasFeatureRestrictions($shopId));
-            }
+                ->setHasAttributeGroupRestrictions($repository->hasAttributeGroupRestrictions($shopId))
+                ->setHasFeatureRestrictions($repository->hasFeatureRestrictions($shopId));
 
             $this->cacheProductRestrictions($cache, $shopId);
         }

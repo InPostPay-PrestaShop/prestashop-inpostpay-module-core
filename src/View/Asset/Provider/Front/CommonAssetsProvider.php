@@ -5,18 +5,11 @@ declare(strict_types=1);
 namespace izi\prestashop\View\Asset\Provider\Front;
 
 use izi\prestashop\Environment\EnvironmentInterface;
-use izi\prestashop\Hook\Front\ActionFrontControllerSetMedia;
 use izi\prestashop\View\Asset\Provider\AssetsProviderInterface;
 use izi\prestashop\View\Asset\Provider\DTO\Assets;
 
-/* IGNORE_THIS_FILE_FOR_TRANSLATION */
 final class CommonAssetsProvider implements AssetsProviderInterface
 {
-    /**
-     * @var \Module
-     */
-    private $module;
-
     /**
      * @var \Context
      */
@@ -27,9 +20,8 @@ final class CommonAssetsProvider implements AssetsProviderInterface
      */
     private $environment;
 
-    public function __construct(\Module $module, \Context $context, EnvironmentInterface $environment)
+    public function __construct(\Context $context, EnvironmentInterface $environment)
     {
-        $this->module = $module;
         $this->context = $context;
         $this->environment = $environment;
     }
@@ -46,7 +38,7 @@ final class CommonAssetsProvider implements AssetsProviderInterface
                 'position' => 'bottom',
                 'priority' => 101,
             ])
-            ->addJavaScriptVariable('inpostizi_backend_ajax_url', $this->context->link->getModuleLink($this->module->name, 'backend'))
-            ->addJavaScriptVariable('inpostizi_generic_http_error', $this->module->l('Something went wrong. Please try again later.', \Tools::strtolower(ActionFrontControllerSetMedia::HOOK_NAME)));
+            ->addJavaScriptVariable('inpostizi_backend_ajax_url', $this->context->link->getModuleLink('inpostizi', 'backend'))
+            ->addJavaScriptVariable('inpostizi_generic_http_error', $this->context->getTranslator()->trans('Something went wrong. Please try again later.', [], 'Modules.Inpostizi.Errors'));
     }
 }

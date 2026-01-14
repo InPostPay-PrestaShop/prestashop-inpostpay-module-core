@@ -1,0 +1,12 @@
+services:
+  _defaults:
+    public: false
+
+  inpost.izi.context_translator:
+    class: Symfony\Component\Translation\Translator
+    factory: [ '@inpost.izi.context', getTranslator ]
+
+  inpost.izi.translator:
+    class: izi\prestashop\Translation\Adapter\Translator
+    arguments:
+      - '@inpost.izi.context_translator'

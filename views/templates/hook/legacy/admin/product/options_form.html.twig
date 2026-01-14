@@ -1,0 +1,14 @@
+{% form_theme form '@Modules/inpostizi/views/templates/admin/config/form_theme.html.twig' %}
+
+<div class="mt-4">
+  <h2>{{ form.vars.label }}</h2>
+
+  <div class="row">
+    <div class="form-group col-md-4">
+      {{ form_label(form.imageGalleryType) }}
+      {{ form_widget(form.imageGalleryType, {attr: {class: 'custom-select'}}) }}
+    </div>
+
+    {{ form_rest(form) }}
+  </div>
+</div>

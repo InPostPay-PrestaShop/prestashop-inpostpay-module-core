@@ -26,7 +26,7 @@ final class CashOnDeliveryHandler implements OptionalServiceHandlerInterface
     public function handle(\Cart $cart, string $serviceCode, DeliveryType $deliveryType, bool $selected): void
     {
         if ('COD' !== $serviceCode) {
-            throw new \DomainException(sprintf('Unsupported service "%s".', $serviceCode));
+            throw new \DomainException(\sprintf('Unsupported service "%s".', $serviceCode));
         }
 
         if (!$selected) {

@@ -1,0 +1,104 @@
+parameters:
+  inpost.izi.validator.translation_domain: Modules.Inpostizi.Validators
+
+services:
+  _defaults:
+    public: false
+
+  inpost.izi.validator:
+    class: Symfony\Component\Validator\Validator\ValidatorInterface
+    public: true
+    factory: [ '@inpost.izi.validator.builder', getValidator ]
+
+  inpost.izi.validator.builder:
+    class: Symfony\Component\Validator\ValidatorBuilder
+    factory: [Symfony\Component\Validator\Validation, createValidatorBuilder ]
+    calls:
+      - method: setConstraintValidatorFactory
+        arguments:
+          - '@inpost.izi.validator.constraint_validator_factory'
+      - method: setTranslator
+        arguments:
+          - '@inpost.izi.context_translator'
+      - method: setTranslationDomain
+        arguments:
+          - '%inpost.izi.validator.translation_domain%'
+
+  inpost.izi.validator.constraint_validator_factory:
+    class: Symfony\Component\Validator\ContainerConstraintValidatorFactory
+    arguments:
+      - '@inpost.izi.validator.constraint_validator_locator'
+
+  inpost.izi.validator.constraint_validator_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+      - izi\prestashop\Validator\Cart\BindableValidator: '@izi\prestashop\Validator\Cart\BindableValidator'
+        izi\prestashop\Validator\Cart\HasProductsValidator: '@izi\prestashop\Validator\Cart\HasProductsValidator'
+        izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator: '@izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator'
+        izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator: '@izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator'
+        izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator: '@izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator'
+        izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator'
+        izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator: '@izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator'
+        izi\prestashop\Validator\Product\UnrestrictedValidator: '@izi\prestashop\Validator\Product\UnrestrictedValidator'
+
+  izi\prestashop\Validator\Cart\BindableValidator:
+    class: izi\prestashop\Validator\Cart\BindableValidator
+    tags:
+      - validator.constraint_validator
+    arguments:
+      - '@inpost.izi.module'
+
+  izi\prestashop\Validator\Cart\HasProductsValidator:
+    class: izi\prestashop\Validator\Cart\HasProductsValidator
+    tags:
+      - validator.constraint_validator
+
+  izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator:
+    class: izi\prestashop\Validator\Cart\PaymentInCurrencyAvailableValidator
+    tags:
+      - validator.constraint_validator
+    arguments:
+      - '@izi\prestashop\Payment\PaymentCurrencyChecker'
+
+  izi\prestashop\Validator\Cart\HasUnrestrictedProductValidator:
+    class: izi\prestashop\Validator\Cart\HasUnrestrictedProductValidator
+    tags:
+      - validator.constraint_validator
+
+  izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator:
+    class: izi\prestashop\Validator\Product\NotInRestrictedCategoryValidator
+    tags:
+      - validator.constraint_validator
+    arguments:
+      - '@izi\prestashop\Repository\Product\CategoryRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator:
+    class: izi\prestashop\Validator\Product\NotFromRestrictedManufacturerValidator
+    tags:
+      - validator.constraint_validator
+    arguments:
+      - '@izi\prestashop\Repository\Product\ManufacturerRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator:
+    class: izi\prestashop\Validator\Product\NotWithRestrictedAttributesValidator
+    tags:
+      - validator.constraint_validator
+    arguments:
+      - '@izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface'
+      - '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
+
+  izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator:
+    class: izi\prestashop\Validator\Product\NotWithRestrictedFeaturesValidator
+    tags:
+      - validator.constraint_validator
+    arguments:
+      - '@izi\prestashop\Repository\Product\FeatureRestrictionsRepositoryInterface'
+
+  izi\prestashop\Validator\Product\UnrestrictedValidator:
+    class: izi\prestashop\Validator\Product\UnrestrictedValidator
+    tags:
+      - validator.constraint_validator
+    arguments:
+      - '@izi\prestashop\Configuration\ProductRestrictionsConfigurationInterface'

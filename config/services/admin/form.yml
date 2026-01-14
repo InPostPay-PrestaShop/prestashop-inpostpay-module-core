@@ -1,4 +1,12 @@
 services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $context: '@inpost.izi.context'
+      $shopContext: '@inpost.izi.shop_context'
+      $translator: '@inpost.izi.translator'
+
   izi\prestashop\Form\TypeExtension\DatePickerCompatibilityTypeExtension:
     class: izi\prestashop\Form\TypeExtension\DatePickerCompatibilityTypeExtension
     tags:
@@ -9,12 +17,64 @@ services:
     tags:
       - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\TimeType }
 
-  izi\prestashop\Form\TypeExtension\HelpTextExtension:
-    class: izi\prestashop\Form\TypeExtension\HelpTextExtension
-    tags:
-      - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\FormType }
-
   izi\prestashop\Form\TypeExtension\UnitTypeExtension:
     class: izi\prestashop\Form\TypeExtension\UnitTypeExtension
     tags:
       - { name: form.type_extension, extended_type: Symfony\Component\Form\Extension\Core\Type\IntegerType }
+
+  izi\prestashop\Form\Type\EnumType:
+    class: izi\prestashop\Form\Type\EnumType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\ObjectModelType:
+    class: izi\prestashop\Form\Type\ObjectModelType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\ObjectModelAutocompleteType:
+    class: izi\prestashop\Form\Type\ObjectModelAutocompleteType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Product\CombinationByAttributesChoiceType:
+    class: izi\prestashop\Form\Type\Product\CombinationByAttributesChoiceType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\CmsPageChoiceType:
+    class: izi\prestashop\Form\Type\CmsPageChoiceType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Image\ImageTypeChoiceType:
+    class: izi\prestashop\Form\Type\Image\ImageTypeChoiceType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Shipping\CarrierChoiceType:
+    class: izi\prestashop\Form\Type\Shipping\CarrierChoiceType
+    tags:
+      - form.type
+    arguments:
+      - '@izi\prestashop\Form\ChoiceList\CarrierChoiceLoader'
+
+  izi\prestashop\Form\Type\MaskedPasswordType:
+    class: izi\prestashop\Form\Type\MaskedPasswordType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Shipping\TimeOfWeekType:
+    class: izi\prestashop\Form\Type\Shipping\TimeOfWeekType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\Type\Shipping\TimeOfWeekRangeType:
+    class: izi\prestashop\Form\Type\Shipping\TimeOfWeekRangeType
+    tags:
+      - form.type
+
+  izi\prestashop\Form\ChoiceList\CarrierChoiceLoader:
+    class: izi\prestashop\Form\ChoiceList\CarrierChoiceLoader
+    arguments:
+      - '@izi\prestashop\ObjectModel\Repository\CarrierRepository'

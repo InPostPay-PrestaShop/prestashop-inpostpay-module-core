@@ -8,29 +8,27 @@ use izi\prestashop\HotProduct\Exception\InvalidProductDataException;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\ObjectModel\Repository\ProductRepository;
 use izi\prestashop\Product\ProductWithCombination;
-use izi\prestashop\Translation\LegacyTranslator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class HotProductValidator
 {
-    private const TRANSLATION_SOURCE = 'hotproductvalidator';
-
     /**
      * @var ProductRepository
      */
     private $productRepository;
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
     /**
      * @param ProductRepository $productRepository
      */
-    public function __construct(ObjectRepositoryInterface $productRepository, ?LegacyTranslator $translator = null)
+    public function __construct(ObjectRepositoryInterface $productRepository, TranslatorInterface $translator)
     {
         $this->productRepository = $productRepository;
-        $this->translator = $translator ?? new LegacyTranslator('inpostizi');
+        $this->translator = $translator;
     }
 
     /**
@@ -73,15 +71,15 @@ final class HotProductValidator
         );
 
         if (null === $productWithCombination) {
-            throw new InvalidProductDataException($this->translator->l('Product or combination does not exist.', self::TRANSLATION_SOURCE));
+            throw new InvalidProductDataException($this->translator->trans('Product or combination does not exist.', [], 'Modules.Inpostizi.Validators'));
         }
 
         if (!self::isAvailableForOrder($productWithCombination->getProduct())) {
-            throw new InvalidProductDataException($this->translator->l('Product is inactive or not available for order.', self::TRANSLATION_SOURCE));
+            throw new InvalidProductDataException($this->translator->trans('Product is inactive or not available for order.', [], 'Modules.Inpostizi.Validators'));
         }
 
         if (!self::hasEan($productWithCombination)) {
-            throw new InvalidProductDataException($this->translator->l('EAN code is required.', self::TRANSLATION_SOURCE));
+            throw new InvalidProductDataException($this->translator->trans('EAN code is required.', [], 'Modules.Inpostizi.Validators'));
         }
 
         return $productWithCombination;

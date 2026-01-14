@@ -9,15 +9,15 @@ use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
 use izi\prestashop\Hook\VersionRange;
 use izi\prestashop\ProductOptions\Message\UpdateProductOptionsCommand;
-use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShop\PrestaShop\Core\Module\Exception\ModuleErrorException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ActionAfterUpdateProductFormHandler implements PrestaShopVersionAwareHookInterface
 {
     public const HOOK_NAME = 'actionAfterUpdateProductFormHandler';
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
@@ -31,7 +31,7 @@ final class ActionAfterUpdateProductFormHandler implements PrestaShopVersionAwar
      */
     private $debug;
 
-    public function __construct(LegacyTranslator $translator, CommandBusInterface $bus, bool $debug = false)
+    public function __construct(TranslatorInterface $translator, CommandBusInterface $bus, bool $debug = false)
     {
         $this->translator = $translator;
         $this->bus = $bus;
@@ -55,7 +55,7 @@ final class ActionAfterUpdateProductFormHandler implements PrestaShopVersionAwar
     {
         $data = $parameters['form_data'] ?? null;
 
-        if (!is_array($data) && !$data instanceof \ArrayAccess) {
+        if (!\is_array($data) && !$data instanceof \ArrayAccess) {
             throw InvalidHookParamException::unexpectedType('form_data', $data, 'array');
         }
 
@@ -73,7 +73,7 @@ final class ActionAfterUpdateProductFormHandler implements PrestaShopVersionAwar
                 throw $e;
             }
 
-            throw new ModuleErrorException($this->translator->l('An error occurred while updating InPost Pay options.', strtolower(self::HOOK_NAME)), 0, $e);
+            throw new ModuleErrorException($this->translator->trans('An error occurred while updating InPost Pay options.', [], 'Modules.Inpostizi.Errors'), 0, $e);
         }
     }
 }

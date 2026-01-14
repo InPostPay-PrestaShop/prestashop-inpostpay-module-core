@@ -1,0 +1,61 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $context: '@inpost.izi.context'
+      $debug: '%kernel.debug%'
+      $translator: '@inpost.izi.translator'
+
+  izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter:
+    class: izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter
+
+  izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia:
+    class: izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia
+    bind:
+      $assetsProviders: !tagged inpost.izi.admin_assets_provider
+
+  izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerAfter:
+    class: izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerAfter
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerBefore:
+    class: izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerBefore
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Admin\DisplayAdminOrderSide:
+    class: izi\prestashop\Hook\Admin\DisplayAdminOrderSide
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Admin\DisplayAdminOrderLeft:
+    class: izi\prestashop\Hook\Admin\DisplayAdminOrderLeft
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Admin\DisplayBackOfficeHeader:
+    class: izi\prestashop\Hook\Admin\DisplayBackOfficeHeader
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Admin\Product\ActionProductFormBuilderModifier:
+    class: izi\prestashop\Hook\Admin\Product\ActionProductFormBuilderModifier
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Admin\Product\ActionAfterUpdateProductFormHandler:
+    class: izi\prestashop\Hook\Admin\Product\ActionAfterUpdateProductFormHandler
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom:
+    class: izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsOptionsStepBottom
+    tags:
+      - inpost.izi.hook
+
+  izi\prestashop\Hook\Legacy\Admin\Product\ActionAdminProductsSaveAfter:
+    class: izi\prestashop\Hook\Legacy\Admin\Product\ActionAdminProductsSaveAfter
+    tags:
+      - inpost.izi.hook

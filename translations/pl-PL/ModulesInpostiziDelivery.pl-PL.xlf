@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziDelivery.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="4d5340b646d9723cdb3bdf42182658d0">
+        <source>APM</source>
+        <target>Paczkomat</target>
+      </trans-unit>
+      <trans-unit id="5055d1a4444c630d6839f48ab48aef91">
+        <source>Courier</source>
+        <target>Kurier</target>
+      </trans-unit>
+      <trans-unit id="23ea1dcca5fb886199e5d9efb52bfe5a">
+        <source>Digital delivery</source>
+        <target>Dostawa elektroniczna</target>
+      </trans-unit>
+      <trans-unit id="7e0df2de796409e39b5ee6060c457be7">
+        <source>Weekend Delivery</source>
+        <target>Paczka w Weekend</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

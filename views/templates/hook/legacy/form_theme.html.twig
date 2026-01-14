@@ -1,0 +1,56 @@
+{% block form_row %}
+  <div class="form-group">
+    {{ form_label(form) }}
+    {{ form_widget(form) }}
+  </div>
+{% endblock %}
+
+{% block form_label %}
+  <label for="{{ id }}" class="control-label col-lg-3">
+    {% if help %}
+      <span class="label-tooltip" title="{{ help|e('html_attr') }}">
+        {{ label }}
+      </span>
+    {% else %}
+      {{ label }}
+    {% endif %}
+  </label>
+{% endblock %}
+
+{% block switch_widget %}
+  <div class="col-lg-9">
+    <span class="switch prestashop-switch fixed-width-lg">
+      {% for choice in choices|reverse %}
+        {% set choice_id = id ~ '_' ~ choice.value %}
+        <input
+            type="radio"
+            name="{{ full_name }}"
+            id="{{ choice_id }}"
+            value="{{ choice.value }}"
+            {% if choice is selectedchoice(value) %}checked="checked"{% endif %}
+        >
+        <label class="t" for="{{ choice_id }}">{{ choice.label|trans({}, choice_translation_domain) }}</label>
+      {% endfor %}
+
+      <a class="slide-button btn"></a>
+    </span>
+  </div>
+{% endblock %}
+
+{% block choice_widget_collapsed %}
+  <div class="col-lg-9">
+    <select name="{{ full_name }}" id="{{ id }}">
+      {% if placeholder is defined %}
+        <option value=""{% if required and value is empty %} selected="selected"{% endif %}>
+          {{ placeholder }}
+        </option>
+      {% endif %}
+
+      {% for choice in choices %}
+        <option value="{{ choice.value }}" {% if choice is selectedchoice(value) %}selected="selected"{% endif %}>
+          {{ choice.label }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+{% endblock %}

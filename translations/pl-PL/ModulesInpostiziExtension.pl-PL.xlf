@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziExtension.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="d115049d9c9e9dd56b164f4fa310926a">
+        <source>Could not retrieve extensions data: {error}</source>
+        <target>Nie udało się pobrać danych rozszerzeń: {error}</target>
+      </trans-unit>
+      <trans-unit id="5e2f5f3c24ae8c6ab3eca618826b0e23">
+        <source>Extensions</source>
+        <target>Rozszerzenia</target>
+      </trans-unit>
+      <trans-unit id="26a6afc14d0b942606eb58d8b2ff18c8">
+        <source>Extensions have been successfully updated.</source>
+        <target>Rozszerzenia zostały pomyślnie zaktualizowane.</target>
+      </trans-unit>
+      <trans-unit id="98dd43dfae05b11befe1f140e0ec787a">
+        <source>Installed</source>
+        <target>Zainstalowane</target>
+      </trans-unit>
+      <trans-unit id="6311ae17c1ee52b36e68aaf4ad066387">
+        <source>Other</source>
+        <target>Pozostałe</target>
+      </trans-unit>
+      <trans-unit id="654866693fd91ce8e9764a218f569918">
+        <source>Recommended</source>
+        <target>Rekomendowane</target>
+      </trans-unit>
+      <trans-unit id="34b6cd75171affba6957e308dcbd92be">
+        <source>Version</source>
+        <target>Wersja</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

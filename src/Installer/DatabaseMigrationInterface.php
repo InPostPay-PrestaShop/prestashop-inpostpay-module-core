@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Installer;
 
-interface DatabaseMigrationInterface
+use izi\prestashop\Installer\Database\MigrationInterface;
+
+/**
+ * @deprecated
+ */
+interface DatabaseMigrationInterface extends MigrationInterface
 {
-    public function getVersion(): string;
-
-    public function up();
-
-    public function down();
 }

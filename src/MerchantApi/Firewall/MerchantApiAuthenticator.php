@@ -65,7 +65,7 @@ final class MerchantApiAuthenticator
     {
         $digest = base64_encode(hash('sha256', $body, true));
 
-        return base64_encode(sprintf(
+        return base64_encode(\sprintf(
             '%s,%s,%s,%s',
             $digest,
             $key->getMerchantId(),
@@ -79,7 +79,7 @@ final class MerchantApiAuthenticator
         $publicKey = openssl_pkey_get_public($key->getPemFormatted());
 
         if (false === $publicKey) {
-            throw new \RuntimeException(sprintf('Could not extract public key: %s.', openssl_error_string()));
+            throw new \RuntimeException(\sprintf('Could not extract public key: %s.', openssl_error_string()));
         }
 
         return $publicKey;
@@ -90,11 +90,11 @@ final class MerchantApiAuthenticator
      */
     private function verifySignature(string $data, string $signature, $publicKey): void
     {
-        $result = openssl_verify($data, base64_decode($signature), $publicKey, OPENSSL_ALGO_SHA256);
+        $result = openssl_verify($data, base64_decode($signature), $publicKey, \OPENSSL_ALGO_SHA256);
 
         switch ($result) {
             case -1:
-                throw new \RuntimeException(sprintf('Could not verify signature: %s.', openssl_error_string()));
+                throw new \RuntimeException(\sprintf('Could not verify signature: %s.', openssl_error_string()));
             case 0:
                 throw new InvalidSignatureException('Signature mismatch.');
             default:

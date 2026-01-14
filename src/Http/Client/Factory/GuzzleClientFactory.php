@@ -8,38 +8,39 @@ use GuzzleHttp\Client;
 use izi\prestashop\Http\Client\Adapter\Guzzle5Adapter;
 use Psr\Http\Client\ClientInterface;
 
-class GuzzleClientFactory implements ClientFactoryInterface
+final class GuzzleClientFactory implements ClientFactoryInterface
 {
-    /**
-     * @var int
-     */
-    private $timeout;
-
-    public function __construct(int $timeout = 10)
-    {
-        $this->timeout = $timeout;
-    }
-
-    public function create(): ClientInterface
+    public function create(array $options = []): ClientInterface
     {
         if (!class_exists(Client::class)) {
-            throw new \RuntimeException(sprintf('Class %s does not exist', Client::class));
+            throw new \RuntimeException(\sprintf('Class "%s" does not exist.', Client::class));
         }
 
+        $options = $this->convertOptions($options);
+
         if (is_subclass_of(Client::class, ClientInterface::class)) {
-            return new Client([
-                'connect_timeout' => 3.,
-                'timeout' => $this->timeout,
-            ]);
+            return new Client($options);
         }
 
         $client = new Client([
-            'defaults' => [
-                'connect_timeout' => 3.,
-                'timeout' => $this->timeout,
-            ],
+            'defaults' => $options,
         ]);
 
         return new Guzzle5Adapter($client);
+    }
+
+    private function convertOptions(array $options): array
+    {
+        $guzzleOptions = [];
+
+        if (isset($options['timeout'])) {
+            $guzzleOptions['connect_timeout'] = $options['timeout'];
+        }
+
+        if (isset($options['max_duration'])) {
+            $guzzleOptions['timeout'] = $options['max_duration'];
+        }
+
+        return $guzzleOptions;
     }
 }

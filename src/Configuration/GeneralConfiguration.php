@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration;
 
 use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
+use izi\prestashop\Hook\Front\DisplayPaymentReturn;
 use izi\prestashop\Hook\Front\DisplayProductActions;
-use izi\prestashop\Hook\Front\DisplayProductAdditionalInfo;
 
 /**
  * @implements PersistentConfigurationInterface<GeneralConfigurationInterface&PromoCodesConfigurationInterface>
@@ -44,35 +44,25 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
         return null === $value ? $value : (int) $value;
     }
 
-    public function getThankYouDisplayHook(?int $shopId = null): ?string
+    public function getThankYouDisplayHook(?int $shopId = null): string
     {
-        return $this->configuration->get(self::THANK_YOU_DISPLAY_HOOK, $shopId);
+        $hook = $this->configuration->get(self::THANK_YOU_DISPLAY_HOOK, $shopId);
+
+        return $hook ?? DisplayPaymentReturn::HOOK_NAME;
     }
 
-    public function getProductCardDisplayHook(?int $shopId = null): ?string
+    public function getProductCardDisplayHook(?int $shopId = null): string
     {
         $hook = $this->configuration->get(self::PRODUCT_CARD_DISPLAY_HOOK, $shopId);
 
-        if (null === $hook) {
-            if (!DisplayProductActions::getVersionRange()->contains(_PS_VERSION_)) {
-                $hook = DisplayProductAdditionalInfo::HOOK_NAME;
-            } else {
-                $hook = DisplayProductActions::HOOK_NAME;
-            }
-        }
-
-        return $hook;
+        return $hook ?? DisplayProductActions::HOOK_NAME;
     }
 
-    public function getCheckoutButtonDisplayHook(?int $shopId = null): ?string
+    public function getCheckoutButtonDisplayHook(?int $shopId = null): string
     {
         $hook = $this->configuration->get(self::CHECKOUT_BUTTON_DISPLAY_HOOK, $shopId);
 
-        if (null === $hook) {
-            $hook = DisplayCheckoutSummaryTop::HOOK_NAME;
-        }
-
-        return $hook;
+        return $hook ?? DisplayCheckoutSummaryTop::HOOK_NAME;
     }
 
     public function isFullPageCacheModuleInUse(?int $shopId = null): bool

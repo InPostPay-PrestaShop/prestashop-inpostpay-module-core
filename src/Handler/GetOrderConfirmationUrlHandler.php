@@ -31,11 +31,11 @@ final class GetOrderConfirmationUrlHandler implements GetOrderConfirmationUrlHan
     public function __invoke(GetOrderConfirmationUrlCommand $command): string
     {
         if (null === $session = $this->repository->findByBasketId($command->getBasketId())) {
-            throw new \DomainException(sprintf('Basket "%s" does not exist.', $command->getBasketId()));
+            throw new \DomainException(\sprintf('Basket "%s" does not exist.', $command->getBasketId()));
         }
 
         if (null === $orderId = $session->getOrderId()) {
-            throw new \DomainException(sprintf('Basket "%s" was not finalized.', $session->getBasketId()));
+            throw new \DomainException(\sprintf('Basket "%s" was not finalized.', $session->getBasketId()));
         }
 
         $session->redirect();

@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Common;
 
 use izi\prestashop\Enum\StringEnum;
-use izi\prestashop\Form\Type\GuiConfigurationType;
-use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method static self ProductCard()
@@ -52,27 +51,27 @@ final class BindingPlace extends StringEnum implements TranslatableInterface
         return self::ThankYouPage() !== $this;
     }
 
-    public function trans(LegacyTranslator $translator): string
+    public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
         switch ($this) {
             case self::ProductCard():
-                return $translator->l('Product card', GuiConfigurationType::TRANSLATION_SOURCE);
+                return $translator->trans('Product card', [], 'Modules.Inpostizi.Binding', $locale);
             case self::BasketSummary():
-                return $translator->l('Cart page', GuiConfigurationType::TRANSLATION_SOURCE);
+                return $translator->trans('Cart page', [], 'Modules.Inpostizi.Binding', $locale);
             case self::BasketPopup():
-                return $translator->l('Add to cart confirmation', 'bindingplace');
+                return $translator->trans('Add to cart confirmation popup', [], 'Modules.Inpostizi.Binding', $locale);
             case self::OrderCreate():
-                return $translator->l('Payment method option selection', 'bindingplace');
+                return $translator->trans('Payment method selection step', [], 'Modules.Inpostizi.Binding', $locale);
             case self::LoginPage():
-                return $translator->l('Login page', GuiConfigurationType::TRANSLATION_SOURCE);
+                return $translator->trans('Login page', [], 'Modules.Inpostizi.Binding', $locale);
             case self::RegisterFormPage():
-                return $translator->l('Register page', GuiConfigurationType::TRANSLATION_SOURCE);
+                return $translator->trans('Registration page', [], 'Modules.Inpostizi.Binding', $locale);
             case self::CheckoutPage():
-                return $translator->l('Checkout page', GuiConfigurationType::TRANSLATION_SOURCE);
+                return $translator->trans('Checkout page', [], 'Modules.Inpostizi.Binding', $locale);
             case self::MiniCartPage():
-                return $translator->l('Cart preview', GuiConfigurationType::TRANSLATION_SOURCE);
+                return $translator->trans('Cart preview', [], 'Modules.Inpostizi.Binding', $locale);
             case self::ThankYouPage():
-                return $translator->l('"Thank you" page', 'bindingplace');
+                return $translator->trans('"Thank you" page', [], 'Modules.Inpostizi.Binding', $locale);
             default:
                 throw new \LogicException('Unreachable statement.');
         }

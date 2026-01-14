@@ -8,32 +8,23 @@ use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Configuration\DTO\Shipping\CarrierMapping;
 use izi\prestashop\Enum\Enum;
-use izi\prestashop\Translation\LegacyTranslator;
-use izi\prestashop\Translation\ServiceNameTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class CarrierMappingsType extends AbstractType implements DataMapperInterface
 {
-    private const TRANSLATION_SOURCE = 'carriermappingstype';
-
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
-    /**
-     * @var ServiceNameTranslator
-     */
-    private $serviceNameTranslator;
-
-    public function __construct(LegacyTranslator $translator, ServiceNameTranslator $serviceNameTranslator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
-        $this->serviceNameTranslator = $serviceNameTranslator;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -65,7 +56,7 @@ final class CarrierMappingsType extends AbstractType implements DataMapperInterf
             return;
         }
 
-        if (!is_array($viewData)) {
+        if (!\is_array($viewData)) {
             throw new UnexpectedTypeException($viewData, 'array');
         }
 
@@ -101,14 +92,14 @@ final class CarrierMappingsType extends AbstractType implements DataMapperInterf
 
     private function getChildLabel(ServiceCode ...$serviceCodes): string
     {
-        $label = $this->translator->l('Carrier mapping', self::TRANSLATION_SOURCE);
+        $label = $this->translator->trans('Carrier mapping', [], 'Modules.Inpostizi.Shipping');
 
         if ([] === $serviceCodes) {
             return $label;
         }
 
-        return sprintf('%s (%s)', $label, implode(' + ', array_map(function (ServiceCode $serviceCode): string {
-            return $this->serviceNameTranslator->getName($serviceCode);
+        return \sprintf('%s (%s)', $label, implode(' + ', array_map(function (ServiceCode $serviceCode): string {
+            return $serviceCode->trans($this->translator);
         }, $serviceCodes)));
     }
 
@@ -123,7 +114,7 @@ final class CarrierMappingsType extends AbstractType implements DataMapperInterf
 
             $diff = array_udiff($serviceCodes, $mappingServiceCodes, [Enum::class, 'compareValues']);
 
-            if ([] === $diff && count($mappingServiceCodes) === count($serviceCodes)) {
+            if ([] === $diff && \count($mappingServiceCodes) === \count($serviceCodes)) {
                 return $mapping;
             }
         }

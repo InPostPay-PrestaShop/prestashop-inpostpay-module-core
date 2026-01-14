@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\View\Widget;
 
 use izi\prestashop\Enum\StringEnum;
-use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method static self ExtraSmall()
@@ -23,19 +23,27 @@ final class Size extends StringEnum implements TranslatableInterface
     private const LARGE = 'size-lg';
     private const EXTRA_LARGE = 'size-xl';
 
-    public function trans(LegacyTranslator $translator): string
+    /**
+     * @return self size corresponding to the default widget behavior if no size is set in the "variation" attribute
+     */
+    public static function getDefault(): self
+    {
+        return self::Large();
+    }
+
+    public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
         switch ($this) {
             case self::ExtraSmall():
-                return $translator->l('Extra small', 'size');
+                return $translator->trans('Extra small', [], 'Modules.Inpostizi.Gui', $locale);
             case self::Small():
-                return $translator->l('Small', 'size');
+                return $translator->trans('Small', [], 'Modules.Inpostizi.Gui', $locale);
             case self::Medium():
-                return $translator->l('Medium', 'size');
+                return $translator->trans('Medium', [], 'Modules.Inpostizi.Gui', $locale);
             case self::Large():
-                return $translator->l('Large', 'size');
+                return $translator->trans('Large', [], 'Modules.Inpostizi.Gui', $locale);
             case self::ExtraLarge():
-                return $translator->l('Extra large', 'size');
+                return $translator->trans('Extra large', [], 'Modules.Inpostizi.Gui', $locale);
             default:
                 throw new \LogicException('Unreachable statement.');
         }

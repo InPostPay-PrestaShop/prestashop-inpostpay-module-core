@@ -7,9 +7,8 @@ namespace izi\prestashop\PromoCode;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ShopAwareConfigurationInterface;
 use izi\prestashop\Database\Connection;
-use izi\prestashop\Repository\CartRuleRepositoryInterface;
 
-class CartRuleOptionsRepository implements CartRuleOptionsRepositoryInterface, CartRuleRepositoryInterface
+final class CartRuleOptionsRepository implements CartRuleOptionsRepositoryInterface
 {
     public const TABLE_NAME = 'inpostizi_cart_rule';
 
@@ -74,7 +73,7 @@ class CartRuleOptionsRepository implements CartRuleOptionsRepositoryInterface, C
             return null;
         }
 
-        if (array_key_exists($cartRuleId, $this->options)) {
+        if (\array_key_exists($cartRuleId, $this->options)) {
             return $this->options[$cartRuleId];
         }
 
@@ -111,21 +110,6 @@ class CartRuleOptionsRepository implements CartRuleOptionsRepositoryInterface, C
         }
 
         return $options->isOmnibus();
-    }
-
-    public function setOmnibus(int $cartRuleId, bool $isOmnibus): void
-    {
-        @trigger_error(sprintf('Method "%s::%s()" is deprecated since 2.1.0. Use "%s::add()" or "%s::update()" instead.', CartRuleRepositoryInterface::class, __FUNCTION__, CartRuleOptionsRepositoryInterface::class, CartRuleOptionsRepositoryInterface::class), E_USER_DEPRECATED);
-
-        $options = $this->find($cartRuleId);
-
-        if (null === $options) {
-            $options = (new CartRuleOptions($cartRuleId))->setIsOmnibus($isOmnibus);
-            $this->add($options);
-        } elseif ($isOmnibus !== $options->isOmnibus()) {
-            $options->setIsOmnibus($isOmnibus);
-            $this->update($options);
-        }
     }
 
     protected function createQueryBuilder(): \DbQuery

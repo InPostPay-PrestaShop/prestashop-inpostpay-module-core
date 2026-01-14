@@ -6,7 +6,6 @@ namespace izi\prestashop\HotProduct\Form;
 
 use izi\prestashop\Form\DataTransformer\DateTimeImmutableToDateTimeTransformer as DateTransformerPolyfill;
 use izi\prestashop\HotProduct\Message\UpdateHotProductCommand;
-use izi\prestashop\Translation\LegacyTranslator;
 use PrestaShopBundle\Form\Admin\Type\DatePickerType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\DataTransformer\DataTransformerChain;
@@ -14,14 +13,16 @@ use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeImmutableToDat
 use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToStringTransformer;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class UpdateHotProductType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'updatehotproducttype';
-
+    /**
+     * @var TranslatorInterface
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -31,12 +32,12 @@ final class UpdateHotProductType extends AbstractType
         $builder
             ->add('availableFrom', DatePickerType::class, [
                 'required' => false,
-                'label' => $this->translator->l('Available from', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Available from', [], 'Modules.Inpostizi.Hotproduct'),
                 'date_format' => 'YYYY-MM-DD HH:mm:ss',
             ])
             ->add('availableTo', DatePickerType::class, [
                 'required' => false,
-                'label' => $this->translator->l('Available to', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Available to', [], 'Modules.Inpostizi.Hotproduct'),
                 'date_format' => 'YYYY-MM-DD HH:mm:ss',
             ]);
 

@@ -49,9 +49,9 @@ final class ProductConfiguration implements ProductConfigurationInterface
         return $this->normalImageTypeId;
     }
 
-    public function setNormalImageTypeId(?\ImageType $imageType): void
+    public function setNormalImageTypeId(?int $imageTypeId): void
     {
-        $this->normalImageTypeId = null === $imageType ? null : (int) $imageType->id;
+        $this->normalImageTypeId = $imageTypeId;
     }
 
     public function getSmallImageTypeId(?int $shopId = null): ?int
@@ -59,9 +59,9 @@ final class ProductConfiguration implements ProductConfigurationInterface
         return $this->smallImageTypeId;
     }
 
-    public function setSmallImageTypeId(?\ImageType $imageType): void
+    public function setSmallImageTypeId(?int $imageTypeId): void
     {
-        $this->smallImageTypeId = null === $imageType ? null : (int) $imageType->id;
+        $this->smallImageTypeId = $imageTypeId;
     }
 
     public function getLargeImageTypeId(?int $shopId = null): ?int
@@ -69,9 +69,9 @@ final class ProductConfiguration implements ProductConfigurationInterface
         return $this->largeImageTypeId;
     }
 
-    public function setLargeImageTypeId(?\ImageType $imageType): void
+    public function setLargeImageTypeId(?int $imageTypeId): void
     {
-        $this->largeImageTypeId = null === $imageType ? null : (int) $imageType->id;
+        $this->largeImageTypeId = $imageTypeId;
     }
 
     public function getDefaultImageGalleryType(?int $shopId = null): ImageGalleryType

@@ -9,6 +9,7 @@ use izi\prestashop\MerchantApi\Command\GetProductsCommand;
 use izi\prestashop\MerchantApi\Model\Product\Response\Products;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 final class ProductController extends AbstractApiController
 {
@@ -18,7 +19,7 @@ final class ProductController extends AbstractApiController
         $pageSize = $request->query->get('page_size');
         $productIds = $request->query->get('product_ids');
 
-        if (null !== $productIds && !is_array($productIds)) {
+        if (null !== $productIds && !\is_array($productIds)) {
             $productIds = explode(',', $productIds);
         }
 
@@ -42,6 +43,6 @@ final class ProductController extends AbstractApiController
             'datetime_timezone' => BasketAppClientInterface::DATETIME_ZONE,
         ]);
 
-        return JsonResponse::create()->setContent($data);
+        return new JsonResponse($data, Response::HTTP_OK, [], true);
     }
 }

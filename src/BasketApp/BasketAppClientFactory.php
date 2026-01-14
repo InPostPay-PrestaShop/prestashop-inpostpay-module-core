@@ -8,7 +8,6 @@ use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Environment\AuthServerUriCollection;
 use izi\prestashop\Http\Client\AuthorizingClient;
 use izi\prestashop\Http\Client\Factory\ClientFactoryInterface;
-use izi\prestashop\Http\Client\Factory\GuzzleClientFactory;
 use izi\prestashop\OAuth2\AuthorizationProviderFactoryInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -42,12 +41,12 @@ final class BasketAppClientFactory
      */
     private $authorizationProviderFactory;
 
-    public function __construct(RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, SerializerInterface $serializer, ?ClientFactoryInterface $clientFactory = null, ?AuthorizationProviderFactoryInterface $authorizationProviderFactory = null)
+    public function __construct(RequestFactoryInterface $requestFactory, StreamFactoryInterface $streamFactory, SerializerInterface $serializer, ClientFactoryInterface $clientFactory, ?AuthorizationProviderFactoryInterface $authorizationProviderFactory = null)
     {
         $this->requestFactory = $requestFactory;
         $this->streamFactory = $streamFactory;
         $this->serializer = $serializer;
-        $this->clientFactory = $clientFactory ?? new GuzzleClientFactory();
+        $this->clientFactory = $clientFactory;
         $this->authorizationProviderFactory = $authorizationProviderFactory ?? new AuthorizationProviderFactory($requestFactory, $streamFactory, $this->clientFactory);
     }
 

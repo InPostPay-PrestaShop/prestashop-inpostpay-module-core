@@ -1,0 +1,19 @@
+services:
+  _defaults:
+    public: false
+
+  inpost.izi.context:
+    class: Context
+    public: true
+    factory: [ Context, getContext ]
+
+  inpost.izi.shop_context:
+    class: PrestaShop\PrestaShop\Adapter\Shop\Context
+
+  izi\prestashop\ContextManager:
+    class: izi\prestashop\ContextManager
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@prestashop.core.localization.locale.repository'

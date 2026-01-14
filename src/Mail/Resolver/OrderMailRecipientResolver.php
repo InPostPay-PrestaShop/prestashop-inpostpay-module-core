@@ -89,7 +89,7 @@ final class OrderMailRecipientResolver
 
     private function resolveIsCustomerMail(): bool
     {
-        return in_array($this->customer->email, $this->emailList);
+        return \in_array($this->customer->email, $this->emailList);
     }
 
     private function addDeliveryMailToSend()

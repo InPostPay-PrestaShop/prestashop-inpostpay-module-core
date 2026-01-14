@@ -1,0 +1,15 @@
+<div id="inpostizi_block_backend" class="panel">
+  <div class="panel-heading">InPost Pay</div>
+
+  <dl class="well list-detail">
+    <dt>{{ 'Delivery method'|trans({},'Modules.Inpostizi.Order') }}:</dt><dd>{{ delivery }}</dd>
+
+    {% if apm is not same as('') %}
+      <dt>{{ 'APM'|trans({},'Modules.Inpostizi.Delivery') }}:</dt><dd>{{ apm }}</dd>
+    {% endif %}
+
+    {% if issue_invoice %}
+      <dt>{{ 'The customer requested a VAT invoice'|trans({}, 'Modules.Inpostizi.Order') }}</dt><dd></dd>
+    {% endif %}
+  </dl>
+</div>

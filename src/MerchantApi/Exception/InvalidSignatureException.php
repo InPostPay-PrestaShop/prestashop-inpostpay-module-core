@@ -20,6 +20,6 @@ final class InvalidSignatureException extends ApiException
 
     public static function missingHeader(string $name): self
     {
-        return new self(sprintf('Missing header: "%s".', $name));
+        return new self(\sprintf('Missing header: "%s".', $name));
     }
 }

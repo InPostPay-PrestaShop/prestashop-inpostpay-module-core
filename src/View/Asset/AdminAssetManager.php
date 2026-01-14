@@ -20,23 +20,30 @@ final class AdminAssetManager extends AbstractAssetManager
 
     public function registerJavaScript(string $path, array $options = []): AssetManagerInterface
     {
+        $controller = $this->getController();
         $url = $this->getPackage()->getUrl($path);
-        $this->getController()->addJS($url);
+
+        $controller->removeJS($url, false);
+        $controller->addJS($url);
 
         return $this;
     }
 
     public function registerStyleSheet(string $path, array $options = []): AssetManagerInterface
     {
+        $controller = $this->getController();
         $url = $this->getPackage()->getUrl($path);
-        $this->getController()->addCSS($url, $options['media'] ?? 'all', null, false);
+        $mediaType = $options['media'] ?? 'all';
+
+        $controller->removeCSS($url, $mediaType);
+        $controller->addCSS($url, $mediaType, null, false);
 
         return $this;
     }
 
     protected function getBasePath(): string
     {
-        return sprintf('%s/views', rtrim($this->module->getPathUri(), '/'));
+        return \sprintf('%s/views', rtrim($this->module->getPathUri(), '/'));
     }
 
     private function getController(): \AdminController

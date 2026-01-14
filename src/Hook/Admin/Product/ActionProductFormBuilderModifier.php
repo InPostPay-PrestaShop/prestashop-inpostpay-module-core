@@ -49,7 +49,7 @@ final class ActionProductFormBuilderModifier implements PrestaShopVersionAwareHo
             throw InvalidHookParamException::unexpectedType('form_builder', $formBuilder, FormBuilderInterface::class);
         }
 
-        if (!is_int($productId = $parameters['id'] ?? null)) {
+        if (!\is_int($productId = $parameters['id'] ?? null)) {
             throw InvalidHookParamException::unexpectedType('id', $productId, 'int');
         }
 

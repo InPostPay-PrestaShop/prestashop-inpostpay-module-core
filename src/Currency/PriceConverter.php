@@ -63,6 +63,6 @@ final class PriceConverter implements PriceConverterInterface
             return $currency;
         }
 
-        throw new \RuntimeException(sprintf('Currency %d does not exist.', $currencyId));
+        throw new \RuntimeException(\sprintf('Currency %d does not exist.', $currencyId));
     }
 }

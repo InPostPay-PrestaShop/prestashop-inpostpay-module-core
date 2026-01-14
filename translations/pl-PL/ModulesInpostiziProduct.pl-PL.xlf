@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziProduct.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="e37cf03c2b4c1b5c0ad5214081e2c009">
+        <source>All images</source>
+        <target>Wszystkie zdjęcia</target>
+      </trans-unit>
+      <trans-unit id="ba08c35a9d8f80fd99614f57e7f4c03c">
+        <source>Customizable products</source>
+        <target>Dostosowywalne produkty</target>
+      </trans-unit>
+      <trans-unit id="f0ffb145cf94055a8a4b4036007054b9">
+        <source>Default image gallery type</source>
+        <target>Domyślny rodzaj galerii zdjęć</target>
+      </trans-unit>
+      <trans-unit id="d242d58268fec7de2df17d2eb3533511">
+        <source>Determines what images are passed to the mobile app (applies to both cart and order products as well as hot products).</source>
+        <target>Określa, które zdjęcia są przesyłane do aplikacji mobilnej (dotyczy zarówno produktów z koszyka i zamówienia, jak i promowanych produktów).</target>
+      </trans-unit>
+      <trans-unit id="2acde1b85cc02410a25711f7f503dc1c">
+        <source>Disallow APM delivery</source>
+        <target>Nie pozwól na dostawę do Paczkomatu</target>
+      </trans-unit>
+      <trans-unit id="9615ed3135486a635731930d8009ca18">
+        <source>Disallow courier delivery</source>
+        <target>Nie pozwól na dostawę kurierem</target>
+      </trans-unit>
+      <trans-unit id="1401d7c432212f9308f54b57f519e5e7">
+        <source>Disallow order</source>
+        <target>Nie pozwól zamówić</target>
+      </trans-unit>
+      <trans-unit id="4117ad91ce7cf3af284a17d8bdc78713">
+        <source>Do not display widget</source>
+        <target>Nie wyświetlaj widgetu</target>
+      </trans-unit>
+      <trans-unit id="b16c55fb0fee99685799e67222f8d8ef">
+        <source>If either the "{hide_widget}" or "{disallow_order}" option is selected, the widget will not be displayed on the product page.</source>
+        <target>W przypadku wyboru opcji "{hide_widget}" lub "{disallow_order}" widget nie będzie wyświetlany na stronach produktów spełniających którykolwiek z poniższych warunków.</target>
+      </trans-unit>
+      <trans-unit id="8f37d219d605ffeb1e11cf5aec34076c">
+        <source>Image gallery type</source>
+        <target>Rodzaj galerii zdjęć</target>
+      </trans-unit>
+      <trans-unit id="a7f7058d98537328c1dbabdcae4169c9">
+        <source>InPost Pay options</source>
+        <target>Opcje InPost Pay</target>
+      </trans-unit>
+      <trans-unit id="46fb7288f3d200a582083cacc0718c8c">
+        <source>Large image type</source>
+        <target>Typ zdjęcia duży</target>
+      </trans-unit>
+      <trans-unit id="4dd0ff8772b0b1249408dc9e4f6b3885">
+        <source>Only cover image</source>
+        <target>Tylko zdjęcie okładkowe</target>
+      </trans-unit>
+      <trans-unit id="c6ca748854a782c9150f972d4e4c9074">
+        <source>Packs of products</source>
+        <target>Zestawy produktów</target>
+      </trans-unit>
+      <trans-unit id="52c6dba9feba73a163b3d71faf11322b">
+        <source>Product combination with selected attributes does not exist.</source>
+        <target>Kombinacja produktu z wybranymi atrybutami nie istnieje.</target>
+      </trans-unit>
+      <trans-unit id="35f02d95e95c00dd976c840eece6e917">
+        <source>Product details image type</source>
+        <target>Typ zdjęcia w szczegółach produktu</target>
+      </trans-unit>
+      <trans-unit id="dc69b3498766f84bb8aa3316146bdd53">
+        <source>Product list image type</source>
+        <target>Typ zdjęcia na liście produktów</target>
+      </trans-unit>
+      <trans-unit id="c890c8109a222c4a83edcf88b641d8e8">
+        <source>Product restrictions</source>
+        <target>Ograniczenia produktów</target>
+      </trans-unit>
+      <trans-unit id="3d19aea4e2d382e85165bbf71cef1e05">
+        <source>Product type</source>
+        <target>Typ produktu</target>
+      </trans-unit>
+      <trans-unit id="101ca77dec0df7d2f721467aef2a03d8">
+        <source>Products with combinations</source>
+        <target>Produkty z kombinacjami</target>
+      </trans-unit>
+      <trans-unit id="989cdd14b02a85ac76081e97c72515ac">
+        <source>Restricted action</source>
+        <target>Sposób działania ograniczeń</target>
+      </trans-unit>
+      <trans-unit id="fafdcf7e6355f6539aeabcea6f3460f4">
+        <source>Standard products</source>
+        <target>Standardowe produkty</target>
+      </trans-unit>
+      <trans-unit id="d11d1534dca3787e2e0ad51a4d2e051e">
+        <source>The restriction will be applied if the product combination has an attribute from the selected groups.</source>
+        <target>Ograniczenie zostanie zastosowane, jeżeli kombinacja produktu ma atrybuty pochodzące z wybranych grup.</target>
+      </trans-unit>
+      <trans-unit id="66e88e7c6a6dbac7d4a0fb62b6b2a910">
+        <source>The restriction will be applied if the product has any of the selected features.</source>
+        <target>Ograniczenie zostanie zastosowane, jeżeli produkt ma jakąkolwiek z wybranych cech.</target>
+      </trans-unit>
+      <trans-unit id="f83bd5432633f888750d87788e126ee9">
+        <source>The restriction will be applied if the product matches any of the below conditions.</source>
+        <target>Ograniczenie zostanie zastosowane, jeżeli produkt spełnia którykolwiek z poniższych warunków.</target>
+      </trans-unit>
+      <trans-unit id="c9b4ce5932248c5d8274a535c11e3a1b">
+        <source>This image format will be used in the product details view in the mobile app.</source>
+        <target>Ten format zdjęcia będzie używany w widoku szczegółów produktu w aplikacji mobilnej.</target>
+      </trans-unit>
+      <trans-unit id="6a3ec8a6d153c645fc18f8d284ee2aba">
+        <source>This image format will be used on the product list in the mobile app.</source>
+        <target>Ten format zdjęcia będzie używany na liście produktów w aplikacji mobilnej.</target>
+      </trans-unit>
+      <trans-unit id="9c80685913a86fab8279ee0bbdfcbd19">
+        <source>This image format will be used when using the zoom option in the mobile app.</source>
+        <target>Ten format zdjęcia będzie używany w przypadku użycia opcji powiększenia obrazu w aplikacji mobilnej.</target>
+      </trans-unit>
+      <trans-unit id="53d0ca486dc7ee72cac2c538297ad2a3">
+        <source>Virtual products</source>
+        <target>Produkty wirtualne</target>
+      </trans-unit>
+      <trans-unit id="21a34acbe661464bf8ec2534c64a402a">
+        <source>You can override this setting for individual products using the product edit form.</source>
+        <target>Możesz nadpisać to ustawienie dla poszczególnych produktów, korzystając z formularza edycji produktu.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

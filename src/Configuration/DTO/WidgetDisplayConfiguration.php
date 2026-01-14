@@ -6,6 +6,7 @@ namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\WidgetDisplayConfigurationInterface;
+use izi\prestashop\View\Widget\Size;
 use izi\prestashop\View\Widget\WidgetConfiguration;
 use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -49,6 +50,7 @@ final class WidgetDisplayConfiguration implements WidgetDisplayConfigurationInte
     public static function for(BindingPlace $bindingPlace): self
     {
         $widgetConfiguration = new WidgetConfiguration($bindingPlace);
+        $widgetConfiguration->setSize(Size::getDefault());
 
         return new self($widgetConfiguration);
     }

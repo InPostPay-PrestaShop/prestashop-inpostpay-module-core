@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Common;
 
-use izi\prestashop\Enum\Enum;
 use izi\prestashop\Enum\NotAnEnum;
+use izi\prestashop\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @todo: Cannot be modeled as an enum since InPost does not consider adding new values as a breaking change.
@@ -21,7 +22,7 @@ use izi\prestashop\Enum\NotAnEnum;
  * @method static self DeferredPayment()
  * @method static self CashOnDelivery()
  */
-final class PaymentType extends NotAnEnum
+final class PaymentType extends NotAnEnum implements TranslatableInterface
 {
     private const CARD = 'CARD';
     private const CARD_TOKEN = 'CARD_TOKEN';
@@ -34,45 +35,31 @@ final class PaymentType extends NotAnEnum
     private const DEFERRED_PAYMENT = 'DEFERRED_PAYMENT';
     private const CASH_ON_DELIVERY = 'CASH_ON_DELIVERY';
 
-    /**
-     * @deprecated
-     *
-     * @return self[]
-     */
-    public static function getCarrierProvidedPaymentOptions(): array
+    public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
-        @trigger_error(sprintf('Method "%s()" is deprecated without replacement.', __METHOD__), \E_USER_DEPRECATED);
-
-        return [self::CashOnDelivery()];
-    }
-
-    /**
-     * @deprecated
-     *
-     * @return self[]
-     */
-    public static function getBankProvidedPaymentOptions(): array
-    {
-        @trigger_error(sprintf('Method "%s()" is deprecated without replacement.', __METHOD__), \E_USER_DEPRECATED);
-
-        $diff = array_udiff(self::cases(), self::getCarrierProvidedPaymentOptions(), [Enum::class, 'compareValues']);
-
-        return array_values($diff);
-    }
-
-    /**
-     * @deprecated
-     *
-     * @return self[]
-     */
-    public static function getAvailableByDefaultPaymentOptions(): array
-    {
-        @trigger_error(sprintf('Method "%s()" is deprecated without replacement.', __METHOD__), \E_USER_DEPRECATED);
-
-        $filtered = array_filter(self::cases(), static function (self $type) {
-            return $type !== self::DeferredPayment();
-        });
-
-        return array_values($filtered);
+        switch ($this) {
+            case self::Card():
+                return $translator->trans('Credit card', [], 'Modules.Inpostizi.Payment', $locale);
+            case self::CardToken():
+                return $translator->trans('Remembered credit card', [], 'Modules.Inpostizi.Payment', $locale);
+            case self::GooglePay():
+                return $translator->trans('Google Pay', [], 'Modules.Inpostizi.Payment', $locale);
+            case self::ApplePay():
+                return $translator->trans('Apple Pay', [], 'Modules.Inpostizi.Payment', $locale);
+            case self::BlikCode():
+                return $translator->trans('BLIK code', [], 'Modules.Inpostizi.Payment', $locale);
+            case self::BlikToken():
+                return $translator->trans('BLIK without a code', [], 'Modules.Inpostizi.Payment', $locale);
+            case self::PayByLink():
+                return $translator->trans('Pay by Link', [], 'Modules.Inpostizi.Payment', $locale);
+            case self::ShoppingLimit():
+                return $translator->trans('Shopping limit', [], 'Modules.Inpostizi.Payment', $locale);
+            case self::DeferredPayment():
+                return $translator->trans('Deferred payment', [], 'Modules.Inpostizi.Payment', $locale);
+            case self::CashOnDelivery():
+                return $translator->trans('Cash on Delivery', [], 'Modules.Inpostizi.Payment', $locale);
+            default:
+                return $this->value;
+        }
     }
 }

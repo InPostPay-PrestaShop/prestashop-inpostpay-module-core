@@ -1,0 +1,18 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Environment\EnvironmentInterface: '@inpost.izi.environment'
+  inpost.izi.environment:
+    class: izi\prestashop\Environment\EnvironmentInterface
+    public: true
+    factory: [ '@izi\prestashop\Configuration\ApiConfiguration', getEnvironment ]
+
+  izi\prestashop\Environment\AuthServerUriCollection:
+    class: izi\prestashop\Environment\AuthServerUriCollection
+    arguments:
+      - '@inpost.izi.environment'
+
+  izi\prestashop\Environment\EnvironmentFactoryInterface: '@izi\prestashop\Environment\EnvironmentFactory'
+  izi\prestashop\Environment\EnvironmentFactory:
+    class: izi\prestashop\Environment\EnvironmentFactory

@@ -1,0 +1,17 @@
+{% form_theme form '@Modules/inpostizi/views/templates/hook/legacy/form_theme.html.twig' %}
+
+<template id="inpostizi_form_tab">
+  <div id="cart_rule_{{ form.vars.id }}" class="panel cart_rule_tab" style="display: none">
+    {{ form_row(form.omnibus) }}
+    {{ form_row(form.promoDetailsPageId) }}
+  </div>
+</template>
+
+<template id="inpostizi_nav_link">
+  <li class="tab-row">
+    <a id="cart_rule_link_{{ form.vars.id }}" class="tab-page" href="javascript:displayCartRuleTab('{{ form.vars.id }}');">
+      <i class="icon-cog"></i>
+      {{ form.vars.label }}
+    </a>
+  </li>
+</template>

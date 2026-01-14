@@ -3,7 +3,7 @@
 {% block support_block_header_content %}
   <i class="material-icons mr-2">extension</i>
   <span>
-    {{ 'Extensions'|legacy_trans }}
+    {{ 'Extensions'|trans({}, 'Modules.Inpostizi.Extension') }}
   </span>
 {% endblock %}
 
@@ -14,7 +14,7 @@
       <tr class="column-headers">
         <th scope="col">{{ 'Name'|trans({}, 'Admin.Global') }}</th>
         <th scope="col">{{ 'Description'|trans({}, 'Admin.Global') }}</th>
-        <th scope="col">{{ 'Version'|trans({}, 'Admin.Global') }}</th>
+        <th scope="col">{{ 'Version'|trans({}, 'Modules.Inpostizi.Extension') }}</th>
         <th scope="col" class="text-right">{{ 'Actions'|trans({}, 'Admin.Global') }}</th>
       </tr>
       </thead>
@@ -22,7 +22,7 @@
       {% if extensions.installed is not empty %}
         <tbody>
         <tr>
-          <th colspan="4" class="text-center">{{ 'Installed'|legacy_trans }}</th>
+          <th colspan="4" class="text-center">{{ 'Installed'|trans({}, 'Modules.Inpostizi.Extension') }}</th>
         </tr>
         {% for extension in extensions.installed %}
           <tr>
@@ -49,7 +49,7 @@
       {% if extensions.recommended is not empty %}
         <tbody>
         <tr>
-          <th colspan="4" class="text-center">{{ 'Recommended'|legacy_trans }}</th>
+          <th colspan="4" class="text-center">{{ 'Recommended'|trans({}, 'Modules.Inpostizi.Extension') }}</th>
         </tr>
         {% for extension in extensions.recommended %}
           <tr>
@@ -74,7 +74,7 @@
       {% if extensions.other is not empty %}
         <tbody>
         <tr>
-          <th colspan="4" class="text-center">{{ 'Other'|legacy_trans }}</th>
+          <th colspan="4" class="text-center">{{ 'Other'|trans({}, 'Modules.Inpostizi.Extension') }}</th>
         </tr>
         {% for extension in extensions.other %}
           <tr>

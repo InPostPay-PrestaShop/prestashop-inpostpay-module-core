@@ -8,7 +8,7 @@ use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Shipping\OptionalService\Exception\ServiceUnavailableException;
-use izi\prestashop\Translation\LegacyTranslator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class GiftWrappingHandler implements OptionalServiceHandlerInterface
 {
@@ -23,11 +23,11 @@ final class GiftWrappingHandler implements OptionalServiceHandlerInterface
     private $manager;
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
-    public function __construct(PrestaShopConfiguration $configuration, ObjectManagerInterface $manager, LegacyTranslator $translator)
+    public function __construct(PrestaShopConfiguration $configuration, ObjectManagerInterface $manager, TranslatorInterface $translator)
     {
         $this->configuration = $configuration;
         $this->manager = $manager;
@@ -42,11 +42,11 @@ final class GiftWrappingHandler implements OptionalServiceHandlerInterface
     public function handle(\Cart $cart, string $serviceCode, DeliveryType $deliveryType, bool $selected): void
     {
         if ('GW' !== $serviceCode) {
-            throw new \DomainException(sprintf('Unsupported service "%s".', $serviceCode));
+            throw new \DomainException(\sprintf('Unsupported service "%s".', $serviceCode));
         }
 
         if ($selected && !$this->configuration->isGiftWrappingEnabled()) {
-            throw new ServiceUnavailableException($serviceCode, $this->translator->l('Gift wrapping is no longer available.', 'giftwrappinghandler'));
+            throw new ServiceUnavailableException($serviceCode, $this->translator->trans('Gift wrapping is no longer available.', [], 'Modules.Inpostizi.Errors'));
         }
 
         if ($selected === (bool) $cart->gift) {

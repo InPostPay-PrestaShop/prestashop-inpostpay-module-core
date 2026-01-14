@@ -14,7 +14,6 @@ final class ShippingOptions implements \JsonSerializable
      * @var CarrierMapping[]
      *
      * @Assert\Valid()
-     *
      * @Assert\All(
      *     @Assert\Type(CarrierMapping::class),
      * )
@@ -25,7 +24,6 @@ final class ShippingOptions implements \JsonSerializable
      * @var ServiceOptions[]
      *
      * @Assert\Valid()
-     *
      * @Assert\All(
      *     @Assert\Type(ServiceOptions::class),
      * )
@@ -61,7 +59,7 @@ final class ShippingOptions implements \JsonSerializable
 
             $diff = array_udiff($serviceCodes, $mappingServiceCodes, [Enum::class, 'compareValues']);
 
-            if ([] === $diff && count($mappingServiceCodes) === count($serviceCodes)) {
+            if ([] === $diff && \count($mappingServiceCodes) === \count($serviceCodes)) {
                 return $carrierMapping;
             }
         }

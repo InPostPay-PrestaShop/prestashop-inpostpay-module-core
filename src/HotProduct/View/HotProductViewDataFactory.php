@@ -49,13 +49,13 @@ final class HotProductViewDataFactory
      * @param ProductRepository $productRepository
      * @param ObjectRepositoryInterface<\Shop> $shopRepository
      */
-    public function __construct(\Context $context, ObjectRepositoryInterface $productRepository, ObjectRepositoryInterface $shopRepository, ProductsApiClientInterface $client)
+    public function __construct(\Context $context, ObjectRepositoryInterface $productRepository, ObjectRepositoryInterface $shopRepository, ProductsApiClientInterface $client, HotProductValidator $validator)
     {
         $this->context = $context;
         $this->productRepository = $productRepository;
         $this->shopRepository = $shopRepository;
         $this->client = $client;
-        $this->validator = new HotProductValidator($productRepository);
+        $this->validator = $validator;
     }
 
     /**
@@ -79,7 +79,7 @@ final class HotProductViewDataFactory
         $viewModels = array_map(function (HotProduct $product) use (&$apiProductMap) {
             $referenceId = (string) $product->getReferenceId();
 
-            if (!array_key_exists($referenceId, $apiProductMap)) {
+            if (!\array_key_exists($referenceId, $apiProductMap)) {
                 return $this->createViewModelForLocalProduct($product, null, false);
             }
 
@@ -122,7 +122,7 @@ final class HotProductViewDataFactory
             return null;
         }
 
-        if (!array_key_exists($shopId, $this->shopMap)) {
+        if (!\array_key_exists($shopId, $this->shopMap)) {
             $this->shopMap[$shopId] = $this->shopRepository->find($shopId);
         }
 

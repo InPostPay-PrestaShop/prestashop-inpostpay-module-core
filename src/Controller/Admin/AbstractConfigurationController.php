@@ -6,22 +6,21 @@ namespace izi\prestashop\Controller\Admin;
 
 use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\Initializer\ConfigurationInitializerInterface;
-use izi\prestashop\Translation\LegacyTranslator;
-use PrestaShopBundle\Security\Voter\PageVoter;
+use izi\prestashop\View\Component\NavBar;
+use izi\prestashop\View\Component\NavItem;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Role\Role;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-/* IGNORE_THIS_FILE_FOR_TRANSLATION */
 abstract class AbstractConfigurationController extends AbstractController
 {
     use LoggerAwareTrait;
 
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     protected $translator;
 
@@ -43,7 +42,7 @@ abstract class AbstractConfigurationController extends AbstractController
     /**
      * @param iterable<ConfigurationInitializerInterface> $configInitializers
      */
-    public function __construct(LegacyTranslator $translator, \Context $context, iterable $configInitializers, ApiConfigurationInterface $apiConfiguration, bool $debug = false)
+    public function __construct(TranslatorInterface $translator, \Context $context, iterable $configInitializers, ApiConfigurationInterface $apiConfiguration, bool $debug = false)
     {
         $this->translator = $translator;
         $this->context = $context;
@@ -53,18 +52,6 @@ abstract class AbstractConfigurationController extends AbstractController
         foreach ($configInitializers as $initializer) {
             $initializer->init();
         }
-    }
-
-    /**
-     * @param string $view
-     *
-     * @internal public visibility for compatibility with Sf 2.8
-     */
-    public function render($view, array $parameters = [], Response $response = null): Response
-    {
-        $parameters['is_legacy_admin_page'] = version_compare(_PS_VERSION_, '1.7.4.0', '<');
-
-        return parent::render($view, $parameters, $response);
     }
 
     final protected static function getConfigPermission(): array
@@ -96,52 +83,49 @@ abstract class AbstractConfigurationController extends AbstractController
         return $this->context->getTranslator()->trans($id, $parameters, $domain, $locale);
     }
 
-    protected function renderNav(Request $request): string
+    final protected function getNavBar(): NavBar
+    {
+        return new NavBar($this->container->get('twig'), $this->getNavItems());
+    }
+
+    protected function getNavItems(): iterable
     {
         $pages = [
             'general' => [
                 'route' => 'admin_inpost_izi_config_general',
-                'title' => $this->translator->l('Configuration', ConfigurationController::TRANSLATION_SOURCE),
+                'title' => $this->translator->trans('Settings', [], 'Admin.Global'),
             ],
             'consents' => [
                 'route' => 'admin_inpost_izi_config_consents',
-                'title' => $this->translator->l('Consents', ConfigurationController::TRANSLATION_SOURCE),
+                'title' => $this->translator->trans('Consents', [], 'Modules.Inpostizi.Config'),
             ],
             'shipping' => [
                 'route' => 'admin_inpost_izi_config_shipping',
-                'title' => $this->translator->l('Shipping configuration', ConfigurationController::TRANSLATION_SOURCE),
+                'title' => $this->translator->trans('Shipping configuration', [], 'Modules.Inpostizi.Config'),
             ],
             'gui' => [
                 'route' => 'admin_inpost_izi_config_gui',
-                'title' => $this->translator->l('GUI configuration', ConfigurationController::TRANSLATION_SOURCE),
+                'title' => $this->translator->trans('GUI configuration', [], 'Modules.Inpostizi.Config'),
             ],
             'support' => [
                 'route' => 'admin_inpost_izi_config_support',
-                'title' => $this->translator->l('Support', ConfigurationController::TRANSLATION_SOURCE),
+                'title' => $this->translator->trans('Support', [], 'Modules.Inpostizi.Config'),
             ],
         ];
 
-        if (null !== $this->apiConfiguration->getClientCredentials() && $this->isGranted(PageVoter::READ, 'AdminProducts_')) {
+        if (null !== $this->apiConfiguration->getClientCredentials() && $this->isGranted('read', 'AdminProducts')) {
             $pages['products'] = [
                 'route' => 'admin_inpost_izi_products_index',
-                'title' => $this->translator->l('Hot products', HotProductController::TRANSLATION_SOURCE),
+                'title' => $this->translator->trans('Hot products', [], 'Modules.Inpostizi.Config'),
                 'active_checker' => static function (Request $request): bool {
                     return $request->attributes->has('_inpost_izi_hot_product_page');
                 },
             ];
         }
 
-        return $this->renderView('@Modules/inpostizi/views/templates/admin/config/nav.html.twig', [
-            'nav_items' => array_map(function (array $page) use ($request): array {
-                return [
-                    'url' => $this->generateUrl($page['route']),
-                    'label' => $page['title'],
-                    'active' => isset($page['active_checker'])
-                        ? $page['active_checker']($request)
-                        : $page['route'] === $request->attributes->get('_route'),
-                ];
-            }, $pages),
-        ]);
+        foreach ($pages as $id => $page) {
+            yield new NavItem($id, $page['title'], $page['route'], $page['active_checker'] ?? null);
+        }
     }
 
     protected function handleError(\Throwable $e, Request $request): void
@@ -156,7 +140,7 @@ abstract class AbstractConfigurationController extends AbstractController
         }
 
         $this->addFlash('error', $this->trans('An unexpected error occurred. [%type% code %code%]', [
-            '%type%' => get_class($e),
+            '%type%' => \get_class($e),
             '%code%' => $e->getCode(),
         ], 'Admin.Notifications.Error'));
     }
@@ -164,42 +148,5 @@ abstract class AbstractConfigurationController extends AbstractController
     final protected function getLogger(): LoggerInterface
     {
         return $this->logger ?? $this->logger = new NullLogger();
-    }
-
-    final protected function isGranted($attributes, $subject = null): bool
-    {
-        if (parent::isGranted($attributes, $subject)) {
-            return true;
-        }
-
-        if (null !== $subject || !str_starts_with($attributes, 'ROLE_')) {
-            return false;
-        }
-
-        return $this->checkUserRole($attributes);
-    }
-
-    /**
-     * Checks the role using the user entity instead of the security token, since the token may not contain
-     * all the user roles if it was reloaded from session.
-     *
-     * Implementing a custom security voter (PS does not provide a default one) would have been a cleaner solution,
-     * but that could cause problems if the container cache was not refreshed after disabling or uninstalling the module.
-     */
-    private function checkUserRole(string $role): bool
-    {
-        if (null === $user = $this->getUser()) {
-            return false;
-        }
-
-        $userRoles = array_map(static function ($role): string {
-            if ($role instanceof Role) {
-                return $role->getRole();
-            }
-
-            return (string) $role;
-        }, $user->getRoles());
-
-        return in_array($role, $userRoles, true);
     }
 }

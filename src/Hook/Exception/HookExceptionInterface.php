@@ -6,8 +6,4 @@ namespace izi\prestashop\Hook\Exception;
 
 interface HookExceptionInterface
 {
-    /**
-     * @deprecated
-     */
-    public function getHookName(): string;
 }

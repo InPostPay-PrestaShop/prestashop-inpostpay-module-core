@@ -1,0 +1,20 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\EventListener\DetectCartDiscountsUpdateListener:
+    class: izi\prestashop\EventListener\DetectCartDiscountsUpdateListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\EventListener\UpdateLastVisitedShopListener:
+    class: izi\prestashop\EventListener\UpdateLastVisitedShopListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@izi\prestashop\Event\EventDispatcherInterface'

@@ -6,18 +6,16 @@ namespace izi\prestashop\Order\Message;
 
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
-use izi\prestashop\Translation\LegacyTranslator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ParametersExtractor implements ParametersExtractorInterface, ParameterDescriptorInterface
 {
-    private const TRANSLATION_SOURCE = 'parametersextractor';
-
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -33,8 +31,8 @@ final class ParametersExtractor implements ParametersExtractorInterface, Paramet
             'delivery_codes' => array_map(static function (ServiceCode $code): string {
                 return $code->value;
             }, $deliveryCodes = $request->getDelivery()->getOptionalServiceCodes()),
-            'is_cod' => in_array(ServiceCode::Cod(), $deliveryCodes, true),
-            'is_pww' => in_array(ServiceCode::Pww(), $deliveryCodes, true),
+            'is_cod' => \in_array(ServiceCode::Cod(), $deliveryCodes, true),
+            'is_pww' => \in_array(ServiceCode::Pww(), $deliveryCodes, true),
             'delivery_point' => $request->getDelivery()->getPoint(),
         ];
     }
@@ -42,11 +40,15 @@ final class ParametersExtractor implements ParametersExtractorInterface, Paramet
     public function getDescriptions(): array
     {
         return [
-            'payment_type' => $this->translator->l('code of used payment method', self::TRANSLATION_SOURCE),
-            'delivery_point' => $this->translator->l('selected APM identifier', self::TRANSLATION_SOURCE),
-            'delivery_codes' => $this->translator->l('codes of selected optional services', self::TRANSLATION_SOURCE),
-            'is_pww' => $this->translator->l('if Weekend Delivery option was selected', self::TRANSLATION_SOURCE),
-            'is_cod' => $this->translator->l('if Cash on Delivery option was selected', self::TRANSLATION_SOURCE),
+            'payment_type' => $this->translator->trans('used payment method code', [], 'Modules.Inpostizi.Order'),
+            'delivery_point' => $this->translator->trans('the selected APM\'s identifier', [], 'Modules.Inpostizi.Order'),
+            'delivery_codes' => $this->translator->trans('codes of selected optional services', [], 'Modules.Inpostizi.Order'),
+            'is_pww' => $this->translator->trans('if {option} option was selected', [
+                '{option}' => $this->translator->trans('Weekend Delivery', [], 'Modules.Inpostizi.Delivery'),
+            ], 'Modules.Inpostizi.Order'),
+            'is_cod' => $this->translator->trans('if {option} option was selected', [
+                '{option}' => $this->translator->trans('Cash on Delivery', [], 'Modules.Inpostizi.Payment'),
+            ], 'Modules.Inpostizi.Order'),
         ];
     }
 }

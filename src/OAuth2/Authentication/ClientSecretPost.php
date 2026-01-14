@@ -18,7 +18,7 @@ final class ClientSecretPost implements AuthenticationMethodInterface
     public function authenticate(RequestInterface $request, array &$payload, ClientCredentialsInterface $credentials): RequestInterface
     {
         if (null === $clientSecret = $credentials->getClientSecret()) {
-            throw new \LogicException(sprintf('"%s" authentication method cannot be used if the client was not issued client credentials.', self::IDENTIFIER));
+            throw new \LogicException(\sprintf('"%s" authentication method cannot be used if the client was not issued client credentials.', self::IDENTIFIER));
         }
 
         $payload['client_id'] = $credentials->getClientId();

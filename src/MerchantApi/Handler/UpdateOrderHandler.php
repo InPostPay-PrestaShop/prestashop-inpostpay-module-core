@@ -65,10 +65,9 @@ final class UpdateOrderHandler implements UpdateOrderHandlerInterface
         $this->updateOrderStatus($order, $event);
         $this->saveTransactionId($order, $event);
 
-        return new OrderStatusData(
-            null,
-            $this->statusDescriptionProvider->getStatus($order)
-        );
+        $status = $this->statusDescriptionProvider->getStatus($order);
+
+        return new OrderStatusData($status);
     }
 
     private function updateOrderStatus(\Order $order, OrderEvent $event): void
@@ -96,15 +95,13 @@ final class UpdateOrderHandler implements UpdateOrderHandlerInterface
             return;
         }
 
-        /**
-         * @var \OrderPayment[] $payments
-         */
         if ([] === $payments = $order->getOrderPayments()) {
             $this->createOrderPayment($order, $transactionId);
 
             return;
         }
 
+        /** @var \OrderPayment $payment */
         foreach ($payments as $payment) {
             if ($payment->transaction_id === $transactionId || '' !== (string) $payment->transaction_id) {
                 continue;

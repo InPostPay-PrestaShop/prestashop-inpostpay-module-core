@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziPayment.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="697abb9a95cfe2c76cc3b71312ea176a">
+        <source>Apple Pay</source>
+        <target>Apple Pay</target>
+      </trans-unit>
+      <trans-unit id="91d1fc4990d4fff923bde3c6c70b7e16">
+        <source>BLIK code</source>
+        <target>Kod BLIK</target>
+      </trans-unit>
+      <trans-unit id="567bb54590ed2713eeb98a955e1f9398">
+        <source>BLIK without a code</source>
+        <target>BLIK bez kodu</target>
+      </trans-unit>
+      <trans-unit id="469ded86e4fce0e962b4d91cc7d426ce">
+        <source>Cash on Delivery</source>
+        <target>Płatność przy odbiorze</target>
+      </trans-unit>
+      <trans-unit id="e7f9e382dc50889098cbe56f2554c77b">
+        <source>Credit card</source>
+        <target>Karta kredytowa</target>
+      </trans-unit>
+      <trans-unit id="db687137cec26f4c0a93e2d8f520e43e">
+        <source>Deferred payment</source>
+        <target>Płatność odroczona</target>
+      </trans-unit>
+      <trans-unit id="a69a8e250d7465b3357efed7e4251deb">
+        <source>Google Pay</source>
+        <target>Google Pay</target>
+      </trans-unit>
+      <trans-unit id="52a0d2a64ff310050981ded93e43169a">
+        <source>Pay by Link</source>
+        <target>Pay by Link</target>
+      </trans-unit>
+      <trans-unit id="5c56966215f9c0850e2caeadc446dda8">
+        <source>Remembered credit card</source>
+        <target>Zapamiętana karta kredytowa</target>
+      </trans-unit>
+      <trans-unit id="bf12eb9565712f0d19eebc65ee067ffb">
+        <source>Shopping limit</source>
+        <target>Limit zakupowy</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

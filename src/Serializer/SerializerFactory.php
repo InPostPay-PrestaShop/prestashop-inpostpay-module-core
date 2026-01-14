@@ -6,14 +6,10 @@ namespace izi\prestashop\Serializer;
 
 use izi\prestashop\Serializer\Normalizer\BasketAppPaginationPageDenormalizer;
 use izi\prestashop\Serializer\Normalizer\CustomDenormalizer;
-use izi\prestashop\Serializer\Normalizer\DateTimeNormalizer as DateTimeNormalizerPolyfill;
 use izi\prestashop\Serializer\Normalizer\EnumDenormalizer;
-use izi\prestashop\Serializer\Normalizer\JsonSerializableNormalizer as JsonSerializableNormalizerPolyfill;
-use izi\prestashop\Serializer\Normalizer\ObjectNormalizer as CustomObjectNormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceAmountNormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceNormalizer;
 use phpDocumentor\Reflection\DocBlock;
-use phpDocumentor\Reflection\FileReflector;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -45,8 +41,8 @@ final class SerializerFactory
             new EnumDenormalizer(),
             new CustomDenormalizer(),
             new CustomNormalizer(),
-            class_exists(DateTimeNormalizer::class) ? new DateTimeNormalizer() : new DateTimeNormalizerPolyfill(),
-            class_exists(JsonSerializableNormalizer::class) ? new JsonSerializableNormalizer() : new JsonSerializableNormalizerPolyfill(),
+            new DateTimeNormalizer(),
+            new JsonSerializableNormalizer(),
             new ArrayDenormalizer(),
             new BasketAppPaginationPageDenormalizer(),
             self::createObjectNormalizer(),
@@ -57,22 +53,14 @@ final class SerializerFactory
     {
         $typeExtractor = self::createTypeExtractor();
 
-        $class = new \ReflectionClass(ObjectNormalizer::class);
-        $params = $class->getConstructor()->getParameters();
-
-        return 3 < count($params) && \Tools::version_compare(_PS_VERSION_, '1.7.5.1', '>=')
-            ? new ObjectNormalizer(null, null, null, $typeExtractor)
-            : new CustomObjectNormalizer(null, null, null, $typeExtractor);
+        return new ObjectNormalizer(null, null, null, $typeExtractor);
     }
 
     private static function createTypeExtractor(): PropertyTypeExtractorInterface
     {
         $typeExtractors = [];
 
-        if (
-            class_exists(DocBlock::class)
-            && (\Tools::version_compare(_PS_VERSION_, '1.7.4', '>=') || class_exists(FileReflector::class))
-        ) {
+        if (class_exists(DocBlock::class)) {
             $typeExtractors[] = new PhpDocExtractor();
         } else {
             $typeExtractors[] = new PropertyDocBlockTypeExtractor();

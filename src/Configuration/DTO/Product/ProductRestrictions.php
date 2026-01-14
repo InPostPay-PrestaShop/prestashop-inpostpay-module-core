@@ -146,29 +146,6 @@ final class ProductRestrictions
         return $this;
     }
 
-    /**
-     * @deprecated use {@see getRestrictedAction()} instead
-     */
-    public function isBlockOrder(): bool
-    {
-        @trigger_error(sprintf('Method "%s()" is deprecated since 2.4.0, use "%s::getRestrictedAction()" instead.', __METHOD__, self::class), E_USER_DEPRECATED);
-
-        return RestrictedAction::DisallowOrder() === $this->restrictedAction;
-    }
-
-    /**
-     * @deprecated use {@see setRestrictedAction()} instead
-     *
-     * @return $this
-     */
-    public function setBlockOrder(bool $blockOrder): self
-    {
-        @trigger_error(sprintf('Method "%s()" is deprecated since 2.4.0, use "%s::setRestrictedAction()" instead.', __METHOD__, self::class), E_USER_DEPRECATED);
-        $this->restrictedAction = $blockOrder ? RestrictedAction::DisallowOrder() : RestrictedAction::HideWidget();
-
-        return $this;
-    }
-
     public function getRestrictedAction(): ?RestrictedAction
     {
         return $this->restrictedAction;

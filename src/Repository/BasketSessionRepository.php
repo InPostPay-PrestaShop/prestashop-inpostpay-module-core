@@ -106,7 +106,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
     public function persist(BasketSessionInterface $session): void
     {
         if (!$session instanceof BasketSession) {
-            throw new \InvalidArgumentException(sprintf('Expected an instance of %s, %s given', BasketSession::class, get_class($session)));
+            throw new \InvalidArgumentException(\sprintf('Expected an instance of %s, %s given', BasketSession::class, \get_class($session)));
         }
 
         $model = $session->getModel();
@@ -154,7 +154,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
 
             return;
         } catch (\PrestaShopDatabaseException $e) {
-            if (null !== $model->id || !in_array((int) $e->getCode(), [1062, 1557, 1569, 1586], true)) {
+            if (null !== $model->id || !\in_array((int) $e->getCode(), [1062, 1557, 1569, 1586], true)) {
                 throw $e;
             }
         }

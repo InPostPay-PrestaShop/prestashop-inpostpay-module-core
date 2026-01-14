@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziConsent.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="c971d24687581caa9dd0d976ff822e28">
+        <source>Add a description to be displayed with the consent in the InPost mobile app.</source>
+        <target>Dodaj opis, który ma być wyświetlany przy zgodzie w aplikacji InPost mobile.</target>
+      </trans-unit>
+      <trans-unit id="0329ef5c3f8994cecdac9af09fd73ba5">
+        <source>Add another consent</source>
+        <target>Dodaj kolejną zgodę</target>
+      </trans-unit>
+      <trans-unit id="aa7249797c954c5b027c7978037e0297">
+        <source>Add another link</source>
+        <target>Dodaj kolejny link</target>
+      </trans-unit>
+      <trans-unit id="699af6edd09943554fa87ce0488e68a0">
+        <source>Always required</source>
+        <target>Zawsze wymagana</target>
+      </trans-unit>
+      <trans-unit id="1b5f9c459802455a52d8d6b17c85a85e">
+        <source>Consent text in the mobile app</source>
+        <target>Opis wyświetlany w aplikacji</target>
+      </trans-unit>
+      <trans-unit id="578f2be92e5c72e5eee6db5a021923cb">
+        <source>Details page</source>
+        <target>Adres zgody</target>
+      </trans-unit>
+      <trans-unit id="29ee5d1ebcc033234938a5234f1f2075">
+        <source>Identifier</source>
+        <target>Identyfikator</target>
+      </trans-unit>
+      <trans-unit id="cd51e69d24b00e28f8ed7fd76a0a0a5b">
+        <source>If blank in a language other than the shop's default, the value for the default language will be used.</source>
+        <target>W przypadku pustej wartości w języku innym niż domyślny dla sklepu, użyta zostanie wartość w języku domyślnym.</target>
+      </trans-unit>
+      <trans-unit id="e27b87b1db9069a1f0bec6624884035d">
+        <source>If left empty, "{default_text}" will be displayed.</source>
+        <target>W przypadku, gdy puste, w aplikacji zostanie wyświetlony tekst "{default_text}".</target>
+      </trans-unit>
+      <trans-unit id="63a11faa3a692d4e00fa8e03bbe8a0d6">
+        <source>Link text</source>
+        <target>Tekst linku</target>
+      </trans-unit>
+      <trans-unit id="bd908db5ccb07777ced8023dffc802f4">
+        <source>Links</source>
+        <target>Linki</target>
+      </trans-unit>
+      <trans-unit id="ebb061953c0454b2c8ee7b0ac615ebcd">
+        <source>Optional</source>
+        <target>Opcjonalna</target>
+      </trans-unit>
+      <trans-unit id="f080d3c0cdd358db818ef31f8eec2221">
+        <source>Required once</source>
+        <target>Wymagana raz</target>
+      </trans-unit>
+      <trans-unit id="48bcdc549fe43533852290c14e2ad896">
+        <source>Requiredness</source>
+        <target>Czy wymagana</target>
+      </trans-unit>
+      <trans-unit id="0412b133fb35854c97b414573446c560">
+        <source>Specifies the page your customer will be taken to when they click the link in the mobile app.</source>
+        <target>Określa stronę, na którą zostanie przeniesiony Twój klient po kliknięciu odnośnika w aplikacji mobilnej.</target>
+      </trans-unit>
+      <trans-unit id="be1628f72d731c6a2c01db00f32104cf">
+        <source>Specify whether the consent is required or optional.</source>
+        <target>Określ czy zgoda jest wymagana czy opcjonalna.</target>
+      </trans-unit>
+      <trans-unit id="4b7f813e281db2e5ccf73db7e2228ffc">
+        <source>The maximum number of consents is {max}.</source>
+        <target>Maksymalna ilość zgód wynosi {max}.</target>
+      </trans-unit>
+      <trans-unit id="18684bb793e47e6518d4b41ce4373812">
+        <source>Unique link identifier. Placeholders created by adding the prefix "{prefix}" to identifiers will be replaced with corresponding links in the description.</source>
+        <target>Unikalny identyfikator linku. W opisie zgody fragmenty powstałe przez dodanie do ID przedrostka "{prefix}" zostaną zastąpione odpowiadającymi linkami.</target>
+      </trans-unit>
+      <trans-unit id="3446ce08df476f0d2911a18ed4613764">
+        <source>Use link identifiers prefixed with "{prefix}" to control the position of links.</source>
+        <target>Aby sterować pozycją poszczególnych linków, użyj identyfikatorów linków poprzedzonych przedrostkiem "{prefix}".</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

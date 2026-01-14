@@ -57,7 +57,7 @@ class ProductOptionsRepository implements ProductOptionsRepositoryInterface
             return null;
         }
 
-        if (array_key_exists($productId, $this->options)) {
+        if (\array_key_exists($productId, $this->options)) {
             return $this->options[$productId];
         }
 

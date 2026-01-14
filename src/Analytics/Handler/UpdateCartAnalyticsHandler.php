@@ -32,7 +32,7 @@ final class UpdateCartAnalyticsHandler implements UpdateCartAnalyticsHandlerInte
         return $oldKey;
     }
 
-    public function __invoke(UpdateCartAnalyticsCommand $command)
+    public function __invoke(UpdateCartAnalyticsCommand $command): void
     {
         $currentBasketRepository = $this->repository->find($command->getCartId());
 

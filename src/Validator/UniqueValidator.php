@@ -24,7 +24,7 @@ final class UniqueValidator extends ConstraintValidator
             return;
         }
 
-        if (!is_array($value) && !$value instanceof \IteratorAggregate) {
+        if (!\is_array($value) && !$value instanceof \IteratorAggregate) {
             throw new UnexpectedValueException($value, 'array|IteratorAggregate');
         }
 
@@ -34,7 +34,7 @@ final class UniqueValidator extends ConstraintValidator
         foreach ($value as $element) {
             $element = $normalizer($element);
 
-            if (!in_array($element, $collectionElements, true)) {
+            if (!\in_array($element, $collectionElements, true)) {
                 $collectionElements[] = $element;
 
                 continue;

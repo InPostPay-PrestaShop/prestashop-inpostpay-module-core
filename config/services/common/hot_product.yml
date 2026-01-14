@@ -1,0 +1,59 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\HotProduct\HotProductRepositoryInterface: '@izi\prestashop\HotProduct\HotProductRepository'
+  izi\prestashop\HotProduct\HotProductRepository:
+    class: izi\prestashop\HotProduct\HotProductRepository
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+      - '@inpost.izi.clock'
+
+  izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\UpdateHotProductHandler
+    tags:
+      - inpost.izi.command_handler
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\HotProduct\HotProductDataMapperInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+
+  izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandlerInterface: '@izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandler'
+  izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandler:
+    class: izi\prestashop\HotProduct\MessageHandler\DeleteRemoteProductHandler
+    tags:
+      - inpost.izi.command_handler
+    arguments:
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\BasketApp\Product\ProductsApiClientInterface'
+
+  izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener:
+    class: izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@inpost.izi.shop_context'
+      - '@izi\prestashop\HotProduct\HotProductRepositoryInterface'
+      - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
+      - '@izi\prestashop\CommandBusInterface'
+      - '@inpost.izi.logger'
+      - '@izi\prestashop\HotProduct\HotProductValidator'
+
+  izi\prestashop\HotProduct\HotProductDataMapperInterface: '@izi\prestashop\HotProduct\HotProductDataMapper'
+  izi\prestashop\HotProduct\HotProductDataMapper:
+    class: izi\prestashop\HotProduct\HotProductDataMapper
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@inpost.izi.object_model.language_repository'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\ObjectModel\Repository\CombinationRepository'
+      - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
+      - '@izi\prestashop\Product\Image\ImageUrlsProviderInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\HotProduct\HotProductValidator:
+    class: izi\prestashop\HotProduct\HotProductValidator
+    arguments:
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@inpost.izi.translator'

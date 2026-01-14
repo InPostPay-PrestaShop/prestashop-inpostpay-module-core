@@ -179,7 +179,7 @@ class Connection
         $conditions = [];
 
         foreach ($criteria as $key => $value) {
-            if (is_int($key)) {
+            if (\is_int($key)) {
                 // $value should be raw SQL
                 $conditions[] = (string) $value;
 
@@ -188,9 +188,9 @@ class Connection
 
             $column = bqSQL($key);
             if (null === $value) {
-                $conditions[] = sprintf('`%s` IS NULL', $column);
+                $conditions[] = \sprintf('`%s` IS NULL', $column);
             } else {
-                $conditions[] = sprintf('`%s` = \'%s\'', $column, pSQL($value));
+                $conditions[] = \sprintf('`%s` = \'%s\'', $column, pSQL($value));
             }
         }
 

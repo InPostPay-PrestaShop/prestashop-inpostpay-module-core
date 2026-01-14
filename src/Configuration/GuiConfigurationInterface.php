@@ -13,8 +13,5 @@ interface GuiConfigurationInterface
      */
     public static function getSupportedBindingPlaces(): array;
 
-    /**
-     * @return WidgetDisplayConfigurationInterface|ProductAwareWidgetDisplayConfigurationInterface
-     */
     public function getDisplayConfiguration(BindingPlace $bindingPlace): WidgetDisplayConfigurationInterface;
 }

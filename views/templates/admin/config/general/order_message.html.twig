@@ -1,39 +1,29 @@
-{% set messageOptionsForm = form.ordersConfiguration.messageOptions %}
+{% set form = form.ordersConfiguration.messageOptions %}
 
 <p class="h3 mb-3">
-  {{ form_label(messageOptionsForm, null, {
+  {{ form_label(form, null, {
     'label_attr': {
       'class': 'p-0'
     }
   }) }}
 </p>
 
-<div class="row mt-3">
-  {% if messageOptionsForm.appendIfApmDelivery is defined %}
+<div class="row mt-3 align-items-baseline">
+  {% if form.appendIfApmDelivery is defined %}
     <div class="col-xl-4 col-lg-6 col-md-12">
-      {{ form_row(messageOptionsForm.appendIfApmDelivery) }}
+      {{ form_row(form.appendIfApmDelivery) }}
 
-      <p class="text-muted">
-        <a href="https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/925564940/InPost+Pay+-+PrestaShop+Widget+2.0#Komentarz-zamówienia" target="_blank">
-          {{ 'Click here'|legacy_trans }}
-        </a>
-        {{ 'to go to module documentation and read full instructions on how to configure message format.'|legacy_trans }}
-      </p>
+      <p class="text-muted">{{ form.vars.details|raw }}</p>
     </div>
 
     <div class="col-xl-8 col-lg-6 col-md-12">
-      {{ form_row(messageOptionsForm.message) }}
+      {{ form_row(form.message) }}
     </div>
   {% else %}
     <div class="col-xl-8 col-lg-6 col-md-12">
-      {{ form_row(messageOptionsForm.message) }}
+      {{ form_row(form.message) }}
 
-      <p class="text-muted">
-        <a href="https://dokumentacja-inpost.atlassian.net/wiki/spaces/PL/pages/925564940/InPost+Pay+-+PrestaShop+Widget+2.0#Komentarz-zamówienia" target="_blank">
-          {{ 'Click here'|legacy_trans }}
-        </a>
-        {{ 'to go to module documentation and read full instructions on how to configure message format.'|legacy_trans }}
-      </p>
+      <p class="text-muted">{{ form.vars.details|raw }}</p>
     </div>
   {% endif %}
 </div>

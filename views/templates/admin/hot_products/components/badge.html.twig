@@ -6,16 +6,6 @@
   'danger': 'badge-danger'
 } %}
 
-{% if is_legacy is defined and is_legacy %}
-  {% set badgeClass = 'label' %}
-  {% set variantClasses = {
-    'success': 'bg-success',
-    'info': 'bg-info',
-    'warning': 'bg-warning',
-    'danger': 'bg-danger'
-  } %}
-{% endif %}
-
 {% set cssClasses = badgeClass %}
 
 {% if state is defined and variantClasses[state] is defined %}

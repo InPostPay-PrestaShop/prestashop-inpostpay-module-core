@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\View\Widget;
 
 use izi\prestashop\Common\BindingPlace;
+use Symfony\Component\OptionsResolver\Exception\InvalidOptionsException;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -83,11 +84,18 @@ final class WidgetConfigurationResolver implements WidgetConfigurationResolverIn
             })
             ->setAllowedTypes('product_id', ['string', 'int', 'null'])
             ->setNormalizer('product_id', static function (Options $options, $value) {
-                if (null === $value) {
+                if ('' !== $value = (string) $value) {
+                    return $value;
+                }
+
+                /** @var BindingPlace $bindingPlace */
+                $bindingPlace = $options['binding_place'];
+
+                if (BindingPlace::ProductCard() !== $bindingPlace) {
                     return null;
                 }
 
-                return (string) $value;
+                throw new InvalidOptionsException(\sprintf('Option "product_id" is required for binding place "%s".', $bindingPlace->value));
             });
     }
 

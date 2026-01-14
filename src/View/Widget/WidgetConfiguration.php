@@ -180,7 +180,7 @@ final class WidgetConfiguration implements WidgetConfigurationInterface
         }
 
         if (null !== $this->maxWidthPx) {
-            yield 'style' => sprintf('max-width: %dpx;', $this->maxWidthPx);
+            yield 'style' => \sprintf('max-width: %dpx;', $this->maxWidthPx);
         }
     }
 

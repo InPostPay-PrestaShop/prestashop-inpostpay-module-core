@@ -44,7 +44,7 @@ final class ConditionalBlockProcessor implements ProcessorInterface
                 }
 
                 if ($this->expressionLanguage->evaluate($expression, $parameters)) {
-                    $result .= implode(PHP_EOL, $currentBlock) . PHP_EOL;
+                    $result .= implode(\PHP_EOL, $currentBlock) . \PHP_EOL;
                 }
 
                 $currentBlock = [];
@@ -52,7 +52,7 @@ final class ConditionalBlockProcessor implements ProcessorInterface
             } elseif (null !== $expression) {
                 $currentBlock[] = $line;
             } else {
-                $result .= $line . PHP_EOL;
+                $result .= $line . \PHP_EOL;
             }
         }
 

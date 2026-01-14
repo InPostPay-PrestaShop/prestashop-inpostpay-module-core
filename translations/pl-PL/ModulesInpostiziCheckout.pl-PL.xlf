@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziCheckout.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="a9e819aadeb05ca1df49418d8ef8faf2">
+        <source>Pay with InPost Pay</source>
+        <target>Zapłać z InPost Pay</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

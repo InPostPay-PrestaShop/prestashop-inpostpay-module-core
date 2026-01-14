@@ -76,8 +76,6 @@ final class ActionFrontControllerSetMedia implements HookInterface
         foreach ($this->assetsProviders as $assetsProvider) {
             $this->registerAssets($assetsProvider);
         }
-
-        // $this->module->l('Something went wrong. Please try again later.', self::HOOK_NAME) kept for \AdminTranslationsController translatable message discovery
     }
 
     private function hasRequiredConfiguration(): bool

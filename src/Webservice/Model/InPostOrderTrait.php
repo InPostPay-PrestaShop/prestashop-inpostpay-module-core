@@ -35,7 +35,7 @@ trait InPostOrderTrait
             return $pointId;
         }
 
-        if (!is_callable(['parent', 'getWsInPostPoint'])) {
+        if (!\is_callable(['parent', 'getWsInPostPoint'])) {
             return null;
         }
 
@@ -97,9 +97,6 @@ trait InPostOrderTrait
      */
     private function get(string $id)
     {
-        $module = \Module::getInstanceByName('inpostizi');
-        assert($module instanceof \InPostIzi);
-
-        return $module->get($id);
+        return \InPostIzi::getInstance()->get($id);
     }
 }

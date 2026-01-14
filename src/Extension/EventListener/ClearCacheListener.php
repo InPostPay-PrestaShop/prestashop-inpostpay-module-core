@@ -46,7 +46,7 @@ final class ClearCacheListener implements EventSubscriberInterface
     public function onStatusUpdate(): void
     {
         static $versionRange;
-        $versionRange = $versionRange ?? new VersionRange('1.7.6', '8.0');
+        $versionRange = $versionRange ?? new VersionRange(null, '8.0');
 
         if ($versionRange->contains($this->psVersion)) {
             return;

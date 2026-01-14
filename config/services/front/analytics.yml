@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Analytics\EventListener\PersistCookiesListener:
+    class: izi\prestashop\Analytics\EventListener\PersistCookiesListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
+      - '@inpost.izi.security.authorization_checker'
+      - '@izi\prestashop\Analytics\Cookie\Executor\CookiePersisterExecutor'

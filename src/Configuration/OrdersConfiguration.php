@@ -108,7 +108,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         );
 
         return $configuration
-            ->setCashOnDeliveryStatusId($this->getCashOnDeliveryStatus())
+            ->setCashOnDeliveryStatusId($this->getCashOnDeliveryStatusId())
             ->setMessageOptions($this->getMessageOptions())
             ->setAllPaymentOptionsEnabled($this->isAllPaymentOptionsEnabled());
     }
@@ -142,7 +142,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
         $map = json_decode($value, true);
 
-        return is_array($map) ? $map : [];
+        return \is_array($map) ? $map : [];
     }
 
     private function getStatusDescriptionMapping(int $languageId, ?int $shopId = null): array
@@ -197,7 +197,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
         $data = json_decode($value, true);
 
-        if (!is_array($data)) {
+        if (!\is_array($data)) {
             return [];
         }
 
@@ -209,7 +209,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         $availablePaymentOptions = array_values($configuration->getAvailablePaymentOptions());
         $this->configuration->set(self::AVAILABLE_PAYMENT_OPTIONS, json_encode($availablePaymentOptions));
 
-        if (is_callable([$configuration, 'isAllPaymentOptionsEnabled'])) {
+        if (\is_callable([$configuration, 'isAllPaymentOptionsEnabled'])) {
             $enabled = (bool) $configuration->isAllPaymentOptionsEnabled();
             $this->setAllPaymentOptionsEnabled($enabled);
 
@@ -245,7 +245,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
 
     private function setMessageOptions(OrdersConfigurationInterface $configuration): void
     {
-        if (is_callable([$configuration, 'getMessageOptions'])) {
+        if (\is_callable([$configuration, 'getMessageOptions'])) {
             $options = $configuration->getMessageOptions();
         } else {
             $options = new MessageOptions($configuration->getMessageFormat(), false, true);
@@ -268,17 +268,5 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         $value = $this->configuration->get(self::COD_OS_ID, $shopId);
 
         return null === $value ? null : (int) $value;
-    }
-
-    private function getCashOnDeliveryStatus(): ?\OrderState
-    {
-        if (null === $statusId = $this->getCashOnDeliveryStatusId()) {
-            return null;
-        }
-
-        $status = new \OrderState();
-        $status->id = $statusId;
-
-        return $status;
     }
 }

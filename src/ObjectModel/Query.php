@@ -81,7 +81,7 @@ class Query
     {
         $result = $this->manager->getConnection()->fetchFirstColumn($this->sql);
 
-        if (count($result) > 1) {
+        if (\count($result) > 1) {
             throw new \DomainException('More than one result was found for query although one row or none was expected.');
         }
 

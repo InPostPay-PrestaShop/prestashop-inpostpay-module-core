@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziGeneral.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="04c6fa9aecf6fc257e4192ba1868a232">
+        <source>Checkout page widget display hook</source>
+        <target>Hook do wyświetlania widgetu w checkoucie</target>
+      </trans-unit>
+      <trans-unit id="ac6329ea064b9212be7e442cb46bf68f">
+        <source>Display widget</source>
+        <target>Wyświetlaj widget</target>
+      </trans-unit>
+      <trans-unit id="38e0bba4abb1c099b3c3b9dfeed745c2">
+        <source>Full page cache in use</source>
+        <target>Full page cache w użyciu</target>
+      </trans-unit>
+      <trans-unit id="0951234f1bff1067ee621b709976bec2">
+        <source>If enabled, the values of the customer's tracking cookies will be added to the order data sent to InPost Pay.</source>
+        <target>Jeżeli włączone, wartości plików cookie śledzących klienta zostaną dodane do danych zamówienia przesyłanych do InPost Pay.</target>
+      </trans-unit>
+      <trans-unit id="26f9667f6cbc9c5d93b04314a3b37e70">
+        <source>If the "{option}" option is selected, the widget will not be visible to users that have not visited your store with the "{query_param}" query parameter, (e.g. https://my-store.com?{query_param}).</source>
+        <target>Jeśli wybierzesz "{option}", widget nie będzie widoczny dla użytkowników, którzy nie odwiedzili Twojego sklepu z parametrem zapytania "{query_param}" (np. https://moj-sklep.pl?{query_param}).</target>
+      </trans-unit>
+      <trans-unit id="db92d79d962ed3c95788dabc1444b2c1">
+        <source>If you choose the "{hook}" hook, the hook call must be manually added in the template file: `{code}.`</source>
+        <target>Jeśli wybierzesz hook "{hook}", wywołanie hooka musi zostać ręcznie dodane w pliku szablonu: `{code}`.</target>
+      </trans-unit>
+      <trans-unit id="c57857df24c2cf96cf0d5a4afc64f094">
+        <source>If you choose the "{hook}" hook, the hook call must be manually added in the {template} file: `{code}.`</source>
+        <target>Jeśli wybierzesz hook "{hook}", wywołanie hooka musi zostać ręcznie dodane w pliku {template}: `{code}`.</target>
+      </trans-unit>
+      <trans-unit id="7a440309fc897f07a1d99a07af29d8db">
+        <source>Maximum number of suggested products</source>
+        <target>Maksymalna liczba produktów sugerowanych</target>
+      </trans-unit>
+      <trans-unit id="204bd9c8db1597d4d82fd6532a43435c">
+        <source>Order confirmation page widget display hook</source>
+        <target>Hook do wyświetlania widgetu na stronie potwierdzenia zamówienia</target>
+      </trans-unit>
+      <trans-unit id="0d5381fd4e980fb92ffc90a505b4e992">
+        <source>Product images configuration</source>
+        <target>Konfiguracja zdjęć produktów</target>
+      </trans-unit>
+      <trans-unit id="f8a1310e6b5d5048d1d3cc59f55999b7">
+        <source>Product page widget display hook</source>
+        <target>Hook do wyświetlania widgetu na karcie produktu</target>
+      </trans-unit>
+      <trans-unit id="062a2e2d89c1e5a2f9cc6762d32ef806">
+        <source>Send analytics data</source>
+        <target>Przesyłaj dane analityczne</target>
+      </trans-unit>
+      <trans-unit id="e66a68a035b5c2a35d129520b87c46bf">
+        <source>The suggested products are selected based on the settings in the "{section}" section of the product configuration form.</source>
+        <target>Produkty sugerowane wybierane są na podstawie ustawień w sekcji "{section}" formularza edycji produktu.</target>
+      </trans-unit>
+      <trans-unit id="4ed70f9413b483bf554359bac24509cd">
+        <source>Use this option if you are using a full page cache module or other caching tools such as Varnish, LiteSpeed Cache etc.</source>
+        <target>Użyj tej opcji, jeśli używasz modułu full page cache lub innych narzędzi full page cache typu Varnish, LiteSpeed Cache itp.</target>
+      </trans-unit>
+      <trans-unit id="e14e979d3bf9677c8f2f9d108297b95d">
+        <source>You can choose a different hook if you have problems displaying the InPost Pay widget on the product page.</source>
+        <target>Możesz wybrać inny hook, jeśli masz problem z wyświetleniem widgetu InPost Pay na karcie produktu w domyślnym hooku.</target>
+      </trans-unit>
+      <trans-unit id="8e906720a71264257a3cc58aa9015402">
+        <source>to everyone</source>
+        <target>wszystkim</target>
+      </trans-unit>
+      <trans-unit id="685686674acfe4bdb5fb224164555bd6">
+        <source>to testers</source>
+        <target>testerom</target>
+      </trans-unit>
+      <trans-unit id="958f470d0b1c8fb2b9e62b48e8903299">
+        <source>unlimited</source>
+        <target>bez limitu</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

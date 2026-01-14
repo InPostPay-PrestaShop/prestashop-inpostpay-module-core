@@ -1,0 +1,17 @@
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $translator: '@inpost.izi.translator'
+
+  izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandlerInterface: '@izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandler'
+  izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandler:
+    class: izi\prestashop\Handler\Config\UpdateCartRuleOptionsHandler
+    tags:
+      - inpost.izi.command_handler
+
+  izi\prestashop\Form\Type\CartRuleOptionsType:
+    class: izi\prestashop\Form\Type\CartRuleOptionsType
+    tags:
+      - form.type

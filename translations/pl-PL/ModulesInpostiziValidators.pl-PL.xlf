@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziValidators.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="235c2a9074a916290e7079c69bf197b5">
+        <source>Could not connect to the authorization server.</source>
+        <target>Nie udało połączyć się z serwerem autoryzacji.</target>
+      </trans-unit>
+      <trans-unit id="b57a7d1ed0c1f93b304b8b8e7fc41898">
+        <source>Could not validate client credentials.</source>
+        <target>Nie udało się zweryfikować danych uwierzytelniających.</target>
+      </trans-unit>
+      <trans-unit id="0f14cd7b55a65d001be0944eec2904cd">
+        <source>Duplicated ID placeholders: "{{ placeholders }}".</source>
+        <target>Powielone ID: "{{ placeholders }}".</target>
+      </trans-unit>
+      <trans-unit id="3825f0da01ae0a7c0a1ca0d1eb4e14dc">
+        <source>EAN code is required.</source>
+        <target>Kod EAN jest wymagany.</target>
+      </trans-unit>
+      <trans-unit id="7c70b333f46f1a9dfabbc08ba8aa7b15">
+        <source>Identifier is not unique.</source>
+        <target>Identyfikatory nie jest unikalny.</target>
+      </trans-unit>
+      <trans-unit id="a41bf5112730a5fa1d08906e57278992">
+        <source>In order for the shipment to be processed correctly by InPost Pay, the email address must match the one received when creating the order ({email}).</source>
+        <target>Aby informacja o przesyłce została poprawnie przetworzona przez InPost Pay, adres email musi zgadzać się z danymi otrzymanymi z InPost przy tworzeniu zamówienia ({email}).</target>
+      </trans-unit>
+      <trans-unit id="e221b0fd3e879543e6fd834e514505f7">
+        <source>Invalid client credentials.</source>
+        <target>Nieprawidłowe dane uwierzytelniające.</target>
+      </trans-unit>
+      <trans-unit id="de0d1f69cf6a3effd8d7184d3c22854e">
+        <source>Invalid message format. {{ error }}</source>
+        <target>Niepoprawny format wiadomości. {{ error }}</target>
+      </trans-unit>
+      <trans-unit id="f609bb09ff74c0ba85a8ad6491985fec">
+        <source>Order comments are not valid.</source>
+        <target>Uwagi do zamówienia nie są poprawne.</target>
+      </trans-unit>
+      <trans-unit id="3419fcc80e54c5ce62164714961f5d15">
+        <source>Product is inactive or not available for order.</source>
+        <target>Produkt nie jest aktywny lub nie jest dostępny na sprzedaż.</target>
+      </trans-unit>
+      <trans-unit id="c0674df384ee0721d5bf7a6152a1608f">
+        <source>Product or combination does not exist.</source>
+        <target>Produkt lub kombinacja nie istnieje.</target>
+      </trans-unit>
+      <trans-unit id="5a87da48e47632ecbb49fa4c5117af9a">
+        <source>The CSRF token is invalid.</source>
+        <target>Nieprawidłowy token CSRF.</target>
+      </trans-unit>
+      <trans-unit id="ca6b295039b53a17b2175aded3b6e0d2">
+        <source>The granted access token does not have all of the required permissions. To resolve this issue, please contact support.</source>
+        <target>Przyznany token dostępu nie posiada wszystkich wymaganych uprawnień. W celu rozwiązania tego problemu, skontaktuj się z pomocą techniczną.</target>
+      </trans-unit>
+      <trans-unit id="077554687e94c49ca7da8a4f353f7b79">
+        <source>Unused ID placeholders: "{{ placeholders}}".</source>
+        <target>Niewykorzystane ID: "{{ placeholders }}".</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

@@ -19,7 +19,7 @@ final class PaymentInCurrencyAvailable extends Constraint
         parent::__construct($options);
 
         if (!$this->paymentModule instanceof \PaymentModule) {
-            throw new InvalidArgumentException(sprintf('The "paymentModule" option must be an instance of "%s", "%s" given.', \PaymentModule::class, get_debug_type($this->paymentModule)));
+            throw new InvalidArgumentException(\sprintf('The "paymentModule" option must be an instance of "%s", "%s" given.', \PaymentModule::class, get_debug_type($this->paymentModule)));
         }
     }
 

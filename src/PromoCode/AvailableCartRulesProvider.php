@@ -68,7 +68,7 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
 
             $promotions[] = $promotion;
 
-            if (count($promotions) >= self::MAX_PROMO_COUNT) {
+            if (\count($promotions) >= self::MAX_PROMO_COUNT) {
                 break;
             }
         }
@@ -124,7 +124,7 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
                 return false;
             }
 
-            return !in_array($cartRuleId, $cartRuleIdsToSkip, true);
+            return !\in_array($cartRuleId, $cartRuleIdsToSkip, true);
         });
 
         usort($cartRules, static function (array $a, array $b): int {

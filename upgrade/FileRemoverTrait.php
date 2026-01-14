@@ -28,7 +28,7 @@ trait FileRemoverTrait
         $basePath = rtrim($this->module->getLocalPath(), '/');
 
         $files = array_map(static function (string $path) use ($basePath): string {
-            return sprintf('%s/%s', $basePath, $path);
+            return \sprintf('%s/%s', $basePath, $path);
         }, $paths);
 
         $this->getFileSystem()->remove($files);
@@ -41,7 +41,7 @@ trait FileRemoverTrait
         $paths = array_map(static function (string $class): string {
             $class = str_replace(self::$namespacePrefix, '', $class);
 
-            return 'src/' . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+            return 'src/' . str_replace('\\', \DIRECTORY_SEPARATOR, $class) . '.php';
         }, $classes);
 
         return $this->removeFiles($paths);

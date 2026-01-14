@@ -65,7 +65,7 @@ class QueryBuilder extends \DbQuery
     {
         $this->query['select'] = [];
 
-        if (!is_array($select)) {
+        if (!\is_array($select)) {
             $select = [$select];
         }
 
@@ -85,7 +85,7 @@ class QueryBuilder extends \DbQuery
     {
         $this->query['order'] = [];
 
-        if (!is_array($orderBy)) {
+        if (!\is_array($orderBy)) {
             $orderBy = [$orderBy];
         }
 

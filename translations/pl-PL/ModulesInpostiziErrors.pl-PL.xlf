@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziErrors.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="4fc1c75e187bb04304e595bf0a9e47e7">
+        <source>An error occurred while updating InPost Pay options.</source>
+        <target>Wystąpił błąd podczas aktualizacji opcji InPost Pay.</target>
+      </trans-unit>
+      <trans-unit id="782990a55975fc9d54d74f3ffb2c7dad">
+        <source>Cart does not exist.</source>
+        <target>Koszyk nie istnieje.</target>
+      </trans-unit>
+      <trans-unit id="aeaa1e9ca3df932dd0769968be325b61">
+        <source>Could not add the product to your cart.</source>
+        <target>Nie udało się dodać produktu do koszyka.</target>
+      </trans-unit>
+      <trans-unit id="fa71ed2acd5e96f8be1fa8609fb4bbbf">
+        <source>Could not add the voucher to your cart.</source>
+        <target>Nie udało się dodać kodu rabatowego do koszyka.</target>
+      </trans-unit>
+      <trans-unit id="5378f8faa0f28fa66c369e16dc73660f">
+        <source>Could not delete the product from your cart.</source>
+        <target>Nie udało się usunąć produktu z koszyka.</target>
+      </trans-unit>
+      <trans-unit id="520cb17bcc300ec257ce420b1e8ec6f2">
+        <source>Could not remove the voucher from your cart.</source>
+        <target>Nie udało się usunąć kodu rabatowego z koszyka.</target>
+      </trans-unit>
+      <trans-unit id="e241dce2751f423f20aa8a1dabda0ead">
+        <source>Could not update product quantity.</source>
+        <target>Nie udało się zaktualizować ilości produktu.</target>
+      </trans-unit>
+      <trans-unit id="906ca1797f0d1acf393b814c7197b942">
+        <source>Customer data is not valid: {error}</source>
+        <target>Dane konta klienta nie są poprawne: {error}</target>
+      </trans-unit>
+      <trans-unit id="8dab8054d5f80c88156d3bb46423486b">
+        <source>Delivery address is not valid: {error}</source>
+        <target>Adres dostawy nie jest poprawny: {error}</target>
+      </trans-unit>
+      <trans-unit id="d858ecb18335ce715d73570770de37fb">
+        <source>Gift wrapping is no longer available.</source>
+        <target>Pakowanie prezentowe nie jest już dostępne.</target>
+      </trans-unit>
+      <trans-unit id="a30ebb63ee481f272ab0255ccbedf5b2">
+        <source>Invoice address is not valid: {error}</source>
+        <target>Adres rozliczeniowy nie jest poprawny: {error}</target>
+      </trans-unit>
+      <trans-unit id="05e070788d5522addd174a9baa153f9f">
+        <source>Something went wrong. Please try again later.</source>
+        <target>Coś poszło nie tak. Spróbuj ponownie później.</target>
+      </trans-unit>
+      <trans-unit id="51daa9058b0a6a3266c6a4e957564a9f">
+        <source>The price of your basket has changed. Please review your order.</source>
+        <target>Cena koszyka uległa zmianie. Zweryfikuj swoje zamówienie.</target>
+      </trans-unit>
+      <trans-unit id="21981a399272f3ec1a06ae1457c74504">
+        <source>The product {product} is no longer available in the selected quantity.</source>
+        <target>Product {product} nie jest już dostępny w wybranej ilości.</target>
+      </trans-unit>
+      <trans-unit id="961341f7184943222246637622031f08">
+        <source>The selected country ({iso_code}) is not available.</source>
+        <target>Wybrany kraj ({iso_code}) nie jest dostępny.</target>
+      </trans-unit>
+      <trans-unit id="d1363ee7cb061a5b383fd7a829dd9e5b">
+        <source>The selected delivery option is not available.</source>
+        <target>Wybrana opcja dostawy nie jest dostępna.</target>
+      </trans-unit>
+      <trans-unit id="17ffb24862c7db18f577ee8328688a9d">
+        <source>The selected payment method is not available.</source>
+        <target>Wybrana metoda płatności nie jest dostępna.</target>
+      </trans-unit>
+      <trans-unit id="be503ee264d6b76ab103af34b1a92c58">
+        <source>There already exists an order for this basket.</source>
+        <target>Dla tego koszyka zostało już utworzone zamówienie.</target>
+      </trans-unit>
+      <trans-unit id="69cab7d3b86365a08719b64843b38c79">
+        <source>There was a problem communicating with the mobile application. Please try again later.</source>
+        <target>Wystąpił problem z komunikacją z aplikacją mobilną. Spróbuj ponownie później.</target>
+      </trans-unit>
+      <trans-unit id="3e20ee217db5522d427f33a2132135c5">
+        <source>This product is no longer in your cart.</source>
+        <target>Tego produktu nie ma już w Twoim koszyku.</target>
+      </trans-unit>
+      <trans-unit id="c0ba79119d68960eab9621eaebf75a76">
+        <source>This product requires customization. Please add it to your cart via the shop page.</source>
+        <target>Ten produkt wymaga dostosowania. Możesz dodać go do swojego koszyka za pośrednictwem strony sklepu.</target>
+      </trans-unit>
+      <trans-unit id="671792fef988fa985b8d4be21cec233f">
+        <source>Voucher {cart_rule} is no longer available: {error}</source>
+        <target>Kupon rabatowy {cart_rule} nie jest już dostępny: {error}</target>
+      </trans-unit>
+      <trans-unit id="50349e727b1f9a9a4ef897aad4f1bbf8">
+        <source>Your request could not be processed.</source>
+        <target>Twoje zapytanie nie mogło zostać przetworzone.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

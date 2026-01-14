@@ -221,9 +221,9 @@ function upgrade_module_2_0_0(Module $module): bool
     }
 
     $db = Db::getInstance();
-    $dbInstaller = new DatabaseInstaller(new Configuration($db), [
+    $dbInstaller = new DatabaseInstaller([
         new Version_2_0_0(new Connection($db)),
-    ]);
+    ], new Configuration($db));
 
     return (new InPostIziUpdater_2_0_0($module, $dbInstaller, $db))->upgrade();
 }

@@ -18,8 +18,9 @@ if (!defined('_PS_VERSION_')) {
 function upgrade_module_1_4_0(Module $module)
 {
     $db = Db::getInstance();
-    $migration = new Version_1_4_0(new Connection($db));
-    $dbInstaller = new DatabaseInstaller(new Configuration(), [$migration]);
+    $dbInstaller = new DatabaseInstaller([
+        new Version_1_4_0(new Connection($db)),
+    ], new Configuration($db));
 
     $db->delete('configuration', 'name LIKE "INPOST_PAY_status_translation_%"');
     $db->execute(sprintf('

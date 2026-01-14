@@ -362,9 +362,11 @@
           aria-haspopup="true"
           aria-expanded="false"
       >
-        {{ 'Select options from list'|legacy_trans }}
+        {{ 'Select options from the list'|trans({}, 'Modules.Inpostizi.Config') }}
       </button>
-      <div class="dropdown-menu inpostizi-checkboxes-options" aria-labelledby="{{ form.vars.id }}_dropdown">
+      <div class="dropdown-menu inpostizi-checkboxes-options"
+           onclick="event.stopPropagation()" {# DIRTIES HACK OF ALL TIME #}
+           aria-labelledby="{{ form.vars.id }}_dropdown">
         {% set allChecked = true %}
 
         {% for child in form.children %}
@@ -385,7 +387,7 @@
           <span class="custom-control-indicator"></span>
           <label class="custom-control-label" for="{{ form.vars.id }}_all">
             <strong>
-              {{ 'Select all options'|legacy_trans }}
+              {{ 'Select all options'|trans({}, 'Modules.Inpostizi.Config') }}
             </strong>
           </label>
         </div>

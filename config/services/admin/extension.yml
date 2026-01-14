@@ -1,0 +1,41 @@
+parameters:
+  inpost.izi.extensions_service_options:
+    url: 'https://dokumentacja-inpost.atlassian.net/wiki/download/attachments/1249509380/modules.json'
+    max_redirects: 10
+
+services:
+  _defaults:
+    public: false
+    autowire: true
+    bind:
+      $context: '@inpost.izi.context'
+
+  izi\prestashop\Extension\MessageHandler\InstallExtensionHandler:
+    class: izi\prestashop\Extension\MessageHandler\InstallExtensionHandler
+    tags:
+      - inpost.izi.command_handler
+    bind:
+      $moduleManager: '@prestashop.module.manager'
+
+  izi\prestashop\Extension\ExtensionsServiceInterface: '@izi\prestashop\Extension\ExtensionsService'
+  izi\prestashop\Extension\ExtensionsService:
+    class: izi\prestashop\Extension\ExtensionsService
+    arguments:
+      - '@inpost.izi.http_client.extensions'
+      - '@inpost.izi.psr17_factory'
+      - '@inpost.izi.serializer'
+      - '%inpost.izi.extensions_service_options%'
+
+  izi\prestashop\Extension\CachedExtensionsService:
+    class: izi\prestashop\Extension\CachedExtensionsService
+    decorates: izi\prestashop\Extension\ExtensionsService
+    arguments:
+      - '@izi\prestashop\Extension\CachedExtensionsService.inner'
+      - '@inpost.izi.cache'
+
+  inpost.izi.http_client.extensions:
+    class: Psr\Http\Client\ClientInterface
+    factory: [ '@izi\prestashop\Http\Client\Factory\ClientFactoryInterface', create ]
+
+  izi\prestashop\Extension\View\ExtensionViewFactory:
+    class: izi\prestashop\Extension\View\ExtensionViewFactory

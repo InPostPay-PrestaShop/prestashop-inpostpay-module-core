@@ -13,7 +13,7 @@ class ServiceUnavailableException extends \Exception
 
     public function __construct(string $serviceCode, ?string $message = null)
     {
-        parent::__construct($message ?? sprintf('Service "%s" is unavailable.', $serviceCode));
+        parent::__construct($message ?? \sprintf('Service "%s" is unavailable.', $serviceCode));
         $this->serviceCode = $serviceCode;
     }
 

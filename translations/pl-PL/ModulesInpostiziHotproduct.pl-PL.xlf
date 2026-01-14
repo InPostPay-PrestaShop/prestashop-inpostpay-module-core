@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziHotproduct.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="4d3d769b812b6faa6b76e1a8abaece2d">
+        <source>Active</source>
+        <target>Aktywny</target>
+      </trans-unit>
+      <trans-unit id="1432596d084873bee8df589b0b01448c">
+        <source>Available from</source>
+        <target>Dostępny od</target>
+      </trans-unit>
+      <trans-unit id="0a0b945c925ac8eb94a4ad328fc54840">
+        <source>Available to</source>
+        <target>Dostępny do</target>
+      </trans-unit>
+      <trans-unit id="73a1b88236287a552fd7b9e4401f333c">
+        <source>Awaiting approval</source>
+        <target>Oczekuje na akceptację</target>
+      </trans-unit>
+      <trans-unit id="13909db555343082cdbef286ed3c2a3d">
+        <source>Edit hot product: {product}</source>
+        <target>Edytuj promowany produkt: {product}</target>
+      </trans-unit>
+      <trans-unit id="6f040e0694f901ebf579d7accff11aa4">
+        <source>Failed to fetch product statuses from the API.</source>
+        <target>Nie udało się pobrać statusu produktów z API.</target>
+      </trans-unit>
+      <trans-unit id="ddcdd64da53f2f1f180648bfa8714453">
+        <source>Hot product has been created successfully and will be awaiting approval.</source>
+        <target>Promowany produkt został pomyślnie utworzony i będzie oczekiwał na akceptację.</target>
+      </trans-unit>
+      <trans-unit id="4bb742544c04d37b2f14e792d689ca10">
+        <source>Hot product has been deleted successfully.</source>
+        <target>Promowany produkt został pomyślnie usunięty.</target>
+      </trans-unit>
+      <trans-unit id="d0341b1d62d7a4e084d204905dc4f835">
+        <source>Hot product has been updated successfully and will be awaiting approval.</source>
+        <target>Promowany produkt został pomyślnie zaktualizowany i będzie oczekiwał na akceptację.</target>
+      </trans-unit>
+      <trans-unit id="e1414304361fa2116962f49f42b8301b">
+        <source>Hot product was not found.</source>
+        <target>Nie odnaleziono promowanego produktu.</target>
+      </trans-unit>
+      <trans-unit id="79e41f293980da78b8ed7b49ad5462b5">
+        <source>Importable</source>
+        <target>Możliwy import</target>
+      </trans-unit>
+      <trans-unit id="6cc938294d5484ce78d79c77f9f93c05">
+        <source>Maximum number of hot products reached.</source>
+        <target>Osiągnięto maksymalną ilość promowanych produktów.</target>
+      </trans-unit>
+      <trans-unit id="be10a9226a67649778aa479b9d901759">
+        <source>New hot product</source>
+        <target>Nowy promowany produkt</target>
+      </trans-unit>
+      <trans-unit id="405e6a003a719605addb982f394d2fbe">
+        <source>No products found.</source>
+        <target>Nie odnaleziono produktów.</target>
+      </trans-unit>
+      <trans-unit id="6a628e226d3bd61caba557cd9fd9e5b6">
+        <source>Not found in API</source>
+        <target>Nie odnaleziony w API</target>
+      </trans-unit>
+      <trans-unit id="e9e569ef5153bfd6b14a155352d56301">
+        <source>Product does not exist or is not available for order</source>
+        <target>Produkt nie istnieje lub nie jest dostępny na sprzedaż</target>
+      </trans-unit>
+      <trans-unit id="e059c5a70a67395dedc8aa7ccff94830">
+        <source>Product has been deleted from API successfully.</source>
+        <target>Produkt został pomyślnie usunięty w API.</target>
+      </trans-unit>
+      <trans-unit id="04d2faff74c9b370f3846e4ab850a7b1">
+        <source>Product has been imported successfully.</source>
+        <target>Promowany produkt został pomyślnie zaimportowany.</target>
+      </trans-unit>
+      <trans-unit id="072bf7386ad6d32a8213bf1299f799fc">
+        <source>Search products by name or reference...</source>
+        <target>Szukaj produktu po nazwie lub kodzie...</target>
+      </trans-unit>
+      <trans-unit id="ec53a8c4f07baed5d8825072c89799be">
+        <source>Status</source>
+        <target>Status</target>
+      </trans-unit>
+      <trans-unit id="c91d6c43a3bc4510df29d5cd02d2eb38">
+        <source>There already exists a hot product for product and combination.</source>
+        <target>Wybrany produkt/kombinacja jest już zdefiniowany jako promowany produkt.</target>
+      </trans-unit>
+      <trans-unit id="13b2dba2063a9eae83d069e6db63f7fa">
+        <source>You are creating a hot product in a multistore context. Product data associated with the default shop will be sent to the Basket App.</source>
+        <target>Tworzysz promowany produkt w kontekście wielu sklepów. Do Basket App zostaną przekazane dane produktu odpowiadające domyślnemu sklepowi.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

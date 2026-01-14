@@ -4,16 +4,19 @@ includes:
 parameters:
   paths:
     - ../../src
+    - ../../config
+    - ../../controllers
     - ../../inpostizi.php
     - Rules
   universalObjectCratesClasses:
     - Cookie
   reportUnmatchedIgnoredErrors: false
-  phpVersion: 70103
+  phpVersion: 70205
   level: 5
   treatPhpDocTypesAsCertain: false
   scanDirectories:
     - ../../../inpostshipping/classes
+    - fixtures
 
 services:
   -

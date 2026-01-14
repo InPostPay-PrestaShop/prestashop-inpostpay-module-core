@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Validator\Product;
 
-use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\ObjectModel\Repository\CombinationRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\Repository\Product\AttributeRestrictionsRepositoryInterface;
@@ -24,12 +23,12 @@ final class NotWithRestrictedAttributesValidator extends ConstraintValidator
     private $combinationRepository;
 
     /**
-     * @param CombinationRepository|null $combinationRepository
+     * @param CombinationRepository $combinationRepository
      */
-    public function __construct(AttributeRestrictionsRepositoryInterface $repository, ?ObjectRepositoryInterface $combinationRepository = null)
+    public function __construct(AttributeRestrictionsRepositoryInterface $repository, ObjectRepositoryInterface $combinationRepository)
     {
         $this->repository = $repository;
-        $this->combinationRepository = $combinationRepository ?? self::createCombinationRepository();
+        $this->combinationRepository = $combinationRepository;
     }
 
     public function validate($value, Constraint $constraint): void
@@ -38,7 +37,7 @@ final class NotWithRestrictedAttributesValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, NotWithRestrictedAttributes::class);
         }
 
-        if (!is_array($value) && !$value instanceof \ArrayAccess) {
+        if (!\is_array($value) && !$value instanceof \ArrayAccess) {
             throw new UnexpectedTypeException($value, 'array|ArrayAccess');
         }
 
@@ -46,7 +45,7 @@ final class NotWithRestrictedAttributesValidator extends ConstraintValidator
             return;
         }
 
-        if (!is_array($attributes)) {
+        if (!\is_array($attributes)) {
             $attributeGroupIds = $this->combinationRepository->getAttributeGroupIds((int) $value['id_product'], (int) $value['id_product_attribute']);
         } else {
             $attributeGroupIds = array_keys($attributes);
@@ -59,13 +58,5 @@ final class NotWithRestrictedAttributesValidator extends ConstraintValidator
         $this->context
             ->buildViolation('Product has attributes from restricted groups.')
             ->addViolation();
-    }
-
-    private static function createCombinationRepository(): ObjectRepositoryInterface
-    {
-        /** @var \InPostIzi $module */
-        $module = \Module::getInstanceByName('inpostizi');
-
-        return $module->get(ObjectManagerInterface::class)->getRepository(\Combination::class);
     }
 }

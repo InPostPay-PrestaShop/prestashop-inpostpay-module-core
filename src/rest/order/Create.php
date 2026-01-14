@@ -9,7 +9,6 @@ use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
-use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
@@ -31,18 +30,13 @@ use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Repository\BasketSessionRepository;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\Serializer\SerializerFactory;
-use izi\prestashop\Shipping\OptionalService\CashOnDeliveryHandler;
-use izi\prestashop\Shipping\OptionalService\ChainHandler;
 use izi\prestashop\Shipping\OptionalService\Exception\ServiceUnavailableException;
-use izi\prestashop\Shipping\OptionalService\GiftWrappingHandler;
 use izi\prestashop\Shipping\OptionalService\OptionalServiceHandlerInterface;
-use izi\prestashop\Shipping\OptionalService\ShippingCostAdjuster;
-use izi\prestashop\Shipping\OptionalService\WeekendDeliveryHandler;
-use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Validator\Product\Unrestricted;
 use PrestaShop\PrestaShop\Core\Crypto\Hashing;
-use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
+use Symfony\Component\Translation\TranslatorInterface as LegacyTranslatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @internal
@@ -53,8 +47,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class Create
 {
-    private const TRANSLATION_SOURCE = 'create';
-
     /**
      * @var \Context
      */
@@ -100,17 +92,26 @@ class Create
      */
     private $validator;
 
-    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null, ?BasketSessionRepositoryInterface $repository = null, ?EventDispatcherInterface $eventDispatcher = null, ?ValidatorInterface $validator = null)
+    /**
+     * @var TranslatorInterface|LegacyTranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * @param \InPostIzi|null $module
+     */
+    public function __construct(?\Context $context = null, ?Hashing $crypto = null, ?\PaymentModule $module = null, ?ShippingConfigurationInterface $shippingConfiguration = null, ?CommandBusInterface $bus = null, ?BasketSessionRepositoryInterface $repository = null, ?EventDispatcherInterface $eventDispatcher = null, ?ValidatorInterface $validator = null)
     {
         $this->context = $context ?? \Context::getContext();
         $this->crypto = $crypto ?? new Hashing();
-        $this->module = $module ?? \Module::getInstanceByName('inpostizi');
+        $this->module = $module ?? \InPostIzi::getInstance();
         $this->shippingConfiguration = $shippingConfiguration ?? $this->module->get(ShippingConfigurationInterface::class);
         $this->bus = $bus ?? $this->module->get(CommandBusInterface::class);
         $this->ordersConfiguration = $this->module->get(OrdersConfigurationInterface::class);
         $this->repository = $repository ?? new BasketSessionRepository(SerializerFactory::create(), $this->module->get(ObjectManagerInterface::class));
         $this->eventDispatcher = $eventDispatcher ?? $this->module->get(EventDispatcherInterface::class);
         $this->validator = $validator ?? $this->module->get('inpost.izi.validator');
+        $this->translator = $this->context->getTranslator();
     }
 
     /**
@@ -126,12 +127,12 @@ class Create
 
         $cart = $session->getBasket()->getEntity();
 
-        if (null === $order = $this->getOrderByCart($cart)) {
+        if (null === $order = \Order::getByCartId($cart->id)) {
             return $this->createOrder($session, $request);
         }
 
         if ('inpostizi' !== $order->module) {
-            throw new CannotCreateOrderException($this->module->l('There already exists an order for this basket.', self::TRANSLATION_SOURCE));
+            throw new CannotCreateOrderException($this->translator->trans('There already exists an order for this basket.', [], 'Modules.Inpostizi.Errors'));
         }
 
         $this->module->getLogger()->warning('Repeated order request for cart #{cartId}. Updating delivery emails.', [
@@ -160,17 +161,6 @@ class Create
         return $session;
     }
 
-    private function getOrderByCart(\Cart $cart): ?\OrderCore
-    {
-        if (is_callable([\Order::class, 'getByCartId'])) {
-            return \Order::getByCartId($cart->id);
-        }
-
-        $orderId = \Order::getOrderByCartId($cart->id);
-
-        return $orderId ? new \Order($orderId) : null;
-    }
-
     /**
      * @param BasketSession $session
      */
@@ -191,7 +181,7 @@ class Create
             }
 
             if ([] !== $serviceCodes) {
-                throw new CannotCreateOrderException(sprintf('Optional service "%s" is not available for digital delivery.', current($serviceCodes)->value));
+                throw new CannotCreateOrderException(\sprintf('Optional service "%s" is not available for digital delivery.', current($serviceCodes)->value));
             }
 
             $carrierId = null;
@@ -199,7 +189,7 @@ class Create
             $carrierReferenceId = $shippingOptions->getCarrierMapping(...$serviceCodes)->getReferenceId();
 
             if (null === $carrierReferenceId || null === $carrierId = $this->getCarrierId($carrierReferenceId, $shopId)) {
-                throw new InternalServerErrorException(sprintf('No valid carrier mapping configured for delivery type "%s"', $deliveryType->value));
+                throw new InternalServerErrorException(\sprintf('No valid carrier mapping configured for delivery type "%s"', $deliveryType->value));
             }
         }
 
@@ -279,7 +269,7 @@ class Create
     }
 
     /**
-     * @param array{delivery: \AddressCore, invoice: \AddressCore} $addresses
+     * @param array{delivery: \Address, invoice: \Address} $addresses
      */
     private function updateCart(\Cart $cart, ?int $carrierId, array $addresses): void
     {
@@ -309,21 +299,21 @@ class Create
             return;
         }
 
-        throw new CannotCreateOrderException($this->module->l('The selected delivery option is not available.', self::TRANSLATION_SOURCE));
+        throw new CannotCreateOrderException($this->translator->trans('The selected delivery option is not available.', [], 'Modules.Inpostizi.Errors'));
     }
 
     private function getCountryId(string $code): int
     {
         if (0 >= $countryId = (int) \Country::getByIso(strtoupper($code))) {
-            throw new CannotCreateOrderException(sprintf($this->module->l('Selected country (%s) is not available.', self::TRANSLATION_SOURCE), $code));
+            throw new CannotCreateOrderException($this->translator->trans('The selected country ({iso_code}) is not available.', ['{iso_code}' => $code], 'Modules.Inpostizi.Errors'));
         }
 
         return $countryId;
     }
 
-    private function findOrCreateDeliveryAddress(AccountInfo $accountInfo, \Customer $customer, ?DeliveryAddress $deliveryAddress = null): \AddressCore
+    private function findOrCreateDeliveryAddress(AccountInfo $accountInfo, \Customer $customer, ?DeliveryAddress $deliveryAddress = null): \Address
     {
-        $address = $this->createAddress();
+        $address = new \CustomerAddress();
 
         $address->id_customer = $customer->id;
 
@@ -345,7 +335,7 @@ class Create
         $address->alias = \Tools::substr($address->address1, 0, 32);
 
         if (true !== $validationResult = $address->validateFields(false, true)) {
-            throw new CannotCreateOrderException(sprintf($this->module->l('Delivery address is not valid: %s', self::TRANSLATION_SOURCE), $validationResult));
+            throw new CannotCreateOrderException($this->translator->trans('Delivery address is not valid: {error}', ['{error}' => $validationResult], 'Modules.Inpostizi.Errors'));
         }
 
         if (!$address->add()) {
@@ -355,9 +345,9 @@ class Create
         return $address;
     }
 
-    private function fillWithDeliveryAddressData(\AddressCore $address, DeliveryAddress $deliveryAddress): void
+    private function fillWithDeliveryAddressData(\Address $address, DeliveryAddress $deliveryAddress): void
     {
-        $name = preg_split('/\s+/', $deliveryAddress->getName(), 2, PREG_SPLIT_NO_EMPTY);
+        $name = preg_split('/\s+/', $deliveryAddress->getName(), 2, \PREG_SPLIT_NO_EMPTY);
 
         $address->firstname = $name[0];
         $address->lastname = $name[1] ?? '-';
@@ -369,7 +359,7 @@ class Create
         $this->setAddressFields($address, $deliveryAddress->getAddress(), $deliveryAddress->getAddressDetails());
     }
 
-    private function fillWithAccountInfoData(\AddressCore $address, AccountInfo $accountInfo): void
+    private function fillWithAccountInfoData(\Address $address, AccountInfo $accountInfo): void
     {
         $clientAddress = $accountInfo->getAddress();
 
@@ -383,9 +373,9 @@ class Create
         $this->setAddressFields($address, $clientAddress->getAddress(), $clientAddress->getAddressDetails());
     }
 
-    private function findOrCreateInvoiceAddress(InvoiceDetails $invoiceDetails, AccountInfo $accountInfo, \Customer $customer): \AddressCore
+    private function findOrCreateInvoiceAddress(InvoiceDetails $invoiceDetails, AccountInfo $accountInfo, \Customer $customer): \Address
     {
-        $address = $this->createAddress();
+        $address = new \CustomerAddress();
 
         $this->setRequiredPhoneNumbers($address, $accountInfo);
 
@@ -404,7 +394,7 @@ class Create
         if (LegalForm::Company() === $invoiceDetails->getLegalForm()) {
             $address->company = $invoiceDetails->getCompanyName();
             if ($prefix = $invoiceDetails->getTaxIdPrefix()) {
-                $address->vat_number = sprintf('%s %s', $prefix, $invoiceDetails->getTaxId());
+                $address->vat_number = \sprintf('%s %s', $prefix, $invoiceDetails->getTaxId());
             } else {
                 $address->vat_number = $invoiceDetails->getTaxId();
             }
@@ -417,7 +407,7 @@ class Create
         $address->alias = \Tools::substr($address->address1 . ' ' . $address->address2, 0, 32);
 
         if (true !== $validationResult = $address->validateFields(false, true)) {
-            throw new CannotCreateOrderException(sprintf($this->module->l('Invoice address is not valid: %s', self::TRANSLATION_SOURCE), $validationResult));
+            throw new CannotCreateOrderException($this->translator->trans('Invoice address is not valid: {error}', ['{error}' => $validationResult], 'Modules.Inpostizi.Errors'));
         }
 
         if (!$address->add()) {
@@ -427,12 +417,7 @@ class Create
         return $address;
     }
 
-    private function createAddress(): \AddressCore
-    {
-        return class_exists(\CustomerAddress::class) ? new \CustomerAddress() : new \Address();
-    }
-
-    private function setRequiredPhoneNumbers(\AddressCore $address, AccountInfo $accountInfo): void
+    private function setRequiredPhoneNumbers(\Address $address, AccountInfo $accountInfo): void
     {
         if ([] === $requiredFields = $address->getFieldsRequiredDB()) {
             return;
@@ -441,17 +426,17 @@ class Create
         $phoneNumber = $this->formatPhoneNumber($accountInfo->getPhoneNumber());
 
         foreach (['phone', 'phone_mobile'] as $field) {
-            if (in_array($field, $requiredFields, true)) {
+            if (\in_array($field, $requiredFields, true)) {
                 $address->{$field} = $phoneNumber;
             }
         }
     }
 
-    private function setAddressFields(\AddressCore $address, string $addressLine, ?AddressDetails $addressDetails): void
+    private function setAddressFields(\Address $address, string $addressLine, ?AddressDetails $addressDetails): void
     {
         $requiredFields = $address->getFieldsRequiredDB();
 
-        if (!in_array('address2', $requiredFields, true)) {
+        if (!\in_array('address2', $requiredFields, true)) {
             $address->address1 = $addressLine;
 
             return;
@@ -459,7 +444,7 @@ class Create
 
         if (
             null === $addressDetails
-            || in_array($building = (string) $addressDetails->getBuilding(), ['', AddressDetails::BUILDING_NUMBER_PLACEHOLDER], true)
+            || \in_array($building = (string) $addressDetails->getBuilding(), ['', AddressDetails::BUILDING_NUMBER_PLACEHOLDER], true)
         ) {
             $address->address1 = $addressLine;
             $address->address2 = '-';
@@ -479,7 +464,7 @@ class Create
         return $phoneNumber->getCountryPrefix() . ' ' . $phoneNumber->getPhone();
     }
 
-    private function findExistingAddress(\Customer $customer, \AddressCore $address, array $ignoreFields = []): ?\AddressCore
+    private function findExistingAddress(\Customer $customer, \Address $address, array $ignoreFields = []): ?\Address
     {
         if ($customer->is_guest) {
             return null;
@@ -491,7 +476,7 @@ class Create
 
         foreach ($addresses as $data) {
             if ($this->isSameAddress($address, $data, $ignoreFields)) {
-                $existingAddress = $this->createAddress();
+                $existingAddress = new \Address();
                 $existingAddress->hydrate($data);
 
                 return $existingAddress;
@@ -501,7 +486,7 @@ class Create
         return null;
     }
 
-    private function isSameAddress(\AddressCore $address, array $data, array $ignoreFields): bool
+    private function isSameAddress(\Address $address, array $data, array $ignoreFields): bool
     {
         $comparedFields = array_diff([
             'firstname',
@@ -547,7 +532,7 @@ class Create
         }
 
         if (true !== $validationResult = $customer->validateFields(false, true)) {
-            throw new CannotCreateOrderException(sprintf($this->module->l('Customer data is not valid: %s', self::TRANSLATION_SOURCE), $validationResult));
+            throw new CannotCreateOrderException($this->translator->trans('Customer data is not valid: {error}', ['{error}' => $validationResult], 'Modules.Inpostizi.Errors'));
         }
 
         if (!$customer->save()) {
@@ -565,7 +550,7 @@ class Create
         try {
             $this->bus->handle(new UpdateCartMessageCommand($cart, $request));
         } catch (InvalidDataException $e) {
-            throw new CannotCreateOrderException($this->module->l('Order comments are not valid.', self::TRANSLATION_SOURCE));
+            throw new CannotCreateOrderException($this->translator->trans('Order comments are not valid.', [], 'Modules.Inpostizi.Validators'));
         } catch (\Exception $e) {
             throw new InternalServerErrorException('Could not save order comments.', 0, $e);
         }
@@ -580,7 +565,7 @@ class Create
         try {
             $model = new \InPostCartChoiceModel($cartId);
 
-            if ($newModel = 0 === (int) $model->id) {
+            if ($newModel = !$model->id) {
                 $model->id = $cartId;
             }
 
@@ -610,7 +595,7 @@ class Create
         $products = $cart->getProducts(true);
 
         if ([] === $products) {
-            throw new CannotCreateOrderException($this->context->getTranslator()->trans('Cart is empty', [], 'Shop.Notifications.Error'));
+            throw new CannotCreateOrderException($this->translator->trans('Cart is empty', [], 'Shop.Notifications.Error'));
         }
 
         $this->validateCartRules($cart);
@@ -619,7 +604,7 @@ class Create
 
         foreach ($products as $product) {
             if ($product['minimal_quantity'] > $product['cart_quantity']) {
-                throw new CannotCreateOrderException($this->context->getTranslator()->trans('The minimum purchase order quantity for the product %product% is %quantity%.', ['%product%' => $product['name'], '%quantity%' => $product['minimal_quantity']], 'Shop.Notifications.Error'));
+                throw new CannotCreateOrderException($this->translator->trans('The minimum purchase order quantity for the product %product% is %quantity%.', ['%product%' => $product['name'], '%quantity%' => $product['minimal_quantity']], 'Shop.Notifications.Error'));
             }
 
             $violations = $this->validator->validate($product, new Unrestricted([
@@ -632,10 +617,10 @@ class Create
             }
 
             if (Unrestricted::DELIVERY_DISALLOWED_ERROR === $violations->get(0)->getCode()) {
-                throw new CannotCreateOrderException($this->module->l('The selected delivery option is not available.', self::TRANSLATION_SOURCE));
+                throw new CannotCreateOrderException($this->translator->trans('The selected delivery option is not available.', [], 'Modules.Inpostizi.Errors'));
             }
 
-            throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
+            throw new CannotCreateOrderException($this->translator->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
         }
 
         if (true === $product = $cart->checkQuantities(true)) {
@@ -643,10 +628,10 @@ class Create
         }
 
         if ($product['active']) {
-            throw new CannotCreateOrderException(sprintf($this->module->l('You can\'t proceed with your order, the product is not available in this quantity: %s', self::TRANSLATION_SOURCE), $product['name']));
+            throw new CannotCreateOrderException($this->translator->trans('The product {product} is no longer available in the selected quantity.', ['{product}' => $product['name']], 'Modules.Inpostizi.Errors'));
         }
 
-        throw new CannotCreateOrderException($this->context->getTranslator()->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
+        throw new CannotCreateOrderException($this->translator->trans('This product (%product%) is no longer available.', ['%product%' => $product['name']], 'Shop.Notifications.Error'));
     }
 
     private function validateCartRules(\Cart $cart): void
@@ -657,7 +642,7 @@ class Create
                 continue;
             }
 
-            throw new CannotCreateOrderException(sprintf($this->module->l('Voucher %s is no longer available: %s'), $cartRule->code ?: $cartRule->name, $error));
+            throw new CannotCreateOrderException($this->translator->trans('Voucher {cart_rule} is no longer available: {error}', ['{cart_rule}' => $cartRule->code ?: $cartRule->name, '{error}' => $error], 'Modules.Inpostizi.Errors'));
         }
     }
 
@@ -672,7 +657,7 @@ class Create
             return;
         }
 
-        throw new CannotCreateOrderException($this->context->getTranslator()->trans('A minimum shopping cart total of %amount% (tax excl.) is required to validate your order. Current cart total is %total% (tax excl.).', ['%amount%' => $this->formatPrice($minimalPurchase), '%total%' => $this->formatPrice($productsTotalExcludingTax)], 'Shop.Theme.Checkout'));
+        throw new CannotCreateOrderException($this->translator->trans('A minimum shopping cart total of %amount% (tax excl.) is required to validate your order. Current cart total is %total% (tax excl.).', ['%amount%' => $this->formatPrice($minimalPurchase), '%total%' => $this->formatPrice($productsTotalExcludingTax)], 'Shop.Theme.Checkout'));
     }
 
     private function checkCartTotal(\Cart $cart, CreateOrderRequest $request): void
@@ -684,7 +669,7 @@ class Create
         $epsilon = $details->getCurrency()->getSmallestUnitAmount() / 2.;
 
         if (abs($orderTotal - $basketPrice) >= $epsilon) {
-            throw new CannotCreateOrderException($this->module->l('Basket price has changed. Please review your order.', self::TRANSLATION_SOURCE));
+            throw new CannotCreateOrderException($this->translator->trans('The price of your basket has changed. Please review your order.', [], 'Modules.Inpostizi.Errors'));
         }
     }
 
@@ -701,15 +686,13 @@ class Create
 
     private function formatPrice(float $price): string
     {
-        if (!is_callable([\Tools::class, 'getContextLocale'])) {
-            return \Tools::displayPrice($price, $this->context->currency);
-        }
-
-        return \Tools::getContextLocale($this->context)->formatPrice($price, 'PLN');
+        return $this->context->currentLocale->formatPrice($price, $this->context->currency->iso_code);
     }
 
     /**
-     * @param array{delivery: \AddressCore, invoice: \AddressCore} $addresses
+     * @todo: use {@see \izi\prestashop\ContextManager}
+     *
+     * @param array{delivery: \Address, invoice: \Address} $addresses
      */
     private function setUpContext(\Cart $cart, array $addresses, int $shopId): void
     {
@@ -722,9 +705,16 @@ class Create
         $this->context->customer = new \Customer($cart->id_customer);
         $this->context->cart->setTaxCalculationMethod();
         $this->context->currency = \Currency::getCurrencyInstance($cart->id_currency);
-        $this->context->language = new \Language($cart->id_lang);
 
-        $this->context->getTranslator()->setLocale($this->context->language->locale);
+        if ((int) $this->context->language->id !== $languageId = (int) $cart->id_lang) {
+            $this->context->language = new \Language($languageId);
+
+            $locale = $this->context->language->getLocale();
+            $this->context->getTranslator()->setLocale($locale);
+            $this->context->currentLocale = $this->module->getContainer()
+                ->get('prestashop.core.localization.locale.repository')
+                ->getLocale($locale);
+        }
 
         \Shop::setContext(\Shop::CONTEXT_SHOP, $shopId);
 
@@ -735,7 +725,7 @@ class Create
         $this->context->country = new \Country($taxAddress->id_country, $cart->id_lang);
 
         if (!$this->context->country->active) {
-            throw new CannotCreateOrderException(sprintf($this->module->l('Selected country (%s) is not available.', self::TRANSLATION_SOURCE), $this->context->country->name));
+            throw new CannotCreateOrderException($this->translator->trans('The selected country ({iso_code}) is not available.', ['{country}' => $this->context->country->iso_code], 'Modules.Inpostizi.Errors'));
         }
     }
 
@@ -764,11 +754,11 @@ class Create
             return;
         }
 
-        if (in_array($paymentType, $availablePaymentOptions, true)) {
+        if (\in_array($paymentType, $availablePaymentOptions, true)) {
             return;
         }
 
-        throw new CannotCreateOrderException($this->module->l('The selected payment method is not available.', self::TRANSLATION_SOURCE));
+        throw new CannotCreateOrderException($this->translator->trans('The selected payment method is not available.', [], 'Modules.Inpostizi.Errors'));
     }
 
     /**
@@ -798,22 +788,11 @@ class Create
             return;
         }
 
-        try {
-            $handler = $this->module->get(OptionalServiceHandlerInterface::class);
-        } catch (ServiceNotFoundException $e) {
-            $config = new PrestaShopConfiguration(new Configuration());
-            $costAdjuster = new ShippingCostAdjuster($this->context, $this->shippingConfiguration, $config);
-
-            $handler = new ChainHandler([
-                new GiftWrappingHandler($config, $this->module->get(ObjectManagerInterface::class), new LegacyTranslator($this->module->name)),
-                new CashOnDeliveryHandler($costAdjuster),
-                new WeekendDeliveryHandler($costAdjuster),
-            ]);
-        }
+        $handler = $this->module->get(OptionalServiceHandlerInterface::class);
 
         foreach (ServiceCode::cases() as $serviceCode) {
             try {
-                $handler->handle($cart, $serviceCode->value, $deliveryType, in_array($serviceCode, $serviceCodes, true));
+                $handler->handle($cart, $serviceCode->value, $deliveryType, \in_array($serviceCode, $serviceCodes, true));
             } catch (ServiceUnavailableException $e) {
                 throw new CannotCreateOrderException($e->getMessage());
             }

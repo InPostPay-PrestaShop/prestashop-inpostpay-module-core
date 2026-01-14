@@ -59,7 +59,7 @@ class InPostIziUpdater_1_6_0
     private function getDefaultProductCardHook(): string
     {
         if (
-            DisplayProductActions::getVersionRange()->contains(_PS_VERSION_)
+            Tools::version_compare(_PS_VERSION_, '1.7.6', '>=')
             && !$this->module->isRegisteredInHook(DisplayProductAdditionalInfo::HOOK_NAME)
         ) {
             return DisplayProductActions::HOOK_NAME;

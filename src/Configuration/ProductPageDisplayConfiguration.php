@@ -7,6 +7,7 @@ namespace izi\prestashop\Configuration;
 use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Validator\Sequentially;
 use izi\prestashop\View\Widget\WidgetConfigurationInterface;
+use PrestaShop\PrestaShop\Adapter\Presenter\Product\ProductLazyArray;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -33,7 +34,7 @@ final class ProductPageDisplayConfiguration implements ProductAwareWidgetDisplay
     public function __construct(WidgetDisplayConfigurationInterface $configuration, ValidatorInterface $validator, array $constraints)
     {
         if (BindingPlace::ProductCard() !== $bindingPlace = $configuration->getWidgetConfiguration()->getBindingPlace()) {
-            throw new \DomainException(sprintf('Expected binding place to be "%s", "%s" given', BindingPlace::ProductCard()->value, $bindingPlace->value));
+            throw new \DomainException(\sprintf('Expected binding place to be "%s", "%s" given', BindingPlace::ProductCard()->value, $bindingPlace->value));
         }
 
         $this->configuration = $configuration;
@@ -41,13 +42,17 @@ final class ProductPageDisplayConfiguration implements ProductAwareWidgetDisplay
         $this->constraints = $constraints;
     }
 
-    public function isDisplayed($product = null): bool
+    public function isDisplayed(?ProductLazyArray $product = null): bool
     {
         if (null === $product) {
             return $this->configuration->isDisplayed();
         }
 
-        if (!$this->configuration->isDisplayed($product)) {
+        $displayed = $this->configuration instanceof ProductAwareWidgetDisplayConfigurationInterface
+            ? $this->configuration->isDisplayed($product)
+            : $this->configuration->isDisplayed();
+
+        if (!$displayed) {
             return false;
         }
 
@@ -59,7 +64,7 @@ final class ProductPageDisplayConfiguration implements ProductAwareWidgetDisplay
             'constraints' => $this->constraints,
         ]));
 
-        return 0 === count($violations);
+        return 0 === \count($violations);
     }
 
     public function getWidgetConfiguration(): WidgetConfigurationInterface

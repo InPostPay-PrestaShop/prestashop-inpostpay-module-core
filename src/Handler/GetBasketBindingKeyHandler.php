@@ -53,7 +53,7 @@ final class GetBasketBindingKeyHandler implements GetBasketBindingKeyHandlerInte
         }
 
         if (BasketSession::isFinalized($session)) {
-            throw new \DomainException(sprintf('Basket "%s" was already finalized.', $basket->getId()));
+            throw new \DomainException(\sprintf('Basket "%s" was already finalized.', $basket->getId()));
         }
 
         $key = $this->client->initializeBasketBinding($session->getBasketId())->getBindingKey();

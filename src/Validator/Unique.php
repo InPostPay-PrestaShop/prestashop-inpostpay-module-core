@@ -32,8 +32,8 @@ final class Unique extends Constraint
         $this->message = $message ?? $this->message;
         $this->normalizer = $normalizer ?? $this->normalizer;
 
-        if (null !== $this->normalizer && !is_callable($this->normalizer)) {
-            throw new InvalidArgumentException(sprintf('The "normalizer" option must be a valid callable ("%s" given).', get_debug_type($this->normalizer)));
+        if (null !== $this->normalizer && !\is_callable($this->normalizer)) {
+            throw new InvalidArgumentException(\sprintf('The "normalizer" option must be a valid callable ("%s" given).', get_debug_type($this->normalizer)));
         }
     }
 }

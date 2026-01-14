@@ -1,0 +1,59 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider:
+    class: izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider
+    tags:
+      - inpost.izi.tracking_number_provider
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\Shipping\DeliveryPriceCalculator:
+    class: izi\prestashop\Shipping\DeliveryPriceCalculator
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@inpost.izi.object_model.address_repository'
+      - '@izi\prestashop\Currency\PriceConverterInterface'
+      - '@izi\prestashop\Shipping\FreeDelivery\MinAmountCalculationStrategyInterface'
+
+  izi\prestashop\Shipping\FreeDelivery\MinAmountCalculationStrategyInterface: '@izi\prestashop\Shipping\FreeDelivery\PriceRangeStrategy'
+  izi\prestashop\Shipping\FreeDelivery\PriceRangeStrategy:
+    class: izi\prestashop\Shipping\FreeDelivery\PriceRangeStrategy
+    arguments:
+      - '@izi\prestashop\Shipping\FreeDelivery\GenericStrategy'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\Shipping\FreeDelivery\GenericStrategy:
+    class: izi\prestashop\Shipping\FreeDelivery\GenericStrategy
+    arguments:
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+
+  izi\prestashop\Shipping\CartTotal\GenericStrategy:
+    class: izi\prestashop\Shipping\CartTotal\GenericStrategy
+
+  izi\prestashop\Shipping\CartTotal\CartTotalDeliveryStrategyInterface: '@izi\prestashop\Shipping\CartTotal\PriceRangeStrategy'
+  izi\prestashop\Shipping\CartTotal\PriceRangeStrategy:
+    class: izi\prestashop\Shipping\CartTotal\PriceRangeStrategy
+    arguments:
+      - '@izi\prestashop\Shipping\CartTotal\GenericStrategy'
+      - '@izi\prestashop\ObjectModel\Repository\RangePriceRepository'
+
+  izi\prestashop\Shipping\CartWeight\GenericStrategy:
+    class: izi\prestashop\Shipping\CartWeight\GenericStrategy
+
+  izi\prestashop\Shipping\CartWeight\CartWeightDeliveryStrategyInterface: '@izi\prestashop\Shipping\CartWeight\WeightRangeStrategy'
+  izi\prestashop\Shipping\CartWeight\WeightRangeStrategy:
+    class: izi\prestashop\Shipping\CartWeight\WeightRangeStrategy
+    arguments:
+      - '@izi\prestashop\Shipping\CartWeight\GenericStrategy'
+      - '@izi\prestashop\ObjectModel\Repository\RangeWeightRepository'
+
+  izi\prestashop\Shipping\ProductDimensions\ProductDimensionsDeliveryStrategyInterface: '@izi\prestashop\Shipping\ProductDimensions\GenericStrategy'
+  izi\prestashop\Shipping\ProductDimensions\GenericStrategy:
+    class: izi\prestashop\Shipping\ProductDimensions\GenericStrategy
+
+  izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDeliveryInterface: '@izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery'
+  izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery:
+    class: izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery

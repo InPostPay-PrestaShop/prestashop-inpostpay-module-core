@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Common\Delivery;
 
 use izi\prestashop\Enum\StringEnum;
-use izi\prestashop\Translation\LegacyTranslator;
 use izi\prestashop\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @method static self Apm()
@@ -24,13 +24,15 @@ final class DeliveryType extends StringEnum implements TranslatableInterface
         return [self::Apm(), self::Courier()];
     }
 
-    public function trans(LegacyTranslator $translator): string
+    public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
         switch ($this) {
             case self::Apm():
-                return $translator->l('APM', 'deliverytype');
+                return $translator->trans('APM', [], 'Modules.Inpostizi.Delivery', $locale);
             case self::Courier():
-                return $translator->l('Courier', 'deliverytype');
+                return $translator->trans('Courier', [], 'Modules.Inpostizi.Delivery', $locale);
+            case self::Digital():
+                return $translator->trans('Digital delivery', [], 'Modules.Inpostizi.Delivery', $locale);
             default:
                 return $this->name;
         }

@@ -4,15 +4,8 @@ declare(strict_types=1);
 
 namespace izi\prestashop\MerchantApi\Model\Order\Response;
 
-use izi\prestashop\Common\Order\MerchantOrderStatus;
-
 final class OrderStatusData implements \JsonSerializable
 {
-    /**
-     * @var MerchantOrderStatus|null
-     */
-    private $order_status;
-
     /**
      * @var string|null
      */
@@ -26,16 +19,10 @@ final class OrderStatusData implements \JsonSerializable
     /**
      * @param string[]|null $delivery_references_list
      */
-    public function __construct(?MerchantOrderStatus $order_status = null, ?string $order_merchant_status_description = null, ?array $delivery_references_list = null)
+    public function __construct(?string $order_merchant_status_description = null, ?array $delivery_references_list = null)
     {
-        $this->order_status = $order_status;
         $this->order_merchant_status_description = $order_merchant_status_description;
         $this->delivery_references_list = $delivery_references_list;
-    }
-
-    public function getStatus(): ?MerchantOrderStatus
-    {
-        return $this->order_status;
     }
 
     public function getStatusDescription(): ?string

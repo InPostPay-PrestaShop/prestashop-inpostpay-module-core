@@ -6,8 +6,6 @@ namespace izi\prestashop\Entities;
 
 /**
  * @template T of object
- *
- * @method bool isFinalized()
  */
 interface BasketInterface
 {
@@ -20,4 +18,6 @@ interface BasketInterface
      * @return T a native basket object
      */
     public function getEntity();
+
+    public function isFinalized(): bool;
 }

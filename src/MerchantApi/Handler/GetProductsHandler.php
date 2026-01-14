@@ -96,7 +96,7 @@ final class GetProductsHandler implements GetProductsHandlerInterface
 
         $responseProducts = array_map([$this, 'mapProductData'], $products);
 
-        if ($totalCount === count($referenceIds)) {
+        if ($totalCount === \count($referenceIds)) {
             return new Products($responseProducts, $totalCount, $pageIndex, $pageSize);
         }
 
@@ -135,15 +135,15 @@ final class GetProductsHandler implements GetProductsHandlerInterface
         }
 
         $offset = $pageIndex * $pageSize;
-        $totalCount += count($importableIds);
+        $totalCount += \count($importableIds);
 
-        $count = count($responseProducts);
+        $count = \count($responseProducts);
 
         if ($count === $pageSize || $offset > $totalCount) {
             return new Products($responseProducts, $totalCount, $pageIndex, $pageSize);
         }
 
-        $productIds = array_slice($importableIds, $offset - $count, $pageSize - $count);
+        $productIds = \array_slice($importableIds, $offset - $count, $pageSize - $count);
         $apiProducts = $this->fetchApiProducts($productIds);
 
         $responseProducts = array_merge(
@@ -164,7 +164,7 @@ final class GetProductsHandler implements GetProductsHandlerInterface
     private function mapApiProductData(Product $apiProduct): IdentifiableProduct
     {
         $referenceId = ReferenceId::fromString($apiProduct->getId());
-        assert(null !== $referenceId);
+        \assert(null !== $referenceId);
 
         $availability = $apiProduct->getAvailability() ?? new ProductAvailability();
         $product = new HotProduct(

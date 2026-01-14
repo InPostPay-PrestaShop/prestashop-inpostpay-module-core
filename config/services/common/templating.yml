@@ -1,0 +1,9 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\View\Templating\RendererInterface: '@izi\prestashop\View\Templating\SmartyRenderer'
+  izi\prestashop\View\Templating\SmartyRenderer:
+    class: izi\prestashop\View\Templating\SmartyRenderer
+    arguments:
+      - '@=service("inpost.izi.context").smarty'

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Form\Type\Widget;
 
-use izi\prestashop\Translation\LegacyTranslator;
+use izi\prestashop\Form\Type\EnumType;
+use izi\prestashop\View\Widget\FrameStyle;
+use izi\prestashop\View\Widget\Size;
+use izi\prestashop\View\Widget\Variant;
 use izi\prestashop\View\Widget\WidgetConfiguration;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -13,14 +16,16 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class WidgetConfigurationType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'widgetconfigurationtype';
-
+    /**
+     * @var TranslatorInterface
+     */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -34,47 +39,48 @@ final class WidgetConfigurationType extends AbstractType
     {
         $builder
             ->add('darkMode', ChoiceType::class, [
-                'label' => $this->translator->l('Background', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('Determines whether the widget is on a light or dark background in your store. The setting affects the font color, make sure it is visible.', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Background', [], 'Modules.Inpostizi.Gui'),
+                'help' => $this->translator->trans('Determines whether the widget is displayed on a light or dark background in your store. This setting affects the font color - make sure it is visible.', [], 'Modules.Inpostizi.Gui'),
                 'choices' => [
-                    $this->translator->l('Light', self::TRANSLATION_SOURCE) => false,
-                    $this->translator->l('Dark', self::TRANSLATION_SOURCE) => true,
+                    $this->translator->trans('Light', [], 'Modules.Inpostizi.Gui') => false,
+                    $this->translator->trans('Dark', [], 'Modules.Inpostizi.Gui') => true,
                 ],
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
                 ],
             ])
-            ->add('variant', WidgetVariantChoiceType::class, [
-                'label' => $this->translator->l('Variant', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('The widget is available in 2 color variants. Choose the one more suitable for your store\'s color scheme.', self::TRANSLATION_SOURCE),
+            ->add('variant', EnumType::class, [
+                'label' => $this->translator->trans('Variant', [], 'Modules.Inpostizi.Gui'),
+                'help' => $this->translator->trans('The widget is available in 2 color variants. Choose the one more suitable for your store\'s color scheme.', [], 'Modules.Inpostizi.Gui'),
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
                 ],
+                'class' => Variant::class,
             ])
-            ->add('frameStyle', WidgetFrameStyleChoiceType::class, [
-                'label' => $this->translator->l('Frame style', self::TRANSLATION_SOURCE),
+            ->add('frameStyle', EnumType::class, [
+                'label' => $this->translator->trans('Frame style', [], 'Modules.Inpostizi.Gui'),
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
                 ],
+                'class' => FrameStyle::class,
+                'required' => false,
+                'placeholder' => $this->translator->trans('Rectangular', [], 'Modules.Inpostizi.Gui'),
             ])
-            ->add('size', WidgetSizeChoiceType::class, [
-                'label' => $this->translator->l('Size', self::TRANSLATION_SOURCE),
+            ->add('size', EnumType::class, [
+                'label' => $this->translator->trans('Size', [], 'Modules.Inpostizi.Gui'),
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
                 ],
+                'class' => Size::class,
             ])
             ->add('maxWidthPx', IntegerType::class, [
                 'required' => false,
-                'label' => $this->translator->l('Max width', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Max width', [], 'Modules.Inpostizi.Gui'),
                 'attr' => [
                     'class' => 'js-widget-attribute-provider',
                 ],
                 'unit' => 'px',
             ]);
-
-        // kept for \AdminTranslationsController translatable message discovery
-        // ->l('Alignment', self::TRANSLATION_SOURCE)
-        // ->l('Specifies the orientation of the widget in the space available for it. If your template allocates a narrow space for the widget the setting will not affect the appearance.', self::TRANSLATION_SOURCE)
     }
 
     public function configureOptions(OptionsResolver $resolver): void

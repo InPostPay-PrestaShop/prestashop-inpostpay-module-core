@@ -14,7 +14,7 @@ interface AuthorizationServerClientInterface
     public function sendAccessTokenRequest(ClientCredentialsInterface $credentials, array $parameters): array;
 
     /**
-     * @return never-return
+     * @return never
      */
     public function redirectToAuthorizationEndpoint(array $parameters);
 }

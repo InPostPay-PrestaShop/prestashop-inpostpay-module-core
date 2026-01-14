@@ -6,7 +6,6 @@ namespace izi\prestashop\Form\Type\Order;
 
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader;
-use izi\prestashop\Translation\PaymentTypeTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
@@ -15,6 +14,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class AvailablePaymentOptionsChoiceType extends AbstractType
 {
@@ -24,14 +24,14 @@ final class AvailablePaymentOptionsChoiceType extends AbstractType
     private $choiceLoader;
 
     /**
-     * @var PaymentTypeTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
     /**
      * @param AvailablePaymentOptionChoiceLoader $choiceLoader
      */
-    public function __construct(ChoiceLoaderInterface $choiceLoader, PaymentTypeTranslator $translator)
+    public function __construct(ChoiceLoaderInterface $choiceLoader, TranslatorInterface $translator)
     {
         $this->choiceLoader = $choiceLoader;
         $this->translator = $translator;
@@ -56,7 +56,7 @@ final class AvailablePaymentOptionsChoiceType extends AbstractType
                 return;
             }
 
-            if (!is_array($data)) {
+            if (!\is_array($data)) {
                 throw new TransformationFailedException('Expected an array.');
             }
 
@@ -64,13 +64,13 @@ final class AvailablePaymentOptionsChoiceType extends AbstractType
 
             // remove valid but unavailable payment type choices
             $data = array_filter($data, static function ($value) use ($choices) {
-                if (!is_string($value)) {
+                if (!\is_string($value)) {
                     return true;
                 }
 
                 $type = PaymentType::from($value);
 
-                return in_array($type, $choices, true);
+                return \in_array($type, $choices, true);
             });
 
             $event->setData($data);
@@ -85,7 +85,7 @@ final class AvailablePaymentOptionsChoiceType extends AbstractType
                 return $paymentType->value;
             },
             'choice_label' => function (PaymentType $paymentType) {
-                return $this->translator->getLabel($paymentType);
+                return $paymentType->trans($this->translator);
             },
         ]);
     }

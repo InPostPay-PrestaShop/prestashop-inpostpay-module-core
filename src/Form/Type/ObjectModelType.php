@@ -102,7 +102,7 @@ final class ObjectModelType extends AbstractType
                     );
                 },
                 'choice_label' => function (\ObjectModel $model) {
-                    if (is_callable([$model, '__toString'])) {
+                    if (\is_callable([$model, '__toString'])) {
                         return (string) $model;
                     }
 
@@ -110,28 +110,26 @@ final class ObjectModelType extends AbstractType
 
                     // might as well use model's "name" property by default...
                     if (property_exists($model, 'name')) {
-                        if (!is_array($model->name)) {
+                        if (!\is_array($model->name)) {
                             $label = $model->name;
                         } elseif ([] !== $model->name) {
                             $label = $model->name[$this->context->language->id] ?? current($model->name);
                         }
                     }
 
-                    return $label ?? sprintf('"%s" #%d', get_class($model), $model->id);
+                    return $label ?? \sprintf('"%s" #%d', \get_class($model), $model->id);
                 },
                 'choice_name' => static function (\ObjectModel $model): string {
                     return (string) $model->id;
                 },
-                'choice_value' => static function (?\ObjectModel $model): string {
-                    return null !== $model ? (string) $model->id : '';
-                },
+                'choice_value' => 'id',
             ])
             ->setAllowedTypes('language_id', ['null', 'int'])
             ->setAllowedTypes('shop_id', ['null', 'int'])
             ->setAllowedTypes('query_builder', ['null', 'callable', QueryBuilder::class])
             ->setAllowedValues('input', ['object', 'id'])
             ->setNormalizer('query_builder', function (Options $options, $value): ?QueryBuilder {
-                if (is_callable($value)) {
+                if (\is_callable($value)) {
                     $value = $value(
                         $this->manager->getRepository($options['class']),
                         $options['language_id'],
@@ -150,7 +148,7 @@ final class ObjectModelType extends AbstractType
     private function getChoiceLoaderCacheKey(string $class, ?QueryBuilder $queryBuilder, ?int $languageId, ?int $shopId): string
     {
         if (null === $queryBuilder) {
-            return sprintf('%s_%d_%d', $class, (int) $languageId, (int) $shopId);
+            return \sprintf('%s_%d_%d', $class, (int) $languageId, (int) $shopId);
         }
 
         $sql = $queryBuilder->build()->getSql();

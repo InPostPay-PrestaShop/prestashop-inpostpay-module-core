@@ -1,0 +1,35 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\Event\EventDispatcherInterface:
+    class: izi\prestashop\Event\Adapter\EventDispatcher
+    public: true
+    arguments:
+      - '@inpost.izi.event_dispatcher'
+
+  inpost.izi.event_dispatcher:
+    class: Symfony\Component\EventDispatcher\EventDispatcherInterface
+    factory: [ izi\prestashop\Event\EventDispatcherFactory, create ]
+    arguments:
+      - '@inpost.izi.event_dispatcher.subscriber_locator'
+
+  inpost.izi.event_dispatcher.subscriber_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+      - izi\prestashop\EventListener\CartListener: '@izi\prestashop\EventListener\CartListener'
+        izi\prestashop\EventListener\DetectCartDiscountsUpdateListener: '@?izi\prestashop\EventListener\DetectCartDiscountsUpdateListener'
+        izi\prestashop\EventListener\OrderListener: '@izi\prestashop\EventListener\OrderListener'
+        izi\prestashop\EventListener\ShipmentListener: '@izi\prestashop\EventListener\ShipmentListener'
+        izi\prestashop\EventListener\UpdateLastVisitedShopListener: '@?izi\prestashop\EventListener\UpdateLastVisitedShopListener'
+        izi\prestashop\Form\BasketAppClientProvider: '@?izi\prestashop\Form\BasketAppClientProvider'
+        izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener: '@?izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener'
+        izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener: '@izi\prestashop\HotProduct\EventListener\UpdateHotProductsListener'
+        izi\prestashop\EventListener\CreateShipmentListener: '@?izi\prestashop\EventListener\CreateShipmentListener'
+        izi\prestashop\Mail\EventListener\ReplaceOrderNotificationRecipientListener: '@izi\prestashop\Mail\EventListener\ReplaceOrderNotificationRecipientListener'
+        izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener: '@izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener'
+        izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener: '@izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener'
+        izi\prestashop\Analytics\EventListener\PersistCookiesListener: '@?izi\prestashop\Analytics\EventListener\PersistCookiesListener'
+        izi\prestashop\Extension\EventListener\ClearCacheListener: '@izi\prestashop\Extension\EventListener\ClearCacheListener'

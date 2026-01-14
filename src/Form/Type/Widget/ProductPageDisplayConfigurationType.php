@@ -8,23 +8,21 @@ use izi\prestashop\Common\BindingPlace;
 use izi\prestashop\Configuration\DTO\ProductPageDisplayConfiguration;
 use izi\prestashop\Configuration\DTO\WidgetDisplayConfiguration;
 use izi\prestashop\Form\Type\Product\ProductRestrictionsType;
-use izi\prestashop\Translation\LegacyTranslator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class ProductPageDisplayConfigurationType extends AbstractType
 {
-    private const TRANSLATION_SOURCE = 'productpagedisplayconfigurationtype';
-
     /**
-     * @var LegacyTranslator
+     * @var TranslatorInterface
      */
     private $translator;
 
-    public function __construct(LegacyTranslator $translator)
+    public function __construct(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -43,8 +41,8 @@ final class ProductPageDisplayConfigurationType extends AbstractType
                 'binding_place' => BindingPlace::ProductCard(),
             ])
             ->add('productRestrictions', ProductRestrictionsType::class, [
-                'label' => $this->translator->l('Product restrictions', self::TRANSLATION_SOURCE),
-                'help' => $this->translator->l('The restriction will be applied if the product matches any of the below conditions.', self::TRANSLATION_SOURCE),
+                'label' => $this->translator->trans('Product restrictions', [], 'Modules.Inpostizi.Product'),
+                'help' => $this->translator->trans('The restriction will be applied if the product matches any of the below conditions.', [], 'Modules.Inpostizi.Product'),
             ]);
     }
 

@@ -16,7 +16,7 @@
           <div class="form-wrapper card-text">
             {{ form_errors(form) }}
 
-            {% if is_ps_176 %}
+            {% if constant('_PS_VERSION_') starts with '1.7.6' %}
               {% import '@PrestaShop/Admin/macros.html.twig' as ps %}
               {{- ps.form_group_row(form.productId, { attr: form.productId.vars.attr }, {
                 'label': form.productId.vars.label

@@ -35,9 +35,9 @@ class ProductRepository extends ObjectRepository
         return (int) \StockAvailable::getQuantityAvailableByProduct($productId, $combinationId, $shopId);
     }
 
-    public function getAvailableQuantity(int $productId, ?int $combinationId = null, ?\Cart $cart = null): int
+    public function getAvailableQuantity(int $productId, ?int $combinationId = null, ?\Cart $cart = null, ?int $customizationId = null): int
     {
-        return (int) \Product::getQuantity($productId, $combinationId, null, $cart);
+        return (int) \Product::getQuantity($productId, $combinationId, null, $cart, $customizationId);
     }
 
     /**

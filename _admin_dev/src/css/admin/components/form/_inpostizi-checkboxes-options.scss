@@ -11,5 +11,11 @@
 
   .custom-control-label {
     display: block;
+    position: relative;
+
+    &:before,
+    &:after {
+      left: -1.5rem;
+    }
   }
 }

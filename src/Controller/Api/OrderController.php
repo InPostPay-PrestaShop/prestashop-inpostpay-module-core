@@ -14,6 +14,7 @@ use izi\prestashop\MerchantApi\Model\Order\Response\Order;
 use izi\prestashop\MerchantApi\Model\Order\Response\OrderStatusData;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 final class OrderController extends AbstractApiController
 {
@@ -25,7 +26,7 @@ final class OrderController extends AbstractApiController
         /** @var Order $order */
         $order = $this->bus->handle($command);
 
-        return $this->orderResponse($order, 201);
+        return $this->orderResponse($order, Response::HTTP_CREATED);
     }
 
     public function get(string $orderId): JsonResponse
@@ -47,13 +48,13 @@ final class OrderController extends AbstractApiController
         return new JsonResponse($orderStatus);
     }
 
-    private function orderResponse(Order $order, int $status = 200): JsonResponse
+    private function orderResponse(Order $order, int $status = Response::HTTP_OK): JsonResponse
     {
         $data = $this->serializer->serialize($order, 'json', [
             'datetime_format' => BasketAppClientInterface::DATETIME_FORMAT,
             'datetime_timezone' => BasketAppClientInterface::DATETIME_ZONE,
         ]);
 
-        return JsonResponse::create(null, $status)->setContent($data);
+        return new JsonResponse($data, $status, [], true);
     }
 }

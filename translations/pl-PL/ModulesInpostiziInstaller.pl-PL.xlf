@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="ModulesInpostiziInstaller.xlf" source-language="pl-PL" target-language="pl-PL" datatype="plaintext">
+    <body>
+      <trans-unit id="8c861a1fde407b8f37b30e21f54016fd">
+        <source>Could not import the module's translations.</source>
+        <target>Nie udało się zaimportować tłumaczeń modułu.</target>
+      </trans-unit>
+      <trans-unit id="707dbb256cab2ab406e252f6a1f9bac0">
+        <source>Could not register hooks.</source>
+        <target>Nie udało się zarejestrować hooków.</target>
+      </trans-unit>
+      <trans-unit id="3f93d44654423ff8a5fcbbfe8d82f57f">
+        <source>Could not update the database schema.</source>
+        <target>Nie udało się zaktualizować struktury bazy danych.</target>
+      </trans-unit>
+      <trans-unit id="9fb283aebb2c206ad3b6054a1f4b5f2f">
+        <source>This module requires PHP {min_version} or later.</source>
+        <target>This module requires PHP {min_version} or later.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

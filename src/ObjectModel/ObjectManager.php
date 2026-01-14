@@ -56,8 +56,8 @@ final class ObjectManager implements ObjectManagerInterface
 
         if (false === $this->connection->execute(\Closure::fromCallable([$model, 'save']))) {
             $message = 0 >= $id
-                ? sprintf('Failed to create a new %s.', get_class($model))
-                : sprintf('Failed to update %s ID %d.', get_class($model), $id);
+                ? \sprintf('Failed to create a new %s.', \get_class($model))
+                : \sprintf('Failed to update %s ID %d.', \get_class($model), $id);
 
             throw new \RuntimeException($message);
         }
@@ -70,7 +70,7 @@ final class ObjectManager implements ObjectManagerInterface
         }
 
         if (false === $this->connection->execute(\Closure::fromCallable([$model, 'delete']))) {
-            throw new \RuntimeException(sprintf('Failed to delete %s ID %d.', get_class($model), $id));
+            throw new \RuntimeException(\sprintf('Failed to delete %s ID %d.', \get_class($model), $id));
         }
     }
 
@@ -98,7 +98,7 @@ final class ObjectManager implements ObjectManagerInterface
 
     public function refresh(\ObjectModel $model): void
     {
-        $class = get_class($model);
+        $class = \get_class($model);
         $metadata = $this->getMetadata($class);
 
         $languageId = $metadata['multilang']
@@ -112,7 +112,7 @@ final class ObjectManager implements ObjectManagerInterface
         $data = $this
             ->getRepository($class)
             ->createQueryBuilder('a', $languageId, $shopId)
-            ->where(sprintf('a.%s = %d', $metadata['primary'], (int) $model->id))
+            ->where(\sprintf('a.%s = %d', $metadata['primary'], (int) $model->id))
             ->build()
             ->getArrayResult();
 
@@ -131,17 +131,17 @@ final class ObjectManager implements ObjectManagerInterface
         }
 
         if (!is_subclass_of($class, \ObjectModel::class)) {
-            throw new \DomainException(sprintf('%s is not a %s.', $class, \ObjectModel::class));
+            throw new \DomainException(\sprintf('%s is not a %s.', $class, \ObjectModel::class));
         }
 
         $metadata = $class::getDefinition($class);
         $metadata['multishop'] = \Shop::isTableAssociated($metadata['table']);
 
-        if (!array_key_exists('multilang', $metadata)) {
+        if (!\array_key_exists('multilang', $metadata)) {
             $metadata['multilang'] = false;
         }
 
-        if (!array_key_exists('multilang_shop', $metadata)) {
+        if (!\array_key_exists('multilang_shop', $metadata)) {
             $metadata['multilang_shop'] = false;
         }
 
@@ -170,7 +170,7 @@ final class ObjectManager implements ObjectManagerInterface
 
     private function getShopId(\ObjectModel $model): ?int
     {
-        if (is_callable([$model, 'getShopId'])) {
+        if (\is_callable([$model, 'getShopId'])) {
             return $model->getShopId();
         }
 

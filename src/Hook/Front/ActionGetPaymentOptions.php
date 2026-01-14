@@ -17,7 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 final class ActionGetPaymentOptions implements HookInterface
 {
     public const HOOK_NAME = 'paymentOptions';
-    private const TRANSLATION_SOURCE = 'actiongetpaymentoptions';
 
     /**
      * @var \PaymentModule&WidgetInterface
@@ -95,7 +94,7 @@ final class ActionGetPaymentOptions implements HookInterface
 
         return (new PaymentOption())
             ->setModuleName($this->paymentModule->name)
-            ->setCallToActionText($this->paymentModule->l('Pay with InPost Pay', self::TRANSLATION_SOURCE))
+            ->setCallToActionText($this->paymentModule->getTranslator()->trans('Pay with InPost Pay', [], 'Modules.Inpostizi.Checkout'))
             ->setBinary(true) // does it do anything?
             ->setAdditionalInformation($additionalInfo);
     }

@@ -2,21 +2,19 @@
 
 namespace izi\prestashop\Event;
 
-use AdminInPostConfirmedShipmentsController;
-
 final class CreateShipmentRequestProcessedEvent extends Event
 {
     /**
-     * @var AdminInPostConfirmedShipmentsController
+     * @var \AdminInPostConfirmedShipmentsController
      */
     private $controller;
 
-    public function __construct(AdminInPostConfirmedShipmentsController $controller)
+    public function __construct(\AdminInPostConfirmedShipmentsController $controller)
     {
         $this->controller = $controller;
     }
 
-    public function getController(): AdminInPostConfirmedShipmentsController
+    public function getController(): \AdminInPostConfirmedShipmentsController
     {
         return $this->controller;
     }

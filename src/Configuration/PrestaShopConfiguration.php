@@ -51,7 +51,7 @@ class PrestaShopConfiguration
     {
         $value = $this->configuration->get(self::TAX_ADDRESS_TYPE, $shopId);
 
-        if (in_array($value, ['id_address_delivery', 'id_address_invoice'], true)) {
+        if (\in_array($value, ['id_address_delivery', 'id_address_invoice'], true)) {
             return $value;
         }
 
