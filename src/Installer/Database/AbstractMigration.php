@@ -25,12 +25,12 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
 
     protected function tableExists(string $table): bool
     {
-        return (bool) $this->connection->fetchOne('SELECT EXISTS (
+        return (bool) $this->connection->fetchOne('SELECT EXISTS(
             SELECT *
             FROM information_schema.TABLES
             WHERE TABLE_SCHEMA = DATABASE()
                 AND TABLE_NAME = "' . _DB_PREFIX_ . pSQL($table) . '" 
-        )');
+        )', false);
     }
 
     protected function dropTable(string $table): void
@@ -75,13 +75,13 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
 
     protected function columnExists(string $table, string $column): bool
     {
-        return (bool) $this->connection->fetchOne('SELECT EXISTS (
+        return (bool) $this->connection->fetchOne('SELECT EXISTS(
             SELECT *
             FROM information_schema.COLUMNS
             WHERE TABLE_SCHEMA = DATABASE()
                 AND TABLE_NAME = "' . _DB_PREFIX_ . pSQL($table) . '" 
                 AND COLUMN_NAME = "' . pSQL($column) . '"
-        )');
+        )', false);
     }
 
     protected function addForeignKey(string $table, string $foreignTable, array $localColumnNames, array $foreignColumnNames, string $name, array $options = []): void
@@ -115,14 +115,14 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
 
     protected function foreignKeyExists(string $table, string $name): bool
     {
-        return (bool) $this->connection->fetchOne('SELECT EXISTS (
+        return (bool) $this->connection->fetchOne('SELECT EXISTS(
             SELECT *
-            FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
+            FROM information_schema.TABLE_CONSTRAINTS
             WHERE TABLE_SCHEMA = DATABASE()
                 AND CONSTRAINT_TYPE = "FOREIGN KEY"
                 AND CONSTRAINT_NAME = "' . pSQL($name) . '"
                 AND TABLE_NAME = "' . _DB_PREFIX_ . pSQL($table) . '"
-        )');
+        )', false);
     }
 
     protected function addUniqueIndex(string $table, array $columns, string $name): void
@@ -143,7 +143,7 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
             SHOW INDEX
             FROM `' . _DB_PREFIX_ . pSQL($table) . '`
             WHERE Key_name = "' . pSQL($name) . '"
-        ');
+       ', false);
 
         return [] !== $result;
     }
@@ -165,12 +165,12 @@ abstract class AbstractMigration implements DatabaseMigrationInterface
 
     private function supportsForeignKeys(string $table): bool
     {
-        return (bool) $this->connection->fetchOne('SELECT EXISTS (
+        return (bool) $this->connection->fetchOne('SELECT EXISTS(
             SELECT *
-            FROM INFORMATION_SCHEMA.TABLES
+            FROM information_schema.TABLES
             WHERE TABLE_SCHEMA = DATABASE()
                 AND ENGINE = "InnoDB"
                 AND TABLE_NAME = "' . _DB_PREFIX_ . pSQL($table) . '"
-        )');
+        )', false);
     }
 }
