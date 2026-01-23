@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
+use izi\prestashop\Environment\EnvironmentFactory;
 use izi\prestashop\Environment\EnvironmentFactoryInterface;
 use izi\prestashop\Environment\EnvironmentInterface;
 use izi\prestashop\Environment\EnvironmentType;
@@ -57,11 +58,11 @@ final class ApiConfiguration implements ApiConfigurationInterface, AccessTokenRe
      */
     private $accessToken;
 
-    public function __construct(ConfigurationInterface $configuration, SerializerInterface $serializer, EnvironmentFactoryInterface $environmentFactory)
+    public function __construct(ConfigurationInterface $configuration, SerializerInterface $serializer, ?EnvironmentFactoryInterface $environmentFactory = null)
     {
         $this->configuration = $configuration;
         $this->serializer = $serializer;
-        $this->environmentFactory = $environmentFactory;
+        $this->environmentFactory = $environmentFactory ?? new EnvironmentFactory();
     }
 
     public function getEnvironment(): EnvironmentInterface

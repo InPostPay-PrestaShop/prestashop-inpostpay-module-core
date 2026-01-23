@@ -6,6 +6,8 @@ namespace izi\prestashop\Database;
 
 /**
  * @experimental
+ *
+ * @phpstan-type DataRow array<string, mixed>
  */
 class Connection
 {
@@ -22,7 +24,7 @@ class Connection
     }
 
     /**
-     * @template T
+     * @template T of mixed
      *
      * @param \Closure(): T $closure function returning false on errors
      *
@@ -68,19 +70,28 @@ class Connection
     /**
      * @param string $sql
      *
-     * @return array<string, mixed>|false
+     * @return DataRow|false
      */
-    public function fetchAssociative(string $sql)
+    public function fetchAssociative(string $sql, bool $useCache = true)
     {
-        return $this->execute(function () use ($sql) {
-            return $this->db->getRow($sql);
+        return $this->execute(function () use ($sql, $useCache) {
+            /** @var DataRow|false $data */
+            $data = $this->db->getRow($sql, $useCache);
+
+            return $data;
         });
     }
 
-    public function fetchAllAssociative(string $sql): array
+    /**
+     * @return DataRow[]
+     */
+    public function fetchAllAssociative(string $sql, bool $useCache = true): array
     {
-        return $this->execute(function () use ($sql) {
-            return $this->db->executeS($sql);
+        return $this->execute(function () use ($sql, $useCache) {
+            /** @var DataRow[] $data */
+            $data = $this->db->executeS($sql, $useCache);
+
+            return $data;
         });
     }
 
@@ -102,10 +113,13 @@ class Connection
     /**
      * @return mixed|false
      */
-    public function fetchOne(string $sql)
+    public function fetchOne(string $sql, bool $useCache = true)
     {
-        return $this->execute(function () use ($sql) {
-            return $this->db->getValue($sql);
+        return $this->execute(function () use ($sql, $useCache) {
+            /** @var mixed|false $value */
+            $value = $this->db->getValue($sql, $useCache);
+
+            return $value;
         });
     }
 

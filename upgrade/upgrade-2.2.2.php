@@ -25,8 +25,6 @@ class InPostIziUpdater_2_2_2
 
     public function __construct(Db $db, ?PaymentsApiClientInterface $client)
     {
-        SymfonyCacheClearer::getInstance()->clear();
-
         $this->db = $db;
         $this->client = $client;
     }
@@ -46,6 +44,8 @@ class InPostIziUpdater_2_2_2
 
     public function upgrade(): bool
     {
+        SymfonyCacheClearer::getInstance()->clear();
+
         return $this->updatePaymentOptionsConfig();
     }
 
