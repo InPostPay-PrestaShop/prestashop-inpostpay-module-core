@@ -18,6 +18,10 @@
         <source>If enabled, the values of the customer's tracking cookies will be added to the order data sent to InPost Pay.</source>
         <target>Jeżeli włączone, wartości plików cookie śledzących klienta zostaną dodane do danych zamówienia przesyłanych do InPost Pay.</target>
       </trans-unit>
+      <trans-unit id="dedf6a34a03c54d9411fe2aaabec59bb">
+        <source>If enabled, the widget on the product page will be divided into two buttons: one for adding the product to the cart and one that opens a modal with information about the binding status.</source>
+        <target>Jeżeli włączone, widget na karcie produktu będzie podzielony na dwa przyciski: dodawania produktu do koszyka oraz otwierający modal z informacją o statusie powiązania koszyka.</target>
+      </trans-unit>
       <trans-unit id="26f9667f6cbc9c5d93b04314a3b37e70">
         <source>If the "{option}" option is selected, the widget will not be visible to users that have not visited your store with the "{query_param}" query parameter, (e.g. https://my-store.com?{query_param}).</source>
         <target>Jeśli wybierzesz "{option}", widget nie będzie widoczny dla użytkowników, którzy nie odwiedzili Twojego sklepu z parametrem zapytania "{query_param}" (np. https://moj-sklep.pl?{query_param}).</target>
@@ -53,6 +57,10 @@
       <trans-unit id="e66a68a035b5c2a35d129520b87c46bf">
         <source>The suggested products are selected based on the settings in the "{section}" section of the product configuration form.</source>
         <target>Produkty sugerowane wybierane są na podstawie ustawień w sekcji "{section}" formularza edycji produktu.</target>
+      </trans-unit>
+      <trans-unit id="9c1cf7901aa2e27752ac5d6dba256974">
+        <source>Use the split widget</source>
+        <target>Używaj podzielonego widgetu</target>
       </trans-unit>
       <trans-unit id="4ed70f9413b483bf554359bac24509cd">
         <source>Use this option if you are using a full page cache module or other caching tools such as Varnish, LiteSpeed Cache etc.</source>

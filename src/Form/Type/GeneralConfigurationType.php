@@ -114,8 +114,8 @@ final class GeneralConfigurationType extends AbstractType
             ])
             ->add('widgetSplitBoundEnabled', SwitchType::class, [
                 'property_path' => 'generalConfiguration.widgetSplitBoundEnabled',
-                'label' => $this->translator->trans('Use the split button', [], 'Modules.Inpostizi.General'),
-                'help' => $this->translator->trans('Replaces the standard button on the product page with a split version that offers two actions: add to cart and display information about basket binding.', [], 'Modules.Inpostizi.General'),
+                'label' => $this->translator->trans('Use the split widget', [], 'Modules.Inpostizi.General'),
+                'help' => $this->translator->trans('If enabled, the widget on the product page will be divided into two buttons: one for adding the product to the cart and one that opens a modal with information about the binding status.', [], 'Modules.Inpostizi.General'),
             ])
             ->add('ordersConfiguration', OrdersConfigurationType::class, [
                 'label' => false,
