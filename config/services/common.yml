@@ -355,6 +355,8 @@ services:
     public: true
     arguments:
       - '@inpost.izi.db'
+    calls:
+      - { method: setLogger, arguments: [ '@inpost.izi.general_logger' ] }
 
   izi\prestashop\ObjectModel\Hydrator:
     class: izi\prestashop\ObjectModel\Hydrator
