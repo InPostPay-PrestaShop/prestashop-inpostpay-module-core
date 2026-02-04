@@ -9,6 +9,7 @@ use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Form\Event\ApiConfigurationValidatedEvent;
 use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
 use izi\prestashop\Hook\Front\DisplayIziCheckoutButton;
+use izi\prestashop\Hook\Front\DisplayIziProductButton;
 use izi\prestashop\Hook\Front\DisplayIziThankYou;
 use izi\prestashop\Hook\Front\DisplayOrderConfirmation;
 use izi\prestashop\Hook\Front\DisplayPaymentReturn;
@@ -84,6 +85,7 @@ final class GeneralConfigurationType extends AbstractType
                 'choices' => [
                     DisplayProductAdditionalInfo::HOOK_NAME => DisplayProductAdditionalInfo::HOOK_NAME,
                     DisplayProductActions::HOOK_NAME => DisplayProductActions::HOOK_NAME,
+                    DisplayIziProductButton::HOOK_NAME => DisplayIziProductButton::HOOK_NAME,
                 ],
                 'label' => $this->translator->trans('Product page widget display hook', [], 'Modules.Inpostizi.General'),
                 'help' => $this->translator->trans('You can choose a different hook if you have problems displaying the InPost Pay widget on the product page.', [], 'Modules.Inpostizi.General'),

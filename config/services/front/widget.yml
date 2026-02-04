@@ -38,6 +38,19 @@ services:
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@izi\prestashop\Order\ContextCustomerUpdater'
 
+  izi\prestashop\Handler\GetProductWidgetHandlerInterface: '@izi\prestashop\Handler\GetProductWidgetHandler'
+  izi\prestashop\Handler\GetProductWidgetHandler:
+    class: izi\prestashop\Handler\GetProductWidgetHandler
+    tags:
+      - inpost.izi.command_handler
+    arguments:
+      - '@izi\prestashop\Configuration\GuiConfigurationInterface'
+      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
+      - '@inpost.izi.module'
+      - '@inpost.izi.context'
+      - '@izi\prestashop\ObjectModel\Repository\ProductRepository'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+
   izi\prestashop\Order\ContextCustomerUpdater:
     class: izi\prestashop\Order\ContextCustomerUpdater
     arguments:
