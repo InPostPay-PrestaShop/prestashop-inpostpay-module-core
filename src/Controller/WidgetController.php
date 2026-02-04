@@ -7,11 +7,13 @@ namespace izi\prestashop\Controller;
 use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\Command\GetBasketBindingKeyCommand;
 use izi\prestashop\Command\GetOrderConfirmationUrlCommand;
+use izi\prestashop\Command\GetProductWidgetCommand;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
 use izi\prestashop\Entities\BasketInterface;
 use izi\prestashop\Entities\Cart;
 use izi\prestashop\Handler\Result\BasketBindingKey;
+use izi\prestashop\Handler\Result\ProductWidgetResult;
 use izi\prestashop\Http\Exception\HttpExceptionInterface as BasketAppHttpException;
 use izi\prestashop\Security\Voter\BindingWidgetVoter;
 use Psr\Container\ContainerInterface;
@@ -113,6 +115,30 @@ final class WidgetController implements ServiceSubscriberInterface
         }
 
         return new Cart($this->context->cart);
+    }
+
+    public function getWidgetHook(string $hook, int $productId, ?int $productAttributeId = null): JsonResponse
+    {
+        try {
+            if ('' === $hook = trim($hook)) {
+                throw new BadRequestHttpException($this->module->l('Hook name is required.', self::TRANSLATION_SOURCE));
+            }
+
+            if (0 >= $productId) {
+                throw new BadRequestHttpException($this->module->l('Product ID is required.', self::TRANSLATION_SOURCE));
+            }
+
+            $command = new GetProductWidgetCommand($hook, $productId, $productAttributeId);
+
+            /** @var ProductWidgetResult $result */
+            $result = $this->bus->handle($command);
+
+            return new JsonResponse([
+                'content' => $result->getContent(),
+            ]);
+        } catch (\Exception $e) {
+            return $this->handleException($e);
+        }
     }
 
     private function handleException(\Exception $e): JsonResponse

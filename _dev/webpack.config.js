@@ -14,6 +14,7 @@ preludeFront
   ])
   .addEntry('v2', ['./src/front/js/v2/index.js'])
   .addStyleEntry('product', ['./src/front/css/product.scss'])
+  .addStyleEntry('button', ['./src/front/css/button.scss'])
   .setPublicPath('../../views/')
   .setOutputPath('../views/')
   .setManifestKeyPrefix('')

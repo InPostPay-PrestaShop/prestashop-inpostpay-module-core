@@ -80,6 +80,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Front\DisplayIziThankYou::HOOK_NAME => '?' . Front\DisplayIziThankYou::class,
             Front\DisplayProductAdditionalInfo::HOOK_NAME => '?' . Front\DisplayProductAdditionalInfo::class,
             Front\DisplayProductActions::HOOK_NAME => '?' . Front\DisplayProductActions::class,
+            Front\DisplayIziProductButton::HOOK_NAME => '?' . Front\DisplayIziProductButton::class,
             Front\DisplayExpressCheckout::HOOK_NAME => '?' . Front\DisplayExpressCheckout::class,
             Front\DisplayCustomerLoginFormAfter::HOOK_NAME => '?' . Front\DisplayCustomerLoginFormAfter::class,
             Front\DisplayCustomerAccountFormTop::HOOK_NAME => '?' . Front\DisplayCustomerAccountFormTop::class,

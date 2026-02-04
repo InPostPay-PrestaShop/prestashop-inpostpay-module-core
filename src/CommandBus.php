@@ -16,6 +16,7 @@ use izi\prestashop\Command\Config\UpdateGuiConfigurationCommand;
 use izi\prestashop\Command\Config\UpdateShippingConfigurationCommand;
 use izi\prestashop\Command\GetBasketBindingKeyCommand;
 use izi\prestashop\Command\GetOrderConfirmationUrlCommand;
+use izi\prestashop\Command\GetProductWidgetCommand;
 use izi\prestashop\Command\UnbindBasketCommand;
 use izi\prestashop\Command\UpdateBasketCommand;
 use izi\prestashop\Command\UpdateOrderAddressDeliveryCommand;
@@ -34,6 +35,7 @@ use izi\prestashop\Handler\Config\UpdateGuiConfigurationHandlerInterface;
 use izi\prestashop\Handler\Config\UpdateShippingConfigurationHandlerInterface;
 use izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface;
 use izi\prestashop\Handler\GetOrderConfirmationUrlHandlerInterface;
+use izi\prestashop\Handler\GetProductWidgetHandlerInterface;
 use izi\prestashop\Handler\UnbindBasketHandlerInterface;
 use izi\prestashop\Handler\UpdateBasketHandlerInterface;
 use izi\prestashop\Handler\UpdateOrderAddressDeliveryHandlerInterface;
@@ -101,6 +103,7 @@ final class CommandBus implements CommandBusInterface, ServiceSubscriberInterfac
             /* widget v2 */
             GetBasketBindingKeyCommand::class => '?' . GetBasketBindingKeyHandlerInterface::class,
             GetOrderConfirmationUrlCommand::class => '?' . GetOrderConfirmationUrlHandlerInterface::class,
+            GetProductWidgetCommand::class => '?' . GetProductWidgetHandlerInterface::class,
 
             /* merchant API */
             ConfirmBasketBindingCommand::class => '?' . ConfirmBasketBindingHandlerInterface::class,

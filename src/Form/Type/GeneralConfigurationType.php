@@ -10,6 +10,7 @@ use izi\prestashop\Form\Event\ApiConfigurationValidatedEvent;
 use izi\prestashop\Form\Type\SwitchType as SwitchTypePolyfill;
 use izi\prestashop\Hook\Front\DisplayCheckoutSummaryTop;
 use izi\prestashop\Hook\Front\DisplayIziCheckoutButton;
+use izi\prestashop\Hook\Front\DisplayIziProductButton;
 use izi\prestashop\Hook\Front\DisplayIziThankYou;
 use izi\prestashop\Hook\Front\DisplayOrderConfirmation;
 use izi\prestashop\Hook\Front\DisplayPaymentReturn;
@@ -74,8 +75,9 @@ final class GeneralConfigurationType extends AbstractType
             ])
             ->add('productCardDisplayHook', ChoiceType::class, [
                 'choices' => [
-                    DisplayProductAdditionalInfo::getHookName() => DisplayProductAdditionalInfo::getHookName(),
-                    DisplayProductActions::getHookName() => DisplayProductActions::getHookName(),
+                    DisplayProductAdditionalInfo::HOOK_NAME => DisplayProductAdditionalInfo::HOOK_NAME,
+                    DisplayProductActions::HOOK_NAME => DisplayProductActions::HOOK_NAME,
+                    DisplayIziProductButton::HOOK_NAME => DisplayIziProductButton::HOOK_NAME,
                 ],
                 'property_path' => 'generalConfiguration.productCardDisplayHook',
                 'label' => $this->translator->l('Product page hook used to display widget', self::TRANSLATION_SOURCE),
