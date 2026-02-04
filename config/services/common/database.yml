@@ -9,3 +9,7 @@ services:
     public: true
     arguments:
       - '@inpost.izi.db'
+    calls:
+      - method: setLogger
+        arguments:
+          - '@inpost.izi.logger'
