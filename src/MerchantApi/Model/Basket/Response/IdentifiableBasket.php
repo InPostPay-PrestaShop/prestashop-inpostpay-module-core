@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\MerchantApi\Model\Basket\Response;
 
 use izi\prestashop\Common\Basket\AvailablePromotion;
+use izi\prestashop\Common\Basket\BasketTrait;
 use izi\prestashop\Common\Basket\Consent;
 use izi\prestashop\Common\Basket\DeliveryOption;
 use izi\prestashop\Common\Basket\Product;
