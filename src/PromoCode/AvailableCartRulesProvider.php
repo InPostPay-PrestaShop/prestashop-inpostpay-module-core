@@ -83,8 +83,9 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
         }
 
         $description = trim(\Tools::substr($cartRule['name'], 0, 60));
-        $startDate = $this->parseDateTime($cartRule['date_from']);
-        $endDate = $this->parseDateTime($cartRule['date_to']);
+        $startDate = $this->parseDateTime($cartRule['date_from'] ?? null);
+        $endDate = $this->parseDateTime($cartRule['date_to'] ?? null);
+        $priority = $cartRule['priority'] ?? \PHP_INT_MAX;
 
         return new AvailablePromotion(
             PromotionType::Merchant(),
@@ -93,7 +94,7 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
             $details,
             $startDate,
             $endDate,
-            (int) $cartRule['priority']
+            (int) $priority
         );
     }
 
@@ -128,7 +129,10 @@ final class AvailableCartRulesProvider implements AvailablePromotionsProviderInt
         });
 
         usort($cartRules, static function (array $a, array $b): int {
-            if (0 !== $result = $a['priority'] <=> $b['priority']) {
+            $priorityA = $a['priority'] ?? \PHP_INT_MAX;
+            $priorityB = $b['priority'] ?? \PHP_INT_MAX;
+
+            if (0 !== $result = $priorityA <=> $priorityB) {
                 return $result;
             }
 
