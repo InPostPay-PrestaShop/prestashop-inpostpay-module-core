@@ -460,14 +460,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     {
         $basePrice = $this->getBasePrice($products);
         $finalPrice = $this->getFinalPrice();
+        $promoPrice = $this->getPromoPrice();
 
-        if (
-            [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_REDUCTION, false, true)
-            || [] !== $this->cart->getCartRules(\CartRule::FILTER_ACTION_GIFT, false, true)
-        ) {
-            $promoPrice = $this->getPromoPrice();
-        } else {
-            $promoPrice = clone $finalPrice; // avoid inconsistent rounding by \Cart::getOrderTotal()
+        if ($promoPrice->getNet() === $finalPrice->getNet()) {
+            // avoid inconsistent rounding by \Cart::getOrderTotal()
+            $promoPrice = clone $finalPrice;
         }
 
         return new Summary(
