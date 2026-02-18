@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\DependencyInjection;
 
+use izi\prestashop\DependencyInjection\Compiler\FilterResourcesPass;
 use izi\prestashop\DependencyInjection\Dumper\PhpDumper;
 use izi\prestashop\Hook\Adapter\HookDispatcher;
 use izi\prestashop\Hook\HookDispatcherInterface;
@@ -13,6 +14,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderResolver;
 use Symfony\Component\Config\Resource\FileResource;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\ClosureLoader;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
@@ -98,6 +100,7 @@ final class ContainerFactory
             'type' => $type,
         ]);
 
+        $container->addCompilerPass(new FilterResourcesPass(), PassConfig::TYPE_BEFORE_REMOVING);
         $container->isCompiled() || $container->compile(false);
 
         return $container;

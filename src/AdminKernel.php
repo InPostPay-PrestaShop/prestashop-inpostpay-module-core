@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop;
 
 use izi\prestashop\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
+use izi\prestashop\DependencyInjection\Compiler\FilterResourcesPass;
 use izi\prestashop\DependencyInjection\Compiler\ProvideServiceLocatorFactoriesPass;
 use izi\prestashop\DependencyInjection\Compiler\TaggedIteratorsCollectorPass;
 use izi\prestashop\DependencyInjection\Dumper\PhpDumper;
@@ -16,6 +17,7 @@ use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Symfony\Component\HttpKernel\Kernel;
@@ -119,6 +121,8 @@ final class AdminKernel extends Kernel
             AnalyzeServiceReferencesPass::decorateRemovingPasses($container, 'inpost.izi.service_locator');
             $container->addCompilerPass(new TaggedIteratorsCollectorPass());
         }
+
+        $container->addCompilerPass(new FilterResourcesPass(), PassConfig::TYPE_BEFORE_REMOVING);
     }
 
     protected function dumpContainer(ConfigCache $cache, ContainerBuilder $container, $class, $baseClass): void
