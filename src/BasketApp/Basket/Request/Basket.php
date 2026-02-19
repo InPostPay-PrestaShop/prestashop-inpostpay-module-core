@@ -37,9 +37,13 @@ final class Basket implements \JsonSerializable
 
     /**
      * @return AvailablePromotion[]
+     *
+     * @deprecated use {@see getAvailablePromotions()} instead
      */
     public function getPromotionsAvailable(): array
     {
+        @trigger_error(\sprintf('The method "%s()" is deprecated since version 3.1, use "getAvailablePromotions()" instead.', __METHOD__), \E_USER_DEPRECATED);
+
         return $this->promotions_available;
     }
 }
