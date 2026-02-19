@@ -1,22 +1,26 @@
 <?php
 
-use InPost\Izi\Upgrade\FileRemoverTrait;
+use InPost\Izi\Upgrade\AssetsRemoverTrait;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-require_once __DIR__ . '/FileRemoverTrait.php';
+require_once __DIR__ . '/AssetsRemoverTrait.php';
 
 class InPostIziUpdater_3_1_0
 {
-    use FileRemoverTrait;
+    use AssetsRemoverTrait;
 
     /**
      * No BC break: previously marked as internal.
      */
     private const CLASSES_TO_REMOVE = [
         izi\prestashop\MerchantApi\Model\Basket\Response\BasketTrait::class,
+    ];
+
+    private const STALE_ASSETS = [
+        'js/front/v2.6684d74eef4aa8872052.js',
     ];
 
     public function __construct(Module $module)
@@ -31,7 +35,8 @@ class InPostIziUpdater_3_1_0
 
     public function upgrade(): bool
     {
-        return $this->removeClasses(self::CLASSES_TO_REMOVE);
+        return $this->removeClasses(self::CLASSES_TO_REMOVE)
+            && $this->removeStaleAssets(self::STALE_ASSETS);
     }
 }
 
