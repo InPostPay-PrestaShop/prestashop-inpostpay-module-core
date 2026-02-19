@@ -2,12 +2,17 @@
   "entrypoints": {
     "v2": {
       "js": [
-        "../../views/js/front/v2.6684d74eef4aa8872052.js"
+        "../../views/js/front/v2.c1663f474810e7d47fc6.js"
       ]
     },
     "product": {
       "css": [
         "../../views/css/front/product.4eeb6b5c5ec8bd44d908.css"
+      ]
+    },
+    "button": {
+      "css": [
+        "../../views/css/front/button.2c2540bafd96e2244eec.css"
       ]
     }
   }
