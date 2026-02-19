@@ -251,6 +251,7 @@ services:
         displayIziThankYou: '@?izi\prestashop\Hook\Front\DisplayIziThankYou'
         displayPaymentReturn: '@?izi\prestashop\Hook\Front\DisplayPaymentReturn'
         displayProductActions: '@?izi\prestashop\Hook\Front\DisplayProductActions'
+        displayIziProductButton: '@?izi\prestashop\Hook\Front\DisplayIziProductButton'
         displayProductAdditionalInfo: '@?izi\prestashop\Hook\Front\DisplayProductAdditionalInfo'
         displayExpressCheckout: '@?izi\prestashop\Hook\Front\DisplayExpressCheckout'
         displayShoppingCart: '@?izi\prestashop\Hook\Front\DisplayShoppingCart'

@@ -28,6 +28,7 @@ services:
         # front
         izi\prestashop\Command\GetBasketBindingKeyCommand: '@?izi\prestashop\Handler\GetBasketBindingKeyHandlerInterface'
         izi\prestashop\Command\GetOrderConfirmationUrlCommand: '@?izi\prestashop\Handler\GetOrderConfirmationUrlHandlerInterface'
+        izi\prestashop\Command\GetProductWidgetCommand: '@?izi\prestashop\Handler\GetProductWidgetHandlerInterface'
         izi\prestashop\MerchantApi\Command\ConfirmBasketBindingCommand: '@?izi\prestashop\MerchantApi\Handler\ConfirmBasketBindingHandlerInterface'
         izi\prestashop\MerchantApi\Command\DeleteBasketBindingCommand: '@?izi\prestashop\MerchantApi\Handler\DeleteBasketBindingHandlerInterface'
         izi\prestashop\MerchantApi\Command\GetBasketCommand: '@?izi\prestashop\MerchantApi\Handler\GetBasketHandlerInterface'

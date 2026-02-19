@@ -70,9 +70,25 @@ final class Summary implements \JsonSerializable
         return $this->basket_base_price;
     }
 
+    public function withBasePrice(Price $price): self
+    {
+        $summary = clone $this;
+        $summary->basket_base_price = $price;
+
+        return $summary;
+    }
+
     public function getFinalPrice(): ?Price
     {
         return $this->basket_final_price;
+    }
+
+    public function withFinalPrice(?Price $price): self
+    {
+        $summary = clone $this;
+        $summary->basket_final_price = $price;
+
+        return $summary;
     }
 
     public function getPromoPrice(): ?Price
@@ -80,9 +96,25 @@ final class Summary implements \JsonSerializable
         return $this->basket_promo_price;
     }
 
+    public function withPromoPrice(?Price $price): self
+    {
+        $summary = clone $this;
+        $summary->basket_promo_price = $price;
+
+        return $summary;
+    }
+
     public function getCurrency(): Currency
     {
         return $this->currency;
+    }
+
+    public function withCurrency(Currency $currency): self
+    {
+        $summary = clone $this;
+        $summary->currency = $currency;
+
+        return $summary;
     }
 
     public function getExpirationDate(): ?\DateTimeImmutable
@@ -90,9 +122,25 @@ final class Summary implements \JsonSerializable
         return $this->basket_expiration_date;
     }
 
+    public function withExpirationDate(?\DateTimeImmutable $date): self
+    {
+        $summary = clone $this;
+        $summary->basket_expiration_date = $date;
+
+        return $summary;
+    }
+
     public function getAdditionalInformation(): ?string
     {
         return $this->basket_additional_information;
+    }
+
+    public function withAdditionalInformation(?string $info): self
+    {
+        $summary = clone $this;
+        $summary->basket_additional_information = $info;
+
+        return $summary;
     }
 
     /**
@@ -103,9 +151,28 @@ final class Summary implements \JsonSerializable
         return $this->payment_type;
     }
 
+    /**
+     * @param PaymentType[] $types
+     */
+    public function withPaymentTypes(array $types): self
+    {
+        $summary = clone $this;
+        $summary->payment_type = $types;
+
+        return $summary;
+    }
+
     public function getNotice(): ?Notice
     {
         return $this->basket_notice;
+    }
+
+    public function withNotice(?Notice $notice): self
+    {
+        $summary = clone $this;
+        $summary->basket_notice = $notice;
+
+        return $summary;
     }
 
     public function jsonSerialize(): array

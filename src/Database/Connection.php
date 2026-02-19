@@ -4,16 +4,39 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Database;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\NullLogger;
+
 /**
  * @experimental
+ *
+ * @phpstan-type DataRow array<string, mixed>
  */
-class Connection
+class Connection implements LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
+    /**
+     * @var \Db
+     */
     protected $db;
 
-    public function __construct(?\Db $db = null)
+    /**
+     * @var bool
+     */
+    private $debug;
+
+    /**
+     * @var \Closure(): bool
+     */
+    private $cacheChecker;
+
+    public function __construct(?\Db $db = null, bool $debug = _PS_MODE_DEV_)
     {
         $this->db = $db ?? \Db::getInstance();
+        $this->logger = new NullLogger();
+        $this->debug = $debug;
     }
 
     public function getPlatformVersion(): string
@@ -22,7 +45,7 @@ class Connection
     }
 
     /**
-     * @template T
+     * @template T of mixed
      *
      * @param \Closure(): T $closure function returning false on errors
      *
@@ -66,22 +89,40 @@ class Connection
     }
 
     /**
-     * @param string $sql
-     *
-     * @return array<string, mixed>|false
+     * @return DataRow|false
      */
-    public function fetchAssociative(string $sql)
+    public function fetchAssociative(string $sql, bool $useCache = true)
     {
-        return $this->execute(function () use ($sql) {
-            return $this->db->getRow($sql);
-        });
+        try {
+            return $this->execute(function () use ($sql, $useCache) {
+                return $this->doFetchAssociative($sql, $useCache);
+            });
+        } catch (\PrestaShopDatabaseException $e) {
+            if ($useCache && $this->isCacheEnabled()) {
+                $sql = rtrim($sql, " \t\n\r\0\x0B;") . ' LIMIT 1';
+                $this->invalidateCache($sql);
+            }
+
+            throw $e;
+        }
     }
 
-    public function fetchAllAssociative(string $sql): array
+    /**
+     * @return DataRow[]
+     */
+    public function fetchAllAssociative(string $sql, bool $useCache = true): array
     {
-        return $this->execute(function () use ($sql) {
-            return $this->db->executeS($sql);
-        });
+        try {
+            return $this->execute(function () use ($sql, $useCache) {
+                return $this->doFetchAllAssociative($sql, $useCache);
+            });
+        } catch (\PrestaShopDatabaseException $e) {
+            if ($useCache && $this->isCacheEnabled()) {
+                $this->invalidateCache($sql);
+            }
+
+            throw $e;
+        }
     }
 
     public function fetchFirstColumn(string $sql): array
@@ -102,11 +143,13 @@ class Connection
     /**
      * @return mixed|false
      */
-    public function fetchOne(string $sql)
+    public function fetchOne(string $sql, bool $useCache = true)
     {
-        return $this->execute(function () use ($sql) {
-            return $this->db->getValue($sql);
-        });
+        if (false === $row = $this->fetchAssociative($sql, $useCache)) {
+            return false;
+        }
+
+        return array_shift($row);
     }
 
     /**
@@ -167,6 +210,33 @@ class Connection
         return (int) $this->db->Affected_Rows();
     }
 
+    protected function isCacheEnabled(): bool
+    {
+        $this->cacheChecker = $this->cacheChecker ?? \Closure::bind(function() {
+            return (bool) $this->is_cache_enabled;
+        }, $this->db, \Db::class);
+
+        return ($this->cacheChecker)();
+    }
+
+    protected function invalidateCache(string $sql): void
+    {
+        /** @var \Cache|null $cache */
+        $cache = \Cache::getInstance();
+
+        if (null === $cache) {
+            return;
+        }
+
+        $key = $cache->getQueryHash($sql);
+
+        try {
+            $cache->delete($key);
+        } catch (\Throwable $e) {
+            // ignore silently
+        }
+    }
+
     /**
      * @param array<string|int, mixed> $criteria
      */
@@ -195,5 +265,64 @@ class Connection
         }
 
         return implode(' AND ', $conditions);
+    }
+
+    /**
+     * @return DataRow|false
+     */
+    private function doFetchAssociative(string $sql, bool $useCache)
+    {
+        /** @var DataRow|false $data */
+        $data = $this->db->getRow($sql, $useCache);
+
+        if (false === $data) {
+            return false;
+        }
+
+        if (\is_array($data)) {
+            if ([] !== $data) {
+                return $data;
+            }
+
+            /* @see \Cache::setQuery() stores every falsy result as an empty array... */
+            if ($useCache && $this->isCacheEnabled()) {
+                return false;
+            }
+        }
+
+        if ($this->debug) {
+            throw new \UnexpectedValueException(\sprintf('Expected the result of "Db::getRow()" to be false or a non-empty array, got "%s" for query "%s".', get_debug_type($data), $sql));
+        }
+
+        $this->logger->warning('Unexpected "Db::getRow()" result.', [
+            'sql' => $sql,
+            'result' => $data,
+        ]);
+
+        return false;
+    }
+
+    /**
+     * @return DataRow[]
+     */
+    private function doFetchAllAssociative(string $sql, bool $useCache): array
+    {
+        /** @var DataRow[] $data */
+        $data = $this->db->executeS($sql, $useCache);
+
+        if (\is_array($data)) {
+            return $data;
+        }
+
+        if ($this->debug) {
+            throw new \UnexpectedValueException(\sprintf('Expected the result of "Db::executeS()" to be an array, got "%s" for query "%s".', get_debug_type($data), $sql));
+        }
+
+        $this->logger->warning('Unexpected "Db::executeS()" result.', [
+            'sql' => $sql,
+            'result' => $data,
+        ]);
+
+        return [];
     }
 }

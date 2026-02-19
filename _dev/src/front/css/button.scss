@@ -1,0 +1,5 @@
+.inpost-izi-btn-wrapper {
+  &:not(:has(inpost-izi-button)) {
+    display: none !important;
+  }
+}

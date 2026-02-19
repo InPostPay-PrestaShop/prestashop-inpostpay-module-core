@@ -94,6 +94,14 @@
         <source>Your request could not be processed.</source>
         <target>Twoje zapytanie nie mogło zostać przetworzone.</target>
       </trans-unit>
+      <trans-unit id="eec51c10f6a01635ec7d8793167a3376">
+        <source>Hook name is required.</source>
+        <target>Nazwa hooka jest wymagana.</target>
+      </trans-unit>
+      <trans-unit id="0db4aad5f10f7b2207e5c57220461127">
+        <source>Product ID is required.</source>
+        <target>ID produktu jest wymagane.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -39,6 +39,8 @@ final class ProductPageAssetsProvider implements AssetsProviderInterface
             $assets->addStyleSheet('product.css');
         }
 
+        $assets->addStyleSheet('button.css');
+
         return $assets;
     }
 }

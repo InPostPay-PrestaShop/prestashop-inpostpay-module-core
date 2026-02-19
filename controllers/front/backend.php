@@ -37,6 +37,13 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             'methods' => ['GET'],
             'controller' => [WidgetController::class, 'getOrderConfirmationUrl'],
         ],
+        [
+            'path' => '/inpost/v2/izi/merchant/widget/get/{hook}/{productId}/{productAttributeId}',
+            'methods' => ['GET'],
+            'prefix' => '/inpost/v2/izi/merchant/widget/get/',
+            'regex' => '#^/inpost/v2/izi/merchant/widget/get/(?<hook>\w+)/(?<productId>\d+)(?:/(?<productAttributeId>\d+))?$#',
+            'controller' => [WidgetController::class, 'getWidgetHook'],
+        ],
     ];
 
     private const API_ROUTES = [
