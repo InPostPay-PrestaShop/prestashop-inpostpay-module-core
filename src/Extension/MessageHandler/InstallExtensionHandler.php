@@ -98,8 +98,6 @@ final class InstallExtensionHandler
 
     private function installOrUpgradeExtension(string $name, string $source): void
     {
-        $args = $this->moduleManager instanceof ModuleManagerInterface ? [$name, $source] : [$source];
-
         if ($this->moduleManager->isInstalled($name)) {
             if (!$this->moduleManager->isEnabled($name)) {
                 try {
@@ -113,6 +111,8 @@ final class InstallExtensionHandler
                 }
             }
 
+            $args = $this->moduleManager instanceof ModuleManagerInterface ? [$name, $source] : [$name, 'latest', $source];
+
             try {
                 $result = $this->moduleManager->upgrade(...$args);
             } catch (\Exception $e) {
@@ -123,6 +123,8 @@ final class InstallExtensionHandler
                 throw new RuntimeException('Could not upgrade the module.', 0, $e ?? null);
             }
         } else {
+            $args = $this->moduleManager instanceof ModuleManagerInterface ? [$name, $source] : [$source];
+
             try {
                 $result = $this->moduleManager->install(...$args);
             } catch (\Exception $e) {
