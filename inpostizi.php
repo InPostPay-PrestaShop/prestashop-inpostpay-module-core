@@ -13,6 +13,7 @@ use izi\prestashop\Hook\Exception\HookNotImplementedException;
 use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Hook\HookExecutorInterface;
+use izi\prestashop\HttpFoundation\RequestStackProvider;
 use izi\prestashop\Installer\DatabaseInstaller;
 use izi\prestashop\Module\Exception\ModuleErrorInterface;
 use PrestaShop\PrestaShop\Adapter\ContainerBuilder as PrestaShopContainerBuilder;
@@ -346,19 +347,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this->requestStack;
         }
 
-        try {
-            /** @var RequestStack $requestStack */
-            $requestStack = $this->get('request_stack');
-            if (null !== $requestStack->getCurrentRequest()) {
-                return $this->requestStack = $requestStack;
-            }
-        } catch (ServiceNotFoundException $e) {
-        }
-
-        $this->requestStack = new RequestStack();
-        $this->requestStack->push(Request::createFromGlobals());
-
-        return $this->requestStack;
+        return $this->requestStack = RequestStackProvider::create()->getRequestStack();
     }
 
     /**
