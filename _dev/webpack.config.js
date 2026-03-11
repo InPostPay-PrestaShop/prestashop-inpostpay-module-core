@@ -1,17 +1,14 @@
-const Prelude = require('@waynetecommerce/webpack-prelude');
+const Encore = require('@symfony/webpack-encore');
 
 const configs = [];
 
-const preludeFront = new Prelude('front');
-
-preludeFront
-  .cleanupOutputBeforeBuild([
-    '*.json',
-    'js/front/*.js',
-    'css/front/*.css',
-    'js/front/*.js.map',
-    'css/front/*.css.map',
-  ])
+Encore.cleanupOutputBeforeBuild([
+  '*.json',
+  'js/front/*.js',
+  'css/front/*.css',
+  'js/front/*.js.map',
+  'css/front/*.css.map',
+])
   .addEntry('v2', ['./src/front/js/v2/index.js'])
   .addStyleEntry('product', ['./src/front/css/product.scss'])
   .addStyleEntry('button', ['./src/front/css/button.scss'])
@@ -28,8 +25,11 @@ preludeFront
   .enableSassLoader()
   .enablePostCssLoader()
   .disableSingleRuntimeChunk()
-  .enableSourceMaps(!Prelude.isProduction());
+  .enableSourceMaps(!Encore.isProduction());
 
-configs.push(preludeFront.getWebpackConfig());
+const frontConfig = Encore.getWebpackConfig();
+frontConfig.name = 'front';
+
+configs.push(frontConfig);
 
 module.exports = configs;

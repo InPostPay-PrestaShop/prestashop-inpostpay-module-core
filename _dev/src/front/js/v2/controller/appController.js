@@ -35,6 +35,7 @@ const appController = () => {
       try {
         await updateCustomProductDisplayHook(event);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(error);
       }
       refreshWidget();
