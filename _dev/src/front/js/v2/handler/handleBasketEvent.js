@@ -1,4 +1,18 @@
 import getConfirmationUrlRequest from '../http/getConfirmationUrlRequest';
+import getCartRequest from '../http/getCartRequest';
+
+/**
+ * @return {Promise<object>}
+ */
+const getCart = async () => {
+  try {
+    return await getCartRequest();
+  } catch (e) {
+    return {
+      cart: window.prestashop.cart,
+    };
+  }
+};
 
 const handleBasketEvent = async (event) => {
   if (event === 'basketProductChanged' || event === 'basketDeleted') {
@@ -6,7 +20,7 @@ const handleBasketEvent = async (event) => {
       reason: {
         linkAction: 'refresh',
       },
-      resp: {},
+      resp: await getCart(),
     });
   } else if (event === 'orderCreated') {
     try {
