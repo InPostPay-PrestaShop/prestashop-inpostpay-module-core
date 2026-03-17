@@ -46,7 +46,8 @@ final class CommonAssetsProvider implements AssetsProviderInterface
                 'position' => 'bottom',
                 'priority' => 101,
             ])
-            ->addJavaScriptVariable('inpostizi_backend_ajax_url', $this->context->link->getModuleLink($this->module->name, 'backend'))
-            ->addJavaScriptVariable('inpostizi_generic_http_error', $this->module->l('Something went wrong. Please try again later.', \Tools::strtolower(ActionFrontControllerSetMedia::HOOK_NAME)));
+            ->addJavaScriptVariable('inpostizi_backend_ajax_url', $this->context->link->getModuleLink('inpostizi', 'backend'))
+            ->addJavaScriptVariable('inpostizi_generic_http_error', $this->module->l('Something went wrong. Please try again later.', \Tools::strtolower(ActionFrontControllerSetMedia::HOOK_NAME)))
+            ->addJavaScriptVariable('inpostizi_cart_controller_url', $this->context->link->getModuleLink('inpostizi', 'cart'));
     }
 }
