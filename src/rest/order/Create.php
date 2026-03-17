@@ -10,6 +10,7 @@ use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Configuration\Adapter\Configuration;
+use izi\prestashop\Configuration\OptionalServicesConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
@@ -812,11 +813,30 @@ class Create
         }
 
         foreach (ServiceCode::cases() as $serviceCode) {
+            $isSelected = \in_array($serviceCode, $serviceCodes, true);
+
+            if ($isSelected && !$this->isOptionalServiceEnabled($serviceCode)) {
+                $message = ServiceCode::Gw() === $serviceCode
+                    ? $this->module->l('Gift wrapping is no longer available.', 'giftwrappinghandler')
+                    : \sprintf($this->module->l('Service "%s" is no longer available.', self::TRANSLATION_SOURCE), $serviceCode->trans(new LegacyTranslator($this->module->name)));
+
+                throw new CannotCreateOrderException($message);
+            }
+
             try {
-                $handler->handle($cart, $serviceCode->value, $deliveryType, in_array($serviceCode, $serviceCodes, true));
+                $handler->handle($cart, $serviceCode->value, $deliveryType, $isSelected);
             } catch (ServiceUnavailableException $e) {
                 throw new CannotCreateOrderException($e->getMessage());
             }
         }
+    }
+
+    private function isOptionalServiceEnabled(ServiceCode $serviceCode): bool
+    {
+        if (!$this->shippingConfiguration instanceof OptionalServicesConfigurationInterface) {
+            return true;
+        }
+
+        return $this->shippingConfiguration->isServiceEnabled($serviceCode->value);
     }
 }
