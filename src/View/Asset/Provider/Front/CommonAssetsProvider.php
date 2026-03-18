@@ -39,6 +39,7 @@ final class CommonAssetsProvider implements AssetsProviderInterface
                 'priority' => 101,
             ])
             ->addJavaScriptVariable('inpostizi_backend_ajax_url', $this->context->link->getModuleLink('inpostizi', 'backend'))
-            ->addJavaScriptVariable('inpostizi_generic_http_error', $this->context->getTranslator()->trans('Something went wrong. Please try again later.', [], 'Modules.Inpostizi.Errors'));
+            ->addJavaScriptVariable('inpostizi_generic_http_error', $this->context->getTranslator()->trans('Something went wrong. Please try again later.', [], 'Modules.Inpostizi.Errors'))
+            ->addJavaScriptVariable('inpostizi_cart_controller_url', $this->context->link->getModuleLink('inpostizi', 'cart'));
     }
 }
