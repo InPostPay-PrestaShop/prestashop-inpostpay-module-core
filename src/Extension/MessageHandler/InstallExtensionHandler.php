@@ -83,7 +83,10 @@ final class InstallExtensionHandler
     {
         try {
             $tmpFile = $this->filesystem->tempnam(sys_get_temp_dir(), 'izi');
-            stream_context_set_default(['http' => ['protocol_version' => '1.1']]);
+            stream_context_set_default([
+                'http' => ['protocol_version' => '1.1'],
+                'ssl' => ['verify_peer' => true],
+            ]);
             $this->filesystem->copy($extension->getUrl(), $tmpFile);
         } catch (IOExceptionInterface $e) {
             throw new RuntimeException('Could not download the extension.', 0, $e);
