@@ -69,9 +69,6 @@ final class AddProductToBasketHandler implements AddProductToBasketHandlerInterf
 
     public function __invoke(AddProductToBasketCommand $command): IdentifiableBasket
     {
-        $basketId = $command->getRequest()->getBasketId();
-        $session = $this->findOrCreateSession($basketId);
-
         $referenceId = ReferenceId::fromString($command->getProductId());
 
         if (null === $referenceId) {
@@ -81,6 +78,9 @@ final class AddProductToBasketHandler implements AddProductToBasketHandlerInterf
         if ($referenceId->hasCustomization()) {
             throw new MalformedRequestException('Adding customizable products is not supported.');
         }
+
+        $basketId = $command->getRequest()->getBasketId();
+        $session = $this->findOrCreateSession($basketId);
 
         $productId = $referenceId->getProductId();
         $combinationId = $referenceId->getCombinationId();
