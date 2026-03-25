@@ -187,7 +187,7 @@ final class ConfigurationCache implements CacheInterface
 
     private function validateKeys($keys): void
     {
-        if (!is_iterable($keys)) {
+        if (is_iterable($keys)) {
             return;
         }
 

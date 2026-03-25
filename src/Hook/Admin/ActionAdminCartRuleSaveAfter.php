@@ -57,9 +57,7 @@ final class ActionAdminCartRuleSaveAfter implements HookInterface
             throw InvalidHookParamException::unexpectedType('return', $cartRule, \CartRule::class . '|false');
         }
 
-        $form = $this->formFactory->create(CartRuleOptionsType::class, new UpdateCartRuleOptionsCommand((int) $cartRule->id), [
-            'csrf_protection' => false,
-        ]);
+        $form = $this->formFactory->create(CartRuleOptionsType::class, new UpdateCartRuleOptionsCommand((int) $cartRule->id));
         $form->handleRequest($request);
 
         if (!$form->isSubmitted()) {

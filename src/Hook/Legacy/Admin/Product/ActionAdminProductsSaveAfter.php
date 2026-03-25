@@ -77,9 +77,7 @@ final class ActionAdminProductsSaveAfter implements PrestaShopVersionAwareHookIn
             throw InvalidHookParamException::unexpectedType('return', $product, \Product::class . '|false');
         }
 
-        $form = $this->formFactory->create(ProductOptionsType::class, new UpdateProductOptionsCommand((int) $product->id), [
-            'csrf_protection' => false,
-        ]);
+        $form = $this->formFactory->create(ProductOptionsType::class, new UpdateProductOptionsCommand((int) $product->id));
         $form->handleRequest($request);
 
         if (!$form->isSubmitted()) {
