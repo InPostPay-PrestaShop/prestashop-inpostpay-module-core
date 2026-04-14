@@ -51,6 +51,11 @@ final class ActionCartUpdateAfter implements HookInterface
             throw InvalidHookParamException::unexpectedType('object', $cart, \Cart::class);
         }
 
+        if (0 >= (int) $cart->id) {
+            /* @see \Context::updateCustomer() before PS 8.0 might attempt to execute updates of carts that have not been persisted */
+            return;
+        }
+
         if ($this->context->controller instanceof \ModuleFrontControllerCore && $this->module === $this->context->controller->module) {
             return;
         }
