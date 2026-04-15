@@ -80,14 +80,11 @@ final class CartListener implements EventSubscriberInterface
         if ([] === $this->updatedCartIds) {
             register_shutdown_function(function () {
                 /* @see https://github.com/PrestaShop/PrestaShop/pull/28267 \Shop instatiation on PS 1.7.8 might result in an error when attempting to read/write from a file given by a relative path */
-                $cwd = getcwd();
-
-                try {
-                    chdir(_PS_ROOT_DIR_);
-                    $this->updateBaskets();
-                } finally {
-                    !$cwd || chdir($cwd);
+                if (\Tools::version_compare(_PS_VERSION_, '1.7.8', '>=') && \Tools::version_compare(_PS_VERSION_, '8.0.0')) {
+                    \Configuration::set('_PS_CACHE_DIR_', _PS_CACHE_DIR_);
                 }
+
+                $this->updateBaskets();
             });
         }
 
