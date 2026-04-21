@@ -106,6 +106,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\CartRule\ActionApplyCartRule::HOOK_NAME => Common\CartRule\ActionApplyCartRule::class,
             Common\CartRule\ActionGetCartRuleContextualValue::HOOK_NAME => Common\CartRule\ActionGetCartRuleContextualValue::class,
             Common\CartRule\ActionValidateCartRule::HOOK_NAME => Common\CartRule\ActionValidateCartRule::class,
+            Common\DisplayPDFInvoice::HOOK_NAME => Common\DisplayPDFInvoice::class,
 
             Front\ActionCartControllerAjaxUpdateResponse::HOOK_NAME => '?' . Front\ActionCartControllerAjaxUpdateResponse::class,
             Front\ActionFrontControllerSetMedia::HOOK_NAME => '?' . Front\ActionFrontControllerSetMedia::class,
