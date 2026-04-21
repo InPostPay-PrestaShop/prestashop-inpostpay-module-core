@@ -120,6 +120,39 @@ services:
       - '@izi\prestashop\Event\EventDispatcherInterface'
       - '@inpost.izi.context'
 
+  izi\prestashop\Hook\Common\DisplayPDFInvoice:
+    class: izi\prestashop\Hook\Common\DisplayPDFInvoice
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+
+  # InPost discounts
+  izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule:
+    class: izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@izi\prestashop\InPostDiscount\CartRule\DiscountApplierInterface'
+
+  izi\prestashop\Hook\Common\CartRule\ActionGetCartRuleContextualValue:
+    class: izi\prestashop\Hook\Common\CartRule\ActionGetCartRuleContextualValue
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+
+  izi\prestashop\Hook\Common\CartRule\ActionValidateCartRule:
+    class: izi\prestashop\Hook\Common\CartRule\ActionValidateCartRule
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\InPostDiscount\CartRule\CustomRuleRepositoryInterface'
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@inpost.izi.translator'
+
   # Product hooks
   izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore:
     class: izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore
@@ -227,6 +260,11 @@ services:
         actionObjectOrderUpdateBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore'
         actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
         actionEmailSendBefore: '@izi\prestashop\Hook\Common\ActionEmailSendBefore'
+        displayPDFInvoice: '@izi\prestashop\Hook\Common\DisplayPDFInvoice'
+        # InPost discounts
+        actionApplyCartRule: '@izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule'
+        actionGetCartRuleContextualValue: '@izi\prestashop\Hook\Common\CartRule\ActionGetCartRuleContextualValue'
+        actionValidateCartRule: '@izi\prestashop\Hook\Common\CartRule\ActionValidateCartRule'
         # webservice
         addWebserviceResources: '@izi\prestashop\Hook\Webservice\AddWebserviceResources'
         # product

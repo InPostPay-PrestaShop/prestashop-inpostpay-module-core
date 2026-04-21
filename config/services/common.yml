@@ -11,6 +11,7 @@ imports:
   - { resource: common/environment.yml }
   - { resource: common/event_dispatcher.yml }
   - { resource: common/hook.yml }
+  - { resource: common/inpost_discount.yml }
   - { resource: common/hot_product.yml }
   - { resource: common/http.yml }
   - { resource: common/logger.yml }
