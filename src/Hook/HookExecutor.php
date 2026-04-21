@@ -101,6 +101,11 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\Product\ActionSpecificPriceDeleteAfter::HOOK_NAME => Common\Product\ActionSpecificPriceDeleteAfter::class,
             Common\Product\ActionUpdateQuantity::HOOK_NAME => Common\Product\ActionUpdateQuantity::class,
 
+            // InPost discounts
+            Common\CartRule\ActionApplyCartRule::HOOK_NAME => Common\CartRule\ActionApplyCartRule::class,
+            Common\CartRule\ActionGetCartRuleContextualValue::HOOK_NAME => Common\CartRule\ActionGetCartRuleContextualValue::class,
+            Common\CartRule\ActionValidateCartRule::HOOK_NAME => Common\CartRule\ActionValidateCartRule::class,
+
             Front\ActionCartControllerAjaxUpdateResponse::HOOK_NAME => '?' . Front\ActionCartControllerAjaxUpdateResponse::class,
             Front\ActionFrontControllerSetMedia::HOOK_NAME => '?' . Front\ActionFrontControllerSetMedia::class,
             Front\DisplayOrderConfirmation::HOOK_NAME => '?' . Front\DisplayOrderConfirmation::class,
