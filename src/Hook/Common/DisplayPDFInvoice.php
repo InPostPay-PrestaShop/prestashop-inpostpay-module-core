@@ -53,7 +53,7 @@ final class DisplayPDFInvoice implements HookInterface
 
         $discountsTotal = $this->getShippingDiscountsTotal((int) $order->id_cart);
 
-        if (0. === $discountsTotal->getTax()) {
+        if (0. === $discountsTotal->getNet()) {
             return '';
         }
 
