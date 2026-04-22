@@ -104,6 +104,20 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\Event\EventDispatcherInterface'
 
+  izi\prestashop\Hook\Common\ActionObjectOrderAddAfter:
+    class: izi\prestashop\Hook\Common\ActionObjectOrderAddAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionObjectOrderCartRuleAddBefore:
+    class: izi\prestashop\Hook\Common\ActionObjectOrderCartRuleAddBefore
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
   izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore:
     class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore
     tags:
@@ -257,8 +271,10 @@ services:
         actionObjectInPostShipmentModelUpdateAfter: '@izi\prestashop\Hook\Common\ActionShipmentUpdateAfter'
         actionValidateOrder: '@izi\prestashop\Hook\Common\ActionValidateOrder'
         actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'
+        actionObjectOrderAddAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderAddAfter'
         actionObjectOrderUpdateBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore'
         actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
+        actionObjectOrderCartRuleAddBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderCartRuleAddBefore'
         actionEmailSendBefore: '@izi\prestashop\Hook\Common\ActionEmailSendBefore'
         displayPDFInvoice: '@izi\prestashop\Hook\Common\DisplayPDFInvoice'
         # InPost discounts

@@ -84,9 +84,12 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\ActionShipmentAddAfter::HOOK_NAME => Common\ActionShipmentAddAfter::class,
             Common\ActionShipmentUpdateBefore::HOOK_NAME => Common\ActionShipmentUpdateBefore::class,
             Common\ActionShipmentUpdateAfter::HOOK_NAME => Common\ActionShipmentUpdateAfter::class,
+            Common\ActionObjectOrderAddAfter::HOOK_NAME => Common\ActionObjectOrderAddAfter::class,
             Common\ActionObjectOrderUpdateBefore::HOOK_NAME => Common\ActionObjectOrderUpdateBefore::class,
             Common\ActionObjectOrderUpdateAfter::HOOK_NAME => Common\ActionObjectOrderUpdateAfter::class,
+            Common\ActionObjectOrderCartRuleAddBefore::HOOK_NAME => Common\ActionObjectOrderCartRuleAddBefore::class,
             Common\ActionEmailSendBefore::HOOK_NAME => Common\ActionEmailSendBefore::class,
+            Common\DisplayPDFInvoice::HOOK_NAME => Common\DisplayPDFInvoice::class,
 
             // products
             Common\Product\ActionProductDeleteBefore::HOOK_NAME => Common\Product\ActionProductDeleteBefore::class,
@@ -106,7 +109,6 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\CartRule\ActionApplyCartRule::HOOK_NAME => Common\CartRule\ActionApplyCartRule::class,
             Common\CartRule\ActionGetCartRuleContextualValue::HOOK_NAME => Common\CartRule\ActionGetCartRuleContextualValue::class,
             Common\CartRule\ActionValidateCartRule::HOOK_NAME => Common\CartRule\ActionValidateCartRule::class,
-            Common\DisplayPDFInvoice::HOOK_NAME => Common\DisplayPDFInvoice::class,
 
             Front\ActionCartControllerAjaxUpdateResponse::HOOK_NAME => '?' . Front\ActionCartControllerAjaxUpdateResponse::class,
             Front\ActionFrontControllerSetMedia::HOOK_NAME => '?' . Front\ActionFrontControllerSetMedia::class,

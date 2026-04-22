@@ -15,6 +15,9 @@ use izi\prestashop\MerchantApi\Event\OrderCreatedEvent;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * Removes InPost discounts from the cart if the order could not be created.
+ */
 final class ClearDiscountsListener implements EventSubscriberInterface
 {
     /**

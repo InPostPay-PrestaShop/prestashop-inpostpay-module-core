@@ -34,6 +34,14 @@ services:
       - '@izi\prestashop\InPostDiscount\DiscountHandlerInterface'
       - '@inpost.izi.logger'
 
+  izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener:
+    class: izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper'
+
   izi\prestashop\InPostDiscount\DiscountHandlerInterface: '@izi\prestashop\InPostDiscount\CartRuleDiscountHandler'
   izi\prestashop\InPostDiscount\CartRuleDiscountHandler:
     class: izi\prestashop\InPostDiscount\CartRuleDiscountHandler
