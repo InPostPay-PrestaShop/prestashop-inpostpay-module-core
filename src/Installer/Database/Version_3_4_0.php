@@ -6,7 +6,7 @@ namespace izi\prestashop\Installer\Database;
 
 use izi\prestashop\InPostDiscount\CartRuleDiscountRepository;
 
-final class Version_3_3_0 extends AbstractMigration
+final class Version_3_4_0 extends AbstractMigration
 {
     private const DISCOUNT_CART_ID_FK = CartRuleDiscountRepository::TABLE_NAME . '-cart_id';
     private const DISCOUNT_CART_CR_UQ = 'uq_cart_cr_id';
@@ -14,7 +14,7 @@ final class Version_3_3_0 extends AbstractMigration
 
     public function getVersion(): string
     {
-        return '3.3.0';
+        return '3.4.0';
     }
 
     public function up(): void
