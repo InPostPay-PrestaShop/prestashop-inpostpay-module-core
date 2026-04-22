@@ -16,9 +16,10 @@ use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
- * Corrects the {@see \Order::$total_discounts_tax_excl} and {@see \OrderCartRule::$value_tax_excl} if the shipping
- * discount calculations were not handled by the "actionApplyCartRule" hook. In such case, the net discount value
- * is proportional to net product prices which may result in a different tax rate than the shipping tax.
+ * Corrects {@see \Order::$total_discounts_tax_excl} and {@see \Order::$total_paid_tax_excl} as well as
+ * {@see \OrderCartRule::$value_tax_excl} if the shipping discount calculations were not handled by the
+ * "actionApplyCartRule" hook. In such case, the net discount value is proportional to net product prices,
+ * which may result in a different tax rate than the shipping tax.
  */
 final class CorrectOrderDiscountTaxesListener implements EventSubscriberInterface
 {
@@ -87,7 +88,7 @@ final class CorrectOrderDiscountTaxesListener implements EventSubscriberInterfac
 
     public function onPreOrderCartRulePersist(OrderCartRuleEvent $event): void
     {
-        if (null === $this->order) {
+        if (null === $order = $this->order) {
             return;
         }
 
@@ -109,9 +110,10 @@ final class CorrectOrderDiscountTaxesListener implements EventSubscriberInterfac
         }
 
         $rule->value_tax_excl = $discount->getAmount()->getNet();
-        $this->order->total_discounts_tax_excl += $deltaNet;
+        $order->total_discounts_tax_excl = \Tools::ps_round($order->total_discounts_tax_excl + $deltaNet, 2, $order->round_mode);
+        $order->total_paid_tax_excl = \Tools::ps_round($order->total_paid_tax_excl - $deltaNet, 2, $order->round_mode);
 
-        $this->objectManager->save($this->order);
+        $this->objectManager->save($order);
     }
 
     public function onOrderCreated(OrderCreatedEvent $event): void

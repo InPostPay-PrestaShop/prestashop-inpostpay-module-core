@@ -56,7 +56,7 @@ class ShippingDiscountsAwareOrderInvoice extends \OrderInvoice
             \Tools::spreadAmount($tax, self::CURRENCY_PRECISION, $breakdown, 'total_amount');
         }
 
-        \Tools::spreadAmount($this->discountsTotal->getNet(), self::CURRENCY_PRECISION, $breakdown, 'total_tax_excl');
+        \Tools::spreadAmount($this->discountsTotal->getNet(), self::CURRENCY_PRECISION, $breakdown, 'total_price_tax_excl');
 
         return $breakdown;
     }

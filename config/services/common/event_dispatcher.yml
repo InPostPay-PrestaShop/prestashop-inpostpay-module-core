@@ -43,3 +43,4 @@ services:
         izi\prestashop\Extension\EventListener\ClearCacheListener: '@izi\prestashop\Extension\EventListener\ClearCacheListener'
         izi\prestashop\InPostDiscount\EventListener\ApplyDiscountsListener: '@izi\prestashop\InPostDiscount\EventListener\ApplyDiscountsListener'
         izi\prestashop\InPostDiscount\EventListener\ClearDiscountsListener: '@izi\prestashop\InPostDiscount\EventListener\ClearDiscountsListener'
+        izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener: '@izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener'
