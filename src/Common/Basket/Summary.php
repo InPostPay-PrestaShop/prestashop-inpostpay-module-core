@@ -190,6 +190,9 @@ final class Summary implements \JsonSerializable
         return $summary;
     }
 
+    /**
+     * @return BasketAdditionalParameter[]
+     */
     public function getAdditionalParameters(): array
     {
         return $this->basket_additional_parameters;

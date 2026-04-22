@@ -86,11 +86,17 @@ final class OrderDetails implements \JsonSerializable
         return $this->payment_type;
     }
 
+    /**
+     * @return BasketAdditionalParameter[]
+     */
     public function getBasketAdditionalParameters(): array
     {
         return $this->basket_additional_parameters;
     }
 
+    /**
+     * @return InPostDiscount[]
+     */
     public function getInpostDiscounts(): array
     {
         return $this->inpost_discounts;
