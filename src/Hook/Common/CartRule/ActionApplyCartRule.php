@@ -47,7 +47,7 @@ final class ActionApplyCartRule implements PrestaShopVersionAwareHookInterface
     }
 
     /**
-     * @param array{cart_rule_calculator: CartRuleCalculator, cart_rule_data: CartRuleData, cart: \Cart, with_free_shipping: bool, is_applied_by_modules: bool} $parameters
+     * @param array{cart_rule_calculator: CartRuleCalculator, cart_rule_data: CartRuleData, cart: \Cart, with_free_shipping: bool, is_applied_by_modules: bool|null} $parameters
      */
     public function execute(array $parameters): void
     {
@@ -74,7 +74,7 @@ final class ActionApplyCartRule implements PrestaShopVersionAwareHookInterface
     /**
      * @param array{cart_rule_calculator: CartRuleCalculator, cart_rule_data: CartRuleData, cart: \Cart, with_free_shipping: bool, is_applied_by_modules: bool} $parameters
      *
-     * @return array{0: CartRuleCalculator, 1: CartRuleData, 2: \Cart, 3: bool, 4: bool}
+     * @return array{0: CartRuleCalculator, 1: CartRuleData, 2: \Cart, 3: bool, 4: bool|null}
      */
     private function extractParameters(array $parameters): array
     {
@@ -97,10 +97,6 @@ final class ActionApplyCartRule implements PrestaShopVersionAwareHookInterface
             throw InvalidHookParamException::unexpectedType('with_free_shipping', $withShipping, 'bool');
         }
 
-        if (!\is_bool($applied = $parameters['is_applied_by_modules'] ?? null)) {
-            throw InvalidHookParamException::unexpectedType('is_applied_by_modules', $applied, 'bool');
-        }
-
-        return [$calculator, $data, $calculator, $withShipping, $applied];
+        return [$calculator, $data, $cart, $withShipping, $parameters['is_applied_by_modules'] ?? null];
     }
 }
