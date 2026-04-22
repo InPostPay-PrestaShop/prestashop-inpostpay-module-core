@@ -682,14 +682,26 @@ class Create
     private function checkCartTotal(\Cart $cart, CreateOrderRequest $request): void
     {
         $details = $request->getOrderDetails();
-
         $orderTotal = $cart->getOrderTotal();
         $basketPrice = $details->getBasketPrice()->getGross();
+        foreach ($details->getInpostDiscounts() as $discount) {
+            $basketPrice -= $discount->getDiscount();
+        }
+
         $epsilon = $details->getCurrency()->getSmallestUnitAmount() / 2.;
 
-        if (abs($orderTotal - $basketPrice) >= $epsilon) {
-            throw new CannotCreateOrderException($this->translator->trans('The price of your basket has changed. Please review your order.', [], 'Modules.Inpostizi.Errors'));
+        if (abs($orderTotal - $basketPrice) < $epsilon) {
+            return;
         }
+
+        $this->module->getLogger()->notice('Basket price mismatch for cart #{cartId}.', [
+            'cartId' => $cart->id,
+            'actual' => $orderTotal,
+            'expected' => $basketPrice,
+            'discounts' => $details->getInpostDiscounts(),
+        ]);
+
+        throw new CannotCreateOrderException($this->translator->trans('The price of your basket has changed. Please review your order.', [], 'Modules.Inpostizi.Errors'));
     }
 
     private function getMinimalPurchaseAmount(): float
