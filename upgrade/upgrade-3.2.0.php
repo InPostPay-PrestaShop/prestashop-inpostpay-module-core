@@ -1,6 +1,7 @@
 <?php
 
 use InPost\Izi\Upgrade\AssetsRemoverTrait;
+use InPost\Izi\Upgrade\TranslationImporterTrait;
 use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Database\Connection;
@@ -12,10 +13,12 @@ if (!defined('_PS_VERSION_')) {
 }
 
 require_once __DIR__ . '/AssetsRemoverTrait.php';
+require_once __DIR__ . '/TranslationImporterTrait.php';
 
 class InPostIziUpdater_3_2_0
 {
     use AssetsRemoverTrait;
+    use TranslationImporterTrait;
 
     private const STALE_ASSETS = [
         'js/front/v2.c1663f474810e7d47fc6.js',
@@ -31,10 +34,11 @@ class InPostIziUpdater_3_2_0
      */
     private $installer;
 
-    public function __construct(Module $module, DatabaseInstaller $installer)
+    public function __construct(Module $module, DatabaseInstaller $installer, string $psVersion = _PS_VERSION_)
     {
         $this->module = $module;
         $this->installer = $installer;
+        $this->psVersion = $psVersion;
     }
 
     public static function create(Module $module): self
@@ -52,7 +56,8 @@ class InPostIziUpdater_3_2_0
         SymfonyCacheClearer::getInstance()->clear();
         $this->installer->install($this->module);
 
-        return $this->removeStaleAssets(self::STALE_ASSETS);
+        return $this->removeStaleAssets(self::STALE_ASSETS)
+            && $this->importTranslations();
     }
 }
 
