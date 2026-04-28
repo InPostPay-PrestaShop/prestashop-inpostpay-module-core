@@ -389,8 +389,6 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 
         $handler->throwAt(E_ERROR, true);
         $handler->setDefaultLogger($this->module->getLogger(), [
-            E_DEPRECATED => LogLevel::DEBUG,
-            E_USER_DEPRECATED => LogLevel::DEBUG,
             E_NOTICE => LogLevel::DEBUG,
             E_USER_NOTICE => LogLevel::DEBUG,
             E_STRICT => LogLevel::DEBUG,
@@ -399,6 +397,12 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             E_USER_ERROR => LogLevel::CRITICAL,
             E_RECOVERABLE_ERROR => LogLevel::CRITICAL,
             E_ERROR => LogLevel::CRITICAL,
+        ]);
+
+        $deprecationLogger = $this->module->getDeprecationLogger();
+        $handler->setLoggers([
+            E_DEPRECATED => [$deprecationLogger, LogLevel::DEBUG],
+            E_USER_DEPRECATED => [$deprecationLogger, LogLevel::DEBUG],
         ]);
     }
 

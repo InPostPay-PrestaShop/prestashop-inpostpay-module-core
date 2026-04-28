@@ -1,21 +1,11 @@
 # common FO/BO configuration
 imports:
   - { resource: common/analytics.yml }
+  - { resource: common/logger.yml }
 
 parameters:
   inpost.izi.container_version: '2.6.0'
-  inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
-  inpost.izi.logger_config:
-    type: rotating_file
-    path: '%inpost.izi.logs_dir%/izi.log'
-    max_files: 14
-    bubble: false
-    channels: [ general, basket_app, merchant_api ]
-    process_psr_3_messages:
-      remove_used_context_fields: true
-    include_stacktraces: true
-
   inpost.izi.basket_app_logger_options:
     max_response_body_size: 1000
 
@@ -233,44 +223,6 @@ services:
       - '@inpost.izi.psr17_factory'
       - '@inpost.izi.psr17_factory'
       - '@izi\prestashop\Http\Client\Factory\GuzzleClientFactory'
-
-  izi\prestashop\Log\MonologLoggerFactory:
-    class: izi\prestashop\Log\MonologLoggerFactory
-    public: false
-    arguments:
-      -
-        - '@izi\prestashop\Log\Handler\RotatingFileHandlerFactory'
-
-  izi\prestashop\Log\Handler\RotatingFileHandlerFactory:
-    class: izi\prestashop\Log\Handler\RotatingFileHandlerFactory
-    public: false
-    arguments:
-      - '@=service("izi\\prestashop\\Configuration\\AdvancedConfigurationInterface").isDebugEnabled() ? "dev" : "prod"'
-
-  inpost.izi.basket_app_logger:
-    class: Psr\Log\LoggerInterface
-    public: false
-    factory: [ '@izi\prestashop\Log\MonologLoggerFactory', create ]
-    arguments:
-      - basket_app
-      - '%inpost.izi.logger_config%'
-
-  inpost.izi.merchant_api_logger:
-    class: Psr\Log\LoggerInterface
-    public: true # todo: make private after refactoring the front controller
-    factory: [ '@izi\prestashop\Log\MonologLoggerFactory', create ]
-    arguments:
-      - merchant_api
-      - '%inpost.izi.logger_config%'
-
-  inpost.izi.logger: '@inpost.izi.general_logger'
-  inpost.izi.general_logger:
-    class: Psr\Log\LoggerInterface
-    public: true
-    factory: [ '@izi\prestashop\Log\MonologLoggerFactory', create ]
-    arguments:
-      - general
-      - '%inpost.izi.logger_config%'
 
   izi\prestashop\Handler\UpdateOrderTrackingNumbersHandlerInterface: '@izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler'
   izi\prestashop\Handler\UpdateOrderTrackingNumbersHandler:
