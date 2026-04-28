@@ -3,7 +3,7 @@ imports:
   - { resource: common/analytics.yml }
 
 parameters:
-  inpost.izi.container_version: '2.5.1'
+  inpost.izi.container_version: '2.6.0'
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
   inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
   inpost.izi.logger_config:
