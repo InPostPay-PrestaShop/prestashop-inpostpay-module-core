@@ -68,7 +68,7 @@ class BasketAnalytics implements BasketAnalyticsInterface
             return $analytics->getParameters();
         }
 
-        @trigger_error(\sprintf('Not implementing the method "getParameters()" in "%s" is deprecated since version 3.2.', \get_class($analytics)), \E_USER_DEPRECATED);
+        @trigger_error(\sprintf('Not implementing the method "getParameters()" in "%s" is deprecated since version 2.6 / 3.2.', \get_class($analytics)), \E_USER_DEPRECATED);
 
         return [
             Parameters::GOOGLE_CLICK_ID => $analytics->getGclid(),

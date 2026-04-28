@@ -20,7 +20,7 @@ class BasketAnalyticsParams implements BasketAnalyticsInterface
             return;
         }
 
-        @trigger_error(\sprintf('Passing $gclid, $fbclid and $client_id as arguments of "%s()" is deprecated since version 3.2, set parameters by name using "withParameter()" instead.', __METHOD__), \E_USER_DEPRECATED);
+        @trigger_error(\sprintf('Passing $gclid, $fbclid and $client_id as arguments of "%s()" is deprecated since version 2.6 / 3.2, set parameters by name using "withParameter()" instead.', __METHOD__), \E_USER_DEPRECATED);
 
         foreach ([Parameters::GOOGLE_CLICK_ID, Parameters::FACEBOOK_CLICK_ID, Parameters::GOOGLE_CLIENT_ID] as $i => $name) {
             if (!\array_key_exists($i, $args)) {
@@ -82,7 +82,7 @@ class BasketAnalyticsParams implements BasketAnalyticsInterface
 
     private function getWithDeprecation(string $name, string $method): ?string
     {
-        @trigger_error(\sprintf('The method "%s()" is deprecated since version 3.2, use "%s::getParameter()" instead.', $method, self::class), \E_USER_DEPRECATED);
+        @trigger_error(\sprintf('The method "%s()" is deprecated since version 2.6 / 3.2, use "%s::getParameter()" instead.', $method, self::class), \E_USER_DEPRECATED);
 
         return $this->getParameter($name);
     }

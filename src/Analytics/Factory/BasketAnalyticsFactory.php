@@ -34,7 +34,7 @@ final class BasketAnalyticsFactory implements BasketAnalyticsFactoryInterface
     public function __construct($extractors)
     {
         if ($extractors instanceof CookieExtractorInterface) {
-            @trigger_error(\sprintf('Passing $gclidExtractor, $fbclidExtractor and $clientIdExtractor as arguments of "%s()" is deprecated since version 3.2, pass extractors with the "getParameterName()" method implemented as an iterable instead.', __METHOD__), \E_USER_DEPRECATED);
+            @trigger_error(\sprintf('Passing $gclidExtractor, $fbclidExtractor and $clientIdExtractor as arguments of "%s()" is deprecated since version 2.6 / 3.2, pass extractors with the "getParameterName()" method implemented as an iterable instead.', __METHOD__), \E_USER_DEPRECATED);
             $args = func_get_args();
             $this->setExtractorsByName($args);
         } elseif (!is_iterable($extractors)) {
@@ -52,7 +52,7 @@ final class BasketAnalyticsFactory implements BasketAnalyticsFactoryInterface
             if (method_exists($extractor, 'getParameterName')) {
                 $name = $extractor->getParameterName();
             } else {
-                @trigger_error(\sprintf('Not implementing the method "getParameterName()" in "%s" is deprecated since version 3.2.', \get_class($extractor)), \E_USER_DEPRECATED);
+                @trigger_error(\sprintf('Not implementing the method "getParameterName()" in "%s" is deprecated since version 2.6 / 3.2.', \get_class($extractor)), \E_USER_DEPRECATED);
 
                 if (!isset(self::PARAM_NAMES[$i])) {
                     continue;
