@@ -8,6 +8,8 @@ use izi\prestashop\Analytics\BasketAnalytics;
 use izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface;
 use izi\prestashop\Analytics\Command\UpdateCartAnalyticsCommand;
 use izi\prestashop\Handler\CommandHandlerTrait;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 final class UpdateCartAnalyticsHandler implements UpdateCartAnalyticsHandlerInterface
 {
@@ -18,44 +20,43 @@ final class UpdateCartAnalyticsHandler implements UpdateCartAnalyticsHandlerInte
      */
     private $repository;
 
-    public function __construct(BasketAnalyticsRepositoryInterface $repository)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(BasketAnalyticsRepositoryInterface $repository, ?LoggerInterface $logger = null)
     {
         $this->repository = $repository;
-    }
-
-    private function getNewFieldValue(?string $oldKey, ?string $newKey): ?string
-    {
-        if (null === $oldKey || $oldKey !== $newKey) {
-            return $newKey;
-        }
-
-        return $oldKey;
+        $this->logger = $logger ?? new NullLogger();
     }
 
     public function __invoke(UpdateCartAnalyticsCommand $command): void
     {
-        $currentBasketRepository = $this->repository->find($command->getCartId());
+        $parameters = BasketAnalytics::doGetParameters($command->getBasketAnalytics());
 
-        if (null === $currentBasketRepository) {
-            $basketAnalytics = new BasketAnalytics(
-                $command->getCartId(),
-                $command->getBasketAnalytics()->getGclid(),
-                $command->getBasketAnalytics()->getFbclid(),
-                $command->getBasketAnalytics()->getClientId()
-            );
-
-            $this->repository->save($basketAnalytics);
-
-            return;
+        if (null === $analytics = $this->repository->find($command->getCartId())) {
+            $analytics = BasketAnalytics::fromParameters($command->getCartId(), $parameters);
+        } elseif (!$analytics instanceof BasketAnalytics) {
+            $parameters = array_merge(BasketAnalytics::doGetParameters($analytics), $parameters);
+            $analytics = BasketAnalytics::fromParameters($command->getCartId(), $parameters);
+        } else {
+            $this->updateParameters($analytics, $parameters);
         }
 
-        $basketAnalytics = new BasketAnalytics(
-            $command->getCartId(),
-            $this->getNewFieldValue($currentBasketRepository->getGclid(), $command->getBasketAnalytics()->getGclid()),
-            $this->getNewFieldValue($currentBasketRepository->getFbclid(), $command->getBasketAnalytics()->getFbclid()),
-            $this->getNewFieldValue($currentBasketRepository->getClientId(), $command->getBasketAnalytics()->getClientId())
-        );
+        $this->repository->save($analytics);
+    }
 
-        $this->repository->save($basketAnalytics);
+    private function updateParameters(BasketAnalytics $analytics, array $parameters): void
+    {
+        foreach ($parameters as $name => $value) {
+            if ($analytics->setParameter($name, $value)) {
+                continue;
+            }
+
+            $this->logger->warning('Unknown analytics parameter "{name}".', [
+                'name' => $name,
+            ]);
+        }
     }
 }
