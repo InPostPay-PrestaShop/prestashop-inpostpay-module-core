@@ -3,6 +3,7 @@ imports:
   - { resource: common.yml }
   - { resource: common_admin.yml }
   - { resource: common_front.yml }
+  - { resource: sf28/cache.php }
 
 parameters:
   inpost.izi.logs_dir: '%kernel.root_dir%/logs/inpost'
