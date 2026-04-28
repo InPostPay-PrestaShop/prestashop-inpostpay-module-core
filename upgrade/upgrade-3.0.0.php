@@ -1,18 +1,20 @@
 <?php
 
 use InPost\Izi\Upgrade\FileRemoverTrait;
+use InPost\Izi\Upgrade\TranslationImporterTrait;
 use izi\prestashop\CacheClearer\SymfonyCacheClearer;
-use izi\prestashop\Translation\MessageHandler\ImportTranslationsHandler;
 
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
 require_once __DIR__ . '/FileRemoverTrait.php';
+require_once __DIR__ . '/TranslationImporterTrait.php';
 
 class InPostIziUpdater_3_0_0
 {
     use FileRemoverTrait;
+    use TranslationImporterTrait;
 
     private const CLASSES_TO_REMOVE = [
         izi\prestashop\AdminKernel::class,
@@ -88,11 +90,6 @@ class InPostIziUpdater_3_0_0
         'views/templates/hook/legacy/admin/product/options_form_tab.tpl',
     ];
 
-    /**
-     * @var string
-     */
-    private $psVersion;
-
     public function __construct(Module $module, string $psVersion = _PS_VERSION_)
     {
         $this->module = $module;
@@ -111,21 +108,6 @@ class InPostIziUpdater_3_0_0
         return $this->removeClasses(self::CLASSES_TO_REMOVE)
             && $this->removeFiles(self::FILES_TO_REMOVE)
             && $this->importTranslations();
-    }
-
-    private function importTranslations(): bool
-    {
-        if (Tools::version_compare($this->psVersion, '1.7.8', '>=')) {
-            return true;
-        }
-
-        try {
-            ImportTranslationsHandler::importModuleTranslations($this->module);
-
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
     }
 }
 

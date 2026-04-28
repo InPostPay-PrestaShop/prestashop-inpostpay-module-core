@@ -62,7 +62,7 @@ final class WidgetController implements ServiceSubscriberInterface
     public static function getSubscribedServices(): array
     {
         return [
-            '?' . AuthorizationCheckerInterface::class,
+            AuthorizationCheckerInterface::class,
         ];
     }
 
@@ -185,7 +185,9 @@ final class WidgetController implements ServiceSubscriberInterface
     private function isGranted($attributes, $subject = null): bool
     {
         if (null === $authChecker = $this->get(AuthorizationCheckerInterface::class)) {
-            return true;
+            @trigger_error(\sprintf('Passing a $container that does not have an "%s" service available to "%s::__construct()" is deprecated.', AuthorizationCheckerInterface::class, self::class), \E_USER_DEPRECATED);
+
+            return false;
         }
 
         return $authChecker->isGranted($attributes, $subject);

@@ -12,6 +12,7 @@ use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Configuration\DTO\Shipping\ServiceOptions;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
+use izi\prestashop\Configuration\OptionalServicesConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\ObjectModel\Repository\CarrierRepository;
@@ -163,7 +164,7 @@ class DeliveryFactory
             );
         }
 
-        if ($this->prestashopConfiguration->isGiftWrappingEnabled($shopId)) {
+        if ($this->isGiftWrappingEnabled($shopId)) {
             $services[] = $this->getGiftWrappingOptionalService($cart);
         }
 
@@ -270,5 +271,18 @@ class DeliveryFactory
         }
 
         return [$hasPhysicalProducts, $hasDigitalProducts];
+    }
+
+    private function isGiftWrappingEnabled(int $shopId): bool
+    {
+        if (!$this->prestashopConfiguration->isGiftWrappingEnabled($shopId)) {
+            return false;
+        }
+
+        if (!$this->configuration instanceof OptionalServicesConfigurationInterface) {
+            return true;
+        }
+
+        return $this->configuration->isServiceEnabled(ServiceCode::Gw()->value, $shopId);
     }
 }

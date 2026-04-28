@@ -47,6 +47,12 @@ final class ImportTranslationsHandler
      */
     public static function importModuleTranslations(\Module $module): void
     {
+        static $imported = [];
+
+        if (isset($imported[$module->name])) {
+            return;
+        }
+
         $container = \is_callable([$module, 'getContainer']) ? $module->getContainer() : SymfonyContainer::getInstance();
 
         /** @var EntityManagerInterface $em */
@@ -62,6 +68,7 @@ final class ImportTranslationsHandler
         $command = new ImportTranslationsCommand($module->getLocalPath() . 'translations');
 
         ($handler)($command);
+        $imported[$module->name] = true;
     }
 
     public function __invoke(ImportTranslationsCommand $command): void
@@ -83,8 +90,11 @@ final class ImportTranslationsHandler
         }
 
         $catalogue = $this->filterCatalogue($catalogue);
+        if ([] === $messagesByDomain = $catalogue->all()) {
+            return;
+        }
 
-        foreach ($catalogue->all() as $domain => $messages) {
+        foreach ($messagesByDomain as $domain => $messages) {
             foreach ($messages as $id => $translation) {
                 $translation = $this->createTranslation($id, $translation, $domain, $language);
                 $this->entityManager->persist($translation);

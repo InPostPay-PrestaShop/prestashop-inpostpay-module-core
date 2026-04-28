@@ -10,6 +10,14 @@ parameters:
       remove_used_context_fields: true
     include_stacktraces: true
 
+  inpost.izi.deprecation_logger_config:
+    type: rotating_file
+    path: '%inpost.izi.logs_dir%/izi.deprecations.log'
+    max_files: 3
+    bubble: false
+    channels: [ deprecation ]
+    include_stacktraces: true
+
 services:
   _defaults:
     public: false
@@ -37,6 +45,14 @@ services:
     arguments:
       - merchant_api
       - '%inpost.izi.logger_config%'
+
+  inpost.izi.logger.deprecation:
+    class: Psr\Log\LoggerInterface
+    public: true # internal
+    factory: [ '@izi\prestashop\Log\LoggerFactoryInterface', create ]
+    arguments:
+      - deprecation
+      - '%inpost.izi.deprecation_logger_config%'
 
   izi\prestashop\Log\LoggerFactoryInterface: '@izi\prestashop\Log\MonologLoggerFactory'
   izi\prestashop\Log\MonologLoggerFactory:

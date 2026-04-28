@@ -1,8 +1,7 @@
 import widgetOptionsBuilder from '../builder/widgetOptionsBuilder';
 import getBindingApiKey from '../handler/getBindingApiKey';
 import unboundWidgetClicked from '../handler/unboundWidgetClicked';
-import updateProductActionsBlock from '../handler/updateProductActionsBlock';
-import updateCustomProductDisplayHook from '../handler/updateCustomProductDisplayHook';
+import updateProductWidgets from '../handler/updateProductWidgets';
 import handleBasketEvent from '../handler/handleBasketEvent';
 import widget from '../components/widget';
 
@@ -31,12 +30,18 @@ const appController = () => {
 
     window.prestashop.on('updatedCart', () => refreshWidget());
     window.prestashop.on('updatedProduct', async (event) => {
-      updateProductActionsBlock(event);
+      // Prevent from running inside quick view
+      if (typeof event.is_quick_view !== 'undefined' && event.is_quick_view) {
+        return;
+      }
+
       try {
-        await updateCustomProductDisplayHook(event);
+        await updateProductWidgets(event);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error(error);
       }
+
       refreshWidget();
     });
   };

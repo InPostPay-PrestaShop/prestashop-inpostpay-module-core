@@ -55,7 +55,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '3.1.0';
+        $this->version = '3.2.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -342,6 +342,18 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     {
         try {
             return $this->get('inpost.izi.logger');
+        } catch (Exception $e) {
+            return new Psr\Log\NullLogger();
+        }
+    }
+
+    /**
+     * @internal
+     */
+    public function getDeprecationLogger(): LoggerInterface
+    {
+        try {
+            return $this->get('inpost.izi.logger.deprecation');
         } catch (Exception $e) {
             return new Psr\Log\NullLogger();
         }

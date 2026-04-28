@@ -5,20 +5,31 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "eslint:lint": "eslint -c .eslintrc ./",
     "eslint:fix": "eslint -c .eslintrc ./ --fix",
-    "eslint:lint:gitlab": "eslint -c .eslintrc ./ --format gitlab",
     "stylelint:lint": "stylelint 'src/**/*.{scss,css}'",
     "stylelint:fix": "stylelint 'src/**/*.{scss,css}' --fix",
-    "stylelint:lint:gitlab": "stylelint --custom-formatter=@gitlab-formatters/stylelint-formatter-gitlab 'src/**/*.{scss,css}' --output-file=gl-code-quality-stylelint-report.json",
     "prettier:lint": "prettier --check '**/*.{js,mjs,jsx,ts,tsx,css,scss}'",
     "prettier:fix": "prettier --write '**/*.{js,mjs,jsx,ts,tsx,css,scss}'",
-    "prettier:lint:gitlab": "prettier-formatter-gitlab 'prettier --l **/*.{js,mjs}'",
-    "build:front": "prelude production --config-name front --progress",
-    "watch:front": "prelude dev --watch --config-name front --progress"
+    "build:front": "encore production --config-name front --progress",
+    "watch:front": "encore dev --watch --config-name front --progress"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "InPost S.A.",
   "devDependencies": {
-    "@waynetecommerce/front-dev-tools": "^1.0.1",
-    "@waynetecommerce/webpack-prelude": "^1.0.0"
+    "@babel/preset-env": "^7.29.0",
+    "@symfony/webpack-encore": "^4.7.0",
+    "autoprefixer": "^10.4.27",
+    "babel-loader": "^9.2.1",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.2",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "postcss-loader": "^8.2.1",
+    "postcss-preset-env": "^10.6.1",
+    "prettier": "^3.8.1",
+    "sass-embedded": "^1.98.0",
+    "sass-loader": "^14.2.1",
+    "stylelint": "^16.26.1",
+    "stylelint-config-prettier-scss": "^1.0.0",
+    "stylelint-config-recommended-scss": "^14.1.0"
   }
 }

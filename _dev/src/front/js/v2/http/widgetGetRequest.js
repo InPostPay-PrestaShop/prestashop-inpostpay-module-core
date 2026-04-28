@@ -10,7 +10,7 @@ import useEndpointRequest from './base/useEndpointRequest';
 const buildEndpointUrl = (hookName, idProduct, idProductAttribute = null) => {
   const { widgetGet } = endpoints;
 
-  if (null !== idProductAttribute) {
+  if (idProductAttribute !== null) {
     return `${widgetGet}/${hookName}/${idProduct}/${idProductAttribute}`;
   }
 

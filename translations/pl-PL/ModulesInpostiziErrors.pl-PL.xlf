@@ -42,9 +42,21 @@
         <source>Gift wrapping is no longer available.</source>
         <target>Pakowanie prezentowe nie jest już dostępne.</target>
       </trans-unit>
+      <trans-unit id="eec51c10f6a01635ec7d8793167a3376">
+        <source>Hook name is required.</source>
+        <target>Nazwa hooka jest wymagana.</target>
+      </trans-unit>
       <trans-unit id="a30ebb63ee481f272ab0255ccbedf5b2">
         <source>Invoice address is not valid: {error}</source>
         <target>Adres rozliczeniowy nie jest poprawny: {error}</target>
+      </trans-unit>
+      <trans-unit id="0db4aad5f10f7b2207e5c57220461127">
+        <source>Product ID is required.</source>
+        <target>ID produktu jest wymagane.</target>
+      </trans-unit>
+      <trans-unit id="e05fdb74fdbb758272dd5b071c954bc0">
+        <source>Service "{service}" is no longer available.</source>
+        <target>Usługa "{service}" nie jest już dostępna.</target>
       </trans-unit>
       <trans-unit id="05e070788d5522addd174a9baa153f9f">
         <source>Something went wrong. Please try again later.</source>
@@ -93,14 +105,6 @@
       <trans-unit id="50349e727b1f9a9a4ef897aad4f1bbf8">
         <source>Your request could not be processed.</source>
         <target>Twoje zapytanie nie mogło zostać przetworzone.</target>
-      </trans-unit>
-      <trans-unit id="eec51c10f6a01635ec7d8793167a3376">
-        <source>Hook name is required.</source>
-        <target>Nazwa hooka jest wymagana.</target>
-      </trans-unit>
-      <trans-unit id="0db4aad5f10f7b2207e5c57220461127">
-        <source>Product ID is required.</source>
-        <target>ID produktu jest wymagane.</target>
       </trans-unit>
     </body>
   </file>

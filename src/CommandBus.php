@@ -21,7 +21,7 @@ final class CommandBus implements CommandBusInterface
     /**
      * {@inheritDoc}
      */
-    public function handle($command)
+    public function handle(object $command)
     {
         $class = \get_class($command);
         $handler = $this->locator->get($class);

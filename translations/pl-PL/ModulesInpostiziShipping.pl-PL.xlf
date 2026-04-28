@@ -26,6 +26,14 @@
         <source>Net value of the amount to be added to the carrier's price if the service is selected.</source>
         <target>Wartość netto kwoty do doliczenia do ceny przewoźnika w przypadku, gdy usługa zostanie wybrana.</target>
       </trans-unit>
+      <trans-unit id="78d32d4c4990993e71f16fd9416d11ff">
+        <source>Offer gift wrapping in the mobile app</source>
+        <target>Oferuj pakowanie prezentowe w aplikacji mobilnej</target>
+      </trans-unit>
+      <trans-unit id="01b228dc6f2809d4393a0da737adb876">
+        <source>The service will not be available unless the "{option}" is enabled in the order settings.</source>
+        <target>Usługa nie będzie dostępna w przypadku, gdy opcja "{option}" ustawień zamówień nie jest włączona.</target>
+      </trans-unit>
       <trans-unit id="a4293995cfbfa9ce60ce71ade2ff75f7">
         <source>exclusive</source>
         <target>wyłącznie</target>

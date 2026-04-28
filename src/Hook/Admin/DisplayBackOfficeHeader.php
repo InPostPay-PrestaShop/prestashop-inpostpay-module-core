@@ -68,9 +68,7 @@ final class DisplayBackOfficeHeader implements HookInterface
             return '';
         }
 
-        $form = $this->formFactory->create(CartRuleOptionsType::class, $this->getInitialFormData($request), [
-            'csrf_protection' => false,
-        ]);
+        $form = $this->formFactory->create(CartRuleOptionsType::class, $this->getInitialFormData($request));
         $form->handleRequest($request);
 
         return $this->twig->render('@Modules/inpostizi/views/templates/hook/admin/cart_rule_form.html.twig', [

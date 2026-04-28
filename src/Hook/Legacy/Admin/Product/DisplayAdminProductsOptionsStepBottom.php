@@ -61,9 +61,7 @@ final class DisplayAdminProductsOptionsStepBottom implements PrestaShopVersionAw
         }
 
         $command = $this->createOptionsUpdateCommand((int) $productId);
-        $form = $this->formFactory->create(ProductOptionsType::class, $command, [
-            'csrf_protection' => false,
-        ]);
+        $form = $this->formFactory->create(ProductOptionsType::class, $command);
 
         return $this->twig->render('@Modules/inpostizi/views/templates/hook/legacy/admin/product/options_form.html.twig', [
             'form' => $form->createView(),
