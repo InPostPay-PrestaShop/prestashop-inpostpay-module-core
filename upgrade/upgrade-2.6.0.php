@@ -1,5 +1,6 @@
 <?php
 
+use InPost\Izi\Upgrade\AssetsRemoverTrait;
 use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Database\Connection;
@@ -10,8 +11,16 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+require_once __DIR__ . '/AssetsRemoverTrait.php';
+
 class InPostIziUpdater_2_6_0
 {
+    use AssetsRemoverTrait;
+
+    private const STALE_ASSETS = [
+        'js/front/v2.c1663f474810e7d47fc6.js',
+    ];
+
     /**
      * @var Module
      */
@@ -43,7 +52,7 @@ class InPostIziUpdater_2_6_0
         SymfonyCacheClearer::getInstance()->clear();
         $this->installer->install($this->module);
 
-        return true;
+        return $this->removeStaleAssets(self::STALE_ASSETS);
     }
 }
 
