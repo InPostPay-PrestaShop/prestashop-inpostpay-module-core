@@ -10,9 +10,15 @@ final class CookieRepository implements CookieRepositoryInterface
 {
     public function persist(Cookie $cookie): void
     {
+        $name = $cookie->getName();
+
+        if (null === $value = $cookie->getValue()) {
+            unset($_COOKIE[$name]);
+        }
+
         setcookie(
-            $cookie->getName(),
-            $cookie->getValue(),
+            $name,
+            $value ?? '',
             $cookie->getExpiresTime(),
             $cookie->getPath(),
             $cookie->getDomain() ?? '',

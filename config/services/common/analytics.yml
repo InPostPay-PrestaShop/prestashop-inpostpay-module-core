@@ -18,6 +18,7 @@ services:
     tags:
       - inpost.izi.analytics.cookie_erase
       - inpost.izi.analytics.cookie_persist
+      - inpost.izi.analytics.param_extractor
 
   izi\prestashop\Analytics\Cookie\GoogleClickIdCookie:
     class: izi\prestashop\Analytics\Cookie\GoogleClickIdCookie
@@ -27,9 +28,22 @@ services:
     tags:
       - inpost.izi.analytics.cookie_erase
       - inpost.izi.analytics.cookie_persist
+      - inpost.izi.analytics.param_extractor
 
   izi\prestashop\Analytics\Cookie\GoogleClientIdCookie:
     class: izi\prestashop\Analytics\Cookie\GoogleClientIdCookie
+    tags:
+      - inpost.izi.analytics.param_extractor
+
+  izi\prestashop\Analytics\Cookie\TikTokClickIdExtractor:
+    class: izi\prestashop\Analytics\Cookie\TikTokClickIdExtractor
+    arguments:
+      - '@izi\prestashop\Analytics\Cookie\Factory\CookieFactory'
+      - '@izi\prestashop\Analytics\Cookie\Repository\CookieRepository'
+    tags:
+      - inpost.izi.analytics.cookie_erase
+      - inpost.izi.analytics.cookie_persist
+      - inpost.izi.analytics.param_extractor
 
   izi\prestashop\Analytics\Cookie\Executor\CookieEraseExecutor:
     class: izi\prestashop\Analytics\Cookie\Executor\CookieEraseExecutor
@@ -45,9 +59,7 @@ services:
   izi\prestashop\Analytics\Factory\BasketAnalyticsFactory:
     class: izi\prestashop\Analytics\Factory\BasketAnalyticsFactory
     arguments:
-      - '@izi\prestashop\Analytics\Cookie\GoogleClickIdCookie'
-      - '@izi\prestashop\Analytics\Cookie\FacebookClickIdCookie'
-      - '@izi\prestashop\Analytics\Cookie\GoogleClientIdCookie'
+      - !tagged inpost.izi.analytics.param_extractor
 
   izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener:
     class: izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener
@@ -57,7 +69,7 @@ services:
       - '@izi\prestashop\CommandBusInterface'
       - '@inpost.izi.request_stack'
       - '@izi\prestashop\Analytics\Factory\BasketAnalyticsFactory'
-      - '@izi\prestashop\Analytics\Cookie\Executor\CookieEraseExecutor'
+      - null
       - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
 
   izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandlerInterface: '@izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandler'
@@ -67,6 +79,7 @@ services:
       - inpost.izi.command_handler
     arguments:
       - '@izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface'
+      - '@inpost.izi.logger'
 
   izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface: '@izi\prestashop\Analytics\BasketAnalyticsRepository'
   izi\prestashop\Analytics\BasketAnalyticsRepository:

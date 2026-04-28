@@ -4,11 +4,17 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Analytics\Cookie;
 
+use izi\prestashop\Analytics\Parameters;
 use Symfony\Component\HttpFoundation\Request;
 
 final class GoogleClientIdCookie implements CookieExtractorInterface
 {
     private const COOKIE_NAME = '_ga';
+
+    public function getParameterName(): string
+    {
+        return Parameters::GOOGLE_CLIENT_ID;
+    }
 
     public function extract(Request $request): ?string
     {

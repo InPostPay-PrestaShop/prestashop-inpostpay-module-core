@@ -8,23 +8,8 @@ use Symfony\Component\HttpFoundation\Cookie;
 
 final class CookieFactory implements CookieFactoryInterface
 {
-    public function create(
-        $name,
-        $value,
-        int $expire = 0,
-        string $path = '/',
-        string $domain = '',
-        bool $secure = false,
-        bool $httpOnly = true
-    ): Cookie {
-        return new Cookie(
-            $name,
-            $value,
-            $expire,
-            $path,
-            $domain,
-            $secure,
-            $httpOnly
-        );
+    public function create(string $name, ?string $value, int $expire = 0, string $path = '/', string $domain = '', bool $secure = false, bool $httpOnly = true): Cookie
+    {
+        return new Cookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
     }
 }
