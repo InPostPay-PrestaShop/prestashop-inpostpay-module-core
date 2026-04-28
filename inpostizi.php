@@ -347,6 +347,18 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         }
     }
 
+    /**
+     * @internal
+     */
+    public function getDeprecationLogger(): LoggerInterface
+    {
+        try {
+            return $this->get('inpost.izi.logger.deprecation');
+        } catch (Exception $e) {
+            return new Psr\Log\NullLogger();
+        }
+    }
+
     private function getInstaller(): InstallerInterface
     {
         try {
