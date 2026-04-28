@@ -22,12 +22,10 @@ class BasketAnalyticsRepository implements BasketAnalyticsRepositoryInterface
 
     public function add(BasketAnalytics $basketAnalytics): void
     {
-        $this->connection->insert(self::TABLE_NAME, [
-            'cart_id' => $basketAnalytics->getCartId(),
-            'gclid' => $basketAnalytics->getGclid(),
-            'fbclid' => $basketAnalytics->getFbclid(),
-            'client_id' => $basketAnalytics->getClientId(),
-        ]);
+        $data = $this->mapParameters($basketAnalytics);
+        $data['cart_id'] = $basketAnalytics->getCartId();
+
+        $this->connection->insert(self::TABLE_NAME, $data);
     }
 
     public function find(int $id): ?BasketAnalyticsInterface
@@ -54,11 +52,8 @@ class BasketAnalyticsRepository implements BasketAnalyticsRepositoryInterface
             return;
         }
 
-        $this->connection->update(self::TABLE_NAME, [
-            'gclid' => $basketAnalytics->getGclid(),
-            'fbclid' => $basketAnalytics->getFbclid(),
-            'client_id' => $basketAnalytics->getClientId(),
-        ], [
+        $data = $this->mapParameters($basketAnalytics);
+        $this->connection->update(self::TABLE_NAME, $data, [
             'cart_id' => $basketAnalytics->getCartId(),
         ]);
     }
@@ -83,7 +78,18 @@ class BasketAnalyticsRepository implements BasketAnalyticsRepositoryInterface
             (int)$row['cart_id'],
             $row['gclid'],
             $row['fbclid'],
-            $row['client_id']
+            $row['client_id'],
+            $row['ttclid']
         );
+    }
+
+    private function mapParameters(BasketAnalytics $analytics): array
+    {
+        return [
+            'gclid' => $analytics->getGclid(),
+            'fbclid' => $analytics->getFbclid(),
+            'client_id' => $analytics->getClientId(),
+            'ttclid' => $analytics->getTikTokClickId(),
+        ];
     }
 }

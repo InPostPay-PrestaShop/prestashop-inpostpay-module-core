@@ -2,6 +2,7 @@
 
 namespace izi\prestashop;
 
+use izi\prestashop\Analytics\BasketAnalytics;
 use izi\prestashop\Analytics\BasketAnalyticsInterface;
 use izi\prestashop\Builder\PriceFactory;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
@@ -301,16 +302,12 @@ class PrestashopOrder
 
         $orderAdditionalParameters = new OrderAdditionalParameters();
 
-        if (null !== $this->basketAnalytics->getClientId()) {
-            $orderAdditionalParameters->addParameter(new OrderAdditionalParameter('client_id', $this->basketAnalytics->getClientId()));
-        }
+        foreach (BasketAnalytics::doGetParameters($this->basketAnalytics) as $name => $value) {
+            if (null === $value) {
+                continue;
+            }
 
-        if (null !== $this->basketAnalytics->getFbclid()) {
-            $orderAdditionalParameters->addParameter(new OrderAdditionalParameter('fbclid', $this->basketAnalytics->getFbclid()));
-        }
-
-        if (null !== $this->basketAnalytics->getGclid()) {
-            $orderAdditionalParameters->addParameter(new OrderAdditionalParameter('gclid', $this->basketAnalytics->getGclid()));
+            $orderAdditionalParameters->addParameter(new OrderAdditionalParameter($name, $value));
         }
 
         return $orderAdditionalParameters;

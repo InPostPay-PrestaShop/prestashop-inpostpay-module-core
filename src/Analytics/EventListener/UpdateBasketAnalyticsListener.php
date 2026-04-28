@@ -31,7 +31,7 @@ final class UpdateBasketAnalyticsListener implements EventSubscriberInterface
     private $basketAnalyticsFactory;
 
     /**
-     * @var CookieEraserInterface
+     * @var CookieEraserInterface|null
      */
     private $cookieEraser;
 
@@ -44,7 +44,7 @@ final class UpdateBasketAnalyticsListener implements EventSubscriberInterface
         CommandBusInterface $commandBus,
         RequestStack $requestStack,
         BasketAnalyticsFactoryInterface $basketAnalyticsFactory,
-        CookieEraserInterface $cookieEraser,
+        ?CookieEraserInterface $cookieEraser,
         GeneralConfigurationInterface $generalConfiguration
     ) {
         $this->commandBus = $commandBus;
@@ -76,6 +76,9 @@ final class UpdateBasketAnalyticsListener implements EventSubscriberInterface
         }
 
         $this->commandBus->handle(new UpdateCartAnalyticsCommand((int) $event->getCart()->id, $basketAnalytics));
-        $this->cookieEraser->erase($request);
+
+        if (null !== $this->cookieEraser) {
+            $this->cookieEraser->erase($request);
+        }
     }
 }

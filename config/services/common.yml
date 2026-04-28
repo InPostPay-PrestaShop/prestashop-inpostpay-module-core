@@ -1,4 +1,7 @@
 # common FO/BO configuration
+imports:
+  - { resource: common/analytics.yml }
+
 parameters:
   inpost.izi.container_version: '2.5.1'
   inpost.izi.logs_dir: '%kernel.root_dir%/../var/logs/inpost'
@@ -260,6 +263,7 @@ services:
       - merchant_api
       - '%inpost.izi.logger_config%'
 
+  inpost.izi.logger: '@inpost.izi.general_logger'
   inpost.izi.general_logger:
     class: Psr\Log\LoggerInterface
     public: true
@@ -1279,81 +1283,6 @@ services:
       - { name: kernel.event_subscriber }
     arguments:
       - '@izi\prestashop\Repository\OrderDataRepositoryInterface'
-
-  izi\prestashop\Analytics\Cookie\Repository\CookieRepositoryInterface: '@izi\prestashop\Analytics\Cookie\Repository\CookieRepository'
-  izi\prestashop\Analytics\Cookie\Repository\CookieRepository:
-    class: izi\prestashop\Analytics\Cookie\Repository\CookieRepository
-
-  izi\prestashop\Analytics\Cookie\Factory\CookieFactoryInterface: '@izi\prestashop\Analytics\Cookie\Factory\CookieFactory'
-  izi\prestashop\Analytics\Cookie\Factory\CookieFactory:
-    class: izi\prestashop\Analytics\Cookie\Factory\CookieFactory
-
-  izi\prestashop\Analytics\Cookie\FacebookClickIdCookie:
-    class: izi\prestashop\Analytics\Cookie\FacebookClickIdCookie
-    arguments:
-      - '@izi\prestashop\Analytics\Cookie\Factory\CookieFactory'
-      - '@izi\prestashop\Analytics\Cookie\Repository\CookieRepository'
-    tags:
-      - { name: inpost.izi.analytics.cookie_erase }
-      - { name: inpost.izi.analytics.cookie_persist }
-
-  izi\prestashop\Analytics\Cookie\GoogleClickIdCookie:
-    class: izi\prestashop\Analytics\Cookie\GoogleClickIdCookie
-    arguments:
-      - '@izi\prestashop\Analytics\Cookie\Factory\CookieFactory'
-      - '@izi\prestashop\Analytics\Cookie\Repository\CookieRepository'
-    tags:
-      - { name: inpost.izi.analytics.cookie_erase }
-      - { name: inpost.izi.analytics.cookie_persist }
-
-  izi\prestashop\Analytics\Cookie\GoogleClientIdCookie:
-    class: izi\prestashop\Analytics\Cookie\GoogleClientIdCookie
-
-  izi\prestashop\Analytics\Cookie\Executor\CookieEraseExecutor:
-    class: izi\prestashop\Analytics\Cookie\Executor\CookieEraseExecutor
-    arguments:
-      - !tagged inpost.izi.analytics.cookie_erase
-
-  izi\prestashop\Analytics\Cookie\Executor\CookiePersisterExecutor:
-    class: izi\prestashop\Analytics\Cookie\Executor\CookiePersisterExecutor
-    arguments:
-      - !tagged inpost.izi.analytics.cookie_persist
-
-  izi\prestashop\Analytics\Factory\BasketAnalyticsFactoryInterface: '@izi\prestashop\Analytics\Factory\BasketAnalyticsFactory'
-  izi\prestashop\Analytics\Factory\BasketAnalyticsFactory:
-    class: izi\prestashop\Analytics\Factory\BasketAnalyticsFactory
-    public: false
-    arguments:
-      - '@izi\prestashop\Analytics\Cookie\GoogleClickIdCookie'
-      - '@izi\prestashop\Analytics\Cookie\FacebookClickIdCookie'
-      - '@izi\prestashop\Analytics\Cookie\GoogleClientIdCookie'
-
-  izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener:
-    class: izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener
-    tags:
-      - { name: kernel.event_subscriber }
-    arguments:
-      - '@izi\prestashop\CommandBusInterface'
-      - '@inpost.izi.request_stack'
-      - '@izi\prestashop\Analytics\Factory\BasketAnalyticsFactory'
-      - '@izi\prestashop\Analytics\Cookie\Executor\CookieEraseExecutor'
-      - '@izi\prestashop\Configuration\GeneralConfigurationInterface'
-
-  izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandlerInterface: '@izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandler'
-  izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandler:
-    class: izi\prestashop\Analytics\Handler\UpdateCartAnalyticsHandler
-    public: false
-    tags:
-      - { name: inpost.izi.command_handler }
-    arguments:
-      - '@izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface'
-
-  izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface: '@izi\prestashop\Analytics\BasketAnalyticsRepository'
-  izi\prestashop\Analytics\BasketAnalyticsRepository:
-    class: izi\prestashop\Analytics\BasketAnalyticsRepository
-    public: false
-    arguments:
-      - '@izi\prestashop\Database\Connection'
 
   izi\prestashop\Extension\EventListener\ClearCacheListener:
     class: izi\prestashop\Extension\EventListener\ClearCacheListener
