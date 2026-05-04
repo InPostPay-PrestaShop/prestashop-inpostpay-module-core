@@ -22,9 +22,13 @@ services:
   izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactory:
     class: izi\prestashop\ObjectModel\Repository\ObjectRepositoryFactory
     arguments:
-      - '@inpost.izi.repository_locator'
+      - '@inpost.izi.object_model.repository_locator'
 
   inpost.izi.repository_locator:
+    alias: inpost.izi.object_model.repository_locator
+#    deprecated: ~
+
+  inpost.izi.object_model.repository_locator:
     class: Symfony\Component\DependencyInjection\ServiceLocator
     tags:
       - container.service_locator

@@ -7,7 +7,7 @@ use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-if (!defined('_PS_VERSION_') || Tools::version_compare(_PS_VERSION_, '8.0.0')) {
+if (!defined('_PS_VERSION_') || Tools::version_compare(_PS_VERSION_, '8.1.0')) {
     return;
 }
 
