@@ -10,6 +10,9 @@ trait AssetsRemoverTrait
 {
     use FileRemoverTrait;
 
+    /**
+     * @param string[] $paths
+     */
     private function removeStaleAssets(array $paths): bool
     {
         return $this->removeFiles(array_map(static function (string $path): string {
