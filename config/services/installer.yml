@@ -13,6 +13,7 @@ services:
     bind:
       $psVersion: !php/const _PS_VERSION_
       $translator: '@inpost.izi.translator'
+      $logger: '@inpost.izi.logger.installer'
 
   izi\prestashop\Installer\:
     resource: ../../src/Installer
@@ -37,7 +38,6 @@ services:
     autoconfigure: false
     arguments:
       - '@izi\prestashop\Installer\LoggingInstaller.inner'
-      - '@inpost.izi.logger.installer'
 
   izi\prestashop\Installer\CoreInstaller:
     tags:

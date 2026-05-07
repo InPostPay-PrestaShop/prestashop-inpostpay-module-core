@@ -39,7 +39,7 @@ final class DeleteHotProductHandler implements DeleteHotProductHandlerInterface
         try {
             $this->client->deleteProduct((string) $product->getReferenceId());
         } catch (ProductNotFoundException $e) {
-            // ignore and remove data from the database
+            // the product had already been deleted, remove local data from the database
         }
 
         $this->repository->remove($product);

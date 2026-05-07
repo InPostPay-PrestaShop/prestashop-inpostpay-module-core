@@ -22,6 +22,7 @@ use izi\prestashop\View\Widget\WidgetConfiguration;
 use izi\prestashop\View\Widget\WidgetConfigurationInterface;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -89,11 +90,12 @@ final class GuiConfiguration implements GuiConfigurationInterface, PersistentCon
      */
     private static $supportedBindingPlaces;
 
-    public function __construct(ConfigurationInterface $configuration, SerializerInterface $serializer, ContainerInterface $container)
+    public function __construct(ConfigurationInterface $configuration, SerializerInterface $serializer, ContainerInterface $container, ?LoggerInterface $logger = null)
     {
         $this->configuration = $configuration;
         $this->serializer = $serializer;
         $this->container = $container;
+        $this->logger = $logger;
     }
 
     public static function getSubscribedServices(): array
