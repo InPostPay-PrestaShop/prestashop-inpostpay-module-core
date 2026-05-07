@@ -361,7 +361,8 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 $this->toDelete[$id] = $product;
                 unset($this->toUpdate[$id]);
             } catch (\Throwable $e) {
-                // ignore and attempt to update anyway
+                // could not validate the product
+                // attempt to update its data in the API to have it disabled if it's not available or doesn't meet the requirements
             }
         }
 
@@ -384,7 +385,9 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
             try {
                 $this->bus->handle(new UpdateHotProductCommand($product->getId()));
             } catch (ProductNotFoundException $e) {
-                // ignore
+                $this->logger->warning('Could not update hot product "{id}": API product does not exist.', [
+                    'id' => (string) $product->getReferenceId(),
+                ]);
             } catch (BasketAppException|NetworkExceptionInterface|OAuth2ExceptionInterface $e) {
                 $this->logger->error('Could not update hot product "{id}" data.', [
                     'id' => (string) $product->getReferenceId(),

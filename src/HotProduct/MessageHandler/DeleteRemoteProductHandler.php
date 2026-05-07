@@ -37,7 +37,7 @@ final class DeleteRemoteProductHandler implements DeleteRemoteProductHandlerInte
         try {
             $this->client->deleteProduct($command->getId());
         } catch (ProductNotFoundException $e) {
-            // ignore silently
+            // the product had already been deleted, remove local data from the database if it exists
         }
 
         if (null !== $product) {

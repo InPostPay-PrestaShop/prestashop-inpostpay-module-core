@@ -136,6 +136,7 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
+      - '@inpost.izi.logger'
 
   izi\prestashop\Configuration\GeneralConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
   izi\prestashop\Configuration\PromoCodesConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
@@ -166,6 +167,7 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
+      - '@inpost.izi.logger'
 
   izi\prestashop\Configuration\ConsentsConfigurationInterface: '@izi\prestashop\Configuration\ConsentsConfiguration'
   izi\prestashop\Configuration\ConsentsConfiguration:
@@ -194,6 +196,7 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
       - '@inpost.izi.gui_configuration_locator'
+      - '@inpost.izi.logger'
 
   izi\prestashop\Environment\EnvironmentInterface: '@inpost.izi.environment'
   inpost.izi.environment:
