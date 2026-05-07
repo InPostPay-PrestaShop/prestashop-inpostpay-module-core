@@ -10,6 +10,7 @@ use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\Entities\Cart;
 use izi\prestashop\Event\CartUpdatedEvent;
+use izi\prestashop\Event\TerminateEvent;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -62,6 +63,7 @@ final class CartListener implements EventSubscriberInterface
     {
         return [
             CartUpdatedEvent::class => 'onCartUpdated',
+            TerminateEvent::class => 'onTerminate',
         ];
     }
 
@@ -77,18 +79,25 @@ final class CartListener implements EventSubscriberInterface
             return;
         }
 
-        if ([] === $this->updatedCartIds) {
-            register_shutdown_function(function () {
-                /* @see https://github.com/PrestaShop/PrestaShop/pull/28267 \Shop instatiation on PS 1.7.8 might result in an error when attempting to read/write from a file given by a relative path */
-                if (\Tools::version_compare(_PS_VERSION_, '1.7.8', '>=') && \Tools::version_compare(_PS_VERSION_, '8.0.0')) {
-                    \Configuration::set('_PS_CACHE_DIR_', _PS_CACHE_DIR_);
-                }
+        $this->updatedCartIds[$cartId] = $cartId;
+    }
 
-                $this->updateBaskets();
-            });
+    public function onTerminate(TerminateEvent $event): void
+    {
+        if ([] === $this->updatedCartIds) {
+            return;
         }
 
-        $this->updatedCartIds[$cartId] = $cartId;
+        /* @see https://github.com/PrestaShop/PrestaShop/pull/28267 \Shop instatiation on PS 1.7.8 might result in an error when attempting to read/write from a file given by a relative path */
+        if (\Tools::version_compare(_PS_VERSION_, '1.7.8', '>=') && \Tools::version_compare(_PS_VERSION_, '8.0.0')) {
+            \Configuration::set('_PS_CACHE_DIR_', _PS_CACHE_DIR_);
+        }
+
+        try {
+            $this->updateBaskets();
+        } finally {
+            $this->updatedCartIds = [];
+        }
     }
 
     private function updateBaskets(): void
@@ -132,8 +141,6 @@ final class CartListener implements EventSubscriberInterface
             $this->logger->notice('Order #{orderId}: basket ID was not removed from customer cookie.', [
                 'orderId' => $orderId,
             ]);
-
-            unset($this->context->cookie->inpostizi_basket_id);
         } else {
             $session->switchBasket(new Cart($this->context->cart));
             $this->sessionRepository->persist($session);

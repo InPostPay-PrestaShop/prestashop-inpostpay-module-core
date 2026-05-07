@@ -8,6 +8,7 @@ use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\BasketApp\Product\Exception\ProductNotFoundException;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Common\Currency;
+use izi\prestashop\Event\TerminateEvent;
 use izi\prestashop\HotProduct\Exception\InvalidProductDataException;
 use izi\prestashop\HotProduct\HotProduct;
 use izi\prestashop\HotProduct\HotProductRepositoryInterface;
@@ -128,6 +129,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
             SpecificPriceEvent::UPDATED => 'onSpecificPricesUpdated',
             SpecificPriceEvent::DELETED => 'onSpecificPricesUpdated',
             StockQuantityUpdatedEvent::class => 'onStockQuantityUpdate',
+            TerminateEvent::class => 'onTerminate',
         ];
     }
 
@@ -319,34 +321,24 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         }
     }
 
+    public function onTerminate(TerminateEvent $event): void
+    {
+        try {
+            $this->processUpdates();
+        } finally {
+            $this->toUpdate = $this->toDelete = [];
+        }
+    }
+
     private function scheduleDelete(HotProduct $product): void
     {
-        $this->registerShutdownFunction();
         $this->toDelete[$product->getId()] = $product;
         unset($this->toUpdate[$product->getId()]);
     }
 
     private function scheduleUpdate(HotProduct $product): void
     {
-        $this->registerShutdownFunction();
         $this->toUpdate[$product->getId()] = $product;
-    }
-
-    private function registerShutdownFunction(): void
-    {
-        if ($this->shutdownRegistered) {
-            return;
-        }
-
-        register_shutdown_function(function () {
-            try {
-                $this->processUpdates();
-            } finally {
-                $this->toUpdate = $this->toDelete = [];
-            }
-        });
-
-        $this->shutdownRegistered = true;
     }
 
     private function processUpdates(): void

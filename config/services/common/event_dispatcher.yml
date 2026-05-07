@@ -5,6 +5,7 @@ services:
   izi\prestashop\Event\EventDispatcherInterface:
     class: izi\prestashop\Event\Adapter\EventDispatcher
     public: true
+    configurator: [ '@izi\prestashop\Event\TerminationHandler', register ]
     arguments:
       - '@inpost.izi.event_dispatcher'
 
@@ -13,6 +14,12 @@ services:
     factory: [ izi\prestashop\Event\EventDispatcherFactory, create ]
     arguments:
       - '@inpost.izi.event_dispatcher.subscriber_locator'
+
+  izi\prestashop\Event\TerminationHandler:
+    class: izi\prestashop\Event\TerminationHandler
+    arguments:
+      - '@inpost.izi.context'
+      - '@?event_dispatcher'
 
   inpost.izi.event_dispatcher.subscriber_locator:
     class: izi\prestashop\DependencyInjection\ServiceLocator
