@@ -858,8 +858,15 @@ services:
   izi\prestashop\Event\Adapter\EventDispatcher:
     class: izi\prestashop\Event\Adapter\EventDispatcher
     public: false
+    configurator: [ '@izi\prestashop\Event\TerminationHandler', register ]
     arguments:
       - '@?inpost.izi.event_dispatcher'
+
+  izi\prestashop\Event\TerminationHandler:
+    class: izi\prestashop\Event\TerminationHandler
+    arguments:
+      - '@inpost.izi.context'
+      - '@?event_dispatcher'
 
   izi\prestashop\Builder\Basket\DeliveryFactory:
     class: izi\prestashop\Builder\Basket\DeliveryFactory
