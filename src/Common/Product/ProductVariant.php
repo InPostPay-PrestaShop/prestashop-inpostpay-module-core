@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Common\Product;
 
+/**
+ * @deprecated since 3.3.0
+ */
 final class ProductVariant implements \JsonSerializable
 {
     /**
@@ -33,6 +36,8 @@ final class ProductVariant implements \JsonSerializable
 
     public function __construct(string $variant_id, string $variant_name, ?string $variant_description = null, ?string $variant_type = null, ?string $variant_values = null)
     {
+        @trigger_error(\sprintf('Class "%s" is deprecated since version 3.3.0.', __CLASS__), \E_USER_DEPRECATED);
+
         $this->variant_id = $variant_id;
         $this->variant_name = $variant_name;
         $this->variant_description = $variant_description;
