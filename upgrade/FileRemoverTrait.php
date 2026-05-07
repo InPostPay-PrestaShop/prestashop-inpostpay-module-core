@@ -23,6 +23,9 @@ trait FileRemoverTrait
      */
     private $filesystem;
 
+    /**
+     * @param string[] $paths
+     */
     private function removeFiles(array $paths): bool
     {
         $basePath = rtrim($this->module->getLocalPath(), '/');
@@ -36,6 +39,9 @@ trait FileRemoverTrait
         return true;
     }
 
+    /**
+     * @param string[] $classes
+     */
     private function removeClasses(array $classes): bool
     {
         $paths = array_map(static function (string $class): string {

@@ -148,7 +148,7 @@ class InPostIziUpdater_1_5_0
             return true;
         }
 
-        return $this->db->delete('configuration', 'id_configuration IN (' . implode(',', $configIds) . ')');
+        return $this->db->delete('configuration', 'id_configuration IN (' . implode(',', array_map('intval', $configIds)) . ')');
     }
 
     private function updateWidgetConfigStructure(): bool
