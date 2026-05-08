@@ -1,6 +1,7 @@
 import getBindingApiKey from './getBindingApiKey';
 import selectorsMap from '../../shared/map/selectorsMap';
 import addToCartHandler from './addToCartHandler';
+import WidgetError from '../error/WidgetError';
 
 const getProductFormData = (form) => {
   const formData = new FormData(form);
@@ -32,9 +33,8 @@ const handleBindingApiKey = (forceNew = false) =>
         .then((key) => {
           resolve(key);
         })
-        .catch(() => {
-          // eslint-disable-next-line prefer-promise-reject-errors
-          reject(undefined);
+        .catch((err) => {
+          reject(err);
         });
 
       return;
@@ -61,7 +61,7 @@ const unboundWidgetClicked = (productId) =>
     const formElement = document.querySelector(productPageForm);
 
     if (!formElement) {
-      reject(new Error('Error while adding product to cart: product not found.'));
+      reject(new WidgetError('PRODUCT_FORM_NOT_FOUND'));
       return;
     }
 
@@ -88,11 +88,10 @@ const unboundWidgetClicked = (productId) =>
           });
       })
       .catch((err) => {
-        if (err instanceof Error && err.message === 'UNDELIVERABLE_PRODUCT') {
+        if (err instanceof WidgetError) {
           reject(err);
         } else {
-          // eslint-disable-next-line prefer-promise-reject-errors
-          reject(undefined);
+          reject(new WidgetError('ADD_TO_CART_FAILED', { cause: err }));
         }
       });
   });

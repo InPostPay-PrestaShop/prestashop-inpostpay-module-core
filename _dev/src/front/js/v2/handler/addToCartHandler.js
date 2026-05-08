@@ -1,6 +1,7 @@
 import useHttpRequest from '../http/base/useHttpRequest';
 import getBindingApiKey from './getBindingApiKey';
 import handleAddToCartException from '../../shared/handler/handleAddToCartException';
+import UndeliverableProductError from '../error/UndeliverableProductError';
 
 const addToCartHandler = async (formData) => {
   const { getResponse, setParams } = useHttpRequest(prestashop.urls.pages.cart, 'POST', null, {
@@ -20,16 +21,22 @@ const addToCartHandler = async (formData) => {
       handleAddToCartException(error);
     });
 
-    throw Error('UNDELIVERABLE_PRODUCT');
+    throw new UndeliverableProductError({ cause: error });
   }
 
-  prestashop.emit('updateCart', {
-    reason: {
-      idProduct: resp.id_product,
-      idProductAttribute: resp.id_product_attribute,
-    },
-    resp,
-  });
+  try {
+    prestashop.emit('updateCart', {
+      reason: {
+        idProduct: resp.id_product,
+        idProductAttribute: resp.id_product_attribute,
+      },
+      resp,
+    });
+  } catch (err) {
+    // Listener failures must not affect widget flow
+    // eslint-disable-next-line no-console
+    console.error('updateCart listener failed', err);
+  }
 
   return getBindingApiKey();
 };
