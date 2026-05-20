@@ -13,6 +13,7 @@ use izi\prestashop\Event\CartUpdatedEvent;
 use izi\prestashop\Event\TerminateEvent;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 final class CartListener implements EventSubscriberInterface
@@ -63,11 +64,10 @@ final class CartListener implements EventSubscriberInterface
     {
         return [
             CartUpdatedEvent::class => 'onCartUpdated',
-            TerminateEvent::class => 'onTerminate',
         ];
     }
 
-    public function onCartUpdated(CartUpdatedEvent $event): void
+    public function onCartUpdated(CartUpdatedEvent $event/*, string $eventName, EventDispatcherInterface $dispatcher*/): void
     {
         if (null === $this->configuration->getClientCredentials()) {
             return;
@@ -77,6 +77,18 @@ final class CartListener implements EventSubscriberInterface
 
         if (0 >= $cartId = (int) $cart->id) {
             return;
+        }
+
+        if ([] === $this->updatedCartIds) {
+            $args = \func_get_args();
+            $dispatcher = $args[2] ?? null;
+
+            if ($dispatcher instanceof EventDispatcherInterface) {
+                $dispatcher->addListener(TerminateEvent::class, [$this, 'onTerminate']);
+            } else {
+                @trigger_error(\sprintf('Not passing $eventName and $dispatcher to "%s()" is deprecated since version 3.3.0.', __METHOD__), \E_USER_DEPRECATED);
+                register_shutdown_function([$this, 'onTerminate']);
+            }
         }
 
         $this->updatedCartIds[$cartId] = $cartId;
