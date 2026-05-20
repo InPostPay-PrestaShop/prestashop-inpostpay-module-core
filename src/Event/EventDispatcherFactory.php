@@ -42,8 +42,8 @@ final class EventDispatcherFactory
             foreach (self::normalizeListeners($listeners) as $listener) {
                 [$method, $priority] = $listener;
 
-                $listener = static function ($event) use ($container, $id, $method) {
-                    return $container->get($id)->{$method}($event);
+                $listener = static function ($event, $eventName, $dispatcher) use ($container, $id, $method) {
+                    return $container->get($id)->{$method}($event, $eventName, $dispatcher);
                 };
 
                 $dispatcher->addListener($eventName, $listener, $priority);
