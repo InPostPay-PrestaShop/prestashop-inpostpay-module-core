@@ -61,7 +61,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
 
         $this->ps_versions_compliancy = [
             'min' => '1.7.6.0',
-            'max' => '9.0.99',
+            'max' => '9.1.99',
         ];
 
         parent::__construct();
