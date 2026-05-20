@@ -75,8 +75,8 @@ final class EventDispatcherFactory implements ServiceSubscriberInterface
             foreach ($this->normalizeListeners($parameters) as $listener) {
                 [$method, $priority] = $listener;
 
-                $dispatcher->addListener($eventName, function ($event) use ($className, $method) {
-                    return $this->locator->get($className)->{$method}($event);
+                $dispatcher->addListener($eventName, function ($event, $eventName, $dispatcher) use ($className, $method) {
+                    return $this->locator->get($className)->{$method}($event, $eventName, $dispatcher);
                 }, $priority);
             }
         }
