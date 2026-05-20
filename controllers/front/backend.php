@@ -223,7 +223,9 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             $logger->debug('Response body: "{body}"', ['body' => $body]);
         }
 
-        $response->headers->set(ModuleVersionInfoProvidingClient::HEADER_NAME, $this->module->version);
+        if (Response::HTTP_UNAUTHORIZED !== $response->getStatusCode()) {
+            $response->headers->set(ModuleVersionInfoProvidingClient::HEADER_NAME, $this->module->version);
+        }
 
         return $response;
     }
