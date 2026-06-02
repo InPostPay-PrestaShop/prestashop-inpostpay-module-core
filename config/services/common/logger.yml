@@ -16,7 +16,6 @@ parameters:
     max_files: 3
     bubble: false
     channels: [ deprecation ]
-    include_stacktraces: true
 
 services:
   _defaults:
