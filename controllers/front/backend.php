@@ -406,6 +406,16 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             E_DEPRECATED => [$deprecationLogger, LogLevel::DEBUG],
             E_USER_DEPRECATED => [$deprecationLogger, LogLevel::DEBUG],
         ]);
+
+        // do not log deprecation notices triggered in external code
+        /** @var callable $prevHandler */
+        $prevHandler = set_error_handler(function (int $type, string $message, string $file, int $line) use (&$prevHandler) {
+            if ($type & (E_DEPRECATED | E_USER_DEPRECATED) && !str_starts_with($file, $this->module->getLocalPath())) {
+                return false;
+            }
+
+            return $prevHandler($type, $message, $file, $line);
+        });
     }
 
     private function handleOutput(string $buffer, int $phase): string
