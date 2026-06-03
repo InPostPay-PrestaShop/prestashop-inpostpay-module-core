@@ -86,6 +86,20 @@ services:
     tags:
       - { name: inpost.izi.hook }
 
+  izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerAfter:
+    class: izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerAfter
+    public: false
+    autowire: true
+    tags:
+      - { name: inpost.izi.hook }
+
+  izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerBefore:
+    class: izi\prestashop\Hook\Admin\ActionAdminInPostConfirmedShipmentsControllerBefore
+    public: false
+    autowire: true
+    tags:
+      - { name: inpost.izi.hook }
+
   izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsExtra:
     class: izi\prestashop\Hook\Legacy\Admin\Product\DisplayAdminProductsExtra
     public: false
