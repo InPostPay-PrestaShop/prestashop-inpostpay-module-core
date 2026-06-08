@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace izi\prestashop\Event;
 
 use izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener;
+use izi\prestashop\Cart\EventListener\SwitchBasketListener;
+use izi\prestashop\Cart\EventListener\UpdateBasketListener;
 use izi\prestashop\DependencyInjection\ServiceSubscriberInterface;
-use izi\prestashop\EventListener\CartListener;
 use izi\prestashop\EventListener\CreateShipmentListener;
 use izi\prestashop\EventListener\OrderListener;
 use izi\prestashop\EventListener\ShipmentListener;
@@ -39,7 +40,8 @@ final class EventDispatcherFactory implements ServiceSubscriberInterface
     public static function getSubscribedServices(): array
     {
         return [
-            CartListener::class,
+            '?' . SwitchBasketListener::class,
+            UpdateBasketListener::class,
             OrderListener::class,
             ShipmentListener::class,
             UpdateHotProductsListener::class,

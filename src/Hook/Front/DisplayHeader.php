@@ -91,6 +91,11 @@ final class DisplayHeader implements HookInterface
      */
     public function execute(array $parameters): void
     {
+        $request = $parameters['request'] ?? null;
+        if (!$request instanceof Request) {
+            $request = null;
+        }
+
         if ($this->shouldRunUpdateContext()) {
             $session = $this->basketSessionRepository->findByEntityId($this->context->cart->id);
 
@@ -101,10 +106,8 @@ final class DisplayHeader implements HookInterface
             $session->setShopId($this->context->shop->id);
             $this->basketSessionRepository->persist($session);
 
-            $this->eventDispatcher->dispatch(new CartUpdatedEvent($this->context->cart));
+            $this->eventDispatcher->dispatch(new CartUpdatedEvent($this->context->cart, $request));
         }
-
-        $request = $parameters['request'] ?? null;
 
         if (($request instanceof Request && $request->isXmlHttpRequest()) || !$this->hasRequiredConfiguration() || !$this->authorizationChecker->isGranted(BindingWidgetVoter::VIEW, $request)) {
             return;

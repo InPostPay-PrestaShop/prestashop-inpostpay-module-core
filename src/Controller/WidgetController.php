@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Controller;
 
 use izi\prestashop\BasketApp\Exception\BasketAppException;
+use izi\prestashop\Cart\Storage\BasketIdStorageInterface;
+use izi\prestashop\Cart\Storage\ChainBasketIdStorage;
 use izi\prestashop\Command\GetBasketBindingKeyCommand;
 use izi\prestashop\Command\GetOrderConfirmationUrlCommand;
 use izi\prestashop\Command\GetProductWidgetCommand;
@@ -64,6 +66,7 @@ final class WidgetController implements ServiceSubscriberInterface
     {
         return [
             '?' . AuthorizationCheckerInterface::class,
+            BasketIdStorageInterface::class,
         ];
     }
 
@@ -86,7 +89,7 @@ final class WidgetController implements ServiceSubscriberInterface
 
             /** @var BasketBindingKey $result */
             $result = $this->bus->handle($command);
-            $this->context->cookie->inpostizi_basket_id = $result->getBasketId();
+            $this->getBasketIdStorage()->setBasketId($result->getBasketId());
 
             return new JsonResponse($result->getBindingKey());
         } catch (\Exception $e) {
@@ -97,7 +100,11 @@ final class WidgetController implements ServiceSubscriberInterface
     public function getOrderConfirmationUrl(): JsonResponse
     {
         try {
-            $command = new GetOrderConfirmationUrlCommand((string) $this->context->cookie->inpostizi_basket_id);
+            if (null === $basketId = $this->getBasketIdStorage()->getBasketId()) {
+                throw new AccessDeniedHttpException($this->module->l('No InPost Pay basket is associated with the current session.'));
+            }
+
+            $command = new GetOrderConfirmationUrlCommand($basketId);
 
             /** @var string $url */
             $url = $this->bus->handle($command);
@@ -186,7 +193,9 @@ final class WidgetController implements ServiceSubscriberInterface
     private function isGranted($attributes, $subject = null): bool
     {
         if (null === $authChecker = $this->get(AuthorizationCheckerInterface::class)) {
-            return true;
+            @trigger_error(\sprintf('Passing a $container that does not have an "%s" service available to "%s::__construct()" is deprecated.', AuthorizationCheckerInterface::class, self::class), \E_USER_DEPRECATED);
+
+            return false;
         }
 
         return $authChecker->isGranted($attributes, $subject);
@@ -206,5 +215,16 @@ final class WidgetController implements ServiceSubscriberInterface
         }
 
         return $this->container->get($name);
+    }
+
+    private function getBasketIdStorage(): BasketIdStorageInterface
+    {
+        if (null !== $storage = $this->get(BasketIdStorageInterface::class)) {
+            return $storage;
+        }
+
+        @trigger_error(\sprintf('Passing a $container that does not have a "%s" service available to "%s::__construct()" is deprecated since version 2.7.0 / 3.3.0.', BasketIdStorageInterface::class, self::class), \E_USER_DEPRECATED);
+
+        return ChainBasketIdStorage::createDefault($this->context);
     }
 }

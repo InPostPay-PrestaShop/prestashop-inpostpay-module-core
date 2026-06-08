@@ -1,4 +1,7 @@
 # common FO configuration
+imports:
+  - { resource: front/cart.yml }
+
 services:
   izi\prestashop\View\Asset\FrontAssetManager:
     class: izi\prestashop\View\Asset\FrontAssetManager
@@ -59,7 +62,7 @@ services:
       - { name: inpost.izi.hook }
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@inpost.izi.context'
+      - '@izi\prestashop\Cart\Storage\BasketIdStorageInterface'
       - '@inpost.izi.module'
       - '@izi\prestashop\Configuration\GeneralConfiguration'
 

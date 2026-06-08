@@ -41,7 +41,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
 
     public function findByBasketId(string $basketId): ?BasketSessionInterface
     {
-        if (isset($this->sessionsByBasketId[$basketId])) {
+        if (\array_key_exists($basketId, $this->sessionsByBasketId)) {
             return $this->sessionsByBasketId[$basketId];
         }
 
@@ -50,7 +50,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
             ->findOneBy(['cart_id' => $basketId]);
 
         if (null === $model) {
-            return null;
+            return $this->sessionsByBasketId[$basketId] = null;
         }
 
         return $this->createExistingSession($model);
@@ -62,7 +62,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
             return null;
         }
 
-        if (isset($this->sessionsByCartId[$cartId])) {
+        if (\array_key_exists($cartId, $this->sessionsByCartId)) {
             return $this->sessionsByCartId[$cartId];
         }
 
@@ -71,7 +71,7 @@ final class BasketSessionRepository implements BasketSessionRepositoryInterface,
             ->findOneBy(['session_id' => $cartId]);
 
         if (null === $model) {
-            return null;
+            return $this->sessionsByCartId[$cartId] = null;
         }
 
         return $this->createExistingSession($model);

@@ -100,3 +100,4 @@ services:
     tags: [ container.service_locator ]
     arguments:
       - Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface: '@inpost.izi.security.authorization_checker'
+        izi\prestashop\Cart\Storage\BasketIdStorageInterface: '@izi\prestashop\Cart\Storage\BasketIdStorageInterface'

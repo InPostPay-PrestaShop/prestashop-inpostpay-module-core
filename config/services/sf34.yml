@@ -36,7 +36,8 @@ services:
       - { name: container.service_locator }
     arguments:
       - izi\prestashop\EventListener\ShipmentListener: '@izi\prestashop\EventListener\ShipmentListener'
-        izi\prestashop\EventListener\CartListener: '@izi\prestashop\EventListener\CartListener'
+        izi\prestashop\Cart\EventListener\SwitchBasketListener: '@?izi\prestashop\Cart\EventListener\SwitchBasketListener'
+        izi\prestashop\Cart\EventListener\UpdateBasketListener: '@izi\prestashop\Cart\EventListener\UpdateBasketListener'
         izi\prestashop\EventListener\OrderListener: '@izi\prestashop\EventListener\OrderListener'
         izi\prestashop\Form\BasketAppClientProvider: '@?izi\prestashop\Form\BasketAppClientProvider'
         izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener: '@?izi\prestashop\MerchantApi\EventListener\UpdateCartRulesListener'
