@@ -29,6 +29,7 @@ services:
       - !tagged inpost.izi.config_initializer
       - '@izi\prestashop\Configuration\ApiConfigurationInterface'
       - '%kernel.debug%'
+      - '%inpost.izi.hot_products.enabled%'
     calls:
       - { method: setLogger, arguments: [ '@inpost.izi.general_logger' ] }
 
@@ -46,6 +47,7 @@ services:
       - '@izi\prestashop\Configuration\ApiConfigurationInterface'
       - !tagged inpost.izi.config_initializer
       - '%kernel.debug%'
+      - '%inpost.izi.hot_products.enabled%'
     calls:
       - { method: setLogger, arguments: [ '@inpost.izi.general_logger' ] }
 

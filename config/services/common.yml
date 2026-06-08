@@ -9,6 +9,8 @@ parameters:
   inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
   inpost.izi.basket_app_logger_options:
     max_response_body_size: 1000
+  inpost.izi.hot_products.enabled: '%env(INPOST_IZI_HOT_PRODUCTS_ENABLED)%'
+  env(INPOST_IZI_HOT_PRODUCTS_ENABLED): 0
 
 services:
   inpost.izi.module:

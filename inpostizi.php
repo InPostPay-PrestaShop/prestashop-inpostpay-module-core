@@ -122,7 +122,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $this->setUpRoutingLoaderResolver();
 
         return parent::install()
-            && $this->registerHook(HookExecutor::getHooksToInstall(_PS_VERSION_));
+            && $this->registerHook(HookExecutor::getHooksToInstall(_PS_VERSION_, [
+                'enable_hot_products' => (bool) getenv('INPOST_IZI_HOT_PRODUCTS_ENABLED'),
+            ]));
     }
 
     /**
