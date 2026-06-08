@@ -119,8 +119,24 @@ class Create
      */
     public function handleRequest(CreateOrderRequest $request): int
     {
-        $session = $this->getSession($request->getOrderDetails()->getBasketId());
+        if (null === $session = $this->repository->findByBasketId($request->getOrderDetails()->getBasketId())) {
+            throw BasketNotFoundException::create();
+        }
 
+        if (null !== $orderId = $this->getExistingOrderId($session)) {
+            $this->processRepeatedRequest($session, $request, $orderId);
+
+            return $orderId;
+        }
+
+        return $this->createOrder($session, $request);
+    }
+
+    /**
+     * @param BasketSession $session
+     */
+    private function getExistingOrderId(BasketSessionInterface $session): ?int
+    {
         if (null !== $orderId = $session->getOrderId()) {
             return (int) $orderId;
         }
@@ -128,37 +144,32 @@ class Create
         $cart = $session->getBasket()->getEntity();
 
         if (null === $order = $this->getOrderByCart($cart)) {
-            return $this->createOrder($session, $request);
+            return null;
         }
 
         if ('inpostizi' !== $order->module) {
             throw new CannotCreateOrderException($this->module->l('There already exists an order for this basket.', self::TRANSLATION_SOURCE));
         }
 
+        return (int) $order->id;
+    }
+
+    /**
+     * @param BasketSession $session
+     */
+    private function processRepeatedRequest(BasketSessionInterface $session, CreateOrderRequest $request, int $orderId): void
+    {
         $this->module->getLogger()->warning('Repeated order request for cart #{cartId}. Updating delivery emails.', [
-            'cartId' => $cart->id,
-            'orderId' => $order->id,
+            'cartId' => $cartId = (int) $session->getBasket()->getId(),
+            'orderId' => $orderId,
         ]);
 
         if (null !== $originalRequest = $session->getOrderRequest()) {
             $request = $originalRequest->withDeliveryEmails($request->getDelivery());
         }
 
-        $this->finalizeSession($session, $request, (int) $order->id);
-        $this->saveCarrierModuleData($cart->id, $request->getDelivery());
-
-        return (int) $order->id;
-    }
-
-    private function getSession(string $basketId): BasketSession
-    {
-        $session = $this->repository->findByBasketId($basketId);
-
-        if (null === $session) {
-            throw BasketNotFoundException::create();
-        }
-
-        return $session;
+        $this->finalizeSession($session, $request, $orderId);
+        $this->saveCarrierModuleData($cartId, $request->getDelivery());
     }
 
     private function getOrderByCart(\Cart $cart): ?\OrderCore
