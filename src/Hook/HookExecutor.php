@@ -14,6 +14,24 @@ use Psr\Container\ContainerInterface;
 final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInterface
 {
     /**
+     * @internal
+     */
+    public const HOT_PRODUCT_HOOKS = [
+        Common\Product\ActionProductDeleteBefore::HOOK_NAME,
+        Common\Product\ActionProductDeleteAfter::HOOK_NAME,
+        Common\Product\ActionProductUpdateAfter::HOOK_NAME,
+        Common\Product\ActionCombinationDeleteBefore::HOOK_NAME,
+        Common\Product\ActionCombinationDeleteAfter::HOOK_NAME,
+        Common\Product\ActionCombinationUpdateAfter::HOOK_NAME,
+        Common\Product\ActionImageAddAfter::HOOK_NAME,
+        Common\Product\ActionImageDeleteAfter::HOOK_NAME,
+        Common\Product\ActionSpecificPriceAddAfter::HOOK_NAME,
+        Common\Product\ActionSpecificPriceUpdateAfter::HOOK_NAME,
+        Common\Product\ActionSpecificPriceDeleteAfter::HOOK_NAME,
+        Common\Product\ActionUpdateQuantity::HOOK_NAME,
+    ];
+
+    /**
      * Not installed by default, registration is handled by {@see UpdateGeneralConfigurationHandler}
      */
     private const OPTIONAL_HOOKS = [
@@ -116,14 +134,20 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
     }
 
     /**
+     * @param array{enable_hot_products?: bool} $options
+     *
      * @return string[]
      */
-    public static function getHooksToInstall(string $psVersion): array
+    public static function getHooksToInstall(string $psVersion, array $options = []): array
     {
         $hookNames = [];
 
         foreach (self::getSubscribedServices() as $hookName => $serviceName) {
             if (\in_array($hookName, self::OPTIONAL_HOOKS, true)) {
+                continue;
+            }
+
+            if (empty($options['enable_hot_products']) && \in_array($hookName, self::HOT_PRODUCT_HOOKS, true)) {
                 continue;
             }
 

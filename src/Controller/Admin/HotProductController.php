@@ -46,9 +46,9 @@ final class HotProductController extends AbstractConfigurationController
     /**
      * @param iterable<ConfigurationInitializerInterface> $configInitializers
      */
-    public function __construct(Context $shopContext, TranslatorInterface $translator, \Context $context, ApiConfigurationInterface $apiConfiguration, iterable $configInitializers, bool $debug = false)
+    public function __construct(Context $shopContext, TranslatorInterface $translator, \Context $context, ApiConfigurationInterface $apiConfiguration, iterable $configInitializers, bool $debug = false, bool $hotProductsEnabled = false)
     {
-        parent::__construct($translator, $context, $configInitializers, $apiConfiguration, $debug);
+        parent::__construct($translator, $context, $configInitializers, $apiConfiguration, $debug, $hotProductsEnabled);
         $this->shopContext = $shopContext;
     }
 
@@ -314,6 +314,15 @@ final class HotProductController extends AbstractConfigurationController
             }, $results),
             'next_page' => $nextPage,
         ]);
+    }
+
+    protected function checkAccess(): void
+    {
+        if (!$this->hotProductsEnabled) {
+            throw $this->createAccessDeniedException('Hot products feature is disabled.');
+        }
+
+        parent::checkAccess();
     }
 
     protected function getRequiredPermissions(): iterable
