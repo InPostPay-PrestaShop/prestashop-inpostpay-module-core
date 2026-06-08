@@ -1,3 +1,7 @@
+parameters:
+  inpost.izi.hot_products.enabled: '%env(bool:INPOST_IZI_HOT_PRODUCTS_ENABLED)%'
+  env(INPOST_IZI_HOT_PRODUCTS_ENABLED): 0
+
 services:
   _defaults:
     public: false

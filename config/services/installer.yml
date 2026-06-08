@@ -5,6 +5,10 @@ imports:
   - { resource: admin/translation.yml }
   - { resource: admin/translation.php }
 
+parameters:
+  inpost.izi.installer.hook_options:
+    enable_hot_products: '%inpost.izi.hot_products.enabled%'
+
 services:
   _defaults:
     public: false
@@ -57,3 +61,7 @@ services:
     arguments:
       - installer
       - '%inpost.izi.logger_config%'
+
+  izi\prestashop\Installer\Hook\HooksProvider:
+    bind:
+      $options: '%inpost.izi.installer.hook_options%'
