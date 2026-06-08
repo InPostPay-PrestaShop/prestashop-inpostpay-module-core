@@ -16,6 +16,7 @@ services:
       - { name: container.service_subscriber, key: security.authorization_checker, id: inpost.izi.security.authorization_checker }
     bind:
       $configInitializers: !tagged inpost.izi.config_initializer
+      $hotProductsEnabled: '%inpost.izi.hot_products.enabled%'
     calls:
       - { method: setLogger, arguments: [ '@inpost.izi.logger' ] }
 
