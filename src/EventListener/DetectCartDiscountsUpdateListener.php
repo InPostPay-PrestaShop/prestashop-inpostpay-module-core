@@ -68,7 +68,7 @@ final class DetectCartDiscountsUpdateListener implements EventSubscriberInterfac
             return;
         }
 
-        $this->eventDispatcher->dispatch(new CartUpdatedEvent($this->context->cart));
+        $this->eventDispatcher->dispatch(new CartUpdatedEvent($this->context->cart, $request));
     }
 
     /**

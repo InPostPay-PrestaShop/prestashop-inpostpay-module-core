@@ -41,8 +41,12 @@ final class UpdateLastVisitedShopListener implements EventSubscriberInterface
         ];
     }
 
-    public function onFrontOfficeRequest(): void
+    public function onFrontOfficeRequest(?RenderHeaderEvent $event = null): void
     {
+        if (null === $event) {
+            @trigger_error(\sprintf('Not passing an $event to "%s()" is deprecated since version 3.3.0', __METHOD__), \E_USER_DEPRECATED);
+        }
+
         if (!isset($this->context->cart->id)) {
             return;
         }
@@ -66,6 +70,6 @@ final class UpdateLastVisitedShopListener implements EventSubscriberInterface
         $session->setShopId($shopId);
         $this->sessionRepository->persist($session);
 
-        $this->eventDispatcher->dispatch(new CartUpdatedEvent($this->context->cart));
+        $this->eventDispatcher->dispatch(new CartUpdatedEvent($this->context->cart, $event ? $event->getRequest() : null));
     }
 }

@@ -43,7 +43,7 @@ services:
       - inpost.izi.hook
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@inpost.izi.context'
+      - '@izi\prestashop\Cart\Storage\BasketIdStorageInterface'
       - '@inpost.izi.module'
       - '@izi\prestashop\Configuration\GeneralConfiguration'
 

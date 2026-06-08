@@ -332,7 +332,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function getRequestStack(): RequestStack
     {
         return $this->requestStack
-            ?? $this->requestStack = (new RequestStackProvider($this->getContainer()))->getRequestStack();
+            ?? $this->requestStack = (new RequestStackProvider($this->getContainer(), $this->context))->getRequestStack();
     }
 
     /**
