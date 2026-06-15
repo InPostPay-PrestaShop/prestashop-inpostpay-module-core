@@ -7,6 +7,7 @@ namespace izi\prestashop\Configuration;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Configuration\DTO\Order\MessageOptions;
 use izi\prestashop\Serializer\SafeDeserializerTrait;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -39,10 +40,11 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
      */
     private $messageOptions = [];
 
-    public function __construct(LanguageAwareConfigurationInterface $configuration, SerializerInterface $serializer)
+    public function __construct(LanguageAwareConfigurationInterface $configuration, SerializerInterface $serializer, ?LoggerInterface $logger = null)
     {
         $this->configuration = $configuration;
         $this->serializer = $serializer;
+        $this->logger = $logger;
     }
 
     public function getInitialStatusId(?PaymentType $paymentType = null, ?int $shopId = null): int

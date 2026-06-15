@@ -39,6 +39,7 @@ trait InPostOrderTrait
             return null;
         }
 
+        // method defined in override from the inpostshipping module
         return parent::getWsInPostPoint();
     }
 
@@ -47,6 +48,8 @@ trait InPostOrderTrait
         try {
             $data = $this->get(OrderDataRepositoryInterface::class)->getOrderData((string) $this->id);
         } catch (ServiceNotFoundException $e) {
+            $this->onServiceNotFound($e);
+
             return null;
         }
 
@@ -74,6 +77,8 @@ trait InPostOrderTrait
         try {
             $carrier = $this->get(ObjectManagerInterface::class)->find(\Carrier::class, (int) $carrierId);
         } catch (ServiceNotFoundException $e) {
+            $this->onServiceNotFound($e);
+
             return null;
         }
 
@@ -101,5 +106,15 @@ trait InPostOrderTrait
         assert($module instanceof \InPostIzi);
 
         return $module->get($id);
+    }
+
+    private function onServiceNotFound(ServiceNotFoundException $e): void
+    {
+        /** @var \InPostIzi $module */
+        $module = \Module::getInstanceByName('inpostizi');
+        $module->getLogger()->error('[WEBSERVICE] Could not resolve delivery point for order: service "{id}" was not found.', [
+            'id' => $e->getId(),
+            'exception' => $e->getMessage(),
+        ]);
     }
 }

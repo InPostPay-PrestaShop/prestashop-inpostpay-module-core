@@ -70,7 +70,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '2.6.0';
+        $this->version = '2.7.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -122,7 +122,9 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         $this->setUpRoutingLoaderResolver();
 
         return parent::install()
-            && $this->registerHook(HookExecutor::getHooksToInstall(_PS_VERSION_));
+            && $this->registerHook(HookExecutor::getHooksToInstall(_PS_VERSION_, [
+                'enable_hot_products' => (bool) getenv('INPOST_IZI_HOT_PRODUCTS_ENABLED'),
+            ]));
     }
 
     /**

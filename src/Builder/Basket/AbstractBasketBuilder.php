@@ -371,22 +371,12 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
             $promoPrice,
             null === $promoPrice ? null : $this->getLowestPrice((int) $model->id, $combinationId, $shopId),
             $this->getProductAttributes($product),
-            $this->getProductVariants($product),
+            null,
             $imageUrls->getAdditionalImages(),
             $related ? null : $this->getDeliveryProduct($model, $promoPrice ?? $basePrice, $quantity, (float) $product['weight'], $product),
             $related ? $this->getDeliveryRelatedProducts($model, $promoPrice ?? $basePrice, $quantity) : null,
             $model->is_virtual ? ProductType::Digital() : ProductType::Physical()
         );
-    }
-
-    /**
-     * @todo unused for now
-     *
-     * @return ProductVariant[]
-     */
-    private function getProductVariants(array $product): array
-    {
-        return [];
     }
 
     /**

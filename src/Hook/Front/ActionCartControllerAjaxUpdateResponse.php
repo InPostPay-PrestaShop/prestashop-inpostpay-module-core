@@ -53,6 +53,6 @@ final class ActionCartControllerAjaxUpdateResponse implements HookInterface
             return;
         }
 
-        $this->dispatcher->dispatch(new CartUpdatedEvent($this->context->cart));
+        $this->dispatcher->dispatch(new CartUpdatedEvent($this->context->cart, $request));
     }
 }

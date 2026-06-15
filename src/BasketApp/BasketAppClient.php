@@ -277,7 +277,7 @@ final class BasketAppClient implements BasketAppClientInterface, ProductsApiClie
 
             throw BasketAppException::create($request, $error, $statusCode); // TODO? replace with exception factory service
         } catch (ExceptionInterface $e) {
-            // ignore deserialization errors
+            // the response could not be deserialized into an Error, throw a generic HTTP exception instead
         }
 
         if (500 <= $statusCode) {

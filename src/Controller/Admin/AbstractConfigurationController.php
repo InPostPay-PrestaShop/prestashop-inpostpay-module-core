@@ -36,6 +36,13 @@ abstract class AbstractConfigurationController extends AbstractController
     protected $apiConfiguration;
 
     /**
+     * @internal
+     *
+     * @var bool
+     */
+    protected $hotProductsEnabled;
+
+    /**
      * @var bool
      */
     private $debug;
@@ -43,12 +50,13 @@ abstract class AbstractConfigurationController extends AbstractController
     /**
      * @param iterable<ConfigurationInitializerInterface> $configInitializers
      */
-    public function __construct(LegacyTranslator $translator, \Context $context, iterable $configInitializers, ApiConfigurationInterface $apiConfiguration, bool $debug = false)
+    public function __construct(LegacyTranslator $translator, \Context $context, iterable $configInitializers, ApiConfigurationInterface $apiConfiguration, bool $debug = false, bool $hotProductsEnabled = false)
     {
         $this->translator = $translator;
         $this->context = $context;
         $this->apiConfiguration = $apiConfiguration;
         $this->debug = $debug;
+        $this->hotProductsEnabled = $hotProductsEnabled;
 
         foreach ($configInitializers as $initializer) {
             $initializer->init();
@@ -121,7 +129,11 @@ abstract class AbstractConfigurationController extends AbstractController
             ],
         ];
 
-        if (null !== $this->apiConfiguration->getClientCredentials() && $this->isGranted(PageVoter::READ, 'AdminProducts_')) {
+        if (
+            $this->hotProductsEnabled
+            && null !== $this->apiConfiguration->getClientCredentials()
+            && $this->isGranted(PageVoter::READ, 'AdminProducts_')
+        ) {
             $pages['products'] = [
                 'route' => 'admin_inpost_izi_products_index',
                 'title' => $this->translator->l('Hot products', HotProductController::TRANSLATION_SOURCE),

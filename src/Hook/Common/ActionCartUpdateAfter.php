@@ -8,6 +8,7 @@ use izi\prestashop\Event\CartUpdatedEvent;
 use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Hook\Exception\InvalidHookParamException;
 use izi\prestashop\Hook\HookInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 final class ActionCartUpdateAfter implements HookInterface
 {
@@ -41,7 +42,7 @@ final class ActionCartUpdateAfter implements HookInterface
     }
 
     /**
-     * @param array{object?: \Cart} $parameters
+     * @param array{object?: \Cart, request?: Request} $parameters
      */
     public function execute(array $parameters): void
     {
@@ -60,6 +61,11 @@ final class ActionCartUpdateAfter implements HookInterface
             return;
         }
 
-        $this->dispatcher->dispatch(new CartUpdatedEvent($cart));
+        $request = $parameters['request'] ?? null;
+        if (null !== $request && !$request instanceof Request) {
+            throw InvalidHookParamException::unexpectedType('request', $request, Request::class . '|null');
+        }
+
+        $this->dispatcher->dispatch(new CartUpdatedEvent($cart, $request));
     }
 }

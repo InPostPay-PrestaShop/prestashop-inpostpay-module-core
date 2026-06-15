@@ -81,7 +81,7 @@ final class RelatedProductsEventHandler implements BasketEventHandlerInterface
             try {
                 $this->addRelatedProduct($cart, $relatedProduct);
             } catch (ProductAlreadyInCartException $e) {
-                // ignore silently
+                // ignore silently: the product had already been added to the cart
             } catch (ProductNotFoundException $e) {
                 return Notice::error($this->context->getTranslator()->trans('Product not found', [], 'Shop.Notifications.Error'));
             } catch (ProductOutOfStockException $e) {

@@ -94,9 +94,7 @@ class Connection implements LoggerAwareInterface
     public function fetchAssociative(string $sql, bool $useCache = true)
     {
         try {
-            return $this->execute(function () use ($sql, $useCache) {
-                return $this->doFetchAssociative($sql, $useCache);
-            });
+            return $this->doFetchAssociative($sql, $useCache);
         } catch (\PrestaShopDatabaseException $e) {
             if ($useCache && $this->isCacheEnabled()) {
                 $sql = rtrim($sql, " \t\n\r\0\x0B;") . ' LIMIT 1';
@@ -113,9 +111,7 @@ class Connection implements LoggerAwareInterface
     public function fetchAllAssociative(string $sql, bool $useCache = true): array
     {
         try {
-            return $this->execute(function () use ($sql, $useCache) {
-                return $this->doFetchAllAssociative($sql, $useCache);
-            });
+            return $this->doFetchAllAssociative($sql, $useCache);
         } catch (\PrestaShopDatabaseException $e) {
             if ($useCache && $this->isCacheEnabled()) {
                 $this->invalidateCache($sql);
@@ -233,7 +229,10 @@ class Connection implements LoggerAwareInterface
         try {
             $cache->delete($key);
         } catch (\Throwable $e) {
-            // ignore silently
+            $this->logger->warning('Could not invalidate SQL cache.', [
+                'sql' => $sql,
+                'exception' => $e,
+            ]);
         }
     }
 
@@ -273,7 +272,9 @@ class Connection implements LoggerAwareInterface
     private function doFetchAssociative(string $sql, bool $useCache)
     {
         /** @var DataRow|false $data */
-        $data = $this->db->getRow($sql, $useCache);
+        $data = $this->execute(function () use ($sql, $useCache) {
+            return $this->db->getRow($sql, $useCache);
+        });
 
         if (false === $data) {
             return false;
@@ -308,7 +309,9 @@ class Connection implements LoggerAwareInterface
     private function doFetchAllAssociative(string $sql, bool $useCache): array
     {
         /** @var DataRow[] $data */
-        $data = $this->db->executeS($sql, $useCache);
+        $data = $this->execute(function () use ($sql, $useCache) {
+            return $this->db->executeS($sql, $useCache);
+        });
 
         if (\is_array($data)) {
             return $data;

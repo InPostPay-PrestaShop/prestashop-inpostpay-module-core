@@ -1,0 +1,30 @@
+services:
+  izi\prestashop\Cart\EventListener\SwitchBasketListener:
+    class: izi\prestashop\Cart\EventListener\SwitchBasketListener
+    tags:
+      - { name: kernel.event_subscriber }
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Cart\Storage\BasketIdStorageInterface'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@inpost.izi.logger'
+
+  izi\prestashop\Cart\Storage\BasketIdStorageInterface:
+    class: izi\prestashop\Cart\Storage\ChainBasketIdStorage
+    public: false
+    tags:
+      - { name: inpost.izi.widget_controller_dependency, key: izi\prestashop\Cart\Storage\BasketIdStorageInterface }
+    arguments:
+      - [ '@izi\prestashop\Cart\Storage\SessionBasketIdStorage', '@izi\prestashop\Cart\Storage\CustomerCookieBasketIdStorage' ]
+
+  izi\prestashop\Cart\Storage\SessionBasketIdStorage:
+    class: izi\prestashop\Cart\Storage\SessionBasketIdStorage
+    public: false
+    arguments:
+      - '@inpost.izi.request_stack'
+
+  izi\prestashop\Cart\Storage\CustomerCookieBasketIdStorage:
+    class: izi\prestashop\Cart\Storage\CustomerCookieBasketIdStorage
+    public: false
+    arguments:
+      - '@inpost.izi.context'

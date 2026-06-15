@@ -1,4 +1,5 @@
 import getBasketBindingKeyRequest from '../http/getBasketBindingKeyRequest';
+import WidgetError from '../error/WidgetError';
 
 /**
  *
@@ -19,9 +20,8 @@ const getBindingApiKey = (forceNew = false) => {
       .then((key) => {
         resolve(key);
       })
-      .catch(() => {
-        // eslint-disable-next-line prefer-promise-reject-errors
-        reject(undefined);
+      .catch((err) => {
+        reject(new WidgetError('BINDING_KEY_FETCH_FAILED', { cause: err }));
       });
   });
 };

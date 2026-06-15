@@ -1,13 +1,16 @@
 # common FO/BO configuration
 imports:
   - { resource: common/analytics.yml }
+  - { resource: common/cart.yml }
   - { resource: common/logger.yml }
 
 parameters:
-  inpost.izi.container_version: '2.6.0'
+  inpost.izi.container_version: '2.7.0'
   inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
   inpost.izi.basket_app_logger_options:
     max_response_body_size: 1000
+  inpost.izi.hot_products.enabled: '%env(INPOST_IZI_HOT_PRODUCTS_ENABLED)%'
+  env(INPOST_IZI_HOT_PRODUCTS_ENABLED): 0
 
 services:
   inpost.izi.module:
@@ -136,6 +139,7 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
+      - '@inpost.izi.logger'
 
   izi\prestashop\Configuration\GeneralConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
   izi\prestashop\Configuration\PromoCodesConfigurationInterface: '@izi\prestashop\Configuration\GeneralConfiguration'
@@ -166,6 +170,7 @@ services:
     arguments:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
+      - '@inpost.izi.logger'
 
   izi\prestashop\Configuration\ConsentsConfigurationInterface: '@izi\prestashop\Configuration\ConsentsConfiguration'
   izi\prestashop\Configuration\ConsentsConfiguration:
@@ -194,6 +199,7 @@ services:
       - '@izi\prestashop\Configuration\Adapter\Configuration'
       - '@inpost.izi.serializer'
       - '@inpost.izi.gui_configuration_locator'
+      - '@inpost.izi.logger'
 
   izi\prestashop\Environment\EnvironmentInterface: '@inpost.izi.environment'
   inpost.izi.environment:
@@ -759,17 +765,6 @@ services:
     class: izi\prestashop\Payment\PaymentCurrencyChecker
     public: false
 
-  izi\prestashop\EventListener\CartListener:
-    class: izi\prestashop\EventListener\CartListener
-    tags:
-      - { name: kernel.event_subscriber }
-    arguments:
-      - '@izi\prestashop\Configuration\ApiConfigurationInterface'
-      - '@inpost.izi.context'
-      - '@izi\prestashop\Repository\BasketSessionRepository'
-      - '@izi\prestashop\CommandBusInterface'
-      - '@inpost.izi.general_logger'
-
   izi\prestashop\EventListener\OrderListener:
     class: izi\prestashop\EventListener\OrderListener
     tags:
@@ -855,8 +850,15 @@ services:
   izi\prestashop\Event\Adapter\EventDispatcher:
     class: izi\prestashop\Event\Adapter\EventDispatcher
     public: false
+    configurator: [ '@izi\prestashop\Event\TerminationHandler', register ]
     arguments:
       - '@?inpost.izi.event_dispatcher'
+
+  izi\prestashop\Event\TerminationHandler:
+    class: izi\prestashop\Event\TerminationHandler
+    arguments:
+      - '@inpost.izi.context'
+      - '@?event_dispatcher'
 
   izi\prestashop\Builder\Basket\DeliveryFactory:
     class: izi\prestashop\Builder\Basket\DeliveryFactory
