@@ -51,6 +51,7 @@ services:
     arguments:
       - '@inpost.izi.module'
       - '@izi\prestashop\Configuration\GeneralConfiguration'
+      - '@inpost.izi.object_model.order_repository'
 
   izi\prestashop\Hook\Front\DisplayOrderConfirmation:
     class: izi\prestashop\Hook\Front\DisplayOrderConfirmation
