@@ -2,6 +2,16 @@ services:
   _defaults:
     public: false
 
+  izi\prestashop\Cart\EventListener\SwitchBasketListener:
+    class: izi\prestashop\Cart\EventListener\SwitchBasketListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\Cart\Storage\BasketIdStorageInterface'
+      - '@izi\prestashop\Repository\BasketSessionRepository'
+      - '@inpost.izi.logger'
+
   izi\prestashop\EventListener\DetectCartDiscountsUpdateListener:
     class: izi\prestashop\EventListener\DetectCartDiscountsUpdateListener
     tags:
@@ -18,3 +28,18 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Cart\Storage\BasketIdStorageInterface:
+    class: izi\prestashop\Cart\Storage\ChainBasketIdStorage
+    arguments:
+      - [ '@izi\prestashop\Cart\Storage\SessionBasketIdStorage', '@izi\prestashop\Cart\Storage\CustomerCookieBasketIdStorage' ]
+
+  izi\prestashop\Cart\Storage\SessionBasketIdStorage:
+    class: izi\prestashop\Cart\Storage\SessionBasketIdStorage
+    arguments:
+      - '@inpost.izi.request_stack'
+
+  izi\prestashop\Cart\Storage\CustomerCookieBasketIdStorage:
+    class: izi\prestashop\Cart\Storage\CustomerCookieBasketIdStorage
+    arguments:
+      - '@inpost.izi.context'

@@ -3,7 +3,7 @@
 use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Database\Connection;
-use izi\prestashop\Hook\Common\Product as ProductHooks;
+use izi\prestashop\Hook\HookExecutor;
 use izi\prestashop\Installer\Database\Version_2_1_0;
 use izi\prestashop\Installer\DatabaseInstaller;
 
@@ -56,20 +56,7 @@ class InPostIziUpdater_2_1_0
 
     private function registerHooks(): bool
     {
-        return $this->module->registerHook([
-            ProductHooks\ActionProductDeleteBefore::HOOK_NAME,
-            ProductHooks\ActionProductDeleteAfter::HOOK_NAME,
-            ProductHooks\ActionProductUpdateAfter::HOOK_NAME,
-            ProductHooks\ActionCombinationDeleteBefore::HOOK_NAME,
-            ProductHooks\ActionCombinationDeleteAfter::HOOK_NAME,
-            ProductHooks\ActionCombinationUpdateAfter::HOOK_NAME,
-            ProductHooks\ActionImageAddAfter::HOOK_NAME,
-            ProductHooks\ActionImageDeleteAfter::HOOK_NAME,
-            ProductHooks\ActionSpecificPriceAddAfter::HOOK_NAME,
-            ProductHooks\ActionSpecificPriceUpdateAfter::HOOK_NAME,
-            ProductHooks\ActionSpecificPriceDeleteAfter::HOOK_NAME,
-            ProductHooks\ActionUpdateQuantity::HOOK_NAME,
-        ]);
+        return $this->module->registerHook(HookExecutor::HOT_PRODUCT_HOOKS);
     }
 
     private function renameCartRulesConfigKey(): bool

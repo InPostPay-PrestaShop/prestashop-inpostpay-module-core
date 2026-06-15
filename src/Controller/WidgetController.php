@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace izi\prestashop\Controller;
 
 use izi\prestashop\BasketApp\Exception\BasketAppException;
+use izi\prestashop\Cart\Storage\BasketIdStorageInterface;
+use izi\prestashop\Cart\Storage\ChainBasketIdStorage;
 use izi\prestashop\Command\GetBasketBindingKeyCommand;
 use izi\prestashop\Command\GetOrderConfirmationUrlCommand;
 use izi\prestashop\Command\GetProductWidgetCommand;
@@ -63,6 +65,7 @@ final class WidgetController implements ServiceSubscriberInterface
     {
         return [
             AuthorizationCheckerInterface::class,
+            BasketIdStorageInterface::class,
         ];
     }
 
@@ -85,7 +88,7 @@ final class WidgetController implements ServiceSubscriberInterface
 
             /** @var BasketBindingKey $result */
             $result = $this->bus->handle($command);
-            $this->context->cookie->inpostizi_basket_id = $result->getBasketId();
+            $this->getBasketIdStorage()->setBasketId($result->getBasketId());
 
             return new JsonResponse($result->getBindingKey());
         } catch (\Exception $e) {
@@ -96,7 +99,11 @@ final class WidgetController implements ServiceSubscriberInterface
     public function getOrderConfirmationUrl(): JsonResponse
     {
         try {
-            $command = new GetOrderConfirmationUrlCommand((string) $this->context->cookie->inpostizi_basket_id);
+            if (null === $basketId = $this->getBasketIdStorage()->getBasketId()) {
+                throw new AccessDeniedHttpException($this->trans('No InPost Pay basket is associated with the current session.', [], 'Modules.Inpostizi.Errors'));
+            }
+
+            $command = new GetOrderConfirmationUrlCommand($basketId);
 
             /** @var string $url */
             $url = $this->bus->handle($command);
@@ -212,5 +219,16 @@ final class WidgetController implements ServiceSubscriberInterface
     private function trans(string $message, array $parameters, string $domain): string
     {
         return $this->context->getTranslator()->trans($message, $parameters, $domain);
+    }
+
+    private function getBasketIdStorage(): BasketIdStorageInterface
+    {
+        if (null !== $storage = $this->get(BasketIdStorageInterface::class)) {
+            return $storage;
+        }
+
+        @trigger_error(\sprintf('Passing a $container that does not have a "%s" service available to "%s::__construct()" is deprecated since version 3.3.0.', BasketIdStorageInterface::class, self::class), \E_USER_DEPRECATED);
+
+        return ChainBasketIdStorage::createDefault($this->context);
     }
 }

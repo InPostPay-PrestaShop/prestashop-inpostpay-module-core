@@ -8,6 +8,7 @@ use izi\prestashop\BasketApp\Exception\BasketAppException;
 use izi\prestashop\BasketApp\Product\Exception\ProductNotFoundException;
 use izi\prestashop\CommandBusInterface;
 use izi\prestashop\Common\Currency;
+use izi\prestashop\Event\TerminateEvent;
 use izi\prestashop\HotProduct\Exception\InvalidProductDataException;
 use izi\prestashop\HotProduct\HotProduct;
 use izi\prestashop\HotProduct\HotProductRepositoryInterface;
@@ -24,6 +25,7 @@ use izi\prestashop\Product\Price\PriceCalculatorInterface;
 use PrestaShop\PrestaShop\Adapter\Shop\Context;
 use Psr\Http\Client\NetworkExceptionInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 final class UpdateHotProductsListener implements EventSubscriberInterface
@@ -91,7 +93,10 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
      */
     private $combination;
 
-    private $shutdownRegistered = false;
+    /**
+     * @var bool
+     */
+    private $terminationListenerRegistered = false;
 
     /**
      * @var array<int, HotProduct>
@@ -142,7 +147,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         $this->product = $product; // keep an object reference to check after deletion
     }
 
-    public function onProductDeleted(ProductEvent $event): void
+    public function onProductDeleted(ProductEvent $event/*, string $eventName, EventDispatcherInterface $dispatcher*/): void
     {
         if ($this->product !== $event->getProduct()) {
             return;
@@ -153,13 +158,14 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 continue;
             }
 
-            $this->scheduleDelete($hotProduct);
+            $args = \func_get_args();
+            $this->scheduleDelete($hotProduct, $args[2] ?? null, __METHOD__);
         }
 
         $this->product = null;
     }
 
-    public function onProductUpdated(ProductEvent $event): void
+    public function onProductUpdated(ProductEvent $event/*, string $eventName, EventDispatcherInterface $dispatcher*/): void
     {
         $product = $event->getProduct();
         $updatedFields = $this->getUpdatedFields($product);
@@ -181,7 +187,8 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 continue;
             }
 
-            $this->scheduleUpdate($hotProduct);
+            $args = \func_get_args();
+            $this->scheduleUpdate($hotProduct, $args[2] ?? null, __METHOD__);
         }
     }
 
@@ -201,7 +208,7 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
         }
     }
 
-    public function onCombinationDeleted(CombinationEvent $event): void
+    public function onCombinationDeleted(CombinationEvent $event/*, string $eventName, EventDispatcherInterface $dispatcher*/): void
     {
         if ($this->combination !== $event->getCombination()) {
             return;
@@ -218,13 +225,14 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 continue;
             }
 
-            $this->scheduleDelete($hotProduct);
+            $args = \func_get_args();
+            $this->scheduleDelete($hotProduct, $args[2] ?? null, __METHOD__);
         }
 
         $this->combination = null;
     }
 
-    public function onCombinationUpdated(CombinationEvent $event): void
+    public function onCombinationUpdated(CombinationEvent $event/*, string $eventName, EventDispatcherInterface $dispatcher*/): void
     {
         $combination = $event->getCombination();
         $updatedFields = $this->getUpdatedFields($combination);
@@ -249,11 +257,12 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 continue;
             }
 
-            $this->scheduleUpdate($hotProduct);
+            $args = \func_get_args();
+            $this->scheduleUpdate($hotProduct, $args[2] ?? null, __METHOD__);
         }
     }
 
-    public function onImagesUpdated(ImageEvent $event): void
+    public function onImagesUpdated(ImageEvent $event/*, string $eventName, EventDispatcherInterface $dispatcher*/): void
     {
         $image = $event->getImage();
         $productId = (int) $image->id_product;
@@ -267,11 +276,12 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 continue;
             }
 
-            $this->scheduleUpdate($hotProduct);
+            $args = \func_get_args();
+            $this->scheduleUpdate($hotProduct, $args[2] ?? null, __METHOD__);
         }
     }
 
-    public function onSpecificPricesUpdated(SpecificPriceEvent $event): void
+    public function onSpecificPricesUpdated(SpecificPriceEvent $event/*, string $eventName, EventDispatcherInterface $dispatcher*/): void
     {
         $price = $event->getPrice();
 
@@ -290,11 +300,12 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 continue;
             }
 
-            $this->scheduleUpdate($hotProduct);
+            $args = \func_get_args();
+            $this->scheduleUpdate($hotProduct, $args[2] ?? null, __METHOD__);
         }
     }
 
-    public function onStockQuantityUpdate(StockQuantityUpdatedEvent $event): void
+    public function onStockQuantityUpdate(StockQuantityUpdatedEvent $event/*, string $eventName, EventDispatcherInterface $dispatcher*/): void
     {
         if (0 === $event->getDeltaQuantity()) {
             return;
@@ -315,38 +326,47 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 continue;
             }
 
-            $this->scheduleUpdate($hotProduct);
+            $args = \func_get_args();
+            $this->scheduleUpdate($hotProduct, $args[2] ?? null, __METHOD__);
         }
     }
 
-    private function scheduleDelete(HotProduct $product): void
+    public function onTerminate(TerminateEvent $event): void
     {
-        $this->registerShutdownFunction();
+        try {
+            $this->processUpdates();
+        } finally {
+            $this->toUpdate = $this->toDelete = [];
+        }
+    }
+
+    private function scheduleDelete(HotProduct $product, $dispatcher, string $method): void
+    {
+        $this->registerTerminationListener($dispatcher, $method);
         $this->toDelete[$product->getId()] = $product;
         unset($this->toUpdate[$product->getId()]);
     }
 
-    private function scheduleUpdate(HotProduct $product): void
+    private function scheduleUpdate(HotProduct $product, $dispatcher, string $method): void
     {
-        $this->registerShutdownFunction();
+        $this->registerTerminationListener($dispatcher, $method);
         $this->toUpdate[$product->getId()] = $product;
     }
 
-    private function registerShutdownFunction(): void
+    private function registerTerminationListener($dispatcher, string $method): void
     {
-        if ($this->shutdownRegistered) {
+        if ($this->terminationListenerRegistered) {
             return;
         }
 
-        register_shutdown_function(function () {
-            try {
-                $this->processUpdates();
-            } finally {
-                $this->toUpdate = $this->toDelete = [];
-            }
-        });
+        if ($dispatcher instanceof EventDispatcherInterface) {
+            $dispatcher->addListener(TerminateEvent::class, [$this, 'onTerminate']);
+        } else {
+            @trigger_error(\sprintf('Not passing $eventName and $dispatcher to "%s()" is deprecated since version 3.3.0.', $method), \E_USER_DEPRECATED);
+            register_shutdown_function([$this, 'onTerminate']);
+        }
 
-        $this->shutdownRegistered = true;
+        $this->terminationListenerRegistered = true;
     }
 
     private function processUpdates(): void
@@ -358,7 +378,8 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
                 $this->toDelete[$id] = $product;
                 unset($this->toUpdate[$id]);
             } catch (\Throwable $e) {
-                // ignore and attempt to update anyway
+                // could not validate the product
+                // attempt to update its data in the API to have it disabled if it's not available or doesn't meet the requirements
             }
         }
 
@@ -381,7 +402,9 @@ final class UpdateHotProductsListener implements EventSubscriberInterface
             try {
                 $this->bus->handle(new UpdateHotProductCommand($product->getId()));
             } catch (ProductNotFoundException $e) {
-                // ignore
+                $this->logger->warning('Could not update hot product "{id}": API product does not exist.', [
+                    'id' => (string) $product->getReferenceId(),
+                ]);
             } catch (BasketAppException|NetworkExceptionInterface|OAuth2ExceptionInterface $e) {
                 $this->logger->error('Could not update hot product "{id}" data.', [
                     'id' => (string) $product->getReferenceId(),

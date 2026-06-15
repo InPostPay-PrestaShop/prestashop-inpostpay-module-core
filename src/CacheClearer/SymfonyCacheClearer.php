@@ -46,7 +46,7 @@ final class SymfonyCacheClearer implements CacheClearerInterface
     }
 
     /**
-     * Dumping container metadata on PHP versions before 8.1 might cause the script to exceed memory limit
+     * Dumping container metadata on PHP versions before 8.1 might cause the script to exceed the memory limit
      * in @see \Symfony\Component\Config\Resource\ReflectionClassResource::generateSignature()
      * due to https://bugs.php.net/bug.php?id=80821 if @see \Module::$_INSTANCE is not empty.
      *

@@ -70,7 +70,7 @@ final class CreateHotProductHandler implements CreateHotProductHandlerInterface
         try {
             $this->client->createProducts(new CreateProductsRequest([$payload]));
         } catch (ProductExistsException $e) {
-            // ignore and save data to the database
+            // the product had already been created, attempt to save its data to the database
         }
 
         $this->repository->add($product);

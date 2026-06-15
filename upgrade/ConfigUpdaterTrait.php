@@ -11,16 +11,22 @@ trait ConfigUpdaterTrait
      */
     private $db;
 
+    /**
+     * @param string[] $keys
+     */
     private function getConfigDataByKeys(array $keys): array
     {
         $sql = (new \DbQuery())
             ->select('c.*')
             ->from('configuration', 'c')
-            ->where(\sprintf('c.name IN ("%s")', implode('","', $keys)));
+            ->where(\sprintf('c.name IN ("%s")', array_map('pSQL', $keys)));
 
         return $this->db->executeS($sql) ?: [];
     }
 
+    /**
+     * @return array<int, array<int, array<string, mixed>>> values by shop group ID, shop ID and config key
+     */
     private function groupConfigValuesByShop(array $data): array
     {
         $dataByShopGroup = [];
@@ -32,6 +38,9 @@ trait ConfigUpdaterTrait
         return $dataByShopGroup;
     }
 
+    /**
+     * @param array<int, array<int, mixed>> $dataByShopGroup unencoded config values by shop group ID and shop ID
+     */
     private function setJsonConfigValues(string $key, array $dataByShopGroup): bool
     {
         foreach ($dataByShopGroup as $shopGroupId => $dataByShop) {
@@ -46,8 +55,11 @@ trait ConfigUpdaterTrait
         return true;
     }
 
+    /**
+     * @param string[] $keys
+     */
     private function deleteConfigurationByKeys(array $keys): bool
     {
-        return $this->db->delete('configuration', 'name IN ("' . implode('","', $keys) . '")');
+        return $this->db->delete('configuration', 'name IN ("' . implode('","', array_map('pSQL', $keys)) . '")');
     }
 }

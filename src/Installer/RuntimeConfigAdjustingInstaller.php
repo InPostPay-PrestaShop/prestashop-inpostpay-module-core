@@ -6,8 +6,10 @@ namespace izi\prestashop\Installer;
 
 use izi\prestashop\CacheClearer\SymfonyCacheClearer;
 use PrestaShop\PrestaShop\Adapter\SymfonyContainer;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
@@ -27,14 +29,20 @@ final class RuntimeConfigAdjustingInstaller implements InstallerInterface, Unins
     private $psVersion;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @var bool
      */
     private $configModified = false;
 
-    public function __construct(InstallerInterface $installer, string $psVersion = _PS_VERSION_)
+    public function __construct(InstallerInterface $installer, string $psVersion = _PS_VERSION_, ?LoggerInterface $logger = null)
     {
         $this->installer = $installer;
         $this->psVersion = $psVersion;
+        $this->logger = $logger;
     }
 
     public function install(\Module $module): void
@@ -61,15 +69,23 @@ final class RuntimeConfigAdjustingInstaller implements InstallerInterface, Unins
 
         $container = \is_callable([$module, 'getContainer']) ? $module->getContainer() : SymfonyContainer::getInstance();
 
-        $this->setUpRoutingLoaderResolver($container);
-        $this->resetCircularReferencesBeforeCacheClear($container);
+        try {
+            $this->setUpRoutingLoaderResolver($container);
+            $this->resetCircularReferencesBeforeCacheClear($container);
 
-        $this->configModified = true;
+            $this->configModified = true;
+        } catch (ServiceNotFoundException $e) {
+            $this->logger->warning('Service "{id}" was not found.', [
+                'id' => $e->getId(),
+                'exception' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
      * Accesses the public "routing.loader" service to provide a @see \Symfony\Component\Config\Loader\LoaderResolverInterface
      * to the routing configuration loader used by @see \PrestaShop\PrestaShop\Adapter\Module\Tab\ModuleTabRegister
+     * in order to prevent an exception when importing routing config in other format than YAML.
      */
     private function setUpRoutingLoaderResolver(ContainerInterface $container): void
     {
@@ -77,11 +93,7 @@ final class RuntimeConfigAdjustingInstaller implements InstallerInterface, Unins
             return;
         }
 
-        try {
-            $container->get('routing.loader');
-        } catch (\Exception $e) {
-            // ignore silently
-        }
+        $container->get('routing.loader');
     }
 
     private function resetCircularReferencesBeforeCacheClear(ContainerInterface $container): void
@@ -94,12 +106,8 @@ final class RuntimeConfigAdjustingInstaller implements InstallerInterface, Unins
             return;
         }
 
-        try {
-            /** @var EventDispatcherInterface $dispatcher */
-            $dispatcher = $container->get('event_dispatcher');
-            $dispatcher->addListener('cli' === \PHP_SAPI ? ConsoleEvents::TERMINATE : KernelEvents::TERMINATE, $listener, -1000);
-        } catch (\Exception $e) {
-            // ignore silently
-        }
+        /** @var EventDispatcherInterface $dispatcher */
+        $dispatcher = $container->get('event_dispatcher');
+        $dispatcher->addListener('cli' === \PHP_SAPI ? ConsoleEvents::TERMINATE : KernelEvents::TERMINATE, $listener, -1000);
     }
 }

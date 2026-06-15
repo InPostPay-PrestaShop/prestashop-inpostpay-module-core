@@ -5,6 +5,7 @@ services:
   izi\prestashop\Event\EventDispatcherInterface:
     class: izi\prestashop\Event\Adapter\EventDispatcher
     public: true
+    configurator: [ '@izi\prestashop\Event\TerminationHandler', register ]
     arguments:
       - '@inpost.izi.event_dispatcher'
 
@@ -14,12 +15,19 @@ services:
     arguments:
       - '@inpost.izi.event_dispatcher.subscriber_locator'
 
+  izi\prestashop\Event\TerminationHandler:
+    class: izi\prestashop\Event\TerminationHandler
+    arguments:
+      - '@inpost.izi.context'
+      - '@?event_dispatcher'
+
   inpost.izi.event_dispatcher.subscriber_locator:
     class: izi\prestashop\DependencyInjection\ServiceLocator
     tags:
       - container.service_locator
     arguments:
-      - izi\prestashop\EventListener\CartListener: '@izi\prestashop\EventListener\CartListener'
+      - izi\prestashop\Cart\EventListener\UpdateBasketListener: '@izi\prestashop\Cart\EventListener\UpdateBasketListener'
+        izi\prestashop\Cart\EventListener\SwitchBasketListener: '@?izi\prestashop\Cart\EventListener\SwitchBasketListener'
         izi\prestashop\EventListener\DetectCartDiscountsUpdateListener: '@?izi\prestashop\EventListener\DetectCartDiscountsUpdateListener'
         izi\prestashop\EventListener\OrderListener: '@izi\prestashop\EventListener\OrderListener'
         izi\prestashop\EventListener\ShipmentListener: '@izi\prestashop\EventListener\ShipmentListener'

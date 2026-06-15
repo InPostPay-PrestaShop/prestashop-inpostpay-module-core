@@ -55,7 +55,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '3.2.1';
+        $this->version = '3.3.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -332,7 +332,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function getRequestStack(): RequestStack
     {
         return $this->requestStack
-            ?? $this->requestStack = (new RequestStackProvider($this->getContainer()))->getRequestStack();
+            ?? $this->requestStack = (new RequestStackProvider($this->getContainer(), $this->context))->getRequestStack();
     }
 
     /**

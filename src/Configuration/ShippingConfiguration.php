@@ -7,6 +7,7 @@ namespace izi\prestashop\Configuration;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Configuration\DTO\Shipping\ShippingOptions;
 use izi\prestashop\Serializer\SafeDeserializerTrait;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 
 /**
@@ -29,10 +30,11 @@ final class ShippingConfiguration implements ShippingConfigurationInterface, Opt
     private $courierShippingOptions = [];
     private $disabledOptionalServices = [];
 
-    public function __construct(ShopAwareConfigurationInterface $configuration, SerializerInterface $serializer)
+    public function __construct(ShopAwareConfigurationInterface $configuration, SerializerInterface $serializer, ?LoggerInterface $logger = null)
     {
         $this->configuration = $configuration;
         $this->serializer = $serializer;
+        $this->logger = $logger;
     }
 
     public function getShippingOptions(DeliveryType $deliveryType, ?int $shopId = null): ShippingOptions
