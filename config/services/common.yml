@@ -5,7 +5,7 @@ imports:
   - { resource: common/logger.yml }
 
 parameters:
-  inpost.izi.container_version: '2.6.0'
+  inpost.izi.container_version: '2.7.0'
   inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
   inpost.izi.basket_app_logger_options:
     max_response_body_size: 1000
