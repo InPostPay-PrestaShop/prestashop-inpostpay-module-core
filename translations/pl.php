@@ -10,6 +10,7 @@ $_MODULE['<{inpostizi}prestashop>inpostizi_9ed4a1989f9f332b9d6b34eb21fcaa39'] = 
 $_MODULE['<{inpostizi}prestashop>deliverytype_4d5340b646d9723cdb3bdf42182658d0'] = 'Paczkomat';
 $_MODULE['<{inpostizi}prestashop>deliverytype_5055d1a4444c630d6839f48ab48aef91'] = 'Kurier';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_782990a55975fc9d54d74f3ffb2c7dad'] = 'Koszyk nie istnieje.';
+$_MODULE['<{inpostizi}prestashop>widgetcontroller_caa4de04d4a1b51e1d99d46a1918918f'] = 'Koszyk InPost Pay nie jest powiązany z obecną sesją.';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_eec51c10f6a01635ec7d8793167a3376'] = 'Nazwa hooka jest wymagana.';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_0db4aad5f10f7b2207e5c57220461127'] = 'ID produktu jest wymagane';
 $_MODULE['<{inpostizi}prestashop>widgetcontroller_69cab7d3b86365a08719b64843b38c79'] = 'Wystąpił problem z komunikacją z aplikacją mobilną. Spróbuj ponownie później.';
