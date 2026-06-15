@@ -42,6 +42,10 @@
         <source>Gift wrapping is no longer available.</source>
         <target>Pakowanie prezentowe nie jest już dostępne.</target>
       </trans-unit>
+      <trans-unit id="caa4de04d4a1b51e1d99d46a1918918f">
+        <source>No InPost Pay basket is associated with the current session.</source>
+        <target>Koszyk InPost Pay nie jest powiązany z obecną sesją.</target>
+      </trans-unit>
       <trans-unit id="eec51c10f6a01635ec7d8793167a3376">
         <source>Hook name is required.</source>
         <target>Nazwa hooka jest wymagana.</target>
