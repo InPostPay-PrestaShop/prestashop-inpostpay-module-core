@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace izi\prestashop\View\Component;
 
 use Twig\Environment;
+use Twig\Markup;
 
 /**
- * @implements \IteratorAggregate<string>
+ * @implements \IteratorAggregate<\Stringable>
  */
 final class NavBar implements \Stringable, \IteratorAggregate
 {
@@ -36,11 +37,11 @@ final class NavBar implements \Stringable, \IteratorAggregate
     }
 
     /**
-     * @return \Traversable<string>
+     * @return \Traversable<\Stringable>
      */
     public function getIterator(): \Traversable
     {
-        yield (string) $this;
+        yield new Markup((string) $this, $this->twig->getCharset());
     }
 
     public function __toString(): string
