@@ -19,6 +19,4 @@ interface GeneralConfigurationInterface
     public function isFullPageCacheModuleInUse(?int $shopId = null): bool;
 
     public function isSendAnalyticsData(?int $shopId = null): bool;
-
-    public function isWidgetSplitBoundEnabled(?int $shopId = null): bool;
 }

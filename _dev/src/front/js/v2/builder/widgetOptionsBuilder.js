@@ -7,7 +7,6 @@
  * @property {function} addToBasketClicked
  * @property {string|undefined} apiBaseUrl
  * @property {boolean} webView
- * @property {boolean} isWidgetSplitBoundEnabled
  * @property {string} language
  */
 
@@ -21,7 +20,6 @@ const widgetOptionsBuilder = () => {
     handleBasketEvent: () => false,
     apiBaseUrl: undefined,
     webView: false,
-    isWidgetSplitBoundEnabled: false,
     language: 'pl',
   };
 
@@ -75,13 +73,6 @@ const widgetOptionsBuilder = () => {
   };
 
   /**
-   * @param widgetSplitBoundEnabled {boolean}
-   */
-  const setIsWidgetSplitBoundEnabled = (widgetSplitBoundEnabled) => {
-    widgetOptions.isWidgetSplitBoundEnabled = widgetSplitBoundEnabled;
-  };
-
-  /**
    * @param addToBasketClicked {function}
    */
   const setAddToBasketClicked = (addToBasketClicked) => {
@@ -104,7 +95,7 @@ const widgetOptionsBuilder = () => {
      * TEMPORARY SOLUTION
      */
     filteredOptions.features = {};
-    filteredOptions.features.isWidgetSplitBoundEnabled = filteredOptions.isWidgetSplitBoundEnabled;
+    filteredOptions.features.isWidgetSplitBoundEnabled = true;
 
     return filteredOptions;
   };
@@ -114,7 +105,6 @@ const widgetOptionsBuilder = () => {
     setBasketBindingApiKey,
     setUnboundWidgetClicked,
     setHandleBasketEvent,
-    setIsWidgetSplitBoundEnabled,
     setAddToBasketClicked,
     setApiBaseUrl,
     setWebView,
