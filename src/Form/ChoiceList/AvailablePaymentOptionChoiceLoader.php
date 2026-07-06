@@ -11,6 +11,9 @@ use Symfony\Component\Form\ChoiceList\ArrayChoiceList;
 use Symfony\Component\Form\ChoiceList\ChoiceListInterface;
 use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 
+/**
+ * @deprecated since 3.4.0
+ */
 final class AvailablePaymentOptionChoiceLoader implements ChoiceLoaderInterface
 {
     /**
@@ -27,6 +30,7 @@ final class AvailablePaymentOptionChoiceLoader implements ChoiceLoaderInterface
 
     public function __construct(BasketAppClientProvider $clientProvider)
     {
+        @trigger_error(sprintf('Class "%s" is deprecated since 3.4.0.', self::class), \E_USER_DEPRECATED);
         $this->clientProvider = $clientProvider;
     }
 

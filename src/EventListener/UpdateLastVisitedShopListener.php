@@ -44,7 +44,7 @@ final class UpdateLastVisitedShopListener implements EventSubscriberInterface
     public function onFrontOfficeRequest(?RenderHeaderEvent $event = null): void
     {
         if (null === $event) {
-            @trigger_error(\sprintf('Not passing an $event to "%s()" is deprecated since version 3.3.0', __METHOD__), \E_USER_DEPRECATED);
+            @trigger_error(\sprintf('Not passing an $event to "%s()" is deprecated since version 3.3.0.', __METHOD__), \E_USER_DEPRECATED);
         }
 
         if (!isset($this->context->cart->id)) {

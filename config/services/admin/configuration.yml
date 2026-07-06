@@ -68,6 +68,7 @@ services:
 
   izi\prestashop\Form\Type\Order\AvailablePaymentOptionsChoiceType:
     class: izi\prestashop\Form\Type\Order\AvailablePaymentOptionsChoiceType
+    # deprecated: ~
     tags:
       - form.type
     bind:
@@ -120,6 +121,7 @@ services:
 
   izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader
+    # deprecated: ~
 
   izi\prestashop\Form\Type\Consent\ConsentType:
     class: izi\prestashop\Form\Type\Consent\ConsentType
