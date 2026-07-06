@@ -41,7 +41,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
      * @Assert\All(
      *     @Assert\All(
      *         @Assert\Type("string"),
-     *     )
+     *     ),
      * )
      */
     private $statusDescriptionMap;
@@ -54,18 +54,12 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
     private $posId;
 
     /**
-     * @var PaymentType[]
-     *
-     * @Assert\All(
-     *     @Assert\Type(PaymentType::class),
-     * )
+     * @var PaymentType[]|null
      */
     private $availablePaymentOptions;
 
     /**
      * @var bool|null
-     *
-     * @Assert\NotNull()
      */
     private $allPaymentOptionsEnabled = true;
 
@@ -78,10 +72,14 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
 
     /**
      * @param array<int, array<int, string>> $statusDescriptionMap
-     * @param PaymentType[] $availablePaymentOptions
+     * @param PaymentType[]|null $availablePaymentOptions
      */
-    public function __construct(?int $initialStatusId = null, ?int $paidStatusId = null, ?string $posId = null, array $statusDescriptionMap = [], array $availablePaymentOptions = [])
+    public function __construct(?int $initialStatusId = null, ?int $paidStatusId = null, ?string $posId = null, array $statusDescriptionMap = [], ?array $availablePaymentOptions = null)
     {
+        if (null !== $availablePaymentOptions) {
+            @trigger_error(\sprintf('Passing $availablePaymentOptions to "%s()" is deprecated since version 3.4.0.', __METHOD__), \E_USER_DEPRECATED);
+        }
+
         $this->defaultInitialStatusId = $initialStatusId;
         $this->paidStatusId = $paidStatusId;
         $this->posId = $posId;
@@ -151,28 +149,45 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this;
     }
 
+    /**
+     * @deprecated since 3.4.0
+     */
     public function getAvailablePaymentOptions(?int $shopId = null): array
     {
-        return $this->availablePaymentOptions;
+        $this->triggerDeprecation(__METHOD__);
+
+        return $this->availablePaymentOptions ?? [];
     }
 
     /**
      * @param PaymentType[] $availablePaymentOptions
+     *
+     * @deprecated since 3.4.0
      */
     public function setAvailablePaymentOptions(array $availablePaymentOptions): self
     {
+        $this->triggerDeprecation(__METHOD__);
         $this->availablePaymentOptions = $availablePaymentOptions;
 
         return $this;
     }
 
-    public function isAllPaymentOptionsEnabled(): ?bool
+    /**
+     * @deprecated since 3.4.0
+     */
+    public function isAllPaymentOptionsEnabled(): bool
     {
+        $this->triggerDeprecation(__METHOD__);
+
         return $this->allPaymentOptionsEnabled;
     }
 
+    /**
+     * @deprecated since 3.4.0
+     */
     public function setAllPaymentOptionsEnabled(?bool $enabled): self
     {
+        $this->triggerDeprecation(__METHOD__);
         $this->allPaymentOptionsEnabled = $enabled;
 
         return $this;
@@ -213,13 +228,8 @@ final class OrdersConfiguration implements OrdersConfigurationInterface
         return $this->getMessageOptions()->getFormat();
     }
 
-    /**
-     * @Assert\IsTrue(message="At least one payment option must be enabled.")
-     *
-     * @internal
-     */
-    public function hasEnabledPaymentOptions(): bool
+    private function triggerDeprecation(string $method): void
     {
-        return $this->allPaymentOptionsEnabled || [] !== $this->availablePaymentOptions;
+        @trigger_error(sprintf('Method "%s()" is deprecated since version 3.4.0.', $method), \E_USER_DEPRECATED);
     }
 }

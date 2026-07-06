@@ -16,18 +16,15 @@ use izi\prestashop\Common\Basket\Quantity;
 use izi\prestashop\Common\Basket\Summary;
 use izi\prestashop\Common\Currency;
 use izi\prestashop\Common\Delivery\DeliveryType;
-use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\Price;
 use izi\prestashop\Common\Product\DeliveryProduct;
 use izi\prestashop\Common\Product\DeliveryRelatedProducts;
 use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductType;
-use izi\prestashop\Common\Product\ProductVariant;
 use izi\prestashop\Common\PromoCode;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
-use izi\prestashop\Configuration\OrdersConfigurationInterface;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\ContextManager;
 use izi\prestashop\Product\Image\ImageUrlsProviderInterface;
@@ -438,7 +435,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         return new Summary(
             $basePrice,
             Currency::Pln(),
-            $this->getPaymentOptions(),
+            [],
             $finalPrice,
             $promoPrice,
             $this->expirationDate,
@@ -660,16 +657,6 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         return $consent->getDescription($defaultLanguageId);
     }
 
-    /**
-     * @return PaymentType[]
-     */
-    private function getPaymentOptions(): array
-    {
-        $configuration = $this->get(OrdersConfigurationInterface::class);
-
-        return array_values($configuration->getAvailablePaymentOptions((int) $this->shopId));
-    }
-
     private function calculateProductPrice(int $productId, ?int $combinationId = null, bool $withTax = true, bool $withReduction = true, int $quantity = 1, ?int $customizationId = null, ?int $shopId = null): ?float
     {
         if (null === $shopId || (int) $this->contextManager->getContext()->shop->id === $shopId) {
@@ -856,7 +843,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $freeDeliveryAmount = $this->getFreeDeliveryAmount($deliveryType);
 
         if (!isset($this->cartSummary)) {
-            $this->cartSummary = new Summary($this->getPromoPrice(), Currency::Pln(), []);
+            $this->cartSummary = new Summary($this->getPromoPrice(), Currency::Pln());
         }
 
         return $this->productDeliveryFactory->createForRelatedProduct($deliveryType, $this->cartSummary, $this->cart, $product, $price, $quantity, $freeDeliveryAmount, $this->shopId);

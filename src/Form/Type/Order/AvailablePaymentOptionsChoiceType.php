@@ -16,6 +16,9 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * @deprecated since 3.4.0
+ */
 final class AvailablePaymentOptionsChoiceType extends AbstractType
 {
     /**
@@ -33,6 +36,7 @@ final class AvailablePaymentOptionsChoiceType extends AbstractType
      */
     public function __construct(ChoiceLoaderInterface $choiceLoader, TranslatorInterface $translator)
     {
+        @trigger_error(sprintf('Class "%s" is deprecated since 3.4.0.', self::class), \E_USER_DEPRECATED);
         $this->choiceLoader = $choiceLoader;
         $this->translator = $translator;
     }
