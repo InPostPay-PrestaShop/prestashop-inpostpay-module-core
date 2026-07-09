@@ -26,6 +26,8 @@ use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
  */
 final class ContainerFactory
 {
+    private const HOOK_NAME = 'actionInPostIziBuildContainer';
+
     private $cacheDir;
     private $hookDispatcher;
 
@@ -56,7 +58,10 @@ final class ContainerFactory
 
         require_once $cachePath;
 
-        return new $className();
+        $container = new $className();
+        $this->includeAutoloaders($container);
+
+        return $container;
     }
 
     private function resolveClassName(string $className): array
@@ -95,7 +100,11 @@ final class ContainerFactory
             $loader->load($resource);
         }
 
-        $this->hookDispatcher->dispatch('actionInPostIziBuildContainer', [
+        if (method_exists($this->hookDispatcher, 'getListenerNames')) {
+            $container->setParameter('inpost.izi.extension_modules', $this->hookDispatcher->getListenerNames(self::HOOK_NAME));
+        }
+
+        $this->hookDispatcher->dispatch(self::HOOK_NAME, [
             'loader' => $loader,
             'type' => $type,
         ]);
@@ -117,5 +126,19 @@ final class ContainerFactory
             ]),
             $container->getResources()
         );
+    }
+
+    private function includeAutoloaders(ContainerInterface $container): void
+    {
+        if (!$container->hasParameter('inpost.izi.extension_modules')) {
+            return;
+        }
+
+        foreach ($container->getParameter('inpost.izi.extension_modules') as $name) {
+            $path = \sprintf('%s%s/vendor/autoload.php', _PS_MODULE_DIR_, $name);
+            if (file_exists($path)) {
+                include_once $path;
+            }
+        }
     }
 }

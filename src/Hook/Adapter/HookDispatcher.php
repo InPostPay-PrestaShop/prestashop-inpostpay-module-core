@@ -12,4 +12,16 @@ final class HookDispatcher implements HookDispatcherInterface
     {
         return \Hook::exec($name, $parameters, null, false, true, false, $shopId);
     }
+
+    /**
+     * @return string[]
+     */
+    public function getListenerNames(string $hookName): array
+    {
+        if (!$modules = \Hook::getHookModuleExecList($hookName)) {
+            return [];
+        }
+
+        return array_column($modules, 'module');
+    }
 }
