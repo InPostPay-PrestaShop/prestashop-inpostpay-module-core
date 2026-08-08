@@ -60,15 +60,8 @@ final class GeneralConfiguration implements GeneralConfigurationInterface, Promo
      */
     private $defaultPromoDetailsPageId;
 
-    public function __construct(
-        bool $enabledForEveryone = false,
-        ?int $maxSuggestedProducts = null,
-        ?string $thankYouDisplayHook = null,
-        ?string $productCardDisplayHook = null,
-        ?string $checkoutButtonDisplayHook = null,
-        bool $fullPageCacheModuleInUse = false,
-        bool $sendAnalyticsData = false
-    ) {
+    public function __construct(bool $enabledForEveryone = false, ?int $maxSuggestedProducts = null, ?string $thankYouDisplayHook = null, ?string $productCardDisplayHook = null, ?string $checkoutButtonDisplayHook = null, bool $fullPageCacheModuleInUse = false, bool $sendAnalyticsData = false)
+    {
         $this->enabledForEveryone = $enabledForEveryone;
         $this->maxSuggestedProducts = $maxSuggestedProducts;
         $this->thankYouDisplayHook = $thankYouDisplayHook;

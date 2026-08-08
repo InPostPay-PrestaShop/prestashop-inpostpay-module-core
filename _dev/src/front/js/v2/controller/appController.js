@@ -13,6 +13,7 @@ const appController = () => {
       setBasketBindingApiKey,
       setUnboundWidgetClicked,
       setHandleBasketEvent,
+      setAddToBasketClicked,
       setLanguage,
       build,
     } = widgetOptionsBuilder();
@@ -25,6 +26,7 @@ const appController = () => {
     setBasketBindingApiKey(getBindingApiKey());
     setUnboundWidgetClicked(unboundWidgetClicked);
     setHandleBasketEvent(handleBasketEvent);
+    setAddToBasketClicked(unboundWidgetClicked);
 
     initWidget(build());
 
