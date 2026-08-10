@@ -62,7 +62,7 @@ final class SerializerFactory
     {
         try {
             return new PhpDocExtractor();
-        } catch (\LogicException $e) {
+        } catch (\Exception $e) {
             return new PropertyDocBlockTypeExtractor();
         }
     }
