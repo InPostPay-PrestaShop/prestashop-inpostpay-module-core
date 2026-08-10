@@ -42,6 +42,10 @@
         <source>inclusive</source>
         <target>włącznie</target>
       </trans-unit>
+      <trans-unit id="462b982f58ba93a18f3038ee1c2aa647">
+        <source>Estimated delivery time</source>
+        <target>Szacowany czas dostawy</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

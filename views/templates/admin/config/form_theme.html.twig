@@ -118,6 +118,14 @@
   {% endif %}
 
   {{ form_errors(form) }}
+  {{ form_row(form.carrierMappings) }}
+
+  <div class="row mt-n2">
+    <div class="col-xl-4 col-md-6 col-12 col-xs-12 mt-2">
+      {{ form_row(form.estimatedDeliveryTime) }}
+    </div>
+  </div>
+
   {{ form_rest(form) }}
 {% endblock %}
 
