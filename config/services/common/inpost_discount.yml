@@ -89,3 +89,6 @@ services:
       - '@izi\prestashop\Configuration\PrestaShopConfiguration'
       - '@izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper'
       - '@izi\prestashop\InPostDiscount\CartRule\CustomRuleRepositoryInterface'
+    tags:
+      - inpost.izi.inpost_discount.cart_rule_factory
+      - inpost.izi.inpost_discount.applier
