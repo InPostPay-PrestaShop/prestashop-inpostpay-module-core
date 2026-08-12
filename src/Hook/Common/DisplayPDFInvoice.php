@@ -12,6 +12,7 @@ use izi\prestashop\InPostDiscount\CartRuleDiscountRepository;
 use izi\prestashop\InPostDiscount\DiscountAmount;
 use izi\prestashop\InPostDiscount\DiscountRepositoryInterface;
 use izi\prestashop\InPostDiscount\ObjectModel\ShippingDiscountsAwareOrderInvoice;
+use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 
 final class DisplayPDFInvoice implements HookInterface
 {
@@ -23,11 +24,18 @@ final class DisplayPDFInvoice implements HookInterface
     private $discountRepository;
 
     /**
-     * @param CartRuleDiscountRepository $discountRepository
+     * @var ObjectRepositoryInterface<\CartRule>
      */
-    public function __construct(DiscountRepositoryInterface $discountRepository)
+    private $cartRuleRepository;
+
+    /**
+     * @param CartRuleDiscountRepository $discountRepository
+     * @param ObjectRepositoryInterface<\CartRule> $cartRuleRepository
+     */
+    public function __construct(DiscountRepositoryInterface $discountRepository, ObjectRepositoryInterface $cartRuleRepository)
     {
         $this->discountRepository = $discountRepository;
+        $this->cartRuleRepository = $cartRuleRepository;
     }
 
     public static function getHookName(): string
@@ -75,8 +83,8 @@ final class DisplayPDFInvoice implements HookInterface
             return $total;
         }
 
-        return array_reduce($discounts, static function (DiscountAmount $total, CartRuleDiscount $discount) {
-            if (InPostPlusCartRuleHandler::DISCOUNT_TYPE !== $discount->getType()) {
+        return array_reduce($discounts, function (DiscountAmount $total, CartRuleDiscount $discount) {
+            if (InPostPlusCartRuleHandler::DISCOUNT_TYPE !== $discount->getType() || $this->isFreeShipping($discount->getCartRuleId())) {
                 return $total;
             }
 
@@ -97,5 +105,14 @@ final class DisplayPDFInvoice implements HookInterface
         }
 
         throw new \RuntimeException(\sprintf('Could not find the "%s" object in the call stack.', \HTMLTemplateInvoice::class));
+    }
+
+    private function isFreeShipping(int $cartRuleId): bool
+    {
+        if (null === $rule = $this->cartRuleRepository->find($cartRuleId)) {
+            return false;
+        }
+
+        return (bool) $rule->free_shipping;
     }
 }

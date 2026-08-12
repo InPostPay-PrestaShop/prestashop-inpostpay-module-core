@@ -140,6 +140,7 @@ services:
       - inpost.izi.hook
     arguments:
       - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@izi\prestashop\ObjectModel\Repository\CartRuleRepository'
 
   # InPost discounts
   izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule:
