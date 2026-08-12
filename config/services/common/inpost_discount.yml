@@ -62,7 +62,7 @@ services:
     tags:
       - container.service_locator
     arguments:
-      - INPOST_PLUS: '@izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler'
+      - INPOST_SUBSCRIPTION: '@izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler'
 
   izi\prestashop\InPostDiscount\CartRule\DiscountApplierInterface: '@izi\prestashop\InPostDiscount\CartRule\DiscountApplier'
   izi\prestashop\InPostDiscount\CartRule\DiscountApplier:
@@ -75,7 +75,7 @@ services:
     tags:
       - container.service_locator
     arguments:
-      - INPOST_PLUS: '@izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler'
+      - INPOST_SUBSCRIPTION: '@izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler'
 
   izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper:
     class: izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper

@@ -15,7 +15,7 @@ use PrestaShop\PrestaShop\Core\Cart\CartRuleData;
 
 final class InPostPlusCartRuleHandler extends AbstractCartRuleFactory implements DiscountApplierInterface
 {
-    public const DISCOUNT_TYPE = 'INPOST_PLUS';
+    public const DISCOUNT_TYPE = 'INPOST_SUBSCRIPTION';
 
     /**
      * @var bool
