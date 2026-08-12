@@ -43,11 +43,11 @@ final class DeliveryDateCalculator implements DeliveryDateCalculatorInterface
      *                                                    if given as an object, its timezone is not adjusted
      *  - working_hours_end: DateTimeInterface|string - same as "working_hours_start"; must be a later time
      *  - timezone: DateTimeZone|string|null - string will be interpreted as a timezone name;
-     *                                         if null, the calculation will use the timezone set by the given clock
+     *                                         to use the timezone set by the given clock, explicitly provide null
      *
      * @param array<string, mixed> $options
      *
-     * @throws ExceptionInterface if the given options are invalid
+     * @throws ExceptionInterface if the options are invalid
      */
     public function __construct(ShippingConfigurationInterface $configuration, ClockInterface $clock, array $options = [])
     {
@@ -56,38 +56,48 @@ final class DeliveryDateCalculator implements DeliveryDateCalculatorInterface
         $this->options = $this->resolveOptions($options);
     }
 
-    public function calculate(\Cart $cart, DeliveryType $deliveryType): \DateTimeImmutable
+    public function calculate(\Cart $cart, DeliveryType $deliveryType, ?\DateTimeImmutable $orderDate = null): \DateTimeImmutable
     {
         if (DeliveryType::Digital() === $deliveryType) {
-            return $this->calculateDigitalDeliveryDate();
+            return $this->calculateDigitalDeliveryDate($orderDate);
         }
 
-        $datetime = $this->clock->now();
-        if (null !== $timezone = $this->options['timezone']) {
-            $datetime = $datetime->setTimezone($timezone);
-        }
-
-        $datetime = $this->moveIntoWorkingHours($datetime);
+        $deliveryDate = $orderDate ?? $this->getCurrentTime();
+        $deliveryDate = $this->moveIntoWorkingHours($deliveryDate);
         $hours = $this->configuration->getShippingOptions($deliveryType)->getEstimatedDeliveryTime() ?? self::DEFAULT_DELIVERY_TIME_HOURS;
 
         while ($hours >= 24) {
-            $datetime = $this->skipWeekend($datetime->modify('+1 day'));
+            $deliveryDate = $this->skipWeekend($deliveryDate->modify('+1 day'));
             $hours -= 24;
         }
 
         if ($hours > 0) {
-            $datetime = $this->skipWeekend($datetime->modify(\sprintf('+%d hours', $hours)));
-            $datetime = $this->moveIntoWorkingHours($datetime);
+            $deliveryDate = $this->skipWeekend($deliveryDate->modify(\sprintf('+%d hours', $hours)));
+            $deliveryDate = $this->moveIntoWorkingHours($deliveryDate);
         }
 
-        return $this->getNextFullHour($datetime);
+        return $this->getNextFullHour($deliveryDate);
     }
 
-    private function calculateDigitalDeliveryDate(): \DateTimeImmutable
+    private function calculateDigitalDeliveryDate(?\DateTimeImmutable $orderDate = null): \DateTimeImmutable
     {
-        $datetime = $this->clock->now()->modify('+1 minute');
+        if (null !== $orderDate) {
+            return $orderDate;
+        }
 
-        return $datetime->setTime((int) $datetime->format('G'), (int) $datetime->format('i'));
+        $deliveryDate = $this->clock->now()->modify('+1 minute');
+
+        return $deliveryDate->setTime((int) $deliveryDate->format('G'), (int) $deliveryDate->format('i'));
+    }
+
+    private function getCurrentTime(): \DateTimeImmutable
+    {
+        $now = $this->clock->now();
+        if (null === $timezone = $this->options['timezone']) {
+            return $now;
+        }
+
+        return $now->setTimezone($timezone);
     }
 
     private function moveIntoWorkingHours(\DateTimeImmutable $datetime): \DateTimeImmutable
