@@ -104,6 +104,20 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\Event\EventDispatcherInterface'
 
+  izi\prestashop\Hook\Common\ActionObjectOrderAddAfter:
+    class: izi\prestashop\Hook\Common\ActionObjectOrderAddAfter
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionObjectOrderCartRuleAddBefore:
+    class: izi\prestashop\Hook\Common\ActionObjectOrderCartRuleAddBefore
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
   izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore:
     class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore
     tags:
@@ -119,6 +133,40 @@ services:
     arguments:
       - '@izi\prestashop\Event\EventDispatcherInterface'
       - '@inpost.izi.context'
+
+  izi\prestashop\Hook\Common\DisplayPDFInvoice:
+    class: izi\prestashop\Hook\Common\DisplayPDFInvoice
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@izi\prestashop\ObjectModel\Repository\CartRuleRepository'
+
+  # InPost discounts
+  izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule:
+    class: izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@izi\prestashop\InPostDiscount\CartRule\DiscountApplierInterface'
+
+  izi\prestashop\Hook\Common\CartRule\ActionGetCartRuleContextualValue:
+    class: izi\prestashop\Hook\Common\CartRule\ActionGetCartRuleContextualValue
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+
+  izi\prestashop\Hook\Common\CartRule\ActionValidateCartRule:
+    class: izi\prestashop\Hook\Common\CartRule\ActionValidateCartRule
+    tags:
+      - inpost.izi.hook
+    arguments:
+      - '@izi\prestashop\InPostDiscount\CartRule\CustomRuleRepositoryInterface'
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@inpost.izi.translator'
 
   # Product hooks
   izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore:
@@ -224,9 +272,16 @@ services:
         actionObjectInPostShipmentModelUpdateAfter: '@izi\prestashop\Hook\Common\ActionShipmentUpdateAfter'
         actionValidateOrder: '@izi\prestashop\Hook\Common\ActionValidateOrder'
         actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'
+        actionObjectOrderAddAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderAddAfter'
         actionObjectOrderUpdateBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore'
         actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
+        actionObjectOrderCartRuleAddBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderCartRuleAddBefore'
         actionEmailSendBefore: '@izi\prestashop\Hook\Common\ActionEmailSendBefore'
+        displayPDFInvoice: '@izi\prestashop\Hook\Common\DisplayPDFInvoice'
+        # InPost discounts
+        actionApplyCartRule: '@izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule'
+        actionGetCartRuleContextualValue: '@izi\prestashop\Hook\Common\CartRule\ActionGetCartRuleContextualValue'
+        actionValidateCartRule: '@izi\prestashop\Hook\Common\CartRule\ActionValidateCartRule'
         # webservice
         addWebserviceResources: '@izi\prestashop\Hook\Webservice\AddWebserviceResources'
         # product

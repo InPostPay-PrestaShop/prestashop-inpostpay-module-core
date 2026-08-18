@@ -43,6 +43,11 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 class InPostIzi extends PaymentModule implements WidgetInterface
 {
     /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
      * @var RequestStack
      */
     private $requestStack;
@@ -55,7 +60,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '3.3.1';
+        $this->version = '3.4.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -280,19 +285,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
 
     public function getContainer(): ContainerInterface
     {
-        if (Tools::version_compare(_PS_VERSION_, '1.7.7')) {
-            return $this->getPS176Container();
-        }
-
-        if (null !== $container = SymfonyContainer::getInstance()) {
-            return $container;
-        }
-
-        try {
-            return parent::getContainer();
-        } catch (PrestaShopContainerNotFoundException $e) {
-            return $this->getFrontOfficeLegacyContainer();
-        }
+        return $this->container ?? $this->container = $this->doGetContainer();
     }
 
     /**
@@ -425,6 +418,28 @@ class InPostIzi extends PaymentModule implements WidgetInterface
         }
     }
 
+    private function doGetContainer(): ContainerInterface
+    {
+        if (Tools::version_compare(_PS_VERSION_, '1.7.7')) {
+            return $this->getPS176Container();
+        }
+
+        if (
+            $this->context->controller instanceof AdminControllerCore
+            && Tools::version_compare(_PS_VERSION_, '1.7.8')
+            && null !== $container = SymfonyContainer::getInstance()
+        ) {
+            // use the kernel container instead of the PS 1.7.6 - 1.7.8 legacy admin context container
+            return $container;
+        }
+
+        try {
+            return parent::getContainer();
+        } catch (PrestaShopContainerNotFoundException $e) {
+            return $this->getFrontOfficeLegacyContainer();
+        }
+    }
+
     /**
      * {@see Module::get()} does not check if {@see Controller::$container} is set on PS 1.7.6.
      */
@@ -434,11 +449,11 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this->context->container;
         }
 
-        if (null !== $container = SymfonyContainer::getInstance()) {
+        if ($this->context->controller instanceof FrontControllerCore && null !== $container = $this->context->controller->getContainer()) {
             return $container;
         }
 
-        if ($this->context->controller instanceof Controller && null !== $container = $this->context->controller->getContainer()) {
+        if (null !== $container = SymfonyContainer::getInstance()) {
             return $container;
         }
 

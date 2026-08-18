@@ -7,7 +7,6 @@ use izi\prestashop\Common\Customer\InvoiceDetails;
 use izi\prestashop\Common\Customer\LegalForm;
 use izi\prestashop\Common\Delivery\DeliveryType;
 use izi\prestashop\Common\Delivery\ServiceCode;
-use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\PhoneNumber;
 use izi\prestashop\Configuration\OptionalServicesConfigurationInterface;
 use izi\prestashop\Configuration\OrdersConfigurationInterface;
@@ -18,6 +17,9 @@ use izi\prestashop\Entities\BasketSessionInterface;
 use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Event\ValidateOrderEvent;
 use izi\prestashop\MerchantApi\Command\Order\UpdateCartMessageCommand;
+use izi\prestashop\MerchantApi\Event\CreateOrderExceptionEvent;
+use izi\prestashop\MerchantApi\Event\CreateOrderRequestEvent;
+use izi\prestashop\MerchantApi\Event\OrderCreatedEvent;
 use izi\prestashop\MerchantApi\Exception\BasketNotFoundException;
 use izi\prestashop\MerchantApi\Exception\CannotCreateOrderException;
 use izi\prestashop\MerchantApi\Exception\InternalServerErrorException;
@@ -130,7 +132,16 @@ class Create
             return $orderId;
         }
 
-        return $this->createOrder($session, $request);
+        try {
+            $orderId = $this->createOrder($session, $request);
+            $this->eventDispatcher->dispatch(new OrderCreatedEvent($session, $request, $orderId));
+
+            return $orderId;
+        } catch (\Throwable $e) {
+            $this->eventDispatcher->dispatch(new CreateOrderExceptionEvent($session, $request, $e));
+
+            throw $e;
+        }
     }
 
     private function getExistingOrderId(BasketSessionInterface $session): ?int
@@ -204,8 +215,6 @@ class Create
 
         $paymentType = $request->getOrderDetails()->getPaymentType();
 
-        $this->checkPaymentType($paymentType, $shopId);
-
         $customer = $this->findOrCreateCustomer($cart, $request->getAccountInfo());
         $addresses = $this->findOrCreateAddresses($customer, $request);
 
@@ -214,10 +223,11 @@ class Create
         $this->updateCartMessage($cart, $request);
         $this->processOptionalServices($cart, $deliveryType, $serviceCodes);
 
+        $this->eventDispatcher->dispatch(new CreateOrderRequestEvent($session, $request));
+
         $this->validateCart($cart, $request);
 
         $orderId = null;
-
         $this->eventDispatcher->addListener(ValidateOrderEvent::class, $listener = function (ValidateOrderEvent $event) use ($session, $request, $cart, &$orderId) {
             if ($event->getOrder()->module !== $this->module->name) {
                 return;
@@ -672,14 +682,26 @@ class Create
     private function checkCartTotal(\Cart $cart, CreateOrderRequest $request): void
     {
         $details = $request->getOrderDetails();
-
         $orderTotal = $cart->getOrderTotal();
         $basketPrice = $details->getBasketPrice()->getGross();
+        foreach ($details->getInpostDiscounts() as $discount) {
+            $basketPrice -= $discount->getDiscount();
+        }
+
         $epsilon = $details->getCurrency()->getSmallestUnitAmount() / 2.;
 
-        if (abs($orderTotal - $basketPrice) >= $epsilon) {
-            throw new CannotCreateOrderException($this->translator->trans('The price of your basket has changed. Please review your order.', [], 'Modules.Inpostizi.Errors'));
+        if (abs($orderTotal - $basketPrice) < $epsilon) {
+            return;
         }
+
+        $this->module->getLogger()->notice('Basket price mismatch for cart #{cartId}.', [
+            'cartId' => $cart->id,
+            'actual' => $orderTotal,
+            'expected' => $basketPrice,
+            'discounts' => $details->getInpostDiscounts(),
+        ]);
+
+        throw new CannotCreateOrderException($this->translator->trans('The price of your basket has changed. Please review your order.', [], 'Modules.Inpostizi.Errors'));
     }
 
     private function getMinimalPurchaseAmount(): float
@@ -753,21 +775,6 @@ class Create
         }
 
         return (int) $carrier->id;
-    }
-
-    private function checkPaymentType(PaymentType $paymentType, int $shopId): void
-    {
-        $availablePaymentOptions = $this->ordersConfiguration->getAvailablePaymentOptions($shopId);
-
-        if ([] === $availablePaymentOptions) {
-            return;
-        }
-
-        if (\in_array($paymentType, $availablePaymentOptions, true)) {
-            return;
-        }
-
-        throw new CannotCreateOrderException($this->translator->trans('The selected payment method is not available.', [], 'Modules.Inpostizi.Errors'));
     }
 
     /**

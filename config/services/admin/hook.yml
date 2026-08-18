@@ -10,6 +10,9 @@ services:
   izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter:
     class: izi\prestashop\Hook\Admin\ActionAdminCartRuleSaveAfter
 
+  izi\prestashop\Hook\Admin\ActionAdminCartRulesListingFieldsModifier:
+    class: izi\prestashop\Hook\Admin\ActionAdminCartRulesListingFieldsModifier
+
   izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia:
     class: izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia
     bind:

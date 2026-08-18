@@ -9,7 +9,6 @@ use izi\prestashop\Serializer\Normalizer\CustomDenormalizer;
 use izi\prestashop\Serializer\Normalizer\EnumDenormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceAmountNormalizer;
 use izi\prestashop\Serializer\Normalizer\PriceNormalizer;
-use phpDocumentor\Reflection\DocBlock;
 use Symfony\Component\PropertyInfo\Extractor\PhpDocExtractor;
 use Symfony\Component\PropertyInfo\Extractor\ReflectionExtractor;
 use Symfony\Component\PropertyInfo\PropertyInfoExtractor;
@@ -51,23 +50,20 @@ final class SerializerFactory
 
     private static function createObjectNormalizer(): ObjectNormalizer
     {
-        $typeExtractor = self::createTypeExtractor();
+        $typeExtractor = new PropertyInfoExtractor([], [
+            self::createPhpDocTypeExtractor(),
+            new ReflectionExtractor(),
+        ]);
 
         return new ObjectNormalizer(null, null, null, $typeExtractor);
     }
 
-    private static function createTypeExtractor(): PropertyTypeExtractorInterface
+    private static function createPhpDocTypeExtractor(): PropertyTypeExtractorInterface
     {
-        $typeExtractors = [];
-
-        if (class_exists(DocBlock::class)) {
-            $typeExtractors[] = new PhpDocExtractor();
-        } else {
-            $typeExtractors[] = new PropertyDocBlockTypeExtractor();
+        try {
+            return new PhpDocExtractor();
+        } catch (\Exception $e) {
+            return new PropertyDocBlockTypeExtractor();
         }
-
-        $typeExtractors[] = new ReflectionExtractor();
-
-        return new PropertyInfoExtractor([], $typeExtractors);
     }
 }

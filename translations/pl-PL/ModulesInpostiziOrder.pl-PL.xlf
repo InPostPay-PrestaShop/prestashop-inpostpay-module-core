@@ -18,14 +18,6 @@
         <source>Delivery method</source>
         <target>Wysyłka</target>
       </trans-unit>
-      <trans-unit id="8cd8b0f7c9d02973566d70ae96bcf976">
-        <source>Enable all available payment options</source>
-        <target>Włącz wszystkie dostępne metody płatności</target>
-      </trans-unit>
-      <trans-unit id="e8051555e4af6e673fbe93a79a86671f">
-        <source>Enabled payment options</source>
-        <target>Włączone metody płatności</target>
-      </trans-unit>
       <trans-unit id="e9bcf55beed989e815dcf421b29e29a1">
         <source>Expressions enclosed in double curly braces are evaluated (e.g. `{conditional}` will result in "{if_true}" if {service} option was selected or "{if_false}" otherwise).</source>
         <target>Wartość wyrażeń zawartych w podwójnych nawiasach klamrowych jest obliczana (np. `{conditional}` wypisze "{if_true}" jeżeli klient wybrał usługę {service} lub "{if_false}" w przeciwnym wypadku).</target>
@@ -58,10 +50,6 @@
         <source>Paid order status</source>
         <target>Status dla zamówienia opłaconego przez InPost Pay</target>
       </trans-unit>
-      <trans-unit id="50b5c5b98ff1773e551421f082fed261">
-        <source>Payment methods are specified on the payment gateway contract</source>
-        <target>Metody płatności zostały określone na umowie o obsługę bramki płatniczej.</target>
-      </trans-unit>
       <trans-unit id="bfa7e2e76dfa5492ab926b3c8d5d5e65">
         <source>The customer requested a VAT invoice</source>
         <target>Klient prosi o wystawienie faktury VAT</target>
@@ -85,10 +73,6 @@
       <trans-unit id="ab5b820752e33d7ac7b511e3cad051cb">
         <source>used payment method code</source>
         <target>kod użytej metody płatności</target>
-      </trans-unit>
-      <trans-unit id="b9289e792ff410cc65d7dfe14e577b7c">
-        <source>{cash_on_delivery} will be available only if you have an agreement with InPost to provide this service in your store.</source>
-        <target>{cash_on_delivery} będzie dostępna tylko wtedy, kiedy posiadasz podpisaną umowę z InPost na świadczenie tej usługi w Twoim sklepie.</target>
       </trans-unit>
     </body>
   </file>

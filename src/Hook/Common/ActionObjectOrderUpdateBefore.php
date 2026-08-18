@@ -42,6 +42,10 @@ final class ActionObjectOrderUpdateBefore implements HookInterface
             throw InvalidHookParamException::unexpectedType('object', $order, \Order::class);
         }
 
+        if ('inpostizi' !== $order->module) {
+            return;
+        }
+
         $controller = $this->context->controller;
         if ($controller instanceof \ModuleFrontControllerCore && 'inpostizi' === $controller->module->name) {
             return;

@@ -64,6 +64,7 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
         return [
             Admin\ActionAdminControllerSetMedia::HOOK_NAME => '?' . Admin\ActionAdminControllerSetMedia::class,
             Admin\ActionAdminCartRuleSaveAfter::HOOK_NAME => '?' . Admin\ActionAdminCartRuleSaveAfter::class,
+            Admin\ActionAdminCartRulesListingFieldsModifier::HOOK_NAME => '?' . Admin\ActionAdminCartRulesListingFieldsModifier::class,
             Admin\DisplayBackOfficeHeader::HOOK_NAME => '?' . Admin\DisplayBackOfficeHeader::class,
             Admin\DisplayAdminOrderLeft::HOOK_NAME => '?' . Admin\DisplayAdminOrderLeft::class,
             Admin\DisplayAdminOrderSide::HOOK_NAME => '?' . Admin\DisplayAdminOrderSide::class,
@@ -83,9 +84,12 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\ActionShipmentAddAfter::HOOK_NAME => Common\ActionShipmentAddAfter::class,
             Common\ActionShipmentUpdateBefore::HOOK_NAME => Common\ActionShipmentUpdateBefore::class,
             Common\ActionShipmentUpdateAfter::HOOK_NAME => Common\ActionShipmentUpdateAfter::class,
+            Common\ActionObjectOrderAddAfter::HOOK_NAME => Common\ActionObjectOrderAddAfter::class,
             Common\ActionObjectOrderUpdateBefore::HOOK_NAME => Common\ActionObjectOrderUpdateBefore::class,
             Common\ActionObjectOrderUpdateAfter::HOOK_NAME => Common\ActionObjectOrderUpdateAfter::class,
+            Common\ActionObjectOrderCartRuleAddBefore::HOOK_NAME => Common\ActionObjectOrderCartRuleAddBefore::class,
             Common\ActionEmailSendBefore::HOOK_NAME => Common\ActionEmailSendBefore::class,
+            Common\DisplayPDFInvoice::HOOK_NAME => Common\DisplayPDFInvoice::class,
 
             // products
             Common\Product\ActionProductDeleteBefore::HOOK_NAME => Common\Product\ActionProductDeleteBefore::class,
@@ -100,6 +104,11 @@ final class HookExecutor implements HookExecutorInterface, ServiceSubscriberInte
             Common\Product\ActionSpecificPriceUpdateAfter::HOOK_NAME => Common\Product\ActionSpecificPriceUpdateAfter::class,
             Common\Product\ActionSpecificPriceDeleteAfter::HOOK_NAME => Common\Product\ActionSpecificPriceDeleteAfter::class,
             Common\Product\ActionUpdateQuantity::HOOK_NAME => Common\Product\ActionUpdateQuantity::class,
+
+            // InPost discounts
+            Common\CartRule\ActionApplyCartRule::HOOK_NAME => Common\CartRule\ActionApplyCartRule::class,
+            Common\CartRule\ActionGetCartRuleContextualValue::HOOK_NAME => Common\CartRule\ActionGetCartRuleContextualValue::class,
+            Common\CartRule\ActionValidateCartRule::HOOK_NAME => Common\CartRule\ActionValidateCartRule::class,
 
             Front\ActionCartControllerAjaxUpdateResponse::HOOK_NAME => '?' . Front\ActionCartControllerAjaxUpdateResponse::class,
             Front\ActionFrontControllerSetMedia::HOOK_NAME => '?' . Front\ActionFrontControllerSetMedia::class,

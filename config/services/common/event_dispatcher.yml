@@ -41,3 +41,6 @@ services:
         izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener: '@izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener'
         izi\prestashop\Analytics\EventListener\PersistCookiesListener: '@?izi\prestashop\Analytics\EventListener\PersistCookiesListener'
         izi\prestashop\Extension\EventListener\ClearCacheListener: '@izi\prestashop\Extension\EventListener\ClearCacheListener'
+        izi\prestashop\InPostDiscount\EventListener\ApplyDiscountsListener: '@izi\prestashop\InPostDiscount\EventListener\ApplyDiscountsListener'
+        izi\prestashop\InPostDiscount\EventListener\ClearDiscountsListener: '@izi\prestashop\InPostDiscount\EventListener\ClearDiscountsListener'
+        izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener: '@izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener'
