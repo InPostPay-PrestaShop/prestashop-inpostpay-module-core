@@ -6,6 +6,7 @@ namespace izi\prestashop\Configuration\DTO\Shipping;
 
 use izi\prestashop\Common\Delivery\ServiceCode;
 use izi\prestashop\Enum\Enum;
+use izi\prestashop\Shipping\DeliveryDateCalculator;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class ShippingOptions implements \JsonSerializable
@@ -29,6 +30,14 @@ final class ShippingOptions implements \JsonSerializable
      * )
      */
     private $optionalServices;
+
+    /**
+     * @var int|null
+     *
+     * @Assert\GreaterThan(0)
+     * @Assert\LessThanOrEqual(1440)
+     */
+    private $estimatedDeliveryTime = DeliveryDateCalculator::DEFAULT_DELIVERY_TIME_HOURS;
 
     /**
      * @param CarrierMapping[] $carrierMappings
@@ -102,6 +111,21 @@ final class ShippingOptions implements \JsonSerializable
     public function setOptionalServices(array $optionalServices): self
     {
         $this->optionalServices = $optionalServices;
+
+        return $this;
+    }
+
+    /**
+     * @return int|null time in hours
+     */
+    public function getEstimatedDeliveryTime(): ?int
+    {
+        return $this->estimatedDeliveryTime;
+    }
+
+    public function setEstimatedDeliveryTime(?int $hours): self
+    {
+        $this->estimatedDeliveryTime = $hours;
 
         return $this;
     }

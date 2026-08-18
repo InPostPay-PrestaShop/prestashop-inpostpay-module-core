@@ -63,6 +63,7 @@ services:
       - '@inpost.izi.translator'
       - '@izi\prestashop\Shipping\DeliveryPriceCalculator'
       - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\Shipping\DeliveryDateCalculatorInterface'
 
   izi\prestashop\Builder\Basket\ProductDeliveryFactory:
     class: izi\prestashop\Builder\Basket\ProductDeliveryFactory

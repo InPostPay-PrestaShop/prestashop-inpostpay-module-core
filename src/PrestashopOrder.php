@@ -5,6 +5,7 @@ namespace izi\prestashop;
 use izi\prestashop\Analytics\BasketAnalytics;
 use izi\prestashop\Analytics\BasketAnalyticsInterface;
 use izi\prestashop\Builder\PriceFactory;
+use izi\prestashop\Clock\SystemClock;
 use izi\prestashop\Common\Basket\ConsentRequirementType;
 use izi\prestashop\Common\Currency;
 use izi\prestashop\Common\Customer\AccountInfo;
@@ -25,6 +26,7 @@ use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductType;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
+use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\MerchantApi\Model\Order\Response\Delivery;
 use izi\prestashop\MerchantApi\Model\Order\Response\Order;
@@ -37,6 +39,9 @@ use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Product\Util\AttributeListParser;
 use izi\prestashop\Product\Util\DescriptionFormatter;
 use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
+use izi\prestashop\Shipping\DeliveryDateCalculator;
+use izi\prestashop\Shipping\DeliveryDateCalculatorInterface;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 
 /**
  * @internal
@@ -218,9 +223,11 @@ class PrestashopOrder
             $deliveryType = DeliveryType::Digital();
         }
 
-        $deliveryDate = \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
-            ->modify('+2 days')
-            ->setTime(12, 0);
+        $deliveryDate = $this->getDeliveryDateCalculator()->calculate(
+            new \Cart($this->order->id_cart),
+            $deliveryType,
+            \DateTimeImmutable::createFromFormat('Y-m-d H:i:s', $this->order->date_add)
+        );
 
         $deliveryOptions = array_map(function (ServiceCode $code): OptionalService {
             // TODO: translate
@@ -461,5 +468,14 @@ class PrestashopOrder
     private function getImageProvider(): ImageUrlsProviderInterface
     {
         return $this->imageProvider ?? $this->imageProvider = $this->module->get(ImageUrlsProviderInterface::class);
+    }
+
+    private function getDeliveryDateCalculator(): DeliveryDateCalculatorInterface
+    {
+        try {
+            return $this->module->get(DeliveryDateCalculatorInterface::class);
+        } catch (ServiceNotFoundException $e) {
+            return new DeliveryDateCalculator($this->module->get(ShippingConfigurationInterface::class), SystemClock::fromSystemTimezone());
+        }
     }
 }

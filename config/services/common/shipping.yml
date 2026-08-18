@@ -1,3 +1,6 @@
+parameters:
+  inpost.izi.date_calcultor_options: [] # use defaults
+
 services:
   _defaults:
     public: false
@@ -57,3 +60,15 @@ services:
   izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDeliveryInterface: '@izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery'
   izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery:
     class: izi\prestashop\Shipping\ProductRestriction\ProductRestrictionDelivery
+
+  # todo: make private after refactoring order data mapper
+  izi\prestashop\Shipping\DeliveryDateCalculatorInterface:
+    alias: izi\prestashop\Shipping\DeliveryDateCalculator
+    public: true
+
+  izi\prestashop\Shipping\DeliveryDateCalculator:
+    class: izi\prestashop\Shipping\DeliveryDateCalculator
+    arguments:
+      - '@izi\prestashop\Configuration\ShippingConfigurationInterface'
+      - '@inpost.izi.clock'
+      - '%inpost.izi.date_calcultor_options%'

@@ -45,7 +45,7 @@ final class ShippingConfiguration implements ShippingConfigurationInterface, Opt
             case DeliveryType::Apm():
                 return $this->getApmShippingOptions($shopId);
             case DeliveryType::Digital():
-                return new ShippingOptions();
+                return (new ShippingOptions())->setEstimatedDeliveryTime(null);
             default:
                 throw new \LogicException('Not implemented.');
         }
