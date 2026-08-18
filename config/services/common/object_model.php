@@ -21,5 +21,3 @@ $container->getDefinition(ObjectRepositoryFactory::class)
         null,
         true
     )));
-
-// TODO: autoconfigure tags on PS 8.1 or later

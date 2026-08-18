@@ -53,6 +53,7 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
             'controller' => [ProductController::class, 'getProducts'],
         ],
         [
+            'name' => 'inpost_izi_merchant_api_order_create',
             'path' => '/inpost/v1/izi/order',
             'methods' => ['POST'],
             'controller' => [OrderController::class, 'create'],
@@ -202,7 +203,10 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
 
         try {
             $this->module->get(MerchantApiAuthenticator::class)->authenticate($request);
-            [$controller, $params] = $this->resolveController($request, $path, self::API_ROUTES);
+            [$controller, $params, $route] = $this->resolveController($request, $path, self::API_ROUTES);
+            if (null !== $route) {
+                $request->attributes->set('_inpost_izi_route', $route);
+            }
 
             /** @var JsonResponse $response */
             $response = null === $controller
@@ -319,10 +323,10 @@ class InpostIziBackendModuleFrontController extends ModuleFrontController
                 continue;
             }
 
-            return [$route['controller'], $params ?? []];
+            return [$route['controller'], $params ?? [], $route['name'] ?? null];
         }
 
-        return [null, []];
+        return [null, [], null];
     }
 
     private function callController(array $controller, Request $request, array $pathParams): Response

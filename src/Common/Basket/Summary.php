@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Common\Basket;
 
 use izi\prestashop\Common\Currency;
+use izi\prestashop\Common\Order\BasketAdditionalParameter;
 use izi\prestashop\Common\PaymentType;
 use izi\prestashop\Common\Price;
 
@@ -51,9 +52,15 @@ final class Summary implements \JsonSerializable
     private $basket_notice;
 
     /**
-     * @param PaymentType[] $payment_type deprecated since 3.4.0 - to be removed in a future version of the BasketApp API
+     * @var BasketAdditionalParameter[]
      */
-    public function __construct(Price $basket_base_price, Currency $currency, array $payment_type = [], ?Price $basket_final_price = null, ?Price $basket_promo_price = null, ?\DateTimeImmutable $basket_expiration_date = null, ?string $basket_additional_information = null, ?Notice $basket_notice = null)
+    private $basket_additional_parameters;
+
+    /**
+     * @param PaymentType[] $payment_type deprecated since 3.4.0 - to be removed in a future version of the BasketApp API
+     * @param BasketAdditionalParameter[] $basket_additional_parameters
+     */
+    public function __construct(Price $basket_base_price, Currency $currency, array $payment_type = [], ?Price $basket_final_price = null, ?Price $basket_promo_price = null, ?\DateTimeImmutable $basket_expiration_date = null, ?string $basket_additional_information = null, ?Notice $basket_notice = null, array $basket_additional_parameters = [])
     {
         if ([] !== $payment_type) {
             @trigger_error(\sprintf('Passing a non-empty array as $payment_type to "%s()" is deprecated since version 3.4.0.', __METHOD__), \E_USER_DEPRECATED);
@@ -67,6 +74,7 @@ final class Summary implements \JsonSerializable
         $this->basket_additional_information = $basket_additional_information;
         $this->payment_type = $payment_type;
         $this->basket_notice = $basket_notice;
+        $this->basket_additional_parameters = $basket_additional_parameters;
     }
 
     public function getBasePrice(): Price
@@ -178,6 +186,25 @@ final class Summary implements \JsonSerializable
     {
         $summary = clone $this;
         $summary->basket_notice = $notice;
+
+        return $summary;
+    }
+
+    /**
+     * @return BasketAdditionalParameter[]
+     */
+    public function getAdditionalParameters(): array
+    {
+        return $this->basket_additional_parameters;
+    }
+
+    /**
+     * @param BasketAdditionalParameter[] $parameters
+     */
+    public function withAdditionalParameters(array $parameters): self
+    {
+        $summary = clone $this;
+        $summary->basket_additional_parameters = $parameters;
 
         return $summary;
     }

@@ -7,26 +7,21 @@ namespace izi\prestashop\Hook\Common;
 use izi\prestashop\Event\EventDispatcherInterface;
 use izi\prestashop\Event\OrderEvent;
 use izi\prestashop\Hook\Exception\InvalidHookParamException;
-use izi\prestashop\Hook\HookInterface;
+use izi\prestashop\Hook\PrestaShopVersionAwareHookInterface;
+use izi\prestashop\Hook\VersionRange;
 
-final class ActionObjectOrderUpdateBefore implements HookInterface
+final class ActionObjectOrderAddAfter implements PrestaShopVersionAwareHookInterface
 {
-    public const HOOK_NAME = 'actionObjectOrderUpdateBefore';
+    public const HOOK_NAME = 'actionObjectOrderAddAfter';
 
     /**
      * @var EventDispatcherInterface
      */
     private $dispatcher;
 
-    /**
-     * @var \Context
-     */
-    private $context;
-
-    public function __construct(EventDispatcherInterface $dispatcher, ?\Context $context = null)
+    public function __construct(EventDispatcherInterface $dispatcher)
     {
         $this->dispatcher = $dispatcher;
-        $this->context = $context ?? \Context::getContext();
     }
 
     public static function getHookName(): string
@@ -34,6 +29,14 @@ final class ActionObjectOrderUpdateBefore implements HookInterface
         return self::HOOK_NAME;
     }
 
+    public static function getVersionRange(): VersionRange
+    {
+        return new VersionRange(null, '9.0.1');
+    }
+
+    /**
+     * @param array{order: \Order} $parameters
+     */
     public function execute(array $parameters): void
     {
         $order = $parameters['object'] ?? null;
@@ -46,11 +49,6 @@ final class ActionObjectOrderUpdateBefore implements HookInterface
             return;
         }
 
-        $controller = $this->context->controller;
-        if ($controller instanceof \ModuleFrontControllerCore && 'inpostizi' === $controller->module->name) {
-            return;
-        }
-
-        $this->dispatcher->dispatch(new OrderEvent($order), OrderEvent::BEFORE_UPDATE);
+        $this->dispatcher->dispatch(new OrderEvent($order), OrderEvent::PERSISTED);
     }
 }

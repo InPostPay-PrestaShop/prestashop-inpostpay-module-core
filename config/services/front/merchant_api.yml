@@ -48,6 +48,7 @@ services:
     arguments:
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@izi\prestashop\Builder\Basket\BasketBuilderFactory'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
 
   izi\prestashop\MerchantApi\Handler\UpdateBasketHandlerInterface: '@izi\prestashop\MerchantApi\Handler\UpdateBasketHandler'
   izi\prestashop\MerchantApi\Handler\UpdateBasketHandler:

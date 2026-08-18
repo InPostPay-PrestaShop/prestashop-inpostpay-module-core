@@ -1,0 +1,94 @@
+services:
+  _defaults:
+    public: false
+
+  izi\prestashop\InPostDiscount\DiscountRepositoryInterface: '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+  izi\prestashop\InPostDiscount\CartRuleDiscountRepository:
+    class: izi\prestashop\InPostDiscount\CartRuleDiscountRepository
+    arguments:
+      - '@izi\prestashop\Database\Connection'
+
+  izi\prestashop\InPostDiscount\CartRule\CustomRuleRepositoryInterface: '@izi\prestashop\InPostDiscount\CartRule\ConfigurationCustomRuleRepository'
+  izi\prestashop\InPostDiscount\CartRule\ConfigurationCustomRuleRepository:
+    class: izi\prestashop\InPostDiscount\CartRule\ConfigurationCustomRuleRepository
+    arguments:
+      - '@izi\prestashop\Configuration\ShopAwareConfigurationInterface'
+      - '@database_connection'
+
+  izi\prestashop\InPostDiscount\EventListener\ApplyDiscountsListener:
+    class: izi\prestashop\InPostDiscount\EventListener\ApplyDiscountsListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@izi\prestashop\InPostDiscount\DiscountHandlerInterface'
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+      - '@inpost.izi.logger'
+
+  izi\prestashop\InPostDiscount\EventListener\ClearDiscountsListener:
+    class: izi\prestashop\InPostDiscount\EventListener\ClearDiscountsListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\InPostDiscount\DiscountRepositoryInterface'
+      - '@izi\prestashop\InPostDiscount\DiscountHandlerInterface'
+      - '@inpost.izi.logger'
+
+  izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener:
+    class: izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener
+    tags:
+      - kernel.event_subscriber
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper'
+
+  izi\prestashop\InPostDiscount\DiscountHandlerInterface: '@izi\prestashop\InPostDiscount\CartRuleDiscountHandler'
+  izi\prestashop\InPostDiscount\CartRuleDiscountHandler:
+    class: izi\prestashop\InPostDiscount\CartRuleDiscountHandler
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\InPostDiscount\CartRule\Factory\CartRuleFactoryInterface'
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+
+  izi\prestashop\InPostDiscount\CartRule\Factory\CartRuleFactoryInterface: '@izi\prestashop\InPostDiscount\CartRule\Factory\CartRuleFactory'
+  izi\prestashop\InPostDiscount\CartRule\Factory\CartRuleFactory:
+    class: izi\prestashop\InPostDiscount\CartRule\Factory\CartRuleFactory
+    arguments:
+      - '@inpost.izi.inpost_discount.cart_rule_factory_locator'
+
+  inpost.izi.inpost_discount.cart_rule_factory_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+      - INPOST_SUBSCRIPTION: '@izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler'
+
+  izi\prestashop\InPostDiscount\CartRule\DiscountApplierInterface: '@izi\prestashop\InPostDiscount\CartRule\DiscountApplier'
+  izi\prestashop\InPostDiscount\CartRule\DiscountApplier:
+    class: izi\prestashop\InPostDiscount\CartRule\DiscountApplier
+    arguments:
+      - '@inpost.izi.inpost_discount.applier_locator'
+
+  inpost.izi.inpost_discount.applier_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+      - INPOST_SUBSCRIPTION: '@izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler'
+
+  izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper:
+    class: izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper
+    arguments:
+      - '@inpost.izi.module'
+
+  izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler:
+    class: izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler
+    arguments:
+      - '@izi\prestashop\ObjectModel\ObjectManagerInterface'
+      - '@izi\prestashop\Configuration\PrestaShopConfiguration'
+      - '@izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper'
+      - '@izi\prestashop\InPostDiscount\CartRule\CustomRuleRepositoryInterface'
+    tags:
+      - inpost.izi.inpost_discount.cart_rule_factory
+      - inpost.izi.inpost_discount.applier
