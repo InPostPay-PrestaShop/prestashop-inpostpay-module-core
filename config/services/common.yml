@@ -12,7 +12,7 @@ imports:
   - { resource: common/event_dispatcher.yml }
   - { resource: common/hook.yml }
   - { resource: common/inpost_discount.yml }
-  - { resource: common/inpost_discount.php }
+  - { resource: common/inpost_discount.php, ignore_errors: true }
   - { resource: common/hot_product.yml }
   - { resource: common/http.yml }
   - { resource: common/logger.yml }
@@ -34,7 +34,7 @@ imports:
   - { resource: custom/common.yml, ignore_errors: true }
 
 parameters:
-  inpost.izi.container_version: '3.4.0'
+  inpost.izi.container_version: '3.4.1'
 
 services:
   _defaults:
