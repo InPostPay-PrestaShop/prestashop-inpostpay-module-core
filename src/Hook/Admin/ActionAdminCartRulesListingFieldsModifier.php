@@ -37,6 +37,6 @@ final class ActionAdminCartRulesListingFieldsModifier implements HookInterface
             ->from(CartRuleDiscountRepository::TABLE_NAME);
 
         $whereConditions[] = 'a.id_cart_rule NOT IN (' . $qb . ')';
-        $parameters['where'] = implode(' AND ', $whereConditions);
+        $parameters['where'] = ' AND ' . implode(' AND ', $whereConditions);
     }
 }

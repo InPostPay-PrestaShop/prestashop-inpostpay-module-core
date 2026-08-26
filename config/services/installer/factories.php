@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use PrestaShop\PrestaShop\Core\Localization\Locale\RepositoryInterface;
 use PrestaShopBundle\Translation\Loader\DatabaseTranslationLoader;
@@ -18,6 +19,7 @@ assert(isset($container) && $container instanceof ContainerBuilder);
 
 $services = [
     'doctrine.orm.entity_manager' => EntityManagerInterface::class,
+    'database_connection' => Connection::class,
     'prestashop.translation.database_loader' => DatabaseTranslationLoader::class,
     'prestashop.core.localization.locale.repository' => RepositoryInterface::class,
 ];
