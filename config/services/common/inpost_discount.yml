@@ -90,5 +90,5 @@ services:
       - '@izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper'
       - '@izi\prestashop\InPostDiscount\CartRule\CustomRuleRepositoryInterface'
     tags:
-      - inpost.izi.inpost_discount.cart_rule_factory
-      - inpost.izi.inpost_discount.applier
+      - { name: inpost.izi.inpost_discount.cart_rule_factory, discount_type: INPOST_SUBSCRIPTION }
+      - { name: inpost.izi.inpost_discount.applier, discount_type: INPOST_SUBSCRIPTION }
