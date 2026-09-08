@@ -121,7 +121,7 @@ abstract class AbstractCartRuleFactory implements CartRuleFactoryInterface
         if (!empty($metadata['fields']['quantity']['allow_null'])) {
             $cartRule->quantity = $cartRule->quantity_per_user = null; // unlimited quantity
         } else {
-            $cartRule->quantity = $cartRule->quantity_per_user = (int) 2e32 - 1; // max unsigned 32-bit int
+            $cartRule->quantity = $cartRule->quantity_per_user = 2 ** 32 - 1; // max unsigned 32-bit int
         }
 
         try {
