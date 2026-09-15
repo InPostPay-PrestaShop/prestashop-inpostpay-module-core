@@ -102,6 +102,7 @@ services:
       - '@inpost.izi.object_model.order_repository'
       - '@izi\prestashop\Repository\BasketSessionRepository'
       - '@izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface'
+      - '@izi\prestashop\InPostDiscount\DiscountRepositoryInterface'
 
   izi\prestashop\MerchantApi\Handler\UpdateOrderHandlerInterface: '@izi\prestashop\MerchantApi\Handler\UpdateOrderHandler'
   izi\prestashop\MerchantApi\Handler\UpdateOrderHandler:

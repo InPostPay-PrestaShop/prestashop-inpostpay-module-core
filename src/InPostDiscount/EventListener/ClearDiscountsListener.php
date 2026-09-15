@@ -12,6 +12,7 @@ use izi\prestashop\InPostDiscount\Event\DiscountAppliedEvent;
 use izi\prestashop\MerchantApi\Event\CreateOrderExceptionEvent;
 use izi\prestashop\MerchantApi\Event\GetBasketRequestEvent;
 use izi\prestashop\MerchantApi\Event\OrderCreatedEvent;
+use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -36,6 +37,11 @@ final class ClearDiscountsListener implements EventSubscriberInterface
     private $handler;
 
     /**
+     * @var ObjectRepositoryInterface<\Order>
+     */
+    private $orderRepository;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -45,11 +51,15 @@ final class ClearDiscountsListener implements EventSubscriberInterface
      */
     private $discounts = [];
 
-    public function __construct(\Context $context, DiscountRepositoryInterface $repository, DiscountHandlerInterface $handler, LoggerInterface $logger)
+    /**
+     * @param ObjectRepositoryInterface<\Order> $orderRepository
+     */
+    public function __construct(\Context $context, DiscountRepositoryInterface $repository, DiscountHandlerInterface $handler, ObjectRepositoryInterface $orderRepository, LoggerInterface $logger)
     {
         $this->context = $context;
         $this->repository = $repository;
         $this->handler = $handler;
+        $this->orderRepository = $orderRepository;
         $this->logger = $logger;
     }
 
@@ -82,7 +92,11 @@ final class ClearDiscountsListener implements EventSubscriberInterface
 
         /** @var \Cart $cart */
         $cart = $event->getSession()->getBasket()->getEntity();
-        $this->removeDiscounts($cart, $this->discounts);
+
+        if (!$this->hasOrder((int) $cart->id)) {
+            $this->removeDiscounts($cart, $this->discounts);
+        }
+
         $this->discounts = [];
     }
 
@@ -91,6 +105,10 @@ final class ClearDiscountsListener implements EventSubscriberInterface
         $cartId = (int) $event->getSession()->getBasket()->getId();
 
         if ([] === $discounts = $this->repository->findByCartId($cartId)) {
+            return;
+        }
+
+        if ($this->hasOrder($cartId)) {
             return;
         }
 
@@ -107,7 +125,16 @@ final class ClearDiscountsListener implements EventSubscriberInterface
             return;
         }
 
+        if ($this->hasOrder($cartId)) {
+            return;
+        }
+
         $this->removeDiscounts($this->context->cart, $discounts);
+    }
+
+    private function hasOrder(int $cartId): bool
+    {
+        return 0 < $cartId && null !== $this->orderRepository->findOneBy(['id_cart' => $cartId]);
     }
 
     /**

@@ -32,6 +32,7 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\InPostDiscount\DiscountRepositoryInterface'
       - '@izi\prestashop\InPostDiscount\DiscountHandlerInterface'
+      - '@inpost.izi.object_model.order_repository'
       - '@inpost.izi.logger'
 
   izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener:
