@@ -7,6 +7,9 @@ namespace izi\prestashop\MerchantApi\Handler;
 use izi\prestashop\Analytics\BasketAnalyticsRepositoryInterface;
 use izi\prestashop\Entities\BasketSession;
 use izi\prestashop\Handler\CommandHandlerTrait;
+use izi\prestashop\InPostDiscount\CartRuleDiscount;
+use izi\prestashop\InPostDiscount\CartRuleDiscountRepository;
+use izi\prestashop\InPostDiscount\DiscountRepositoryInterface;
 use izi\prestashop\MerchantApi\Command\GetOrderCommand;
 use izi\prestashop\MerchantApi\Exception\OrderNotFoundException;
 use izi\prestashop\MerchantApi\Model\Order\Response\Order;
@@ -37,18 +40,26 @@ final class GetOrderHandler implements GetOrderHandlerInterface
     private $analyticsRepository;
 
     /**
+     * @var DiscountRepositoryInterface<CartRuleDiscount>
+     */
+    private $discountRepository;
+
+    /**
      * @param ObjectRepositoryInterface<\Order> $orderRepository
      * @param BasketSessionRepositoryInterface<BasketSession> $repository
      * @param BasketAnalyticsRepositoryInterface|null $analyticsRepository
+     * @param DiscountRepositoryInterface<CartRuleDiscount>|null $discountRepository
      */
     public function __construct(
         ObjectRepositoryInterface $orderRepository,
         BasketSessionRepositoryInterface $repository,
-        ?BasketAnalyticsRepositoryInterface $analyticsRepository = null
+        ?BasketAnalyticsRepositoryInterface $analyticsRepository = null,
+        ?DiscountRepositoryInterface $discountRepository = null
     ) {
         $this->orderRepository = $orderRepository;
         $this->sessionRepository = $repository;
         $this->analyticsRepository = $analyticsRepository ?? new \izi\prestashop\Analytics\BasketAnalyticsRepository(new \izi\prestashop\Database\Connection());
+        $this->discountRepository = $discountRepository ?? new CartRuleDiscountRepository(new \izi\prestashop\Database\Connection());
     }
 
     public function __invoke(GetOrderCommand $command): Order
@@ -65,6 +76,6 @@ final class GetOrderHandler implements GetOrderHandlerInterface
 
         \Shop::setContext(\Shop::CONTEXT_SHOP, (int) $order->id_shop);
 
-        return PrestashopOrder::getOrder($order, $session->getBasketId(), $session->getOrderRequest(), $this->analyticsRepository->find((int) $order->id_cart));
+        return PrestashopOrder::getOrder($order, $session->getBasketId(), $session->getOrderRequest(), $this->analyticsRepository->find((int) $order->id_cart), $this->discountRepository);
     }
 }
