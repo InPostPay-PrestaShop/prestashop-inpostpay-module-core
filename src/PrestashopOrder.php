@@ -25,6 +25,10 @@ use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductType;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
+use izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler;
+use izi\prestashop\InPostDiscount\CartRuleDiscount;
+use izi\prestashop\InPostDiscount\DiscountAmount;
+use izi\prestashop\InPostDiscount\DiscountRepositoryInterface;
 use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 use izi\prestashop\MerchantApi\Model\Order\Response\Delivery;
 use izi\prestashop\MerchantApi\Model\Order\Response\Order;
@@ -74,6 +78,21 @@ class PrestashopOrder
     private $freeShipping;
 
     /**
+     * @var DiscountRepositoryInterface<CartRuleDiscount>
+     */
+    private $discountRepository;
+
+    /**
+     * @var DiscountAmount|null
+     */
+    private $inPostPlusDiscount;
+
+    /**
+     * @var array<int, array<string, mixed>>|null rows of the "order_cart_rule" table
+     */
+    private $orderCartRules;
+
+    /**
      * @var AddressDataMapper
      */
     private $addressDataMapper;
@@ -88,12 +107,16 @@ class PrestashopOrder
      */
     private $basketAnalytics;
 
-    public function __construct(\Order $order, string $basketId, ?CreateOrderRequest $orderData = null, ?BasketAnalyticsInterface $basketAnalytics = null)
+    /**
+     * @param DiscountRepositoryInterface<CartRuleDiscount> $discountRepository
+     */
+    public function __construct(\Order $order, string $basketId, ?CreateOrderRequest $orderData, ?BasketAnalyticsInterface $basketAnalytics, DiscountRepositoryInterface $discountRepository)
     {
         $this->order = $order;
         $this->basketId = $basketId;
         $this->orderData = $orderData;
         $this->basketAnalytics = $basketAnalytics;
+        $this->discountRepository = $discountRepository;
 
         $this->module = \Module::getInstanceByName('inpostizi');
 
@@ -104,9 +127,12 @@ class PrestashopOrder
         $this->addressDataMapper = new AddressDataMapper();
     }
 
-    public static function getOrder(\Order $order, string $basketId, ?CreateOrderRequest $request = null, ?BasketAnalyticsInterface $basketAnalytics = null): Order
+    /**
+     * @param DiscountRepositoryInterface<CartRuleDiscount> $discountRepository
+     */
+    public static function getOrder(\Order $order, string $basketId, ?CreateOrderRequest $request, ?BasketAnalyticsInterface $basketAnalytics, DiscountRepositoryInterface $discountRepository): Order
     {
-        return (new self($order, $basketId, $request, $basketAnalytics))->mapOrder();
+        return (new self($order, $basketId, $request, $basketAnalytics, $discountRepository))->mapOrder();
     }
 
     public function mapOrder(): Order
@@ -322,15 +348,12 @@ class PrestashopOrder
 
     public function readSummaryOrderBasePrice(): Price
     {
-        $gross = (float) $this->order->total_paid_tax_incl;
-        $net = (float) $this->order->total_paid_tax_excl;
+        $delivery = $this->getDeliveryPrice();
 
-        if (!$this->hasFreeShippingCartRule()) {
-            $gross -= $this->order->total_shipping_tax_incl;
-            $net -= $this->order->total_shipping_tax_excl;
-        }
-
-        return PriceFactory::create($net, $gross);
+        return PriceFactory::create(
+            (float) $this->order->total_paid_tax_excl - $delivery->getNet(),
+            (float) $this->order->total_paid_tax_incl - $delivery->getGross()
+        );
     }
 
     public function readPaymentType(): PaymentType
@@ -370,7 +393,9 @@ class PrestashopOrder
 
     private function getDiscountsTotal(): float
     {
-        return (float) \Tools::math_round($this->order->total_discounts_tax_incl, 2);
+        $total = (float) $this->order->total_discounts_tax_incl - $this->getInPostPlusDiscount()->getGross();
+
+        return (float) \Tools::math_round(max(0., $total), 2);
     }
 
     private function createProduct(array $data): Product
@@ -428,7 +453,7 @@ class PrestashopOrder
             return $this->freeShipping;
         }
 
-        foreach ($this->order->getCartRules() as $cartRule) {
+        foreach ($this->getOrderCartRules() as $cartRule) {
             if ($cartRule['free_shipping']) {
                 return $this->freeShipping = true;
             }
@@ -437,16 +462,76 @@ class PrestashopOrder
         return $this->freeShipping = false;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function getOrderCartRules(): array
+    {
+        return $this->orderCartRules ?? $this->orderCartRules = $this->order->getCartRules() ?: [];
+    }
+
     private function getDeliveryPrice(): Price
     {
         if ($this->hasFreeShippingCartRule()) {
             return PriceFactory::create(0., 0.);
         }
 
+        $discount = $this->getInPostPlusDiscount();
+
         return PriceFactory::create(
-            (float) $this->order->total_shipping_tax_excl,
-            (float) $this->order->total_shipping_tax_incl
+            max(0., (float) $this->order->total_shipping_tax_excl - $discount->getNet()),
+            max(0., (float) $this->order->total_shipping_tax_incl - $discount->getGross())
         );
+    }
+
+    private function getInPostPlusDiscount(): DiscountAmount
+    {
+        if (isset($this->inPostPlusDiscount)) {
+            return $this->inPostPlusDiscount;
+        }
+
+        $total = new DiscountAmount(0., 0.);
+
+        if ([] === $orderCartRules = $this->getOrderCartRules()) {
+            return $this->inPostPlusDiscount = $total;
+        }
+
+        $inPostCartRuleIds = $this->getInPostPlusCartRuleIds();
+
+        foreach ($orderCartRules as $orderCartRule) {
+            $cartRuleId = (int) $orderCartRule['id_cart_rule'];
+
+            if ([] !== $inPostCartRuleIds ? !\in_array($cartRuleId, $inPostCartRuleIds, true) : !$this->isInPostPlusCartRule($cartRuleId)) {
+                continue;
+            }
+
+            $total = $total->add(new DiscountAmount((float) $orderCartRule['value_tax_excl'], (float) $orderCartRule['value']));
+        }
+
+        return $this->inPostPlusDiscount = $total;
+    }
+
+    private function isInPostPlusCartRule(int $cartRuleId): bool
+    {
+        $cartRule = $this->module->get(ObjectManagerInterface::class)->find(\CartRule::class, $cartRuleId);
+
+        return $cartRule instanceof \CartRule && InPostPlusCartRuleHandler::DISCOUNT_TYPE === $cartRule->description;
+    }
+
+    /**
+     * @return int[]
+     */
+    private function getInPostPlusCartRuleIds(): array
+    {
+        $ids = [];
+
+        foreach ($this->discountRepository->findByCartId((int) $this->order->id_cart) as $discount) {
+            if ($discount instanceof CartRuleDiscount && InPostPlusCartRuleHandler::DISCOUNT_TYPE === $discount->getType()) {
+                $ids[] = $discount->getCartRuleId();
+            }
+        }
+
+        return $ids;
     }
 
     private function getAttributeListParser(): AttributeListParser
