@@ -37,11 +37,6 @@ final class ClearDiscountsListener implements EventSubscriberInterface
     private $handler;
 
     /**
-     * @var ObjectRepositoryInterface<\Order>
-     */
-    private $orderRepository;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -51,15 +46,11 @@ final class ClearDiscountsListener implements EventSubscriberInterface
      */
     private $discounts = [];
 
-    /**
-     * @param ObjectRepositoryInterface<\Order> $orderRepository
-     */
-    public function __construct(\Context $context, DiscountRepositoryInterface $repository, DiscountHandlerInterface $handler, ObjectRepositoryInterface $orderRepository, LoggerInterface $logger)
+    public function __construct(\Context $context, DiscountRepositoryInterface $repository, DiscountHandlerInterface $handler, LoggerInterface $logger)
     {
         $this->context = $context;
         $this->repository = $repository;
         $this->handler = $handler;
-        $this->orderRepository = $orderRepository;
         $this->logger = $logger;
     }
 
@@ -93,7 +84,7 @@ final class ClearDiscountsListener implements EventSubscriberInterface
         /** @var \Cart $cart */
         $cart = $event->getSession()->getBasket()->getEntity();
 
-        if (!$this->hasOrder((int) $cart->id)) {
+        if (!$event->getSession()->getBasket()->isFinalized()) {
             $this->removeDiscounts($cart, $this->discounts);
         }
 
@@ -108,7 +99,7 @@ final class ClearDiscountsListener implements EventSubscriberInterface
             return;
         }
 
-        if ($this->hasOrder($cartId)) {
+        if ($event->getSession()->getBasket()->isFinalized()) {
             return;
         }
 
@@ -125,16 +116,11 @@ final class ClearDiscountsListener implements EventSubscriberInterface
             return;
         }
 
-        if ($this->hasOrder($cartId)) {
+        if ($this->context->cart->orderExists()) {
             return;
         }
 
         $this->removeDiscounts($this->context->cart, $discounts);
-    }
-
-    private function hasOrder(int $cartId): bool
-    {
-        return 0 < $cartId && null !== $this->orderRepository->findOneBy(['id_cart' => $cartId]);
     }
 
     /**
