@@ -25,6 +25,6 @@ class FeatureHelper
 
     public function isCustomCartRulesFeatureAvailable(): bool
     {
-        return $this->customCartRulesAvailable ?? $this->customCartRulesAvailable = $this->module->isRegisteredInHook(ActionApplyCartRule::HOOK_NAME);
+        return $this->customCartRulesAvailable ?? $this->customCartRulesAvailable = (bool) $this->module->isRegisteredInHook(ActionApplyCartRule::HOOK_NAME);
     }
 }
