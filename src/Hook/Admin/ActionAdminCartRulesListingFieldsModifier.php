@@ -18,25 +18,19 @@ final class ActionAdminCartRulesListingFieldsModifier implements HookInterface
     }
 
     /**
-     * @param array{where: string} $parameters
+     * @param array{where: string|null} $parameters
      */
     public function execute(array $parameters): void
     {
-        $where = $parameters['where'] ?? null;
-        if (null !== $where && !\is_string($where)) {
+        if (!\is_string($where = $parameters['where'] ?? '')) {
             throw InvalidHookParamException::unexpectedType('where', $where, 'string|null');
-        }
-
-        $whereConditions = [];
-        if (null !== $where) {
-            $whereConditions[] = $where;
         }
 
         $qb = (new \DbQuery())
             ->select('cart_rule_id')
             ->from(CartRuleDiscountRepository::TABLE_NAME);
 
-        $whereConditions[] = 'a.id_cart_rule NOT IN (' . $qb . ')';
-        $parameters['where'] = ' AND ' . implode(' AND ', $whereConditions);
+        $where .= ' AND a.id_cart_rule NOT IN (' . $qb . ')';
+        $parameters['where'] = $where;
     }
 }
