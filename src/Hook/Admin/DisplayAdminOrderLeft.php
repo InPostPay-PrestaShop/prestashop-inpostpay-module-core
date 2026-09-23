@@ -69,6 +69,7 @@ final class DisplayAdminOrderLeft implements PrestaShopVersionAwareHookInterface
             'delivery' => $deliveryType->trans($this->translator),
             'apm' => DeliveryType::Apm() === $deliveryType ? (string) $data->getDelivery()->getPoint() : '',
             'issue_invoice' => null !== $data->getInvoiceDetails(),
+            'delivery_email' => $data->getDelivery()->getEmail(),
         ]);
     }
 }

@@ -54,6 +54,10 @@
         <source>The customer requested a VAT invoice</source>
         <target>Klient prosi o wystawienie faktury VAT</target>
       </trans-unit>
+      <trans-unit id="ab538b40b3dad237acb5c9b73fc46f71">
+        <source>Unique masked email address</source>
+        <target>Unikalny maskowany adres e-mail</target>
+      </trans-unit>
       <trans-unit id="aa38035ab7c137762ca1191f50548cac">
         <source>codes of selected optional services</source>
         <target>kody wybranych usług dodatkowych</target>
