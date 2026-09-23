@@ -2,6 +2,7 @@
   <div class="panel-heading">InPost Pay</div>
 
   <dl class="well list-detail">
+    <dt>{{ 'Unique masked email address'|trans({},'Modules.Inpostizi.Order') }}:</dt><dd><a href="mailto:{{ delivery_email }}">{{ delivery_email }}</a></dd>
     <dt>{{ 'Delivery method'|trans({},'Modules.Inpostizi.Order') }}:</dt><dd>{{ delivery }}</dd>
 
     {% if apm is not same as('') %}
