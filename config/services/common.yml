@@ -34,7 +34,7 @@ imports:
   - { resource: custom/common.yml, ignore_errors: true }
 
 parameters:
-  inpost.izi.container_version: '3.4.5'
+  inpost.izi.container_version: '3.4.6'
 
 services:
   _defaults:

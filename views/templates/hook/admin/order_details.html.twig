@@ -7,6 +7,13 @@
     <div class="row mt-3">
       <div class="col">
         <p class="mb-1">
+          <strong>{{ 'Unique masked email address'|trans({},'Modules.Inpostizi.Order') }}:</strong>
+        </p>
+        <p>
+          <a href="mailto:{{ delivery_email }}">{{ delivery_email }}</a>
+        </p>
+
+        <p class="mb-1">
           <strong>{{ 'Delivery method'|trans({},'Modules.Inpostizi.Order') }}:</strong>
         </p>
         <p>{{ delivery }}</p>

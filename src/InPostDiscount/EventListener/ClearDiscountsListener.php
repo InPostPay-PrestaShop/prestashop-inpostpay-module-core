@@ -12,7 +12,6 @@ use izi\prestashop\InPostDiscount\Event\DiscountAppliedEvent;
 use izi\prestashop\MerchantApi\Event\CreateOrderExceptionEvent;
 use izi\prestashop\MerchantApi\Event\GetBasketRequestEvent;
 use izi\prestashop\MerchantApi\Event\OrderCreatedEvent;
-use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -93,17 +92,17 @@ final class ClearDiscountsListener implements EventSubscriberInterface
 
     public function onBasketRequest(GetBasketRequestEvent $event): void
     {
-        $cartId = (int) $event->getSession()->getBasket()->getId();
-
-        if ([] === $discounts = $this->repository->findByCartId($cartId)) {
-            return;
-        }
-
         if ($event->getSession()->getBasket()->isFinalized()) {
             return;
         }
 
-        $this->removeDiscounts($this->context->cart, $discounts);
+        /** @var \Cart $cart */
+        $cart = $event->getSession()->getBasket()->getEntity();
+        if ([] === $discounts = $this->repository->findByCartId((int) $cart->id)) {
+            return;
+        }
+
+        $this->removeDiscounts($cart, $discounts);
     }
 
     public function onFrontOfficeRequest(): void
