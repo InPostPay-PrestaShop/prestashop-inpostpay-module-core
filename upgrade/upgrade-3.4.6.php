@@ -8,7 +8,7 @@ if (!defined('_PS_VERSION_')) {
 
 require_once __DIR__ . '/TranslationImporterTrait.php';
 
-class InPostIziUpdater_3_5_0
+class InPostIziUpdater_3_4_6
 {
     use TranslationImporterTrait;
 
@@ -32,7 +32,7 @@ class InPostIziUpdater_3_5_0
 /**
  * @param InPostIzi $module
  */
-function upgrade_module_3_5_0(Module $module): bool
+function upgrade_module_3_4_6(Module $module): bool
 {
-    return InPostIziUpdater_3_5_0::create($module)->upgrade();
+    return InPostIziUpdater_3_4_6::create($module)->upgrade();
 }
