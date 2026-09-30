@@ -26,6 +26,8 @@ interface OrdersConfigurationInterface
 
     /**
      * @return PaymentType[] if all payment options are enabled, an empty array should be returned
+     *
+     * @deprecated since 2.8.0 / 3.4.0
      */
     public function getAvailablePaymentOptions(?int $shopId = null): array;
 

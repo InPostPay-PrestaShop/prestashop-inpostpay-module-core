@@ -18,8 +18,10 @@ services:
         actionObjectInPostShipmentModelUpdateAfter: '@izi\prestashop\Hook\Common\ActionShipmentUpdateAfter'
         actionValidateOrder: '@izi\prestashop\Hook\Common\ActionValidateOrder'
         actionOrderStatusPostUpdate: '@izi\prestashop\Hook\Common\ActionOrderStatusPostUpdate'
+        actionObjectOrderAddAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderAddAfter'
         actionObjectOrderUpdateBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore'
         actionObjectOrderUpdateAfter: '@izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter'
+        actionObjectOrderCartRuleAddBefore: '@izi\prestashop\Hook\Common\ActionObjectOrderCartRuleAddBefore'
         actionAjaxDieCartControllerdisplayAjaxUpdateBefore: '@izi\prestashop\Hook\Front\ActionCartControllerAjaxUpdateResponse'
         actionFrontControllerSetMedia: '@izi\prestashop\Hook\Front\ActionFrontControllerSetMedia'
         actionEmailSendBefore: '@izi\prestashop\Hook\Common\ActionEmailSendBefore'
@@ -39,6 +41,11 @@ services:
         displayCustomerLoginFormAfter: '@izi\prestashop\Hook\Front\DisplayCustomerLoginFormAfter'
         displayIziCartPreviewButton: '@izi\prestashop\Hook\Front\DisplayIziCartPreviewButton'
         displayIziCheckoutButton: '@izi\prestashop\Hook\Front\DisplayIziCheckoutButton'
+        displayPDFInvoice: '@izi\prestashop\Hook\Common\DisplayPDFInvoice'
+        # InPost discounts
+        actionApplyCartRule: '@izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule'
+        actionGetCartRuleContextualValue: '@izi\prestashop\Hook\Common\CartRule\ActionGetCartRuleContextualValue'
+        actionValidateCartRule: '@izi\prestashop\Hook\Common\CartRule\ActionValidateCartRule'
         # products
         actionObjectProductDeleteBefore: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore'
         actionObjectProductDeleteAfter: '@izi\prestashop\Hook\Common\Product\ActionProductDeleteAfter'

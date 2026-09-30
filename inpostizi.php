@@ -70,7 +70,7 @@ class InPostIzi extends PaymentModule implements WidgetInterface
     public function __construct()
     {
         $this->name = 'inpostizi';
-        $this->version = '2.7.0';
+        $this->version = '2.8.0';
         $this->author = 'InPost S.A.';
         $this->tab = 'payments_gateways';
 
@@ -395,7 +395,12 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this->getPS176Container();
         }
 
-        if (null !== $container = SymfonyContainer::getInstance()) {
+        if (
+            $this->context->controller instanceof AdminControllerCore
+            && Tools::version_compare(_PS_VERSION_, '1.7.8')
+            && null !== $container = SymfonyContainer::getInstance()
+        ) {
+            // use the kernel container instead of the PS 1.7.6 - 1.7.8 legacy admin context container
             return $container;
         }
 
@@ -540,11 +545,11 @@ class InPostIzi extends PaymentModule implements WidgetInterface
             return $this->context->container;
         }
 
-        if (null !== $container = SymfonyContainer::getInstance()) {
+        if ($this->context->controller instanceof FrontControllerCore && null !== $container = $this->context->controller->getContainer()) {
             return $container;
         }
 
-        if ($this->context->controller instanceof Controller && null !== $container = $this->context->controller->getContainer()) {
+        if (null !== $container = SymfonyContainer::getInstance()) {
             return $container;
         }
 

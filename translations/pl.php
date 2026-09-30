@@ -101,10 +101,6 @@ $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_fd282be0a539046c5c22736
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_32e0295e9c28454d52b4f4f3643b46e7'] = 'Status zamówienia utworzonego przez InPost Pay (płatność za pobraniem)';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_05a5fcc9d88a553b80b2633aa4556d58'] = 'Status dla zamówienia opłaconego przez InPost Pay';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_33af8066d3c83110d4bd897f687cedd2'] = 'Statusy zamówień';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_8cd8b0f7c9d02973566d70ae96bcf976'] = 'Włącz wszystkie dostępne metody płatności';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_50b5c5b98ff1773e551421f082fed261'] = 'Metody płatności zostały określone na umowie o obsługę bramki płatniczej.';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e1bbdbf5c497c484c061c4c2a0359e58'] = 'Płatność przy odbiorze będzie dostępna tylko wtedy, kiedy posiadasz podpisaną umowę z InPost na świadczenie tej usługi w Twoim sklepie.';
-$_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e8051555e4af6e673fbe93a79a86671f'] = 'Włączone metody płatności';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_e9adbbd1cd7eff7e1a588c31f79521d5'] = 'POS ID';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_d3188981fad68a05eec51ac57e69feca'] = 'W przypadku środowiska sandbox skontaktuj się z InPost. W przypadku środowiska produkcyjnego - zaloguj się do InPost i pobierz POS ID.';
 $_MODULE['<{inpostizi}prestashop>ordersconfigurationtype_f13673c7e261fd8d00915c9cb768ad95'] = 'Komentarz zamówienia';
@@ -241,7 +237,6 @@ $_MODULE['<{inpostizi}prestashop>create_f609bb09ff74c0ba85a8ad6491985fec'] = 'Uw
 $_MODULE['<{inpostizi}prestashop>create_aa5c35a3fda1aae28e338de76d2849f4'] = 'Nie możesz złożyć zamówienia, produkt nie jest dostępny w tej ilości: %s';
 $_MODULE['<{inpostizi}prestashop>create_cda059f021a57b6dbc4304efa95b40ab'] = 'Kupon rabatowy %s nie jest już dostępny: %s';
 $_MODULE['<{inpostizi}prestashop>create_6e0a1f3186d8fc17ec4cfb51ce31153b'] = 'Cena koszyka uległa zmianie. Zweryfikuj swoje zamówienie.';
-$_MODULE['<{inpostizi}prestashop>create_17ffb24862c7db18f577ee8328688a9d'] = 'Wybrana metoda płatności nie jest dostępna.';
 $_MODULE['<{inpostizi}prestashop>create_55cfd803cafdd83125559712d449f6be'] = 'Usługa \"%s\" nie jest już dostępna.';
 $_MODULE['<{inpostizi}prestashop>giftwrappinghandler_d858ecb18335ce715d73570770de37fb'] = 'Pakowanie prezentowe nie jest już dostępne';
 $_MODULE['<{inpostizi}prestashop>paymenttypetranslator_e7f9e382dc50889098cbe56f2554c77b'] = 'Karta kredytowa';
@@ -307,6 +302,7 @@ $_MODULE['<{inpostizi}prestashop>admin_template_translations_5e2f5f3c24ae8c6ab3e
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_98dd43dfae05b11befe1f140e0ec787a'] = 'Zainstalowane';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_654866693fd91ce8e9764a218f569918'] = 'Rekomendowane';
 $_MODULE['<{inpostizi}prestashop>admin_template_translations_6311ae17c1ee52b36e68aaf4ad066387'] = 'Pozostałe';
+$_MODULE['<{inpostizi}prestashop>order_details_ab538b40b3dad237acb5c9b73fc46f71'] = 'Unikalny maskowany adres e-mail';
 $_MODULE['<{inpostizi}prestashop>order_details_6310f29293c902c64db619c29179d99a'] = 'Wysyłka';
 $_MODULE['<{inpostizi}prestashop>order_details_4d5340b646d9723cdb3bdf42182658d0'] = 'Paczkomat';
 $_MODULE['<{inpostizi}prestashop>order_details_bfa7e2e76dfa5492ab926b3c8d5d5e65'] = 'Klient prosi o wystawienie faktury VAT';

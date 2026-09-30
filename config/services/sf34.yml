@@ -47,6 +47,9 @@ services:
         izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener: '@izi\prestashop\Mail\EventListener\AddDigitalDeliveryRecipientListener'
         izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener: '@izi\prestashop\Analytics\EventListener\UpdateBasketAnalyticsListener'
         izi\prestashop\Extension\EventListener\ClearCacheListener: '@izi\prestashop\Extension\EventListener\ClearCacheListener'
+        izi\prestashop\InPostDiscount\EventListener\ApplyDiscountsListener: '@izi\prestashop\InPostDiscount\EventListener\ApplyDiscountsListener'
+        izi\prestashop\InPostDiscount\EventListener\ClearDiscountsListener: '@izi\prestashop\InPostDiscount\EventListener\ClearDiscountsListener'
+        izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener: '@izi\prestashop\InPostDiscount\EventListener\CorrectOrderDiscountTaxesListener'
 
   izi\prestashop\Event\EventDispatcherFactory:
     class: izi\prestashop\Event\EventDispatcherFactory
@@ -73,3 +76,17 @@ services:
       - validator: '@inpost.izi.validator'
         context: '@inpost.izi.shop_context'
         izi\prestashop\Repository\ProductRestrictionsRepositoryInterface: '@izi\prestashop\Repository\ProductRestrictionsRepositoryInterface'
+
+  inpost.izi.inpost_discount.cart_rule_factory_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+      - INPOST_SUBSCRIPTION: '@izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler'
+
+  inpost.izi.inpost_discount.applier_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags:
+      - container.service_locator
+    arguments:
+      - INPOST_SUBSCRIPTION: '@izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler'

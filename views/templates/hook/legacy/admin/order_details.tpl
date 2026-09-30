@@ -2,6 +2,7 @@
   <div class="panel-heading">InPost Pay</div>
 
   <dl class="well list-detail">
+    <dt>{l s='Unique masked email address' mod='inpostizi'}:</dt><dd>{mailto address=$delivery_email|escape:'html':'UTF-8'}</dd>
     <dt>{l s='Delivery method' mod='inpostizi'}:</dt><dd>{$delivery}</dd>
 
     {if $apm !== ''}

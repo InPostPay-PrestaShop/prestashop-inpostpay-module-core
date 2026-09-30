@@ -103,6 +103,7 @@ services:
     arguments:
       - '@izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader'
       - '@izi\prestashop\Translation\PaymentTypeTranslator'
+    deprecated: The "%service_id%" service is deprecated since version 2.8.0.
 
   izi\prestashop\Form\Type\Order\MessageOptionsType:
     class: izi\prestashop\Form\Type\Order\MessageOptionsType
@@ -232,6 +233,7 @@ services:
     class: izi\prestashop\Form\ChoiceList\AvailablePaymentOptionChoiceLoader
     public: false
     autowire: true
+    deprecated: The "%service_id%" service is deprecated since version 2.8.0.
 
   izi\prestashop\Form\ChoiceList\CarrierChoiceLoader:
     class: izi\prestashop\Form\ChoiceList\CarrierChoiceLoader

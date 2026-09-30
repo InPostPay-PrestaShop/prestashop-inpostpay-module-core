@@ -59,6 +59,12 @@ services:
       - '@inpost.izi.form_factory'
       - '@izi\prestashop\CommandBusInterface'
 
+  izi\prestashop\Hook\Admin\ActionAdminCartRulesListingFieldsModifier:
+    class: izi\prestashop\Hook\Admin\ActionAdminCartRulesListingFieldsModifier
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+
   izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia:
     class: izi\prestashop\Hook\Admin\ActionAdminControllerSetMedia
     public: false
@@ -169,3 +175,15 @@ services:
     autowire: true
     tags:
       - { name: inpost.izi.service_locator, tag: inpost.izi.widget_controller_dependency, index_by: key }
+
+  inpost.izi.inpost_discount.cart_rule_factory_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: inpost.izi.inpost_discount.cart_rule_factory, index_by: discount_type, default_index_method: getDefaultDiscountType }
+
+  inpost.izi.inpost_discount.applier_locator:
+    class: izi\prestashop\DependencyInjection\ServiceLocator
+    autowire: true
+    tags:
+      - { name: inpost.izi.service_locator, tag: inpost.izi.inpost_discount.applier, index_by: discount_type, default_index_method: getDefaultDiscountType }

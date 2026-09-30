@@ -36,6 +36,7 @@ final class ParametersExtractor implements ParametersExtractorInterface, Paramet
             'is_cod' => in_array(ServiceCode::Cod(), $deliveryCodes, true),
             'is_pww' => in_array(ServiceCode::Pww(), $deliveryCodes, true),
             'delivery_point' => $request->getDelivery()->getPoint(),
+            'delivery_email' => $request->getDelivery()->getEmail(),
         ];
     }
 

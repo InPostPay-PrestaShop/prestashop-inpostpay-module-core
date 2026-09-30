@@ -9,6 +9,7 @@ use izi\prestashop\Configuration\ApiConfigurationInterface;
 use izi\prestashop\Configuration\GeneralConfigurationInterface;
 use izi\prestashop\Event\CartUpdatedEvent;
 use izi\prestashop\Event\EventDispatcherInterface;
+use izi\prestashop\Hook\Front\Event\RenderHeaderEvent;
 use izi\prestashop\Hook\HookInterface;
 use izi\prestashop\Repository\BasketSessionRepositoryInterface;
 use izi\prestashop\Security\Voter\BindingWidgetVoter;
@@ -114,6 +115,8 @@ final class DisplayHeader implements HookInterface
         }
 
         $this->analyticsCookiePersister->persist($request);
+
+        $this->eventDispatcher->dispatch(new RenderHeaderEvent($request));
     }
 
     private function hasRequiredConfiguration(): bool

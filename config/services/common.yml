@@ -2,15 +2,16 @@
 imports:
   - { resource: common/analytics.yml }
   - { resource: common/cart.yml }
+  - { resource: common/inpost_discount.yml }
   - { resource: common/logger.yml }
 
 parameters:
-  inpost.izi.container_version: '2.7.0'
+  inpost.izi.container_version: '2.8.0'
   inpost.izi.cache_dir: '%kernel.cache_dir%/inpost/izi'
   inpost.izi.basket_app_logger_options:
     max_response_body_size: 1000
   inpost.izi.hot_products.enabled: '%env(INPOST_IZI_HOT_PRODUCTS_ENABLED)%'
-  env(INPOST_IZI_HOT_PRODUCTS_ENABLED): 0
+  env(INPOST_IZI_HOT_PRODUCTS_ENABLED): '0'
 
 services:
   inpost.izi.module:
@@ -629,23 +630,77 @@ services:
       - '@inpost.izi.context'
       - '@izi\prestashop\Event\EventDispatcherInterface'
 
+  izi\prestashop\Hook\Common\ActionObjectOrderAddAfter:
+    class: izi\prestashop\Hook\Common\ActionObjectOrderAddAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
+  izi\prestashop\Hook\Common\ActionObjectOrderCartRuleAddBefore:
+    class: izi\prestashop\Hook\Common\ActionObjectOrderCartRuleAddBefore
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+
   izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore:
-      class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore
-      public: false
-      tags:
-          - { name: inpost.izi.hook }
-      arguments:
-          - '@izi\prestashop\Event\EventDispatcherInterface'
-          - '@inpost.izi.context'
+    class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateBefore
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+      - '@inpost.izi.context'
 
   izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter:
-      class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter
-      public: false
-      tags:
-          - { name: inpost.izi.hook }
-      arguments:
-          - '@izi\prestashop\Event\EventDispatcherInterface'
-          - '@inpost.izi.context'
+    class: izi\prestashop\Hook\Common\ActionObjectOrderUpdateAfter
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\Event\EventDispatcherInterface'
+      - '@inpost.izi.context'
+
+  izi\prestashop\Hook\Common\DisplayPDFInvoice:
+    class: izi\prestashop\Hook\Common\DisplayPDFInvoice
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@izi\prestashop\ObjectModel\Repository\CartRuleRepository'
+
+  # InPost discounts
+  izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule:
+    class: izi\prestashop\Hook\Common\CartRule\ActionApplyCartRule
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@izi\prestashop\InPostDiscount\CartRule\DiscountApplierInterface'
+
+  izi\prestashop\Hook\Common\CartRule\ActionGetCartRuleContextualValue:
+    class: izi\prestashop\Hook\Common\CartRule\ActionGetCartRuleContextualValue
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@inpost.izi.context'
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+
+  izi\prestashop\Hook\Common\CartRule\ActionValidateCartRule:
+    class: izi\prestashop\Hook\Common\CartRule\ActionValidateCartRule
+    public: false
+    tags:
+      - { name: inpost.izi.hook }
+    arguments:
+      - '@izi\prestashop\InPostDiscount\CartRule\CustomRuleRepositoryInterface'
+      - '@izi\prestashop\InPostDiscount\CartRuleDiscountRepository'
+      - '@inpost.izi.context'
 
   # Product hooks
   izi\prestashop\Hook\Common\Product\ActionProductDeleteBefore:

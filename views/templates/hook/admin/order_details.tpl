@@ -9,6 +9,11 @@
     <div class="row mt-3">
       <div class="col">
         <p class="mb-1">
+          <strong>{l s='Unique masked email address' mod='inpostizi'}:</strong>
+        </p>
+        <p>{mailto address=$delivery_email|escape:'html':'UTF-8'}</p>
+
+        <p class="mb-1">
           <strong>{l s='Delivery method' mod='inpostizi'}:</strong>
         </p>
         <p>{$delivery}</p>
