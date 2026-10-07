@@ -6,6 +6,7 @@ namespace izi\prestashop\Form\Type;
 
 use izi\prestashop\Configuration\DTO\ProductConfiguration;
 use izi\prestashop\Form\Type\Image\ImageTypeChoiceType;
+use izi\prestashop\Product\Description\DescriptionSource;
 use izi\prestashop\Product\Image\ImageGalleryType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -46,6 +47,14 @@ final class ProductConfigurationType extends AbstractType
             ->add('largeImageTypeId', ImageTypeChoiceType::class, [
                 'label' => $this->translator->trans('Large image type', [], 'Modules.Inpostizi.Product'),
                 'help' => $this->translator->trans('This image format will be used when using the zoom option in the mobile app.', [], 'Modules.Inpostizi.Product'),
+            ])
+            ->add('descriptionSource', EnumType::class, [
+                'class' => DescriptionSource::class,
+                'label' => $this->translator->trans('Product description source', [], 'Modules.Inpostizi.Product'),
+                'help' => nl2br(implode("\n\n", [
+                    $this->translator->trans('Determines which product description is passed to the mobile app (applies to both cart and order products as well as hot products).', [], 'Modules.Inpostizi.Product'),
+                    $this->translator->trans('The description is passed as HTML with limited formatting: only basic text markup is kept, images are removed, links are replaced with their text, and styles other than text alignment, underline and strikethrough are removed.', [], 'Modules.Inpostizi.Product'),
+                ])),
             ]);
     }
 

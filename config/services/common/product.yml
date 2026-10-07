@@ -56,3 +56,19 @@ services:
     class: PrestaShop\PrestaShop\Adapter\Image\ImageRetriever
     arguments:
       - '@=service("inpost.izi.context").link'
+
+  # todo: make private after refactoring cart/order data mappers
+  izi\prestashop\Product\Description\ProductDescriptionProviderInterface:
+    alias: izi\prestashop\Product\Description\ProductDescriptionProvider
+    public: true
+
+  izi\prestashop\Product\Description\ProductDescriptionProvider:
+    class: izi\prestashop\Product\Description\ProductDescriptionProvider
+    arguments:
+      - '@izi\prestashop\Configuration\ProductConfigurationInterface'
+      - '@izi\prestashop\Product\Description\DescriptionSanitizerInterface'
+      - '@inpost.izi.logger'
+
+  izi\prestashop\Product\Description\DescriptionSanitizerInterface: '@izi\prestashop\Product\Description\DescriptionSanitizer'
+  izi\prestashop\Product\Description\DescriptionSanitizer:
+    class: izi\prestashop\Product\Description\DescriptionSanitizer

@@ -9,14 +9,19 @@ use izi\prestashop\Common\HotProduct\Product;
 use izi\prestashop\Common\HotProduct\ProductAvailability;
 use izi\prestashop\Common\HotProduct\Quantity;
 use izi\prestashop\Common\Product\ProductAttribute;
+use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
+use izi\prestashop\Configuration\ProductConfiguration;
 use izi\prestashop\ObjectModel\Repository\CombinationRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
 use izi\prestashop\ObjectModel\Repository\ProductRepository;
+use izi\prestashop\Product\Description\DescriptionSanitizer;
+use izi\prestashop\Product\Description\ProductDescriptionProvider;
+use izi\prestashop\Product\Description\ProductDescriptionProviderInterface;
 use izi\prestashop\Product\Image\ImageUrlsProviderInterface;
 use izi\prestashop\Product\Price\PriceCalculatorInterface;
 use izi\prestashop\Product\Price\PriceQuery;
-use izi\prestashop\Product\Util\DescriptionFormatter;
+use Psr\Log\NullLogger;
 
 final class HotProductDataMapper implements HotProductDataMapperInterface
 {
@@ -56,6 +61,11 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
     private $context;
 
     /**
+     * @var ProductDescriptionProviderInterface
+     */
+    private $descriptionProvider;
+
+    /**
      * @var array<int, \Language> Polish language by shop ID
      */
     private $languages = [];
@@ -65,7 +75,7 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
      * @param ProductRepository $productRepository
      * @param CombinationRepository $combinationRepository
      */
-    public function __construct(PrestaShopConfiguration $configuration, ObjectRepositoryInterface $languageRepository, ObjectRepositoryInterface $productRepository, ObjectRepositoryInterface $combinationRepository, PriceCalculatorInterface $priceCalculator, ImageUrlsProviderInterface $imageProvider, ?\Context $context = null)
+    public function __construct(PrestaShopConfiguration $configuration, ObjectRepositoryInterface $languageRepository, ObjectRepositoryInterface $productRepository, ObjectRepositoryInterface $combinationRepository, PriceCalculatorInterface $priceCalculator, ImageUrlsProviderInterface $imageProvider, ?\Context $context = null, ?ProductDescriptionProviderInterface $descriptionProvider = null)
     {
         $this->configuration = $configuration;
         $this->languageRepository = $languageRepository;
@@ -74,6 +84,7 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
         $this->priceCalculator = $priceCalculator;
         $this->imageProvider = $imageProvider;
         $this->context = $context ?? \Context::getContext();
+        $this->descriptionProvider = $descriptionProvider ?? new ProductDescriptionProvider(new ProductConfiguration(new Configuration()), new DescriptionSanitizer(), new NullLogger());
     }
 
     public function map(HotProduct $hotProduct): Product
@@ -125,7 +136,7 @@ final class HotProductDataMapper implements HotProductDataMapperInterface
 
         return new Product(
             \Tools::substr($product->name ?? '', 0, 255),
-            DescriptionFormatter::formatDescription($product),
+            $this->descriptionProvider->getDescription($product, $shopId),
             (string) $imageUrls->getMainImageUrl(),
             $price,
             $currency,

@@ -116,7 +116,7 @@ final class GeneralConfigurationType extends AbstractType
                 'label' => false,
             ])
             ->add('productConfiguration', ProductConfigurationType::class, [
-                'label' => $this->translator->trans('Product images configuration', [], 'Modules.Inpostizi.General'),
+                'label' => $this->translator->trans('Product configuration', [], 'Modules.Inpostizi.General'),
             ])
             ->add('maxSuggestedProducts', IntegerType::class, [
                 'property_path' => 'generalConfiguration.maxSuggestedProducts',
