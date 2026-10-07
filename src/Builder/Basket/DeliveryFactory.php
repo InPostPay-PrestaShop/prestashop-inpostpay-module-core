@@ -17,6 +17,8 @@ use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\ObjectModel\Repository\CarrierRepository;
 use izi\prestashop\ObjectModel\Repository\ObjectRepositoryInterface;
+use izi\prestashop\Shipping\DeliveryDateCalculator;
+use izi\prestashop\Shipping\DeliveryDateCalculatorInterface;
 use izi\prestashop\Shipping\DeliveryPriceCalculatorInterface;
 use Psr\Clock\ClockInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -57,9 +59,14 @@ class DeliveryFactory
     private $prestashopConfiguration;
 
     /**
+     * @var DeliveryDateCalculatorInterface
+     */
+    private $deliveryDateCalculator;
+
+    /**
      * @param CarrierRepository $carrierRepository
      */
-    public function __construct(ShippingConfigurationInterface $configuration, ObjectRepositoryInterface $carrierRepository, ClockInterface $clock, TranslatorInterface $translator, DeliveryPriceCalculatorInterface $priceCalculator, PrestaShopConfiguration $prestashopConfiguration)
+    public function __construct(ShippingConfigurationInterface $configuration, ObjectRepositoryInterface $carrierRepository, ClockInterface $clock, TranslatorInterface $translator, DeliveryPriceCalculatorInterface $priceCalculator, PrestaShopConfiguration $prestashopConfiguration, ?DeliveryDateCalculatorInterface $deliveryDateCalculator = null)
     {
         $this->configuration = $configuration;
         $this->carrierRepository = $carrierRepository;
@@ -67,6 +74,7 @@ class DeliveryFactory
         $this->translator = $translator;
         $this->priceCalculator = $priceCalculator;
         $this->prestashopConfiguration = $prestashopConfiguration;
+        $this->deliveryDateCalculator = $deliveryDateCalculator ?? new DeliveryDateCalculator($configuration, $clock);
     }
 
     /**
@@ -77,13 +85,11 @@ class DeliveryFactory
         $deliveryOptions = [];
         $shopId = $shopId ?? (int) $cart->id_shop;
 
-        $deliveryDate = $this->getDeliveryDate();
         $isFreeShipping = null;
-
         [$hasPhysicalProducts, $hasDigitalProducts] = $this->getProductTypes($cart);
 
         if ($hasDigitalProducts) {
-            $deliveryOptions[] = $this->createDigitalDeliveryOption();
+            $deliveryOptions[] = $this->createDigitalDeliveryOption($cart);
         }
 
         if (!$hasPhysicalProducts) {
@@ -108,7 +114,7 @@ class DeliveryFactory
 
             $deliveryOptions[] = new DeliveryOption(
                 $deliveryType,
-                $deliveryDate,
+                $this->deliveryDateCalculator->calculate($cart, $deliveryType),
                 $price,
                 $this->getOptionalServices($deliveryType, $cart, $options, $carrier, $isFreeShipping, $shopId),
                 $this->priceCalculator->getFreeDeliveryMinAmount($cart, $carrier)
@@ -118,10 +124,9 @@ class DeliveryFactory
         return $deliveryOptions;
     }
 
-    private function createDigitalDeliveryOption(): DeliveryOption
+    private function createDigitalDeliveryOption(\Cart $cart): DeliveryOption
     {
-        $deliveryDate = $this->clock->now()->modify('+1 minute');
-        $deliveryDate = $deliveryDate->setTime((int) $deliveryDate->format('G'), (int) $deliveryDate->format('i'));
+        $deliveryDate = $this->deliveryDateCalculator->calculate($cart, DeliveryType::Digital());
         $price = PriceFactory::create(0., 0.);
 
         return new DeliveryOption(DeliveryType::Digital(), $deliveryDate, $price);
@@ -247,15 +252,6 @@ class DeliveryFactory
         }
 
         return $carrier;
-    }
-
-    // TODO make configurable?
-    private function getDeliveryDate(): \DateTimeImmutable
-    {
-        return $this->clock
-            ->now()
-            ->modify('+2 days')
-            ->setTime(12, 0);
     }
 
     private function getProductTypes(\Cart $cart): array

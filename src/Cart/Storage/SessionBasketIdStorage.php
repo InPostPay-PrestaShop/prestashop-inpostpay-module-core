@@ -52,6 +52,10 @@ final class SessionBasketIdStorage implements BasketIdStorageInterface
             $session->start();
         }
 
+        if ('' === $session->getId()) {
+            throw new StorageUnavailableException('The session is not backed by an active PHP session.');
+        }
+
         return $session;
     }
 }
