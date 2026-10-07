@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace izi\prestashop\Configuration\DTO;
 
 use izi\prestashop\Configuration\ProductConfigurationInterface;
+use izi\prestashop\Product\Description\DescriptionSource;
 use izi\prestashop\Product\Image\ImageGalleryType;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -36,12 +37,18 @@ final class ProductConfiguration implements ProductConfigurationInterface
      */
     private $defaultImageGalleryType;
 
-    public function __construct(?int $normalImageTypeId, ?int $smallImageTypeId, ?int $largeImageTypeId, ?ImageGalleryType $defaultImageGalleryType = null)
+    /**
+     * @var DescriptionSource
+     */
+    private $descriptionSource;
+
+    public function __construct(?int $normalImageTypeId, ?int $smallImageTypeId, ?int $largeImageTypeId, ?ImageGalleryType $defaultImageGalleryType = null, ?DescriptionSource $descriptionSource = null)
     {
         $this->normalImageTypeId = $normalImageTypeId;
         $this->smallImageTypeId = $smallImageTypeId;
         $this->largeImageTypeId = $largeImageTypeId;
         $this->defaultImageGalleryType = $defaultImageGalleryType ?? ImageGalleryType::AllImages();
+        $this->descriptionSource = $descriptionSource ?? DescriptionSource::LongWithShortFallback();
     }
 
     public function getNormalImageTypeId(?int $shopId = null): ?int
@@ -82,5 +89,15 @@ final class ProductConfiguration implements ProductConfigurationInterface
     public function setDefaultImageGalleryType(ImageGalleryType $galleryType): void
     {
         $this->defaultImageGalleryType = $galleryType;
+    }
+
+    public function getDescriptionSource(?int $shopId = null): DescriptionSource
+    {
+        return $this->descriptionSource;
+    }
+
+    public function setDescriptionSource(DescriptionSource $descriptionSource): void
+    {
+        $this->descriptionSource = $descriptionSource;
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
+use izi\prestashop\Product\Description\DescriptionSource;
 use izi\prestashop\Product\Image\ImageGalleryType;
 
 interface ProductConfigurationInterface
@@ -15,4 +16,6 @@ interface ProductConfigurationInterface
     public function getLargeImageTypeId(?int $shopId = null): ?int;
 
     public function getDefaultImageGalleryType(?int $shopId = null): ImageGalleryType;
+
+    public function getDescriptionSource(?int $shopId = null): DescriptionSource;
 }

@@ -26,17 +26,21 @@ use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\ConsentsConfigurationInterface;
 use izi\prestashop\Configuration\DTO;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
+use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\ContextManager;
+use izi\prestashop\Product\Description\DescriptionSanitizer;
+use izi\prestashop\Product\Description\ProductDescriptionProvider;
+use izi\prestashop\Product\Description\ProductDescriptionProviderInterface;
 use izi\prestashop\Product\Image\ImageUrlsProviderInterface;
 use izi\prestashop\Product\Price\BatchLowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceProviderInterface;
 use izi\prestashop\Product\Price\LowestPriceQuery;
 use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Product\Util\AttributeListParser;
-use izi\prestashop\Product\Util\DescriptionFormatter;
 use izi\prestashop\PromoCode\AvailablePromotionsProviderInterface;
 use izi\prestashop\PromoCode\PromoCodeProviderInterface;
 use izi\prestashop\Validator\Product\Unrestricted;
+use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
@@ -93,6 +97,11 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
      * @var ImageUrlsProviderInterface
      */
     private $imageProvider;
+
+    /**
+     * @var ProductDescriptionProviderInterface|null
+     */
+    private $descriptionProvider;
 
     /**
      * @var ValidatorInterface|null
@@ -329,7 +338,7 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
         $shopId = \array_key_exists('id_shop', $product) ? (int) $product['id_shop'] : null;
 
         $category = $model->id_category_default ?: $model->getDefaultCategory();
-        $description = DescriptionFormatter::formatDescription($model);
+        $description = $this->getDescriptionProvider()->getDescription($model, $shopId);
         $link = $this->contextManager->getContext()->link->getProductLink($model, null, null, null, $this->cart->id_lang, $shopId, $combinationId);
         $imageUrls = $this->getImageProvider()->getImageUrls((int) $model->id, $combinationId);
 
@@ -992,6 +1001,19 @@ abstract class AbstractBasketBuilder implements BasketBuilderInterface
     private function getImageProvider(): ImageUrlsProviderInterface
     {
         return $this->imageProvider ?? $this->imageProvider = $this->get(ImageUrlsProviderInterface::class);
+    }
+
+    private function getDescriptionProvider(): ProductDescriptionProviderInterface
+    {
+        if (null === $this->descriptionProvider) {
+            try {
+                $this->descriptionProvider = $this->get(ProductDescriptionProviderInterface::class);
+            } catch (ServiceNotFoundException $e) {
+                $this->descriptionProvider = new ProductDescriptionProvider($this->get(ProductConfigurationInterface::class), new DescriptionSanitizer(), \InPostIzi::getInstance()->getLogger());
+            }
+        }
+
+        return $this->descriptionProvider;
     }
 
     private function willExceedFreeDeliveryThreshold(DeliveryType $deliveryType, Price $productPrice, Quantity $quantity): bool
