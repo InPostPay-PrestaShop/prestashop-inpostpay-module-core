@@ -31,7 +31,7 @@ final class ServiceOptionsType extends AbstractType
         $builder->add('additionalCost', MoneyType::class, [
             'required' => false,
             'currency' => Currency::Pln()->value,
-            'scale' => 2,
+            'scale' => 6,
             'label' => $this->translator->trans('Additional cost', [], 'Modules.Inpostizi.Shipping'),
             'help' => nl2br(implode("\n", [
                 $this->translator->trans('Net value of the amount to be added to the carrier\'s price if the service is selected.', [], 'Modules.Inpostizi.Shipping'),
