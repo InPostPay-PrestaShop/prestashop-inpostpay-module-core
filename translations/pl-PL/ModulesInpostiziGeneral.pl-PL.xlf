@@ -38,9 +38,9 @@
         <source>Order confirmation page widget display hook</source>
         <target>Hook do wyświetlania widgetu na stronie potwierdzenia zamówienia</target>
       </trans-unit>
-      <trans-unit id="0d5381fd4e980fb92ffc90a505b4e992">
-        <source>Product images configuration</source>
-        <target>Konfiguracja zdjęć produktów</target>
+      <trans-unit id="d0d28bd1440986344be18b69371b53c8">
+        <source>Product configuration</source>
+        <target>Konfiguracja produktów</target>
       </trans-unit>
       <trans-unit id="f8a1310e6b5d5048d1d3cc59f55999b7">
         <source>Product page widget display hook</source>

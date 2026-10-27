@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace izi\prestashop\Configuration;
 
+use izi\prestashop\Product\Description\DescriptionSource;
 use izi\prestashop\Product\Image\ImageGalleryType;
 
 /**
@@ -15,6 +16,7 @@ final class ProductConfiguration implements ProductConfigurationInterface, Persi
     private const IMAGE_SMALL_TYPE = 'INPOST_PAY_PRODUCT_IMAGE_SMALL_TYPE';
     private const IMAGE_LARGE_TYPE = 'INPOST_PAY_PRODUCT_IMAGE_LARGE_TYPE';
     private const DEFAULT_IMAGE_GALLERY_TYPE = 'INPOST_PAY_PRODUCT_DEFAULT_IMAGE_GALLERY_TYPE';
+    private const DESCRIPTION_SOURCE = 'INPOST_PAY_PRODUCT_DESCRIPTION_SOURCE';
 
     /**
      * @var ShopAwareConfigurationInterface
@@ -48,13 +50,21 @@ final class ProductConfiguration implements ProductConfigurationInterface, Persi
         return ImageGalleryType::tryFrom($value) ?? ImageGalleryType::AllImages();
     }
 
+    public function getDescriptionSource(?int $shopId = null): DescriptionSource
+    {
+        $value = (int) $this->configuration->get(self::DESCRIPTION_SOURCE, $shopId);
+
+        return DescriptionSource::tryFrom($value) ?? DescriptionSource::LongWithShortFallback();
+    }
+
     public function copy(): ProductConfigurationInterface
     {
         return new DTO\ProductConfiguration(
             $this->getNormalImageTypeId(),
             $this->getSmallImageTypeId(),
             $this->getLargeImageTypeId(),
-            $this->getDefaultImageGalleryType()
+            $this->getDefaultImageGalleryType(),
+            $this->getDescriptionSource()
         );
     }
 
@@ -64,5 +74,6 @@ final class ProductConfiguration implements ProductConfigurationInterface, Persi
         $this->configuration->set(self::IMAGE_SMALL_TYPE, $configuration->getSmallImageTypeId());
         $this->configuration->set(self::IMAGE_LARGE_TYPE, $configuration->getLargeImageTypeId());
         $this->configuration->set(self::DEFAULT_IMAGE_GALLERY_TYPE, $configuration->getDefaultImageGalleryType()->value);
+        $this->configuration->set(self::DESCRIPTION_SOURCE, $configuration->getDescriptionSource()->value);
     }
 }

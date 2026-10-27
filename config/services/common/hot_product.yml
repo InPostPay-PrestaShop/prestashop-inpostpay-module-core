@@ -55,6 +55,7 @@ services:
       - '@izi\prestashop\Product\Price\PriceCalculatorInterface'
       - '@izi\prestashop\Product\Image\ImageUrlsProviderInterface'
       - '@inpost.izi.context'
+      - '@izi\prestashop\Product\Description\ProductDescriptionProviderInterface'
 
   izi\prestashop\HotProduct\HotProductValidator:
     class: izi\prestashop\HotProduct\HotProductValidator

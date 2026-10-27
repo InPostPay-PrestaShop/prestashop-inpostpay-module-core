@@ -26,6 +26,7 @@ use izi\prestashop\Common\Product\ProductAttribute;
 use izi\prestashop\Common\Product\ProductType;
 use izi\prestashop\Configuration\Adapter\Configuration;
 use izi\prestashop\Configuration\PrestaShopConfiguration;
+use izi\prestashop\Configuration\ProductConfigurationInterface;
 use izi\prestashop\Configuration\ShippingConfigurationInterface;
 use izi\prestashop\InPostDiscount\CartRule\Factory\InPostPlusCartRuleHandler;
 use izi\prestashop\InPostDiscount\CartRuleDiscount;
@@ -37,11 +38,13 @@ use izi\prestashop\MerchantApi\Model\Order\Response\Order;
 use izi\prestashop\MerchantApi\Model\Order\Response\OrderDetails;
 use izi\prestashop\ObjectModel\ObjectManagerInterface;
 use izi\prestashop\Order\Address\AddressDataMapper;
+use izi\prestashop\Product\Description\DescriptionSanitizer;
+use izi\prestashop\Product\Description\ProductDescriptionProvider;
+use izi\prestashop\Product\Description\ProductDescriptionProviderInterface;
 use izi\prestashop\Product\Image\ImageUrlsProvider;
 use izi\prestashop\Product\Image\ImageUrlsProviderInterface;
 use izi\prestashop\Product\ReferenceId;
 use izi\prestashop\Product\Util\AttributeListParser;
-use izi\prestashop\Product\Util\DescriptionFormatter;
 use izi\prestashop\Shipping\CarrierModuleTrackingNumberProvider;
 use izi\prestashop\Shipping\DeliveryDateCalculator;
 use izi\prestashop\Shipping\DeliveryDateCalculatorInterface;
@@ -60,6 +63,11 @@ class PrestashopOrder
      * @var ImageUrlsProvider
      */
     private $imageProvider;
+
+    /**
+     * @var ProductDescriptionProviderInterface|null
+     */
+    private $descriptionProvider;
 
     /**
      * @var \InPostIzi
@@ -419,7 +427,7 @@ class PrestashopOrder
 
         if (\Validate::isLoadedObject($model)) {
             $category = (string) $model->id_category_default;
-            $description = DescriptionFormatter::formatDescription($model);
+            $description = $this->getDescriptionProvider()->getDescription($model, (int) $this->order->id_shop);
             $link = \Context::getContext()->link->getProductLink($model, null, null, null, $this->order->id_lang, $this->order->id_shop, $data['product_attribute_id']);
 
             $imageUrls = $this->getImageProvider()->getImageUrls((int) $data['product_id'], (int) $data['product_attribute_id'], $this->language, (int) $this->order->id_shop);
@@ -562,5 +570,18 @@ class PrestashopOrder
         } catch (ServiceNotFoundException $e) {
             return new DeliveryDateCalculator($this->module->get(ShippingConfigurationInterface::class), SystemClock::fromSystemTimezone());
         }
+    }
+
+    private function getDescriptionProvider(): ProductDescriptionProviderInterface
+    {
+        if (null === $this->descriptionProvider) {
+            try {
+                $this->descriptionProvider = $this->module->get(ProductDescriptionProviderInterface::class);
+            } catch (ServiceNotFoundException $e) {
+                $this->descriptionProvider = new ProductDescriptionProvider($this->module->get(ProductConfigurationInterface::class), new DescriptionSanitizer(), $this->module->getLogger());
+            }
+        }
+
+        return $this->descriptionProvider;
     }
 }

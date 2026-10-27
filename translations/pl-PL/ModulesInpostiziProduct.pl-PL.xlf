@@ -14,9 +14,21 @@
         <source>Default image gallery type</source>
         <target>Domyślny rodzaj galerii zdjęć</target>
       </trans-unit>
+      <trans-unit id="7a6403b6d12d6bf7aa576a941c43af02">
+        <source>Description (summary if the description is empty)</source>
+        <target>Opis (podsumowanie, jeśli opis jest pusty)</target>
+      </trans-unit>
+      <trans-unit id="5d541d33bc1310c26c48ab72bc87330e">
+        <source>Description only</source>
+        <target>Tylko opis</target>
+      </trans-unit>
       <trans-unit id="d242d58268fec7de2df17d2eb3533511">
         <source>Determines what images are passed to the mobile app (applies to both cart and order products as well as hot products).</source>
         <target>Określa, które zdjęcia są przesyłane do aplikacji mobilnej (dotyczy zarówno produktów z koszyka i zamówienia, jak i promowanych produktów).</target>
+      </trans-unit>
+      <trans-unit id="135feeb5a91998c801109f8211b7afee">
+        <source>Determines which product description is passed to the mobile app (applies to both cart and order products as well as hot products).</source>
+        <target>Określa, który opis produktu jest przesyłany do aplikacji mobilnej (dotyczy zarówno produktów z koszyka i zamówienia, jak i promowanych produktów).</target>
       </trans-unit>
       <trans-unit id="2acde1b85cc02410a25711f7f503dc1c">
         <source>Disallow APM delivery</source>
@@ -62,6 +74,10 @@
         <source>Product combination with selected attributes does not exist.</source>
         <target>Kombinacja produktu z wybranymi atrybutami nie istnieje.</target>
       </trans-unit>
+      <trans-unit id="aeeeea6072351e3e17a37adcd69b6456">
+        <source>Product description source</source>
+        <target>Źródło opisu produktu</target>
+      </trans-unit>
       <trans-unit id="35f02d95e95c00dd976c840eece6e917">
         <source>Product details image type</source>
         <target>Typ zdjęcia w szczegółach produktu</target>
@@ -89,6 +105,14 @@
       <trans-unit id="fafdcf7e6355f6539aeabcea6f3460f4">
         <source>Standard products</source>
         <target>Standardowe produkty</target>
+      </trans-unit>
+      <trans-unit id="5a888c296d9a9043270e1e48b1ef6a7f">
+        <source>Summary only</source>
+        <target>Tylko podsumowanie</target>
+      </trans-unit>
+      <trans-unit id="1803ba396cfd88507c67fb9dbcf12094">
+        <source>The description is passed as HTML with limited formatting: only basic text markup is kept, images are removed, links are replaced with their text, and styles other than text alignment, underline and strikethrough are removed.</source>
+        <target>Opis jest przesyłany jako HTML z ograniczonym formatowaniem: zachowywane są tylko podstawowe znaczniki tekstu, obrazy są usuwane, linki są zastępowane ich tekstem, a style (poza wyrównaniem, podkreśleniem i przekreśleniem tekstu) są usuwane.</target>
       </trans-unit>
       <trans-unit id="d11d1534dca3787e2e0ad51a4d2e051e">
         <source>The restriction will be applied if the product combination has an attribute from the selected groups.</source>
