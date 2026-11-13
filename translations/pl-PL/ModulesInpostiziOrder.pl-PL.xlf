@@ -6,6 +6,10 @@
         <source>Append custom content to customer message if APM delivery was selected</source>
         <target>Doklej dodatkową zawartość do komentarza klienta w przypadku dostawy do Paczkomatu</target>
       </trans-unit>
+      <trans-unit id="e4a1b8efaedd7a198645d1682e265178">
+        <source>Append unique masked email address to customer message</source>
+        <target>Doklej unikalny maskowany adres e-mail do komentarza klienta</target>
+      </trans-unit>
       <trans-unit id="5a584bae80c34e6ee9b177aa167eb865">
         <source>Available parameters</source>
         <target>Dostępne parametry</target>
@@ -53,6 +57,10 @@
       <trans-unit id="bfa7e2e76dfa5492ab926b3c8d5d5e65">
         <source>The customer requested a VAT invoice</source>
         <target>Klient prosi o wystawienie faktury VAT</target>
+      </trans-unit>
+      <trans-unit id="e7936257eb0e9484874f657f3d5490d2">
+        <source>The masked email address is required to handle the order (e.g. to ship the parcel). Before disabling this option, make sure none of your integrations rely on it.</source>
+        <target>Maskowany adres e-mail jest potrzebny do obsługi zamówienia (np. nadania przesyłki). Przed wyłączeniem tej opcji upewnij się, że żadna z Twoich integracji z niego nie korzysta.</target>
       </trans-unit>
       <trans-unit id="ab538b40b3dad237acb5c9b73fc46f71">
         <source>Unique masked email address</source>

@@ -43,6 +43,10 @@ final class MessageOptionsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('appendDeliveryEmail', SwitchType::class, [
+                'label' => $this->translator->trans('Append unique masked email address to customer message', [], 'Modules.Inpostizi.Order'),
+                'help' => $this->translator->trans('The masked email address is required to handle the order (e.g. to ship the parcel). Before disabling this option, make sure none of your integrations rely on it.', [], 'Modules.Inpostizi.Order'),
+            ])
             ->add('appendIfApmDelivery', SwitchType::class, [
                 'label' => $this->translator->trans('Append custom content to customer message if APM delivery was selected', [], 'Modules.Inpostizi.Order'),
             ])
@@ -58,7 +62,9 @@ final class MessageOptionsType extends AbstractType
                 $data = $event->getData();
 
                 if ($data instanceof MessageOptions && $data->isCustomFormat()) {
-                    $event->getForm()->remove('appendIfApmDelivery');
+                    $form = $event->getForm();
+                    $form->remove('appendDeliveryEmail');
+                    $form->remove('appendIfApmDelivery');
                 }
             });
     }

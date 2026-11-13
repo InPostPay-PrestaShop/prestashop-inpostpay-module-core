@@ -50,6 +50,7 @@ final class ParametersExtractor implements ParametersExtractorInterface, Paramet
             'is_cod' => $this->translator->trans('if {option} option was selected', [
                 '{option}' => $this->translator->trans('Cash on Delivery', [], 'Modules.Inpostizi.Payment'),
             ], 'Modules.Inpostizi.Order'),
+            'delivery_email' => $this->translator->trans('Unique masked email address', [], 'Modules.Inpostizi.Order'),
         ];
     }
 }
