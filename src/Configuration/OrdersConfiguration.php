@@ -182,7 +182,7 @@ final class OrdersConfiguration implements OrdersConfigurationInterface, Persist
         if (\is_callable([$configuration, 'getMessageOptions'])) {
             $options = $configuration->getMessageOptions();
         } else {
-            $options = new MessageOptions($configuration->getMessageFormat(), false, true);
+            $options = new MessageOptions($configuration->getMessageFormat(), false, false, true);
         }
 
         $value = $this->serializer->serialize($options, 'json');

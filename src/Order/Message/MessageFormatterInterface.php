@@ -8,11 +8,7 @@ use izi\prestashop\MerchantApi\Model\Order\Request\CreateOrderRequest;
 
 interface MessageFormatterInterface
 {
-    public const DEFAULT_FORMAT = <<<FORMAT
-{order_comments}
-
-Unikalny maskowany adres e-mail: {delivery_email}
-FORMAT;
+    public const DEFAULT_FORMAT = '{order_comments}';
 
     public function format(string $message, CreateOrderRequest $request): string;
 }

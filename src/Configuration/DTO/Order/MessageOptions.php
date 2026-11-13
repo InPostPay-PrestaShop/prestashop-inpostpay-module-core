@@ -23,6 +23,13 @@ final class MessageOptions implements \JsonSerializable
      *
      * @Assert\NotNull()
      */
+    private $appendDeliveryEmail;
+
+    /**
+     * @var bool|null
+     *
+     * @Assert\NotNull()
+     */
     private $appendIfApmDelivery;
 
     /**
@@ -30,9 +37,10 @@ final class MessageOptions implements \JsonSerializable
      */
     private $customFormat;
 
-    public function __construct(?string $message = '', bool $appendIfApmDelivery = false, bool $customFormat = false)
+    public function __construct(?string $message = '', bool $appendDeliveryEmail = true, bool $appendIfApmDelivery = false, bool $customFormat = false)
     {
         $this->message = $message;
+        $this->appendDeliveryEmail = $appendDeliveryEmail;
         $this->appendIfApmDelivery = $appendIfApmDelivery;
         $this->customFormat = $customFormat;
     }
@@ -45,6 +53,18 @@ final class MessageOptions implements \JsonSerializable
     public function setMessage(?string $message): self
     {
         $this->message = $message;
+
+        return $this;
+    }
+
+    public function getAppendDeliveryEmail(): ?bool
+    {
+        return $this->appendDeliveryEmail;
+    }
+
+    public function setAppendDeliveryEmail(?bool $appendDeliveryEmail): self
+    {
+        $this->appendDeliveryEmail = $appendDeliveryEmail;
 
         return $this;
     }
@@ -75,11 +95,16 @@ final class MessageOptions implements \JsonSerializable
             return (string) $this->message;
         }
 
-        if (!$this->appendIfApmDelivery) {
-            return MessageFormatterInterface::DEFAULT_FORMAT;
+        $format = MessageFormatterInterface::DEFAULT_FORMAT;
+        if ($this->appendDeliveryEmail) {
+            $format .= "\n\nUnikalny maskowany adres e-mail: {delivery_email}";
         }
 
-        return \sprintf("%s\n\n{%% if \"APM\" == delivery_type %%}\n%s\n{%% endif %%}", MessageFormatterInterface::DEFAULT_FORMAT, $this->message);
+        if (!$this->appendIfApmDelivery) {
+            return $format;
+        }
+
+        return \sprintf("%s\n\n{%% if \"APM\" == delivery_type %%}\n%s\n{%% endif %%}", $format, $this->message);
     }
 
     public function jsonSerialize(): array
