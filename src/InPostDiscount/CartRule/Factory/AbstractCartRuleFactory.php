@@ -6,6 +6,7 @@ namespace izi\prestashop\InPostDiscount\CartRule\Factory;
 
 use izi\prestashop\Configuration\PrestaShopConfiguration;
 use izi\prestashop\InPostDiscount\CartRule\CustomRuleRepositoryInterface;
+use izi\prestashop\InPostDiscount\CartRule\Util\CartRuleFactoryHelper;
 use izi\prestashop\InPostDiscount\CartRule\Util\FeatureHelper;
 use izi\prestashop\InPostDiscount\CartRuleDiscount;
 use izi\prestashop\InPostDiscount\DiscountAmount;
@@ -32,19 +33,19 @@ abstract class AbstractCartRuleFactory implements CartRuleFactoryInterface
     private $featureHelper;
 
     /**
-     * @var CustomRuleRepositoryInterface
+     * @var CartRuleFactoryHelper
      */
-    private $customRuleRepository;
+    private $helper;
 
     public function __construct(ObjectManagerInterface $objectManager, PrestaShopConfiguration $configuration, FeatureHelper $featureHelper, CustomRuleRepositoryInterface $customRuleRepository)
     {
         $this->objectManager = $objectManager;
         $this->configuration = $configuration;
         $this->featureHelper = $featureHelper;
-        $this->customRuleRepository = $customRuleRepository;
+        $this->helper = new CartRuleFactoryHelper($objectManager, $customRuleRepository);
     }
 
-    public function create($cart, $discount): CartRuleDiscount
+    public function create(\Cart $cart, InPostDiscount $discount): CartRuleDiscount
     {
         if (!$this->supports($type = $discount->getType())) {
             throw UnsupportedTypeException::create($type);
@@ -96,67 +97,14 @@ abstract class AbstractCartRuleFactory implements CartRuleFactoryInterface
 
     private function findOrCreateCustomCartRule(string $type): \CartRule
     {
-        $cartRuleId = $this->customRuleRepository->getCartRuleId($type);
-
-        if (null === $cartRuleId || null === $cartRule = $this->objectManager->find(\CartRule::class, $cartRuleId)) {
-            return $this->createCustomCartRule($type);
-        }
-
-        if (!$cartRule->active) {
-            $cartRule->active = true;
-            $this->objectManager->save($cartRule);
-        }
-
-        return $cartRule;
-    }
-
-    private function createCustomCartRule(string $type): \CartRule
-    {
-        $cartRule = $this->createCartRule($type);
-        $cartRule->code = $type;
-        /* @see \CartRuleCore::FILTER_ACTION_REDUCTION filter handling by {@see \Cart::getCartRules()} */
-        $cartRule->reduction_amount = 1.; // the actual value will be calculated in hook
-
-        $metadata = $this->objectManager->getMetadata(\CartRule::class);
-        if (!empty($metadata['fields']['quantity']['allow_null'])) {
-            $cartRule->quantity = $cartRule->quantity_per_user = null; // unlimited quantity
-        } else {
-            $cartRule->quantity = $cartRule->quantity_per_user = 2 ** 32 - 1; // max unsigned 32-bit int
-        }
-
-        try {
-            $this->objectManager->save($cartRule);
-            $this->customRuleRepository->registerCartRule($type, (int) $cartRule->id);
-        } catch (\Throwable $e) {
-            try {
-                $this->objectManager->remove($cartRule);
-            } catch (\Throwable $ignored) {
-                // ignore and rethrow the original exception
-            }
-
-            throw $e;
-        }
-
-        return $cartRule;
+        return $this->helper->findOrCreateCustom($type, $this->getCartRuleName($type), static function (\CartRule $cartRule): void {
+            /* @see \CartRuleCore::FILTER_ACTION_REDUCTION filter handling by {@see \Cart::getCartRules()} */
+            $cartRule->reduction_amount = 1.; // the actual value will be calculated in hook
+        });
     }
 
     private function createCartRule(string $type): \CartRule
     {
-        $cartRule = new \CartRule();
-
-        $cartRule->name = [];
-        foreach ($this->objectManager->getRepository(\Language::class)->findAll() as $language) {
-            $cartRule->name[$language->id] = $this->getCartRuleName($type);
-        }
-
-        $cartRule->date_from = '2000-01-01 00:00:00'; // arbitrary past date
-        $cartRule->date_to = '2050-01-01 00:00:00'; // arbitrary future date
-        $cartRule->description = $type;
-        $cartRule->partial_use = false;
-        $cartRule->reduction_tax = true;
-        $cartRule->highlight = false;
-        $cartRule->active = true;
-
-        return $cartRule;
+        return $this->helper->create($type, $this->getCartRuleName($type));
     }
 }
