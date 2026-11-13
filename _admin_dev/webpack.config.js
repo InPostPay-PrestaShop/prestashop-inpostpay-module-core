@@ -13,7 +13,6 @@ const entries = [
 const getEntries = () => {
   const entry = {
     'cart-rules': './src/js/cart-rules.js',
-    'nav-bar-fix': './src/js/nav-bar-fix.js',
   };
 
   entries.forEach((name) => {
